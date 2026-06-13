@@ -1,0 +1,5 @@
+node_modules
+dist
+tests/shot-*.png
+*.log
+.DS_Store
