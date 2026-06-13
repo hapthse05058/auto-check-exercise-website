@@ -126,8 +126,8 @@ async function autoCheckExercises(studentsExerciseList, tableIndex, onStatus) {
             );
           } else {
             try {
-              // const result = await gradeExercise(quesAndAnsArr);
-              const result = fakeApiResponse;//fake data from asset/mockData.js
+              const result = await gradeExercise(quesAndAnsArr);
+              // const result = fakeApiResponse;//fake data from asset/mockData.js
               
               if (result.assistantText) {
                 // Writing to the doc needs a REAL Google token, not the JWT.
