@@ -113,9 +113,10 @@ export default function LoginPage() {
             >
               Login
             </button>
-            <div className="forgot-password-link">
+            {/* hide function from UI, but keep it in case we want to add it back later */}
+            {/* <div className="forgot-password-link">
               <Link to="/forgot-password">Forgot password?</Link>
-            </div>
+            </div> */}
           </div>
         )}
         {status.text && (
