@@ -244,20 +244,20 @@ export function buildFeedbackRequests(gradingResults, exercise, tabId, tableInde
 }
 
 /**
- * Writes the AI feedback into the student's Google Doc.
+ * Writes pre-computed grading results into the student's Google Doc.
+ * `gradingResults` is `[{questionIndex, aiFeedback}]` in doc (question) order;
+ * each row is targeted by its questionIndex, which is unique within the doc.
  * `student` carries {docId, tabId, exercise}; `tableIndex` locates the
  * exercise tables for the lesson/class type.
  */
-export async function writeToGGDocFile(
-  agentResponse,
+export async function writeGradingResultsToDoc(
+  gradingResults,
   student,
   accessToken,
   tableIndex,
 ) {
+  if (!gradingResults || gradingResults.length === 0) return;
   try {
-    const gradingResults = parseAiResponse(agentResponse);
-    if (gradingResults.length === 0) return;
-
     const finalRequests = buildFeedbackRequests(
       gradingResults,
       student.exercise,
@@ -272,4 +272,24 @@ export async function writeToGGDocFile(
     console.error(error);
     throw error;
   }
+}
+
+/**
+ * Writes the AI feedback into the student's Google Doc.
+ * `student` carries {docId, tabId, exercise}; `tableIndex` locates the
+ * exercise tables for the lesson/class type.
+ */
+export async function writeToGGDocFile(
+  agentResponse,
+  student,
+  accessToken,
+  tableIndex,
+) {
+  const gradingResults = parseAiResponse(agentResponse);
+  await writeGradingResultsToDoc(
+    gradingResults,
+    student,
+    accessToken,
+    tableIndex,
+  );
 }

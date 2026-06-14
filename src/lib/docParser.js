@@ -18,6 +18,30 @@ export function containsCorrectMark(str) {
   return str.includes(IS_CORRECT_ANSWER);
 }
 
+/** Normalizes a string for keying: collapse whitespace + trim. */
+export function normalizeText(value) {
+  return String(value ?? "").replace(/\s+/g, " ").trim();
+}
+
+/**
+ * Stable key uniquely identifying a graded item by its (question, answer)
+ * pair. Two students who answered the SAME question DIFFERENTLY get different
+ * keys, so they never share feedback.
+ */
+export function makeAnswerKey(question, answer) {
+  return `${normalizeText(question)}${normalizeText(answer)}`;
+}
+
+/**
+ * Extracts the leading question index (e.g. "13" from "13. Bài tập...").
+ * This index locates the correct row inside a student's own doc. Returns null
+ * when the question has no leading number (then we must not guess a row).
+ */
+export function extractQuestionIndex(question) {
+  const match = String(question ?? "").match(/^\s*(\d+)\./);
+  return match ? match[1] : null;
+}
+
 /** True when the answer cell contains anything besides arrows/whitespace. */
 export function hasAnswer(val) {
   if (val === null || val === undefined) {

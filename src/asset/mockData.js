@@ -20,6 +20,5 @@ export const fakeApiResponse = {
 | 16  | Chàng trai bên cạnh bạn là bạn trai của tôi. (Chàng trai xác định) | The boy beside you is my boyfriend            | ✅ Đúng                                                                                   |
 | 17  | Món salad ở trong bếp không ngon. (Salad đã được xác định) | The salad in the kitchen is not tasty         | ✅ Đúng                                                                                   |
 | 18  | Cô gái ở đằng kia rất xinh. (Cô gái xác định)             | The girl over there is beautiful               | ✅ Đúng                                                                                   |
-
-Các câu còn lại đúng rồi em nha! Tiếp tục cố gắng và cẩn thận thế này nhé em!`
+`
 };

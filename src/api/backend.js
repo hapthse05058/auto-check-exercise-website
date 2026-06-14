@@ -239,3 +239,22 @@ export async function gradeExercise(items) {
   });
   return response.json();
 }
+
+/**
+ * Sends a DEDUPED array of unique {question, answer} pairs (for the whole
+ * class) to the cached grader and returns `[{question, answer, feedback}]`.
+ * The backend reuses gradingCache feedback and only sends genuine misses to
+ * the AI. `feedback` can be null when the AI returned nothing for a pair.
+ */
+export async function gradeAnswers(items) {
+  const response = await authFetch("/grade-cached", {
+    method: "POST",
+    body: { items },
+  });
+  if (!response.ok) {
+    const data = await response.json().catch(() => null);
+    throw new Error(data?.error || "Grading failed");
+  }
+  const data = await response.json();
+  return Array.isArray(data.results) ? data.results : [];
+}

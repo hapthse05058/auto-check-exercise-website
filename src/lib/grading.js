@@ -4,22 +4,18 @@
  * feedback back into the doc. Port of processDocs/autoCheckExercises from
  * extension/popup.js.
  */
-import { fetchStudentDocRefs, gradeExercise } from "../api/backend.js";
+import { fetchStudentDocRefs, gradeAnswers } from "../api/backend.js";
 import { getTabContent } from "../api/googleDocs.js";
+import { ensureValidGoogleToken } from "../auth/tokens.js";
 import {
-  ensureValidGoogleToken,
-  ensureValidToken,
-} from "../auth/tokens.js";
-import {
+  extractQuestionIndex,
   getQesAndAnsFromPartIVOfTheTargetTab,
+  makeAnswerKey,
   parseDocLinks,
   wasExerciseReviewedByAI,
 } from "./docParser.js";
 import { getTableIndexOfExercise } from "./docTables.js";
-import { writeToGGDocFile } from "./docWriter.js";
-import { fakeApiResponse } from "../asset/mockData.js";
-
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+import { writeGradingResultsToDoc } from "./docWriter.js";
 
 const chunkArray = (array, size) => {
   const result = [];
@@ -106,43 +102,97 @@ export async function processDocs({
 async function autoCheckExercises(studentsExerciseList, tableIndex, onStatus) {
   if (!studentsExerciseList.length) return;
 
-  const CONCURRENCY_LIMIT = 5;
-  const chunks = chunkArray(studentsExerciseList, CONCURRENCY_LIMIT);
+  // 1. Skip docs that were already graded; only work on the rest.
+  const pending = [];
+  for (const item of studentsExerciseList) {
+    if (wasExerciseReviewedByAI(item.student.exercise, tableIndex)) {
+      onStatus.append(
+        `\n This exercise has been checked: ${item.student.docId}. Skip checking it again...`,
+      );
+    } else {
+      pending.push(item);
+    }
+  }
+  if (!pending.length) {
+    onStatus.append("\n All docs were already checked. Nothing to grade.");
+    return;
+  }
 
+  // 2. Gather every answer across the class and DEDUPE by (question, answer).
+  //    Identical answers (within the class and across past runs via the cache)
+  //    are graded only once.
+  const uniqueAnswers = new Map(); // key -> {question, answer}
+  for (const { quesAndAnsArr } of pending) {
+    for (const qa of quesAndAnsArr) {
+      const key = makeAnswerKey(qa.question, qa.answer);
+      if (!uniqueAnswers.has(key)) {
+        uniqueAnswers.set(key, { question: qa.question, answer: qa.answer });
+      }
+    }
+  }
+  const studentAnswerArr = [...uniqueAnswers.values()];
+  if (!studentAnswerArr.length) {
+    onStatus.append("\n No answered questions found to grade.");
+    return;
+  }
+
+  // 3. Grade on the backend (gradingCache lookup + AI for misses).
+  onStatus.set(`Grading ${studentAnswerArr.length} unique answers...`);
+  let graded;
+  try {
+    graded = await gradeAnswers(studentAnswerArr);
+  } catch (err) {
+    console.error(err);
+    onStatus.set(`Grading failed: ${err.message}`);
+    return;
+  }
+
+  // 4. Map feedback back by the SAME (question, answer) key.
+  const feedbackByKey = new Map();
+  for (const g of graded) {
+    if (g && g.feedback != null) {
+      feedbackByKey.set(makeAnswerKey(g.question, g.answer), g.feedback);
+    }
+  }
+
+  // 5. Write each pending student's feedback into their doc, targeting rows by
+  //    question index (unique within a doc). Never guess: an answer without a
+  //    matched feedback or a parseable index is skipped.
+  const CONCURRENCY_LIMIT = 5;
+  const chunks = chunkArray(pending, CONCURRENCY_LIMIT);
   try {
     for (const chunk of chunks) {
+      // Writing to the doc needs a REAL Google token, not the JWT.
+      const googleToken = await ensureValidGoogleToken();
       await Promise.all(
-        chunk.map(async (stuExercise, index) => {
-          // Stagger requests so the AI backend isn't hit all at once.
-          await sleep(index * 25000);
-
-          // Re-validate: waiting for the AI can take a long time (25s * index).
-          await ensureValidToken();
-
-          const { quesAndAnsArr, student } = stuExercise;
-          if (wasExerciseReviewedByAI(student.exercise, tableIndex)) {
-            onStatus.append(
-              `\n This exercise has been checked: ${student.docId}. Skip checking it again...`,
-            );
-          } else {
-            try {
-              const result = await gradeExercise(quesAndAnsArr);
-              // const result = fakeApiResponse;//fake data from asset/mockData.js
-              
-              if (result.assistantText) {
-                // Writing to the doc needs a REAL Google token, not the JWT.
-                const googleToken = await ensureValidGoogleToken();
-                await writeToGGDocFile(
-                  result.assistantText,
-                  student,
-                  googleToken,
-                  tableIndex,
-                );
-              }
-            } catch (err) {
-              console.log(err);
-              onStatus.append(`\n Failed grading ${student.docId}: ${err.message}`);
+        chunk.map(async ({ quesAndAnsArr, student }) => {
+          const gradingResults = [];
+          for (const qa of quesAndAnsArr) {
+            const feedback = feedbackByKey.get(makeAnswerKey(qa.question, qa.answer));
+            const questionIndex = extractQuestionIndex(qa.question);
+            if (feedback != null && questionIndex != null) {
+              gradingResults.push({ questionIndex, aiFeedback: feedback });
             }
+          }
+          if (!gradingResults.length) {
+            onStatus.append(
+              `\n No feedback matched for ${student.docId}, skipping.`,
+            );
+            return;
+          }
+          try {
+            await writeGradingResultsToDoc(
+              gradingResults,
+              student,
+              googleToken,
+              tableIndex,
+            );
+            onStatus.append(`\n Wrote feedback to ${student.docId}.`);
+          } catch (err) {
+            console.error(err);
+            onStatus.append(
+              `\n Failed writing ${student.docId}: ${err.message}`,
+            );
           }
         }),
       );
