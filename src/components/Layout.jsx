@@ -124,7 +124,7 @@ export default function Layout() {
         <div className="header-right">
           {isAuthenticated && <NavMenu />}
           {isAuthenticated && <ProfileMenu teacherInfo={teacherInfo} />}
-          {isAuthenticated ? (
+          {/* {isAuthenticated ? (
             <button className="logout-btn" onClick={handleLogout}>
               Logout
             </button>
@@ -132,7 +132,11 @@ export default function Layout() {
             <Link to="/login" className="primary-btn login-link">
               Login
             </Link>
-          )}
+          )} */}
+
+          {isAuthenticated && <button className="logout-btn" onClick={handleLogout}>
+            Logout
+          </button>}
         </div>
       </header>
       <main className="app-main">

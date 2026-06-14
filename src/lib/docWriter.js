@@ -273,23 +273,3 @@ export async function writeGradingResultsToDoc(
     throw error;
   }
 }
-
-/**
- * Writes the AI feedback into the student's Google Doc.
- * `student` carries {docId, tabId, exercise}; `tableIndex` locates the
- * exercise tables for the lesson/class type.
- */
-export async function writeToGGDocFile(
-  agentResponse,
-  student,
-  accessToken,
-  tableIndex,
-) {
-  const gradingResults = parseAiResponse(agentResponse);
-  await writeGradingResultsToDoc(
-    gradingResults,
-    student,
-    accessToken,
-    tableIndex,
-  );
-}

@@ -231,15 +231,6 @@ export async function saveStudents(classId, students) {
   });
 }
 
-/** Sends question/answer pairs to the AI grader. */
-export async function gradeExercise(items) {
-  const response = await authFetch("/grade", {
-    method: "POST",
-    body: { items },
-  });
-  return response.json();
-}
-
 /**
  * Sends a DEDUPED array of unique {question, answer} pairs (for the whole
  * class) to the cached grader and returns `[{question, answer, feedback}]`.
