@@ -5,6 +5,7 @@ import AddStudentsPage from "./pages/AddStudentsPage.jsx";
 import AuthCallbackPage from "./pages/AuthCallbackPage.jsx";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage.jsx";
 import GradePage from "./pages/GradePage.jsx";
+import GradingCachePage from "./pages/GradingCachePage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import MissingTeacherPage from "./pages/MissingTeacherPage.jsx";
 import NewClassPage from "./pages/NewClassPage.jsx";
@@ -25,6 +26,7 @@ export default function App() {
           <Route path="/grade" element={<GradePage />} />
           <Route path="/classes/new" element={<NewClassPage />} />
           <Route path="/students/add" element={<AddStudentsPage />} />
+          <Route path="/admin/grading-cache" element={<GradingCachePage />} />
           <Route path="/missing-teacher" element={<MissingTeacherPage />} />
           <Route path="/signup" element={<SignupPage />} />
         </Route>

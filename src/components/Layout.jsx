@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext.jsx";
-import { SUPPORT_EMAIL } from "../config.js";
+import { SUPPORT_EMAIL, isAdminEmail } from "../config.js";
 
 function initials(name) {
   if (!name) return "?";
@@ -15,6 +15,7 @@ function NavMenu() {
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef(null);
   const navigate = useNavigate();
+  const { teacherInfo } = useAuth();
 
   useEffect(() => {
     const onClick = (event) => {
@@ -48,6 +49,14 @@ function NavMenu() {
           <button className="menu-option" onClick={() => go("/students/add")}>
             Add students into a class
           </button>
+          {isAdminEmail(teacherInfo?.gmail) && (
+            <button
+              className="menu-option"
+              onClick={() => go("/admin/grading-cache")}
+            >
+              Manage grading cache
+            </button>
+          )}
           <a className="menu-option" href={`mailto:${SUPPORT_EMAIL}`}>
             Contact for support: {SUPPORT_EMAIL}
           </a>

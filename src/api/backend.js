@@ -249,3 +249,63 @@ export async function gradeAnswers(items) {
   const data = await response.json();
   return Array.isArray(data.results) ? data.results : [];
 }
+
+// ---------------------------------------------------------------------------
+// gradingCache management (admin only)
+// ---------------------------------------------------------------------------
+
+/**
+ * Lists/searches gradingCache records (substring match on `field`) with paging.
+ * Returns `{ results, total, page, pageSize, totalPages }`.
+ */
+export async function fetchGradingCache(
+  field = "question",
+  q = "",
+  page = 1,
+  pageSize = 100,
+) {
+  const params = new URLSearchParams({
+    field,
+    page: String(page),
+    pageSize: String(pageSize),
+  });
+  if (q) params.set("q", q);
+  const response = await authFetch(`/grading-cache?${params.toString()}`);
+  if (!response.ok) throw new Error("Failed to fetch grading cache");
+  const data = await response.json();
+  return {
+    results: Array.isArray(data.results) ? data.results : [],
+    total: data.total ?? 0,
+    page: data.page ?? 1,
+    pageSize: data.pageSize ?? pageSize,
+    totalPages: data.totalPages ?? 1,
+  };
+}
+
+/** Adds a record. Returns the raw response so callers can read .ok/.json(). */
+export async function createGradingCache(payload) {
+  return authFetch("/grading-cache", { method: "POST", body: payload });
+}
+
+/** Edits a record (backend re-keys the doc id if key fields change). */
+export async function updateGradingCache(id, payload) {
+  return authFetch(`/grading-cache/${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    body: payload,
+  });
+}
+
+/** Deletes a record by id. */
+export async function deleteGradingCache(id) {
+  return authFetch(`/grading-cache/${encodeURIComponent(id)}`, {
+    method: "DELETE",
+  });
+}
+
+/** Deletes many records by id at once. */
+export async function bulkDeleteGradingCache(ids) {
+  return authFetch("/grading-cache/bulk-delete", {
+    method: "POST",
+    body: { ids },
+  });
+}

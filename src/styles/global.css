@@ -99,8 +99,8 @@ body {
   margin: 1rem auto;
 }
 .page-wide {
-  max-width: 760px;
-  margin: 1rem auto;
+  max-width: 100%;
+  margin: 0;
 }
 .page-title {
   font-size: 18px;
