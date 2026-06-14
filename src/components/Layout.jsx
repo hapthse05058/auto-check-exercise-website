@@ -43,6 +43,9 @@ function NavMenu() {
       </button>
       {open && (
         <div className="menu-options">
+          <button className="menu-option" onClick={() => go("/grade")}>
+            Chấm bài
+          </button>
           <button className="menu-option" onClick={() => go("/classes/new")}>
             Add new class
           </button>

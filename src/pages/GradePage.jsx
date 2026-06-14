@@ -7,6 +7,7 @@ import {
   updateCurrentLessonForClass,
 } from "../api/backend.js";
 import { useAuth } from "../auth/AuthContext.jsx";
+import { isAdminEmail } from "../config.js";
 import { processDocs } from "../lib/grading.js";
 
 const READY_TO_PROCESS_MESSAGE = "Ready to process...";
@@ -23,6 +24,8 @@ export default function GradePage() {
   const [docLinksText, setDocLinksText] = useState("");
   const [status, setStatus] = useState("");
   const [processing, setProcessing] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [saveCache, setSaveCache] = useState(false);
   const currentLessonRef = useRef(null);
 
   const selectedClass = classes.find((cls) => cls.id === selectedClassId);
@@ -44,6 +47,7 @@ export default function GradePage() {
           navigate("/missing-teacher", { replace: true });
           return;
         }
+        setIsAdmin(isAdminEmail(teacherInfo.gmail));
         const classList = await fetchClasses(teacherInfo.id);
         if (cancelled) return;
         setClasses(classList);
@@ -127,6 +131,8 @@ export default function GradePage() {
         classType: selectedClass?.classType,
         lessonName,
         onStatus,
+        // Non-admins always use the cache; admins control it via the toggle.
+        useCache: isAdmin ? saveCache : true,
       });
     } catch (error) {
       if (error.message !== "RE-AUTH_NEEDED") {
@@ -179,6 +185,17 @@ export default function GradePage() {
         onChange={(e) => setDocLinksText(e.target.value)}
         disabled={processing}
       />
+      {isAdmin && (
+        <label className="cache-toggle mb-1" title="When off, AI feedback is not stored in or read from the grading cache.">
+          <input
+            type="checkbox"
+            checked={saveCache}
+            onChange={(e) => setSaveCache(e.target.checked)}
+            disabled={processing}
+          />
+          <span>Save to grading cache {saveCache ? "(on)" : "(off)"}</span>
+        </label>
+      )}
       <button
         className="mb-1 primary-btn"
         onClick={handleProcessAllDocs}

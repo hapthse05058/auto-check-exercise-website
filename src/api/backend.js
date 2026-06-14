@@ -237,10 +237,10 @@ export async function saveStudents(classId, students) {
  * The backend reuses gradingCache feedback and only sends genuine misses to
  * the AI. `feedback` can be null when the AI returned nothing for a pair.
  */
-export async function gradeAnswers(items) {
+export async function gradeAnswers(items, useCache = true) {
   const response = await authFetch("/grade-cached", {
     method: "POST",
-    body: { items },
+    body: { items, useCache },
   });
   if (!response.ok) {
     const data = await response.json().catch(() => null);

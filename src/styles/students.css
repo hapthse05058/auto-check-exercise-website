@@ -385,3 +385,17 @@
   opacity: 0.45;
   cursor: not-allowed;
 }
+.cache-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--color-text-secondary, #51615c);
+  cursor: pointer;
+  user-select: none;
+}
+.cache-toggle input {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}

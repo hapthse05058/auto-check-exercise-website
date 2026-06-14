@@ -42,6 +42,7 @@ export async function processDocs({
   classType,
   lessonName,
   onStatus,
+  useCache = true,
 }) {
   let links = [];
   const trimmed = (docLinksText || "").trim();
@@ -95,11 +96,16 @@ export async function processDocs({
     );
   }
 
-  await autoCheckExercises(studentsExerciseList, tableIndex, onStatus);
+  await autoCheckExercises(studentsExerciseList, tableIndex, onStatus, useCache);
   return true;
 }
 
-async function autoCheckExercises(studentsExerciseList, tableIndex, onStatus) {
+async function autoCheckExercises(
+  studentsExerciseList,
+  tableIndex,
+  onStatus,
+  useCache = true,
+) {
   if (!studentsExerciseList.length) return;
 
   // 1. Skip docs that were already graded; only work on the rest.
@@ -136,11 +142,14 @@ async function autoCheckExercises(studentsExerciseList, tableIndex, onStatus) {
     return;
   }
 
-  // 3. Grade on the backend (gradingCache lookup + AI for misses).
-  onStatus.set(`Grading ${studentAnswerArr.length} unique answers...`);
+  // 3. Grade on the backend (gradingCache lookup + AI for misses, unless
+  //    caching is disabled — then every answer goes straight to the AI).
+  onStatus.set(
+    `Grading ${studentAnswerArr.length} unique answers${useCache ? "" : " (cache off)"}...`,
+  );
   let graded;
   try {
-    graded = await gradeAnswers(studentAnswerArr);
+    graded = await gradeAnswers(studentAnswerArr, useCache);
   } catch (err) {
     console.error(err);
     onStatus.set(`Grading failed: ${err.message}`);
