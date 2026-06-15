@@ -1,0 +1,252 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  fetchClasses,
+  fetchCurrentLesson,
+  fetchLessons,
+  fetchStudents,
+} from "../api/backend.js";
+import { getTabContent } from "../api/googleDocs.js";
+import { useAuth } from "../auth/AuthContext.jsx";
+import { ensureValidGoogleToken } from "../auth/tokens.js";
+import { LESSON_OPTIONS } from "../shared/constant.js";
+
+/** "lesson05" -> "BUỔI 05" (falls back to the raw value / a dash). */
+function gradedLabel(currentLesson) {
+  if (!currentLesson) return "—";
+  return (
+    LESSON_OPTIONS.find((o) => o.value === currentLesson)?.label ||
+    currentLesson
+  );
+}
+
+function extractDocId(url) {
+  return String(url || "").match(/\/document\/d\/([a-zA-Z0-9_-]+)/)?.[1] || "";
+}
+
+export default function ClassStudentsPage() {
+  const { loadTeacherInfo } = useAuth();
+  const navigate = useNavigate();
+
+  const [classes, setClasses] = useState([]);
+  const [selectedClassId, setSelectedClassId] = useState("");
+  const [lessons, setLessons] = useState([]);
+  const [selectedLessonId, setSelectedLessonId] = useState("");
+  const [lessonsLoading, setLessonsLoading] = useState(false);
+
+  const [students, setStudents] = useState([]);
+  const [currentLesson, setCurrentLesson] = useState(null);
+  const [searched, setSearched] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState("Select a class and search.");
+
+  const selectedLessonName = lessons.find((l) => l.id === selectedLessonId)?.name;
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const teacherInfo = await loadTeacherInfo();
+        if (cancelled) return;
+        if (!teacherInfo) {
+          navigate("/missing-teacher", { replace: true });
+          return;
+        }
+        const classList = await fetchClasses(teacherInfo.id);
+        if (!cancelled) setClasses(classList);
+      } catch (error) {
+        if (cancelled || error.message === "RE-AUTH_NEEDED") return;
+        console.error("Error loading classes:", error);
+        setStatus("Failed to load classes.");
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [loadTeacherInfo, navigate]);
+
+  const handleClassChange = async (event) => {
+    const classId = event.target.value;
+    setSelectedClassId(classId);
+    setSelectedLessonId("");
+    setLessons([]);
+    setStudents([]);
+    setSearched(false);
+    if (!classId) return;
+
+    const cls = classes.find((c) => c.id === classId);
+    setLessonsLoading(true);
+    try {
+      const lessonList = await fetchLessons(cls?.classType);
+      setLessons(lessonList);
+      // Pre-select the class's current lesson when available (drives the tab to
+      // open on the doc links).
+      const current = await fetchCurrentLesson(classId);
+      if (current && lessonList.some((l) => l.id === current)) {
+        setSelectedLessonId(current);
+      }
+    } catch (error) {
+      if (error.message === "RE-AUTH_NEEDED") return;
+      console.error("Error fetching lessons:", error);
+      setStatus("Failed to load lessons.");
+    } finally {
+      setLessonsLoading(false);
+    }
+  };
+
+  const handleSearch = async () => {
+    if (!selectedClassId || loading) return;
+    setLoading(true);
+    setStatus("Searching…");
+    try {
+      const [studentList, current] = await Promise.all([
+        fetchStudents(selectedClassId),
+        fetchCurrentLesson(selectedClassId),
+      ]);
+      setStudents(studentList);
+      setCurrentLesson(current);
+      setSearched(true);
+      setStatus(
+        studentList.length
+          ? `${studentList.length} student${studentList.length === 1 ? "" : "s"} found.`
+          : "No students found in this class.",
+      );
+    } catch (error) {
+      if (error.message === "RE-AUTH_NEEDED") return;
+      console.error("Search error:", error);
+      setStatus("Search failed.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Opens the student's doc. When a lesson is selected, resolve the matching
+  // tab id so the doc opens on that tab; otherwise open the plain link.
+  const openDoc = async (event, ggDocLink) => {
+    const docId = extractDocId(ggDocLink);
+    if (!docId || !selectedLessonName) {
+      return; // let the anchor's default href/target handle it
+    }
+    event.preventDefault();
+    // Open a blank tab synchronously to keep the user-gesture (avoids popup
+    // blockers), then point it at the resolved tab URL.
+    const win = window.open("", "_blank");
+    try {
+      const token = await ensureValidGoogleToken();
+      const tab = await getTabContent(docId, token, selectedLessonName);
+      const tabId = tab?.tabProperties?.tabId;
+      const url = tabId
+        ? `https://docs.google.com/document/d/${docId}/edit?tab=${tabId}`
+        : ggDocLink;
+      if (win) win.location.href = url;
+      else window.open(url, "_blank", "noopener");
+    } catch (err) {
+      console.error("Open doc error:", err);
+      if (win) win.location.href = ggDocLink;
+      else window.open(ggDocLink, "_blank", "noopener");
+    }
+  };
+
+  return (
+    <div className="page-wide">
+      <div className="wrap">
+        <div className="topbar">
+          <div className="topbar-left">
+            <h2>
+              Students{" "}
+              {searched && (
+                <span className="count-badge">{students.length}</span>
+              )}
+            </h2>
+            <p>Search students by class and open their exercise docs.</p>
+          </div>
+        </div>
+
+        <div className="cache-search">
+          <select value={selectedClassId} onChange={handleClassChange}>
+            <option value="">Select class</option>
+            {classes.map((cls) => (
+              <option key={cls.id} value={cls.id}>
+                {cls.name}
+              </option>
+            ))}
+          </select>
+          <select
+            value={selectedLessonId}
+            onChange={(e) => setSelectedLessonId(e.target.value)}
+            disabled={!selectedClassId || lessonsLoading || lessons.length === 0}
+          >
+            <option value="">
+              {lessonsLoading ? "Loading lessons…" : "Select lesson (optional)"}
+            </option>
+            {lessons.map((lesson) => (
+              <option key={lesson.id} value={lesson.id}>
+                {lesson.name}
+              </option>
+            ))}
+          </select>
+          <button
+            className="btn-confirm"
+            onClick={handleSearch}
+            disabled={!selectedClassId || loading}
+          >
+            Search
+          </button>
+        </div>
+
+        {loading ? (
+          <div className="cache-loading">
+            <span className="spinner" aria-hidden="true"></span>
+            <span>Searching…</span>
+          </div>
+        ) : !searched ? (
+          <div className="empty-state">
+            <i className="ti ti-users" aria-hidden="true"></i>
+            <p>Select a class and click Search.</p>
+          </div>
+        ) : students.length === 0 ? (
+          <div className="empty-state">
+            <i className="ti ti-users" aria-hidden="true"></i>
+            <p>No students found in this class.</p>
+          </div>
+        ) : (
+          <div className="cache-table-wrap">
+            <table className="cache-table">
+              <thead>
+                <tr>
+                  <th>Tên học sinh</th>
+                  <th>Link bài tập</th>
+                  <th>Đã chấm</th>
+                </tr>
+              </thead>
+              <tbody>
+                {students.map((s) => (
+                  <tr key={s.id}>
+                    <td>{s.name}</td>
+                    <td>
+                      {s.ggDocLink ? (
+                        <a
+                          href={s.ggDocLink}
+                          target="_blank"
+                          rel="noreferrer"
+                          onClick={(e) => openDoc(e, s.ggDocLink)}
+                        >
+                          Mở bài tập
+                        </a>
+                      ) : (
+                        "—"
+                      )}
+                    </td>
+                    <td>{gradedLabel(currentLesson)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        <div className="status-line">{status}</div>
+      </div>
+    </div>
+  );
+}

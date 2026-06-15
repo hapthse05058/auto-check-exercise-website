@@ -52,6 +52,9 @@ function NavMenu() {
           <button className="menu-option" onClick={() => go("/students/add")}>
             Add students into a class
           </button>
+          <button className="menu-option" onClick={() => go("/students/manage")}>
+            Quản lý học sinh
+          </button>
           {isAdminEmail(teacherInfo?.gmail) && (
             <button
               className="menu-option"

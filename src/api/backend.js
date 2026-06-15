@@ -231,6 +231,15 @@ export async function saveStudents(classId, students) {
   });
 }
 
+/** Returns the full student records of a class (id, name, gmail, ggDocLink). */
+export async function fetchStudents(classId) {
+  const response = await authFetch(
+    `/students?classId=${encodeURIComponent(classId)}`,
+  );
+  if (!response.ok) throw new Error("Failed to fetch students");
+  return response.json();
+}
+
 /**
  * Sends a DEDUPED array of unique {question, answer} pairs (for the whole
  * class) to the cached grader and returns `[{question, answer, feedback}]`.

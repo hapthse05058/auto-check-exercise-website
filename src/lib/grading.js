@@ -144,9 +144,6 @@ async function autoCheckExercises(
 
   // 3. Grade on the backend (gradingCache lookup + AI for misses, unless
   //    caching is disabled — then every answer goes straight to the AI).
-  onStatus.set(
-    `Grading ${studentAnswerArr.length} unique answers${useCache ? "" : " (cache off)"}...`,
-  );
   let graded;
   try {
     graded = await gradeAnswers(studentAnswerArr, useCache);
@@ -200,7 +197,7 @@ async function autoCheckExercises(
           } catch (err) {
             console.error(err);
             onStatus.append(
-              `\n Failed writing ${student.docId}: ${err.message}`,
+              `\n Failed writing to ${student.docId}: ${err.message}`,
             );
           }
         }),

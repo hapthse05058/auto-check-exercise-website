@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import Layout from "./components/Layout.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import AddStudentsPage from "./pages/AddStudentsPage.jsx";
+import ClassStudentsPage from "./pages/ClassStudentsPage.jsx";
 import AuthCallbackPage from "./pages/AuthCallbackPage.jsx";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage.jsx";
 import GradePage from "./pages/GradePage.jsx";
@@ -26,6 +27,7 @@ export default function App() {
           <Route path="/grade" element={<GradePage />} />
           <Route path="/classes/new" element={<NewClassPage />} />
           <Route path="/students/add" element={<AddStudentsPage />} />
+          <Route path="/students/manage" element={<ClassStudentsPage />} />
           <Route path="/admin/grading-cache" element={<GradingCachePage />} />
           <Route path="/missing-teacher" element={<MissingTeacherPage />} />
           <Route path="/signup" element={<SignupPage />} />
