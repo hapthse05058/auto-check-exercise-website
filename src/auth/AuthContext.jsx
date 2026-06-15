@@ -8,7 +8,11 @@ import {
 } from "react";
 import { fetchTeacherInfo } from "../api/backend.js";
 import { clearAuthStorage } from "./storage.js";
-import { AUTH_EXPIRED_EVENT, hasStoredSession } from "./tokens.js";
+import {
+  AUTH_EXPIRED_EVENT,
+  hasStoredSession,
+  proactiveTokenRefresh,
+} from "./tokens.js";
 
 const AuthContext = createContext(null);
 
@@ -53,6 +57,17 @@ export function AuthProvider({ children }) {
     window.addEventListener(AUTH_EXPIRED_EVENT, onExpired);
     return () => window.removeEventListener(AUTH_EXPIRED_EVENT, onExpired);
   }, []);
+
+  // Proactively refresh tokens in the background every 60 s so they never
+  // expire mid-session (e.g. during a long grading run). Triggers a real
+  // refresh only when >= 75% of the token's lifetime has elapsed.
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    const id = setInterval(() => {
+      proactiveTokenRefresh().catch(() => {});
+    }, 60_000);
+    return () => clearInterval(id);
+  }, [isAuthenticated]);
 
   /** Marks the session as logged in (tokens are already in storage). */
   const onLoggedIn = useCallback(() => {

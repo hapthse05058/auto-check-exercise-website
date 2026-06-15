@@ -44,7 +44,7 @@ function NavMenu() {
       {open && (
         <div className="menu-options">
           <button className="menu-option" onClick={() => go("/grade")}>
-            Chấm bài
+            Grade exercises
           </button>
           <button className="menu-option" onClick={() => go("/classes/new")}>
             Add new class
@@ -53,7 +53,7 @@ function NavMenu() {
             Add students into a class
           </button>
           <button className="menu-option" onClick={() => go("/students/manage")}>
-            Quản lý học sinh
+            Manage students
           </button>
           {isAdminEmail(teacherInfo?.gmail) && (
             <button

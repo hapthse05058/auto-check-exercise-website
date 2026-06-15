@@ -25,7 +25,7 @@ export default function GradePage() {
   const [status, setStatus] = useState("");
   const [processing, setProcessing] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [saveCache, setSaveCache] = useState(false);
+  const [saveCache, setSaveCache] = useState(true);
   const currentLessonRef = useRef(null);
 
   const selectedClass = classes.find((cls) => cls.id === selectedClassId);
@@ -133,6 +133,7 @@ export default function GradePage() {
         onStatus,
         // Non-admins always use the cache; admins control it via the toggle.
         useCache: isAdmin ? saveCache : true,
+        isAdmin,
       });
     } catch (error) {
       if (error.message !== "RE-AUTH_NEEDED") {

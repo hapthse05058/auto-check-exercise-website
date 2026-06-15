@@ -59,22 +59,49 @@ async function refreshSilentToken() {
   }
 
   const data = await response.json();
+  const now = Date.now();
 
   storageSet({
     access_token: data.access_token,
     expiry_date: data.expiry_date,
+    access_token_issued_at: now,
     refresh_token: data.refresh_token,
     refresh_token_expires_date: data.refresh_token_expires_date,
     // Refresh the Google Docs token too (present for username/password login).
     ...(data.google_access_token
       ? {
           google_access_token: data.google_access_token,
-          google_token_expiry: Date.now() + 3600 * 1000,
+          google_token_expiry: now + 3600 * 1000,
+          google_token_issued_at: now,
         }
       : {}),
   });
 
   return data.access_token;
+}
+
+async function refreshGoogleToken() {
+  const backendToken = await ensureValidToken();
+  const response = await fetch(`${DOMAIN_BE}/auth/google-token`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${backendToken}`,
+      "x-api-key": EXTENSION_SECRET_KEY,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to refresh Google access token for Docs API");
+  }
+
+  const data = await response.json();
+  const now = Date.now();
+  storageSet({
+    google_access_token: data.google_access_token,
+    google_token_expiry: now + (data.expires_in || 3600) * 1000,
+    google_token_issued_at: now,
+  });
+  return data.google_access_token;
 }
 
 /**
@@ -101,25 +128,52 @@ export async function ensureValidGoogleToken() {
   }
 
   // Expired/near expiry: mint a fresh one from the backend using our JWT.
-  const backendToken = await ensureValidToken();
-  const response = await fetch(`${DOMAIN_BE}/auth/google-token`, {
-    method: "GET",
-    headers: {
-      Authorization: `Bearer ${backendToken}`,
-      "x-api-key": EXTENSION_SECRET_KEY,
-    },
-  });
+  return await refreshGoogleToken();
+}
 
-  if (!response.ok) {
-    throw new Error("Failed to refresh Google access token for Docs API");
+/**
+ * Proactively refreshes tokens that have consumed >= 75% of their lifetime.
+ * Intended to be called on a background interval so tokens never expire
+ * mid-session (e.g. during a long grading run).
+ */
+export async function proactiveTokenRefresh() {
+  const result = storageGet([
+    "access_token",
+    "expiry_date",
+    "access_token_issued_at",
+    "google_access_token",
+    "google_token_expiry",
+    "google_token_issued_at",
+  ]);
+
+  const now = Date.now();
+  const needs75Refresh = (issuedAt, expiryDate) => {
+    if (!issuedAt || !expiryDate) return false;
+    const total = expiryDate - issuedAt;
+    return total > 0 && (now - issuedAt) / total >= 0.75;
+  };
+
+  if (
+    result.access_token &&
+    needs75Refresh(result.access_token_issued_at, result.expiry_date)
+  ) {
+    try {
+      await refreshSilentToken();
+    } catch (err) {
+      console.warn("Proactive backend token refresh failed:", err);
+    }
   }
 
-  const data = await response.json();
-  storageSet({
-    google_access_token: data.google_access_token,
-    google_token_expiry: Date.now() + (data.expires_in || 3600) * 1000,
-  });
-  return data.google_access_token;
+  if (
+    result.google_access_token &&
+    needs75Refresh(result.google_token_issued_at, result.google_token_expiry)
+  ) {
+    try {
+      await refreshGoogleToken();
+    } catch (err) {
+      console.warn("Proactive Google token refresh failed:", err);
+    }
+  }
 }
 
 /**

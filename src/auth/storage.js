@@ -9,10 +9,12 @@ const PREFIX = "ace_"; // auto-check-exercise
 export const AUTH_KEYS = [
   "access_token",
   "expiry_date",
+  "access_token_issued_at",
   "refresh_token",
   "refresh_token_expires_date",
   "google_access_token",
   "google_token_expiry",
+  "google_token_issued_at",
 ];
 
 export function storageGet(keys) {

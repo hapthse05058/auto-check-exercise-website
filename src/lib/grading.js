@@ -43,6 +43,7 @@ export async function processDocs({
   lessonName,
   onStatus,
   useCache = true,
+  isAdmin = false,
 }) {
   let links = [];
   const trimmed = (docLinksText || "").trim();
@@ -144,6 +145,13 @@ async function autoCheckExercises(
 
   // 3. Grade on the backend (gradingCache lookup + AI for misses, unless
   //    caching is disabled — then every answer goes straight to the AI).
+  if (isAdmin) {
+    onStatus.set(
+      `Grading ${studentAnswerArr.length} unique answers${useCache ? "" : " (cache off)"}...`,
+    );
+  } else {
+    onStatus.set("Grading answers...");
+  }
   let graded;
   try {
     graded = await gradeAnswers(studentAnswerArr, useCache);

@@ -47,17 +47,20 @@ export async function loginWithUsernamePassword(username, password) {
   }
 
   const data = await response.json();
+  const now = Date.now();
   storageSet({
     access_token: data.access_token,
-    expiry_date: Date.now() + (data.expires_in || 3600) * 1000,
+    expiry_date: now + (data.expires_in || 3600) * 1000,
+    access_token_issued_at: now,
     refresh_token: data.refresh_token || null,
     refresh_token_expires_date: data.refresh_token_expires_date || null,
     // Real Google token (service account) for the Google Docs API.
     // `access_token` above is a JWT valid for THIS backend only.
     google_access_token: data.google_access_token || null,
     google_token_expiry: data.google_access_token
-      ? Date.now() + (data.expires_in || 3600) * 1000
+      ? now + (data.expires_in || 3600) * 1000
       : null,
+    google_token_issued_at: data.google_access_token ? now : null,
   });
   return { ok: true };
 }
@@ -76,9 +79,10 @@ export async function loginWithGoogleCode(code, redirectUri) {
   const tokens = await response.json();
   storageSet({
     access_token: tokens.access_token,
+    expiry_date: tokens.expiry_date,
+    access_token_issued_at: Date.now(),
     refresh_token: tokens.refresh_token,
     refresh_token_expires_date: tokens.refresh_token_expires_date,
-    expiry_date: tokens.expiry_date,
   });
   return tokens;
 }
