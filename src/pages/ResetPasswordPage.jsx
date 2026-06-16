@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { resetPassword } from "../api/backend.js";
+import { useLanguage } from "../i18n/LanguageContext.jsx";
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export default function ResetPasswordPage() {
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -32,7 +34,7 @@ export default function ResetPasswordPage() {
 
     if (!password || !confirm) {
       setStatus({
-        text: "Please enter and confirm your new password.",
+        text: t("reset.needBoth"),
         color: "red",
       });
       return;
@@ -40,7 +42,7 @@ export default function ResetPasswordPage() {
 
     if (password.length < 6) {
       setStatus({
-        text: "Password must be at least 6 characters long.",
+        text: t("reset.min"),
         color: "red",
       });
       return;
@@ -48,20 +50,20 @@ export default function ResetPasswordPage() {
 
     if (password !== confirm) {
       setStatus({
-        text: "Passwords do not match. Please try again.",
+        text: t("reset.mismatch"),
         color: "red",
       });
       return;
     }
 
-    setStatus({ text: "Resetting password...", color: "black" });
+    setStatus({ text: t("reset.resetting"), color: "black" });
     setSubmitting(true);
 
     try {
       const resetToken = sessionStorage.getItem("reset_token");
       if (!resetToken) {
         setStatus({
-          text: "Reset token not found. Please start over.",
+          text: t("reset.noToken"),
           color: "red",
         });
         return;
@@ -70,7 +72,7 @@ export default function ResetPasswordPage() {
       await resetPassword(resetToken, password);
 
       setStatus({
-        text: "Password reset successfully! Redirecting to login...",
+        text: t("reset.success"),
         color: "green",
       });
 
@@ -82,7 +84,7 @@ export default function ResetPasswordPage() {
     } catch (error) {
       console.error("Reset password error:", error);
       setStatus({
-        text: error.message || "Error connecting to server. Please try again.",
+        text: error.message || t("reset.serverError"),
         color: "red",
       });
     } finally {
@@ -93,14 +95,14 @@ export default function ResetPasswordPage() {
   return (
     <div className="page-narrow">
       <div className="form-panel">
-        <h4>Create New Password</h4>
-        <p>Enter your new password below</p>
+        <h4>{t("reset.title")}</h4>
+        <p>{t("reset.intro")}</p>
         <div className="form-field">
-          <label htmlFor="newPasswordInput">New Password</label>
+          <label htmlFor="newPasswordInput">{t("reset.newPassword")}</label>
           <input
             id="newPasswordInput"
             type="password"
-            placeholder="Enter new password (min 6 characters)"
+            placeholder={t("reset.newPasswordPlaceholder")}
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
             onKeyDown={(e) => {
@@ -109,11 +111,11 @@ export default function ResetPasswordPage() {
           />
         </div>
         <div className="form-field">
-          <label htmlFor="confirmPasswordInput">Confirm Password</label>
+          <label htmlFor="confirmPasswordInput">{t("reset.confirm")}</label>
           <input
             id="confirmPasswordInput"
             type="password"
-            placeholder="Confirm your new password"
+            placeholder={t("reset.confirmPlaceholder")}
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             onKeyDown={(e) => {
@@ -123,14 +125,14 @@ export default function ResetPasswordPage() {
         </div>
         <div className="action-row">
           <button className="logout-btn" onClick={clearTokenAndGoToLogin}>
-            Cancel
+            {t("common.cancel")}
           </button>
           <button
             className="primary-btn"
             onClick={handleResetPassword}
             disabled={submitting}
           >
-            Reset Password
+            {t("reset.submit")}
           </button>
         </div>
         {status.text && (

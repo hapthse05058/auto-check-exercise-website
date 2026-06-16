@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchClasses, saveStudents } from "../api/backend.js";
 import { useAuth } from "../auth/AuthContext.jsx";
+import { useLanguage } from "../i18n/LanguageContext.jsx";
 
 function initials(name) {
   const parts = name.trim().split(/\s+/);
@@ -21,6 +22,7 @@ const EMPTY_FORM = { name: "", gmail: "", doc: "" };
 
 export default function AddStudentsPage() {
   const { loadTeacherInfo } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const [classes, setClasses] = useState([]);
@@ -30,7 +32,7 @@ export default function AddStudentsPage() {
   const [editIndex, setEditIndex] = useState(-1);
   const [form, setForm] = useState(EMPTY_FORM);
   const [formErrors, setFormErrors] = useState({});
-  const [status, setStatus] = useState("Add students into an existing class.");
+  const [status, setStatus] = useState(t("addStudents.intro"));
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -50,7 +52,7 @@ export default function AddStudentsPage() {
       } catch (error) {
         if (cancelled || error.message === "RE-AUTH_NEEDED") return;
         console.error("Error fetching classes:", error);
-        setStatus("Failed to load classes.");
+        setStatus(t("addStudents.loadFailed"));
       }
     })();
     return () => {
@@ -95,7 +97,7 @@ export default function AddStudentsPage() {
 
   const handleSaveStudents = async () => {
     if (!classId) {
-      setStatus("Please select a class.");
+      setStatus(t("addStudents.selectClassFirst"));
       return;
     }
 
@@ -104,33 +106,31 @@ export default function AddStudentsPage() {
       .filter((student) => student.gmail && student.name);
 
     if (!studentsToSave.length) {
-      setStatus("Please add at least one student with gmail and name.");
+      setStatus(t("addStudents.atLeastOne"));
       return;
     }
 
-    setStatus("Saving students...");
+    setStatus(t("addStudents.saving"));
     setSaving(true);
     try {
       const response = await saveStudents(classId, studentsToSave);
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
-        setStatus(errorData?.error || "Failed to save students.");
+        setStatus(errorData?.error || t("addStudents.saveFailed"));
         return;
       }
 
-      const confirmed = window.confirm(
-        "Students added successfully. Do you want to return to Homepage?",
-      );
+      const confirmed = window.confirm(t("addStudents.savedConfirm"));
       if (confirmed) {
         navigate("/grade");
       } else {
         setStudents([]);
-        setStatus("Students saved. You can add another batch.");
+        setStatus(t("addStudents.savedMore"));
       }
     } catch (error) {
       console.error("Error saving students:", error);
-      setStatus("Unable to save students. Please try again.");
+      setStatus(t("addStudents.saveError"));
     } finally {
       setSaving(false);
     }
@@ -142,27 +142,28 @@ export default function AddStudentsPage() {
         <div className="topbar">
           <div className="topbar-left">
             <h2>
-              Student list{" "}
+              {t("addStudents.listTitle")}{" "}
               <span className="count-badge">
-                {students.length}{" "}
-                {students.length === 1 ? "student" : "students"}
+                {students.length === 1
+                  ? t("addStudents.countOne", { n: students.length })
+                  : t("addStudents.countMany", { n: students.length })}
               </span>
             </h2>
-            <p>Manage students and their linked documents.</p>
+            <p>{t("addStudents.subtitle")}</p>
           </div>
           <button className="btn-add" onClick={() => openModal()}>
-            <i className="ti ti-plus" aria-hidden="true"></i> Add student
+            <i className="ti ti-plus" aria-hidden="true"></i> {t("addStudents.add")}
           </button>
         </div>
 
         <div className="field-group">
-          <label>Class name</label>
+          <label>{t("addStudents.className")}</label>
           <select
             className="mb-1"
             value={classId}
             onChange={(e) => setClassId(e.target.value)}
           >
-            <option value="">Select a class</option>
+            <option value="">{t("addStudents.selectClass")}</option>
             {classes.map((cls) => (
               <option key={cls.id} value={cls.id}>
                 {cls.name}
@@ -176,8 +177,9 @@ export default function AddStudentsPage() {
             <div className="empty-state">
               <i className="ti ti-users" aria-hidden="true"></i>
               <p>
-                No students yet. Click <strong>Add student</strong> to get
-                started.
+                {t("addStudents.emptyStart")}{" "}
+                <strong>{t("addStudents.emptyStartStrong")}</strong>{" "}
+                {t("addStudents.emptyStartEnd")}
               </p>
             </div>
           ) : (
@@ -226,57 +228,57 @@ export default function AddStudentsPage() {
           <div className="modal-bg open">
             <div className="modal">
               <div className="modal-header">
-                <h3>{editIndex >= 0 ? "Edit student" : "Add new student"}</h3>
+                <h3>{editIndex >= 0 ? t("addStudents.editTitle") : t("addStudents.addTitle")}</h3>
               </div>
               <div className="field-group">
-                <label>Full name</label>
+                <label>{t("addStudents.fullName")}</label>
                 <input
                   type="text"
-                  placeholder="e.g. Trần Thị Hải"
+                  placeholder={t("addStudents.fullNamePlaceholder")}
                   value={form.name}
                   autoFocus
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                 />
                 {formErrors.name && (
                   <div className="err" style={{ display: "block" }}>
-                    Please enter the student's full name.
+                    {t("addStudents.errName")}
                   </div>
                 )}
               </div>
               <div className="field-group">
-                <label>Gmail address</label>
+                <label>{t("addStudents.gmail")}</label>
                 <input
                   type="email"
-                  placeholder="student@gmail.com"
+                  placeholder={t("addStudents.gmailPlaceholder")}
                   value={form.gmail}
                   onChange={(e) => setForm({ ...form, gmail: e.target.value })}
                 />
                 {formErrors.gmail && (
                   <div className="err" style={{ display: "block" }}>
-                    Please enter a valid Gmail address.
+                    {t("addStudents.errGmail")}
                   </div>
                 )}
               </div>
               <div className="field-group">
-                <label>Google Doc link</label>
+                <label>{t("addStudents.docLink")}</label>
                 <input
                   type="url"
-                  placeholder="https://docs.google.com/…"
+                  placeholder={t("addStudents.docLinkPlaceholder")}
                   value={form.doc}
                   onChange={(e) => setForm({ ...form, doc: e.target.value })}
                 />
                 {formErrors.doc && (
                   <div className="err" style={{ display: "block" }}>
-                    Please enter a valid URL.
+                    {t("addStudents.errDoc")}
                   </div>
                 )}
               </div>
               <div className="modal-footer">
                 <button className="btn-cancel" onClick={() => setModalOpen(false)}>
-                  Cancel
+                  {t("common.cancel")}
                 </button>
                 <button className="btn-confirm" onClick={confirmStudent}>
-                  {editIndex >= 0 ? "Save changes" : "Save Student"}
+                  {editIndex >= 0 ? t("addStudents.saveChanges") : t("addStudents.saveStudent")}
                 </button>
               </div>
             </div>
@@ -285,10 +287,10 @@ export default function AddStudentsPage() {
 
         <div className="action-row">
           <button className="logout-btn" onClick={() => navigate("/grade")}>
-            Back To Homepage
+            {t("common.backHome")}
           </button>
           <button className="btn-add" onClick={handleSaveStudents} disabled={saving}>
-            Save Student List
+            {t("addStudents.saveList")}
           </button>
         </div>
         <div className="status-line">{status}</div>

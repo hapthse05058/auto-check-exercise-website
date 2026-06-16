@@ -399,3 +399,56 @@
   height: 16px;
   cursor: pointer;
 }
+
+/* teacher-points billing panel */
+.billing-panel {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  padding: 12px 16px;
+  margin-bottom: 1rem;
+  border: 1px solid var(--color-border-tertiary, #dfe7e4);
+  border-radius: var(--border-radius-md, 6px);
+  background: var(--color-background-secondary, #f3f6f5);
+}
+.billing-item {
+  display: flex;
+  flex-direction: column;
+}
+.billing-label {
+  font-size: 12px;
+  color: var(--color-text-secondary, #51615c);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.billing-value {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-primary-dark, #0f6e56);
+}
+.billing-panel .btn-cancel {
+  margin-left: auto;
+}
+
+/* language switcher */
+.lang-switch {
+  display: inline-flex;
+  border: 1px solid var(--color-border-secondary, #c9d4d0);
+  border-radius: var(--border-radius-md, 6px);
+  overflow: hidden;
+}
+.lang-option {
+  border: none;
+  background: var(--color-background-primary, #fff);
+  color: var(--color-text-secondary, #51615c);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 9px;
+  cursor: pointer;
+  font-family: var(--font-sans);
+}
+.lang-option.active {
+  background: var(--color-primary, #00977b);
+  color: #fff;
+}

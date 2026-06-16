@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { signupTeacher } from "../api/backend.js";
 import { useAuth } from "../auth/AuthContext.jsx";
+import { useLanguage } from "../i18n/LanguageContext.jsx";
 
 const INITIAL_FORM = {
   username: "",
@@ -15,6 +16,7 @@ const INITIAL_FORM = {
 };
 
 export default function SignupPage() {
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const { refreshTeacherInfo } = useAuth();
   const [form, setForm] = useState(INITIAL_FORM);
@@ -35,29 +37,27 @@ export default function SignupPage() {
     const notes = form.notes.trim();
 
     if (!username || !password || !gmail || !name || !phone || !dob) {
-      setStatus(
-        "Please fill in all mandatory fields: Username, Password, Gmail, Full name, phone number, and DOB.",
-      );
+      setStatus(t("signup.requiredFields"));
       return;
     }
 
     const emailRegex = /^[^\s@]+@gmail\.com$/;
     if (!emailRegex.test(gmail)) {
-      setStatus("Please enter a valid Gmail address.");
+      setStatus(t("signup.invalidGmail"));
       return;
     }
 
     if (username.length < 3) {
-      setStatus("Username must be at least 3 characters long.");
+      setStatus(t("signup.usernameMin"));
       return;
     }
 
     if (password.length < 6) {
-      setStatus("Password must be at least 6 characters long.");
+      setStatus(t("signup.passwordMin"));
       return;
     }
 
-    setStatus("Saving your teacher information...");
+    setStatus(t("signup.saving"));
     setSaving(true);
 
     try {
@@ -73,25 +73,23 @@ export default function SignupPage() {
       });
 
       if (response.status === 409) {
-        setStatus(
-          "An account already exists for this email. Returning to the app.",
-        );
+        setStatus(t("signup.exists"));
         setTimeout(() => navigate("/grade"), 1200);
         return;
       }
 
       if (!response.ok) {
         const data = await response.json().catch(() => null);
-        setStatus(data?.error || "Failed to save teacher info. Please try again.");
+        setStatus(data?.error || t("signup.failed"));
         return;
       }
 
-      setStatus("Teacher info saved successfully. Redirecting...");
+      setStatus(t("signup.saved"));
       await refreshTeacherInfo().catch(() => null);
       setTimeout(() => navigate("/grade"), 900);
     } catch (error) {
       console.error("Signup error:", error);
-      setStatus("Unable to connect to the backend. Please try again later.");
+      setStatus(t("signup.connectError"));
     } finally {
       setSaving(false);
     }
@@ -101,100 +99,100 @@ export default function SignupPage() {
     <div className="page-narrow">
       <div className="form-panel">
         <div className="mb-2">
-          <h3 className="m-0">Teacher Sign Up</h3>
+          <h3 className="m-0">{t("signup.title")}</h3>
         </div>
         <div className="form-field">
           <label htmlFor="username">
-            Username <span className="required-star">*</span>
+            {t("signup.username")} <span className="required-star">*</span>
           </label>
           <input
             id="username"
             type="text"
-            placeholder="Enter your username"
+            placeholder={t("signup.usernamePlaceholder")}
             value={form.username}
             onChange={update("username")}
           />
         </div>
         <div className="form-field">
           <label htmlFor="password">
-            Password <span className="required-star">*</span>
+            {t("signup.password")} <span className="required-star">*</span>
           </label>
           <input
             id="password"
             type="password"
-            placeholder="Enter your password"
+            placeholder={t("signup.passwordPlaceholder")}
             value={form.password}
             onChange={update("password")}
           />
         </div>
         <div className="form-field">
           <label htmlFor="gmail">
-            Gmail <span className="required-star">*</span>
+            {t("signup.gmail")} <span className="required-star">*</span>
           </label>
           <input
             id="gmail"
             type="email"
-            placeholder="Enter your Gmail address"
+            placeholder={t("signup.gmailPlaceholder")}
             value={form.gmail}
             onChange={update("gmail")}
           />
         </div>
         <div className="form-field">
           <label htmlFor="name">
-            Full name <span className="required-star">*</span>
+            {t("signup.name")} <span className="required-star">*</span>
           </label>
           <input
             id="name"
             type="text"
-            placeholder="Enter your full name"
+            placeholder={t("signup.namePlaceholder")}
             value={form.name}
             onChange={update("name")}
           />
         </div>
         <div className="form-field">
           <label htmlFor="phone">
-            Phone number <span className="required-star">*</span>
+            {t("signup.phone")} <span className="required-star">*</span>
           </label>
           <input
             id="phone"
             type="tel"
-            placeholder="Enter your phone number"
+            placeholder={t("signup.phonePlaceholder")}
             value={form.phone}
             onChange={update("phone")}
           />
         </div>
         <div className="form-field">
           <label htmlFor="dob">
-            Date of birth <span className="required-star">*</span>
+            {t("signup.dob")} <span className="required-star">*</span>
           </label>
           <input id="dob" type="date" value={form.dob} onChange={update("dob")} />
         </div>
         <div className="form-field">
-          <label htmlFor="address">Address</label>
+          <label htmlFor="address">{t("signup.address")}</label>
           <input
             id="address"
             type="text"
-            placeholder="Optional address"
+            placeholder={t("signup.addressPlaceholder")}
             value={form.address}
             onChange={update("address")}
           />
         </div>
         <div className="form-field">
-          <label htmlFor="notes">Additional info</label>
+          <label htmlFor="notes">{t("signup.notes")}</label>
           <textarea
             id="notes"
             rows={3}
-            placeholder="Optional notes"
+            placeholder={t("signup.notesPlaceholder")}
             value={form.notes}
             onChange={update("notes")}
           />
         </div>
         <div className="action-row">
           <button className="logout-btn" onClick={() => navigate(-1)}>
-            Go Back
+            {t("common.goBack")}
           </button>
           <button className="primary-btn" onClick={handleSave} disabled={saving}>
-            Save
+            {t("common.save")}
           </button>
         </div>
         <div className="status-line">{status}</div>

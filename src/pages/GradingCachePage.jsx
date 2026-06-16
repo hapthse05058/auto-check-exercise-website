@@ -9,13 +9,14 @@ import {
 } from "../api/backend.js";
 import { useAuth } from "../auth/AuthContext.jsx";
 import { isAdminEmail } from "../config.js";
+import { useLanguage } from "../i18n/LanguageContext.jsx";
 
-const SEARCH_FIELDS = [
-  { value: "question", label: "Question" },
-  { value: "answer", label: "Answer" },
-  { value: "feedback", label: "Feedback" },
-  { value: "model", label: "Model" },
-  { value: "promptVersion", label: "Prompt version" },
+const SEARCH_FIELD_KEYS = [
+  { value: "question", key: "fieldQuestion" },
+  { value: "answer", key: "fieldAnswer" },
+  { value: "feedback", key: "fieldFeedback" },
+  { value: "model", key: "fieldModel" },
+  { value: "promptVersion", key: "fieldPromptVersion" },
 ];
 
 const EMPTY_FORM = {
@@ -39,12 +40,18 @@ function formatDate(iso) {
 export default function GradingCachePage() {
   const { loadTeacherInfo } = useAuth();
   const navigate = useNavigate();
+  const { t } = useLanguage();
+
+  const SEARCH_FIELDS = SEARCH_FIELD_KEYS.map((f) => ({
+    value: f.value,
+    label: t(`cache.${f.key}`),
+  }));
 
   const [field, setField] = useState("question");
   const [query, setQuery] = useState("");
   const [rows, setRows] = useState([]);
   const [selected, setSelected] = useState(() => new Set());
-  const [status, setStatus] = useState("Loading grading cache…");
+  const [status, setStatus] = useState(t("cache.loadingInit"));
   const [loading, setLoading] = useState(false);
   const [bulkDeleting, setBulkDeleting] = useState(false);
 
@@ -79,7 +86,7 @@ export default function GradingCachePage() {
       } catch (error) {
         if (cancelled || error.message === "RE-AUTH_NEEDED") return;
         console.error("Error loading grading cache:", error);
-        setStatus("Failed to load grading cache.");
+        setStatus(t("cache.loadFailedInit"));
       }
     })();
     return () => {
@@ -90,7 +97,7 @@ export default function GradingCachePage() {
 
   async function runSearch(searchField = field, q = query, targetPage = 1) {
     setLoading(true);
-    setStatus("Searching…");
+    setStatus(t("cache.searching"));
     try {
       const data = await fetchGradingCache(
         searchField,
@@ -105,13 +112,13 @@ export default function GradingCachePage() {
       setSelected(new Set()); // selection is stale after a new page/search
       setStatus(
         data.total
-          ? `${data.total} record${data.total === 1 ? "" : "s"} found.`
-          : "No records found.",
+          ? t("cache.found", { n: data.total })
+          : t("cache.none"),
       );
     } catch (error) {
       if (error.message === "RE-AUTH_NEEDED") return;
       console.error("Search error:", error);
-      setStatus("Search failed.");
+      setStatus(t("cache.searchFailed"));
     } finally {
       setLoading(false);
     }
@@ -138,23 +145,21 @@ export default function GradingCachePage() {
   // Bulk-delete the selected records, then refetch the current page.
   const handleBulkDelete = async (ids) => {
     if (!ids.length) return;
-    const ok = window.confirm(
-      `Delete ${ids.length} selected record${ids.length === 1 ? "" : "s"}? This cannot be undone.`,
-    );
+    const ok = window.confirm(t("cache.bulkConfirm", { n: ids.length }));
     if (!ok) return;
     setBulkDeleting(true);
     try {
       const response = await bulkDeleteGradingCache(ids);
       if (!response.ok) {
-        setStatus("Bulk delete failed.");
+        setStatus(t("cache.bulkFailed"));
         return;
       }
-      setStatus(`Deleted ${ids.length} record${ids.length === 1 ? "" : "s"}.`);
+      setStatus(t("cache.bulkDeleted", { n: ids.length }));
       // Refetch the current page (the BE clamps if this page no longer exists).
       await runSearch(field, query, page);
     } catch (error) {
       console.error("Bulk delete error:", error);
-      setStatus("Bulk delete failed: " + error.message);
+      setStatus(t("cache.bulkFailed"));
     } finally {
       setBulkDeleting(false);
     }
@@ -199,21 +204,21 @@ export default function GradingCachePage() {
         const data = await response.json().catch(() => null);
         const msg =
           data?.error === "already_exists"
-            ? "A record with the same question/answer/model already exists."
+            ? t("cache.alreadyExists")
             : data?.error === "key_conflict"
-              ? "Editing these key fields would collide with another record."
-              : data?.error || "Save failed.";
+              ? t("cache.keyConflict")
+              : data?.error || t("cache.saveFailed");
         setStatus(msg);
         return;
       }
 
       setModalOpen(false);
-      setStatus(editId ? "Record updated." : "Record added.");
+      setStatus(editId ? t("cache.updated") : t("cache.added"));
       // Edited record stays on the current page; a new record sorts to page 1.
       await runSearch(field, query, editId ? page : 1);
     } catch (error) {
       console.error("Save error:", error);
-      setStatus("Save failed: " + error.message);
+      setStatus(t("cache.saveFailed"));
     } finally {
       setSaving(false);
     }
@@ -221,20 +226,20 @@ export default function GradingCachePage() {
 
   const handleDelete = async (row) => {
     const ok = window.confirm(
-      `Delete this cached feedback?\n\nQ: ${row.question}\nA: ${row.answer}`,
+      t("cache.deleteConfirm", { q: row.question, a: row.answer }),
     );
     if (!ok) return;
     try {
       const response = await deleteGradingCache(row.id);
       if (!response.ok) {
-        setStatus("Delete failed.");
+        setStatus(t("cache.deleteFailed"));
         return;
       }
-      setStatus("Record deleted.");
+      setStatus(t("cache.deleted"));
       await runSearch(field, query, page);
     } catch (error) {
       console.error("Delete error:", error);
-      setStatus("Delete failed: " + error.message);
+      setStatus(t("cache.deleteFailed"));
     }
   };
 
@@ -244,13 +249,13 @@ export default function GradingCachePage() {
         <div className="topbar">
           <div className="topbar-left">
             <h2>
-              Grading cache{" "}
+              {t("cache.title")}{" "}
               <span className="count-badge">{total}</span>
             </h2>
-            <p>Search, add, edit and delete cached AI feedback.</p>
+            <p>{t("cache.subtitle")}</p>
           </div>
           <button className="btn-add" onClick={openAdd}>
-            <i className="ti ti-plus" aria-hidden="true"></i> Add record
+            <i className="ti ti-plus" aria-hidden="true"></i> {t("cache.addRecord")}
           </button>
         </div>
 
@@ -270,24 +275,24 @@ export default function GradingCachePage() {
           </select>
           <input
             type="text"
-            placeholder="Search value (contains)…"
+            placeholder={t("cache.searchPlaceholder")}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
           <button className="btn-confirm" type="submit" disabled={loading}>
-            Search
+            {t("common.search")}
           </button>
         </form>
 
         {rows.length > 0 && (
           <div className="cache-bulkbar">
-            <span className="cache-bulk-count">{selected.size} selected</span>
+            <span className="cache-bulk-count">{t("cache.selected", { n: selected.size })}</span>
             <button
               className="logout-btn"
               disabled={selected.size === 0 || bulkDeleting}
               onClick={() => handleBulkDelete([...selected])}
             >
-              <i className="ti ti-trash" aria-hidden="true"></i> Delete selected
+              <i className="ti ti-trash" aria-hidden="true"></i> {t("cache.deleteSelected")}
             </button>
           </div>
         )}
@@ -295,12 +300,12 @@ export default function GradingCachePage() {
         {loading ? (
           <div className="cache-loading">
             <span className="spinner" aria-hidden="true"></span>
-            <span>Searching…</span>
+            <span>{t("cache.searching")}</span>
           </div>
         ) : rows.length === 0 ? (
           <div className="empty-state">
             <i className="ti ti-database" aria-hidden="true"></i>
-            <p>No records. Adjust your search or add a new record.</p>
+            <p>{t("cache.empty")}</p>
           </div>
         ) : (
           <div className="cache-table-wrap">
@@ -315,13 +320,13 @@ export default function GradingCachePage() {
                       aria-label="Select all on screen"
                     />
                   </th>
-                  <th>Question</th>
-                  <th>Answer</th>
-                  <th>Feedback</th>
-                  <th>Model</th>
-                  <th>PV</th>
-                  <th>Hits</th>
-                  <th>Created</th>
+                  <th>{t("cache.colQuestion")}</th>
+                  <th>{t("cache.colAnswer")}</th>
+                  <th>{t("cache.colFeedback")}</th>
+                  <th>{t("cache.colModel")}</th>
+                  <th>{t("cache.colPv")}</th>
+                  <th>{t("cache.colHits")}</th>
+                  <th>{t("cache.colCreated")}</th>
                   <th></th>
                 </tr>
               </thead>
@@ -373,17 +378,17 @@ export default function GradingCachePage() {
               disabled={page <= 1 || loading}
               onClick={() => goToPage(page - 1)}
             >
-              <i className="ti ti-chevron-left" aria-hidden="true"></i> Prev
+              <i className="ti ti-chevron-left" aria-hidden="true"></i> {t("cache.prev")}
             </button>
             <span className="cache-pager-info">
-              Page {page} / {totalPages}
+              {t("cache.pageInfo", { page, total: totalPages })}
             </span>
             <button
               className="btn-cancel"
               disabled={page >= totalPages || loading}
               onClick={() => goToPage(page + 1)}
             >
-              Next <i className="ti ti-chevron-right" aria-hidden="true"></i>
+              {t("cache.next")} <i className="ti ti-chevron-right" aria-hidden="true"></i>
             </button>
           </div>
         )}
@@ -392,10 +397,10 @@ export default function GradingCachePage() {
           <div className="modal-bg open">
             <div className="modal">
               <div className="modal-header">
-                <h3>{editId ? "Edit record" : "Add record"}</h3>
+                <h3>{editId ? t("cache.editTitle") : t("cache.addTitle")}</h3>
               </div>
               <div className="field-group">
-                <label>Question</label>
+                <label>{t("cache.question")}</label>
                 <textarea
                   rows={2}
                   value={form.question}
@@ -403,12 +408,12 @@ export default function GradingCachePage() {
                 />
                 {formErrors.question && (
                   <div className="err" style={{ display: "block" }}>
-                    Question is required.
+                    {t("cache.qafRequired")}
                   </div>
                 )}
               </div>
               <div className="field-group">
-                <label>Answer</label>
+                <label>{t("cache.answer")}</label>
                 <textarea
                   rows={2}
                   value={form.answer}
@@ -416,12 +421,12 @@ export default function GradingCachePage() {
                 />
                 {formErrors.answer && (
                   <div className="err" style={{ display: "block" }}>
-                    Answer is required.
+                    {t("cache.aRequired")}
                   </div>
                 )}
               </div>
               <div className="field-group">
-                <label>Feedback</label>
+                <label>{t("cache.feedback")}</label>
                 <textarea
                   rows={3}
                   value={form.feedback}
@@ -429,12 +434,12 @@ export default function GradingCachePage() {
                 />
                 {formErrors.feedback && (
                   <div className="err" style={{ display: "block" }}>
-                    Feedback is required.
+                    {t("cache.fRequired")}
                   </div>
                 )}
               </div>
               <div className="field-group">
-                <label>Model (leave blank for default)</label>
+                <label>{t("cache.modelOptional")}</label>
                 <input
                   type="text"
                   placeholder="deepseek-chat"
@@ -443,7 +448,7 @@ export default function GradingCachePage() {
                 />
               </div>
               <div className="field-group">
-                <label>Prompt version (leave blank for default)</label>
+                <label>{t("cache.pvOptional")}</label>
                 <input
                   type="text"
                   placeholder="v1"
@@ -454,7 +459,7 @@ export default function GradingCachePage() {
                 />
               </div>
               <div className="field-group">
-                <label>Hit count</label>
+                <label>{t("cache.hitCount")}</label>
                 <input
                   type="number"
                   min={0}
@@ -465,10 +470,7 @@ export default function GradingCachePage() {
                 />
               </div>
               {editId && (
-                <p className="field-note">
-                  Note: editing question / answer / model / prompt version
-                  re-keys the record so grading still finds it.
-                </p>
+                <p className="field-note">{t("cache.reKeyNote")}</p>
               )}
               <div className="modal-footer">
                 <button
@@ -476,14 +478,14 @@ export default function GradingCachePage() {
                   onClick={() => setModalOpen(false)}
                   disabled={saving}
                 >
-                  Cancel
+                  {t("common.cancel")}
                 </button>
                 <button
                   className="btn-confirm"
                   onClick={handleSave}
                   disabled={saving}
                 >
-                  {editId ? "Save changes" : "Add record"}
+                  {editId ? t("cache.saveChanges") : t("cache.addRecord")}
                 </button>
               </div>
             </div>

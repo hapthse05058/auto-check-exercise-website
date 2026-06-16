@@ -3,8 +3,10 @@ import { Link, useNavigate } from "react-router-dom";
 import { loginWithUsernamePassword } from "../api/backend.js";
 import { useAuth } from "../auth/AuthContext.jsx";
 import { startGoogleLogin } from "../auth/googleOAuth.js";
+import { useLanguage } from "../i18n/LanguageContext.jsx";
 
 export default function LoginPage() {
+  const { t } = useLanguage();
   const { isAuthenticated, onLoggedIn, sessionMessage } = useAuth();
   const navigate = useNavigate();
   const [method, setMethod] = useState("username");
@@ -23,13 +25,13 @@ export default function LoginPage() {
     if (submitting) return;
     if (!username.trim() || !password.trim()) {
       setStatus({
-        text: "Please enter both username and password.",
+        text: t("login.needBoth"),
         color: "red",
       });
       return;
     }
 
-    setStatus({ text: "Logging in...", color: "black" });
+    setStatus({ text: t("login.loggingIn"), color: "black" });
     setSubmitting(true);
     try {
       const result = await loginWithUsernamePassword(
@@ -40,13 +42,13 @@ export default function LoginPage() {
         setStatus({ text: result.error, color: "red" });
         return;
       }
-      setStatus({ text: "Login successful. Loading...", color: "green" });
+      setStatus({ text: t("login.success"), color: "green" });
       onLoggedIn();
       navigate("/grade", { replace: true });
     } catch (error) {
       console.error("Login error:", error);
       setStatus({
-        text: "Error connecting to server. Please try again.",
+        text: t("login.serverError"),
         color: "red",
       });
     } finally {
@@ -57,48 +59,48 @@ export default function LoginPage() {
   return (
     <div className="page-narrow">
       <div className="login-panel">
-        <h4>Login</h4>
+        <h4>{t("login.title")}</h4>
         {sessionMessage && <p className="session-message">{sessionMessage}</p>}
         <div className="login-methods">
           <div
             className={`method-tab ${method === "username" ? "active" : ""}`}
             onClick={() => setMethod("username")}
           >
-            Username/Password
+            {t("login.tabUsername")}
           </div>
           <div
             className={`method-tab ${method === "google" ? "active" : ""}`}
             onClick={() => setMethod("google")}
           >
-            Google Login
+            {t("login.tabGoogle")}
           </div>
         </div>
 
         {method === "google" ? (
           <div className="login-form">
-            <p>Continue with your Google account to grade exercises.</p>
+            <p>{t("login.googleHint")}</p>
             <button className="primary-btn" onClick={startGoogleLogin}>
-              Login by Gmail
+              {t("login.googleBtn")}
             </button>
           </div>
         ) : (
           <div className="login-form">
             <div className="form-field">
-              <label htmlFor="loginUsername">Username</label>
+              <label htmlFor="loginUsername">{t("login.username")}</label>
               <input
                 id="loginUsername"
                 type="text"
-                placeholder="Enter your username"
+                placeholder={t("login.usernamePlaceholder")}
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
               />
             </div>
             <div className="form-field">
-              <label htmlFor="loginPassword">Password</label>
+              <label htmlFor="loginPassword">{t("login.password")}</label>
               <input
                 id="loginPassword"
                 type="password"
-                placeholder="Enter your password"
+                placeholder={t("login.passwordPlaceholder")}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 onKeyDown={(e) => {
@@ -111,7 +113,7 @@ export default function LoginPage() {
               onClick={handleUsernamePasswordLogin}
               disabled={submitting}
             >
-              Login
+              {t("login.submit")}
             </button>
             {/* hide function from UI, but keep it in case we want to add it back later */}
             {/* <div className="forgot-password-link">

@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { requestPasswordReset } from "../api/backend.js";
+import { useLanguage } from "../i18n/LanguageContext.jsx";
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export default function ForgotPasswordPage() {
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [identifier, setIdentifier] = useState("");
   const [status, setStatus] = useState({ text: "", color: "black" });
@@ -14,11 +16,11 @@ export default function ForgotPasswordPage() {
     if (submitting) return;
     const trimmed = identifier.trim();
     if (!trimmed) {
-      setStatus({ text: "Please enter your username or email.", color: "red" });
+      setStatus({ text: t("forgot.needIdentifier"), color: "red" });
       return;
     }
 
-    setStatus({ text: "Sending reset link...", color: "black" });
+    setStatus({ text: t("forgot.sending"), color: "black" });
     setSubmitting(true);
 
     try {
@@ -33,14 +35,14 @@ export default function ForgotPasswordPage() {
         );
 
         setStatus({
-          text: "Reset link sent! Proceed to set your new password.",
+          text: t("forgot.sent"),
           color: "green",
         });
         await sleep(1000);
         navigate("/reset-password");
       } else {
         setStatus({
-          text: data.message || "Reset request processed.",
+          text: data.message || t("forgot.processed"),
           color: "green",
         });
         await sleep(2000);
@@ -49,7 +51,7 @@ export default function ForgotPasswordPage() {
     } catch (error) {
       console.error("Forgot password error:", error);
       setStatus({
-        text: error.message || "Error connecting to server. Please try again.",
+        text: error.message || t("forgot.serverError"),
         color: "red",
       });
     } finally {
@@ -60,14 +62,14 @@ export default function ForgotPasswordPage() {
   return (
     <div className="page-narrow">
       <div className="form-panel">
-        <h4>Reset Password</h4>
-        <p>Enter your username or email to receive a password reset link</p>
+        <h4>{t("forgot.title")}</h4>
+        <p>{t("forgot.intro")}</p>
         <div className="form-field">
-          <label htmlFor="resetIdentifier">Username or Email</label>
+          <label htmlFor="resetIdentifier">{t("forgot.identifier")}</label>
           <input
             id="resetIdentifier"
             type="text"
-            placeholder="Enter username or email"
+            placeholder={t("forgot.identifierPlaceholder")}
             value={identifier}
             onChange={(e) => setIdentifier(e.target.value)}
             onKeyDown={(e) => {
@@ -77,14 +79,14 @@ export default function ForgotPasswordPage() {
         </div>
         <div className="action-row">
           <button className="logout-btn" onClick={() => navigate("/login")}>
-            Cancel
+            {t("common.cancel")}
           </button>
           <button
             className="primary-btn"
             onClick={handleForgotPassword}
             disabled={submitting}
           >
-            Send Reset Email
+            {t("forgot.send")}
           </button>
         </div>
         {status.text && (

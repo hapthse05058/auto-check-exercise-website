@@ -8,6 +8,7 @@ import {
 } from "../api/backend.js";
 import { getTabContent } from "../api/googleDocs.js";
 import { useAuth } from "../auth/AuthContext.jsx";
+import { useLanguage } from "../i18n/LanguageContext.jsx";
 import { ensureValidGoogleToken } from "../auth/tokens.js";
 import { LESSON_OPTIONS } from "../shared/constant.js";
 
@@ -26,6 +27,7 @@ function extractDocId(url) {
 
 export default function ClassStudentsPage() {
   const { loadTeacherInfo } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const [classes, setClasses] = useState([]);
@@ -38,7 +40,7 @@ export default function ClassStudentsPage() {
   const [currentLesson, setCurrentLesson] = useState(null);
   const [searched, setSearched] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState("Select a class and search.");
+  const [status, setStatus] = useState(t("classStudents.initial"));
 
   const selectedLessonName = lessons.find((l) => l.id === selectedLessonId)?.name;
 
@@ -57,7 +59,7 @@ export default function ClassStudentsPage() {
       } catch (error) {
         if (cancelled || error.message === "RE-AUTH_NEEDED") return;
         console.error("Error loading classes:", error);
-        setStatus("Failed to load classes.");
+        setStatus(t("classStudents.loadClassesFailed"));
       }
     })();
     return () => {
@@ -88,7 +90,7 @@ export default function ClassStudentsPage() {
     } catch (error) {
       if (error.message === "RE-AUTH_NEEDED") return;
       console.error("Error fetching lessons:", error);
-      setStatus("Failed to load lessons.");
+      setStatus(t("classStudents.loadLessonsFailed"));
     } finally {
       setLessonsLoading(false);
     }
@@ -97,7 +99,7 @@ export default function ClassStudentsPage() {
   const handleSearch = async () => {
     if (!selectedClassId || loading) return;
     setLoading(true);
-    setStatus("Searching…");
+    setStatus(t("classStudents.searching"));
     try {
       const [studentList, current] = await Promise.all([
         fetchStudents(selectedClassId),
@@ -108,13 +110,15 @@ export default function ClassStudentsPage() {
       setSearched(true);
       setStatus(
         studentList.length
-          ? `${studentList.length} student${studentList.length === 1 ? "" : "s"} found.`
-          : "No students found in this class.",
+          ? studentList.length === 1
+            ? t("classStudents.foundOne", { n: studentList.length })
+            : t("classStudents.foundMany", { n: studentList.length })
+          : t("classStudents.noStudents"),
       );
     } catch (error) {
       if (error.message === "RE-AUTH_NEEDED") return;
       console.error("Search error:", error);
-      setStatus("Search failed.");
+      setStatus(t("classStudents.searchFailed"));
     } finally {
       setLoading(false);
     }
@@ -153,18 +157,18 @@ export default function ClassStudentsPage() {
         <div className="topbar">
           <div className="topbar-left">
             <h2>
-              Students{" "}
+              {t("classStudents.title")}{" "}
               {searched && (
                 <span className="count-badge">{students.length}</span>
               )}
             </h2>
-            <p>Search students by class and open their exercise docs.</p>
+            <p>{t("classStudents.subtitle")}</p>
           </div>
         </div>
 
         <div className="cache-search">
           <select value={selectedClassId} onChange={handleClassChange}>
-            <option value="">Select class</option>
+            <option value="">{t("classStudents.selectClass")}</option>
             {classes.map((cls) => (
               <option key={cls.id} value={cls.id}>
                 {cls.name}
@@ -177,7 +181,7 @@ export default function ClassStudentsPage() {
             disabled={!selectedClassId || lessonsLoading || lessons.length === 0}
           >
             <option value="">
-              {lessonsLoading ? "Loading lessons…" : "Select lesson (optional)"}
+              {lessonsLoading ? t("classStudents.loadingLessons") : t("classStudents.selectLessonOptional")}
             </option>
             {lessons.map((lesson) => (
               <option key={lesson.id} value={lesson.id}>
@@ -190,33 +194,33 @@ export default function ClassStudentsPage() {
             onClick={handleSearch}
             disabled={!selectedClassId || loading}
           >
-            Search
+            {t("common.search")}
           </button>
         </div>
 
         {loading ? (
           <div className="cache-loading">
             <span className="spinner" aria-hidden="true"></span>
-            <span>Searching…</span>
+            <span>{t("classStudents.searching")}</span>
           </div>
         ) : !searched ? (
           <div className="empty-state">
             <i className="ti ti-users" aria-hidden="true"></i>
-            <p>Select a class and click Search.</p>
+            <p>{t("classStudents.selectAndSearch")}</p>
           </div>
         ) : students.length === 0 ? (
           <div className="empty-state">
             <i className="ti ti-users" aria-hidden="true"></i>
-            <p>No students found in this class.</p>
+            <p>{t("classStudents.noStudents")}</p>
           </div>
         ) : (
           <div className="cache-table-wrap">
             <table className="cache-table">
               <thead>
                 <tr>
-                  <th>Tên học sinh</th>
-                  <th>Link bài tập</th>
-                  <th>Đã chấm</th>
+                  <th>{t("classStudents.colName")}</th>
+                  <th>{t("classStudents.colDoc")}</th>
+                  <th>{t("classStudents.colGraded")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -231,7 +235,7 @@ export default function ClassStudentsPage() {
                           rel="noreferrer"
                           onClick={(e) => openDoc(e, s.ggDocLink)}
                         >
-                          Mở bài tập
+                          {t("classStudents.openDoc")}
                         </a>
                       ) : (
                         "—"

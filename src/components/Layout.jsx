@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext.jsx";
 import { SUPPORT_EMAIL, isAdminEmail } from "../config.js";
+import { useLanguage } from "../i18n/LanguageContext.jsx";
 
 function initials(name) {
   if (!name) return "?";
@@ -10,12 +11,34 @@ function initials(name) {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
+/** VI / EN language toggle. */
+function LanguageSwitcher() {
+  const { lang, setLang, t } = useLanguage();
+  return (
+    <div className="lang-switch" role="group" aria-label={t("lang.label")}>
+      <button
+        className={`lang-option ${lang === "vi" ? "active" : ""}`}
+        onClick={() => setLang("vi")}
+      >
+        {t("lang.vi")}
+      </button>
+      <button
+        className={`lang-option ${lang === "en" ? "active" : ""}`}
+        onClick={() => setLang("en")}
+      >
+        {t("lang.en")}
+      </button>
+    </div>
+  );
+}
+
 /** ☰ menu with navigation shortcuts (replaces the extension popup menu). */
 function NavMenu() {
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef(null);
   const navigate = useNavigate();
   const { teacherInfo } = useAuth();
+  const { t } = useLanguage();
 
   useEffect(() => {
     const onClick = (event) => {
@@ -32,6 +55,8 @@ function NavMenu() {
     navigate(path);
   };
 
+  const isAdmin = isAdminEmail(teacherInfo?.gmail);
+
   return (
     <div className="menu-wrapper" ref={wrapperRef}>
       <button
@@ -44,27 +69,35 @@ function NavMenu() {
       {open && (
         <div className="menu-options">
           <button className="menu-option" onClick={() => go("/grade")}>
-            Grade exercises
+            {t("nav.grade")}
           </button>
           <button className="menu-option" onClick={() => go("/classes/new")}>
-            Add new class
+            {t("nav.addClass")}
           </button>
           <button className="menu-option" onClick={() => go("/students/add")}>
-            Add students into a class
+            {t("nav.addStudents")}
           </button>
           <button className="menu-option" onClick={() => go("/students/manage")}>
-            Manage students
+            {t("nav.manageStudents")}
           </button>
-          {isAdminEmail(teacherInfo?.gmail) && (
+          {isAdmin && (
             <button
               className="menu-option"
               onClick={() => go("/admin/grading-cache")}
             >
-              Manage grading cache
+              {t("nav.manageCache")}
+            </button>
+          )}
+          {isAdmin && (
+            <button
+              className="menu-option"
+              onClick={() => go("/admin/teacher-points")}
+            >
+              {t("nav.managePoints")}
             </button>
           )}
           <a className="menu-option" href={`mailto:${SUPPORT_EMAIL}`}>
-            Contact for support: {SUPPORT_EMAIL}
+            {t("nav.support", { email: SUPPORT_EMAIL })}
           </a>
         </div>
       )}
@@ -76,6 +109,7 @@ function NavMenu() {
 function ProfileMenu({ teacherInfo }) {
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef(null);
+  const { t } = useLanguage();
 
   useEffect(() => {
     const onClick = (event) => {
@@ -101,7 +135,9 @@ function ProfileMenu({ teacherInfo }) {
       </button>
       {open && (
         <div className="menu-options profile-popover">
-          <p className="profile-greeting">Hi {teacherInfo.name || "there"}!</p>
+          <p className="profile-greeting">
+            {t("nav.hi", { name: teacherInfo.name || t("nav.there") })}
+          </p>
           {teacherInfo.username && (
             <p className="profile-detail">
               <i className="ti ti-user" aria-hidden="true"></i>
@@ -122,10 +158,11 @@ function ProfileMenu({ teacherInfo }) {
 
 export default function Layout() {
   const { isAuthenticated, teacherInfo, logout } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    logout("Please login to use the app...");
+    logout(t("session.pleaseLogin"));
     navigate("/login");
   };
 
@@ -134,24 +171,17 @@ export default function Layout() {
       <header className="app-header">
         <Link to="/grade" className="brand">
           <img src="/check-exercise.png" alt="" className="brand-icon" />
-          <h3 className="m-0">AI Exercise Checker tool - For Basic classes</h3>
+          <h3 className="m-0">{t("common.appTitle")}</h3>
         </Link>
         <div className="header-right">
+          <LanguageSwitcher />
           {isAuthenticated && <NavMenu />}
           {isAuthenticated && <ProfileMenu teacherInfo={teacherInfo} />}
-          {/* {isAuthenticated ? (
+          {isAuthenticated && (
             <button className="logout-btn" onClick={handleLogout}>
-              Logout
+              {t("nav.logout")}
             </button>
-          ) : (
-            <Link to="/login" className="primary-btn login-link">
-              Login
-            </Link>
-          )} */}
-
-          {isAuthenticated && <button className="logout-btn" onClick={handleLogout}>
-            Logout
-          </button>}
+          )}
         </div>
       </header>
       <main className="app-main">

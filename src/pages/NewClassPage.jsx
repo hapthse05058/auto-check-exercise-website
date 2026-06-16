@@ -8,12 +8,11 @@ import {
   fetchLessons,
 } from "../api/backend.js";
 import { useAuth } from "../auth/AuthContext.jsx";
-
-const DUPLICATE_NAME_MESSAGE =
-  "This class name is duplicated with another once in the system";
+import { useLanguage } from "../i18n/LanguageContext.jsx";
 
 export default function NewClassPage() {
   const { loadTeacherInfo } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const [name, setName] = useState("");
@@ -24,7 +23,7 @@ export default function NewClassPage() {
   const [lessonsLoading, setLessonsLoading] = useState(false);
   const [lesson, setLesson] = useState("");
   const [existingClasses, setExistingClasses] = useState([]);
-  const [status, setStatus] = useState("Create a new class for your account.");
+  const [status, setStatus] = useState(t("newClass.intro"));
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -82,21 +81,21 @@ export default function NewClassPage() {
       (cls) => cls.name?.trim().toLowerCase() === trimmed.toLowerCase(),
     );
     if (localDuplicate) {
-      setNameError(DUPLICATE_NAME_MESSAGE);
+      setNameError(t("newClass.duplicateName"));
       return false;
     }
 
     try {
       const exists = await checkClassNameExists(trimmed);
       if (exists) {
-        setNameError(DUPLICATE_NAME_MESSAGE);
+        setNameError(t("newClass.duplicateName"));
         return false;
       }
       setNameError("");
       return true;
     } catch (error) {
       console.error("Error checking class name:", error);
-      setNameError("Unable to verify class name. Please try again later.");
+      setNameError(t("newClass.verifyError"));
       return false;
     }
   };
@@ -104,17 +103,17 @@ export default function NewClassPage() {
   const handleSave = async () => {
     const trimmed = name.trim();
     if (!trimmed) {
-      setNameError("Class name is required.");
+      setNameError(t("newClass.nameRequired"));
       return;
     }
 
     const validClassName = await verifyClassName();
     if (!validClassName) {
-      setStatus("Please fix the class name before saving.");
+      setStatus(t("newClass.fixName"));
       return;
     }
 
-    setStatus("Saving class...");
+    setStatus(t("newClass.saving"));
     setSaving(true);
     try {
       const teacherInfo = await loadTeacherInfo();
@@ -127,15 +126,15 @@ export default function NewClassPage() {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
-        setStatus(errorData?.error || "Failed to create class.");
+        setStatus(errorData?.error || t("newClass.createFailed"));
         return;
       }
 
-      setStatus("Class created successfully.");
+      setStatus(t("newClass.created"));
       navigate("/grade");
     } catch (error) {
       console.error("Error creating class:", error);
-      setStatus("Unable to create class. Please try again.");
+      setStatus(t("newClass.createError"));
     } finally {
       setSaving(false);
     }
@@ -146,15 +145,15 @@ export default function NewClassPage() {
   return (
     <div className="page-narrow">
       <div className="form-panel">
-        <h4>Create New Class</h4>
+        <h4>{t("newClass.title")}</h4>
         <div className="form-field">
           <label htmlFor="newClassName">
-            Class name <span className="required-star">*</span>
+            {t("newClass.name")} <span className="required-star">*</span>
           </label>
           <input
             id="newClassName"
             type="text"
-            placeholder="Enter class name"
+            placeholder={t("newClass.namePlaceholder")}
             value={name}
             onChange={(e) => {
               setName(e.target.value);
@@ -167,9 +166,9 @@ export default function NewClassPage() {
           )}
         </div>
         <div className="form-field">
-          <label htmlFor="newClassType">Class type</label>
+          <label htmlFor="newClassType">{t("newClass.type")}</label>
           <select id="newClassType" value={classType} onChange={handleTypeChange}>
-            <option value="">Select class type</option>
+            <option value="">{t("newClass.selectType")}</option>
             {classTypes.map((type) => (
               <option key={type.code} value={type.code}>
                 {type.name || type.code || type.id}
@@ -178,7 +177,7 @@ export default function NewClassPage() {
           </select>
         </div>
         <div className="form-field">
-          <label htmlFor="newClassLesson">Current lesson</label>
+          <label htmlFor="newClassLesson">{t("newClass.currentLesson")}</label>
           <select
             id="newClassLesson"
             value={lesson}
@@ -187,10 +186,10 @@ export default function NewClassPage() {
           >
             <option value="">
               {lessonsLoading
-                ? "Loading lessons..."
+                ? t("newClass.loadingLessons")
                 : lessons.length === 0 && classType
-                  ? "No lessons available"
-                  : "Select lesson"}
+                  ? t("newClass.noLessons")
+                  : t("newClass.selectLesson")}
             </option>
             {lessons.map((item) => (
               <option key={item.id} value={item.id}>
@@ -201,10 +200,10 @@ export default function NewClassPage() {
         </div>
         <div className="action-row">
           <button className="logout-btn" onClick={() => navigate("/grade")}>
-            Back To Homepage
+            {t("common.backHome")}
           </button>
           <button className="primary-btn" onClick={handleSave} disabled={!canSave}>
-            Save Class
+            {t("newClass.saveClass")}
           </button>
         </div>
         <div className="status-line">{status}</div>

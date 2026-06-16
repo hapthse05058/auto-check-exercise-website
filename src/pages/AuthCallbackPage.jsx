@@ -3,12 +3,14 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { loginWithGoogleCode } from "../api/backend.js";
 import { useAuth } from "../auth/AuthContext.jsx";
 import { getGoogleRedirectUri } from "../auth/googleOAuth.js";
+import { useLanguage } from "../i18n/LanguageContext.jsx";
 
 /**
  * Google redirects here with ?code=... after the consent screen.
  * Web replacement for the chrome.identity.launchWebAuthFlow callback.
  */
 export default function AuthCallbackPage() {
+  const { t } = useLanguage();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { onLoggedIn } = useAuth();
@@ -20,11 +22,11 @@ export default function AuthCallbackPage() {
     const oauthError = searchParams.get("error");
 
     if (oauthError) {
-      setError(`Google login was cancelled or failed (${oauthError}).`);
+      setError(t("authCallback.cancelled", { err: oauthError }));
       return;
     }
     if (!code) {
-      setError("Missing authorization code in the callback URL.");
+      setError(t("authCallback.missingCode"));
       return;
     }
     if (exchanged.current) return;
@@ -37,23 +39,23 @@ export default function AuthCallbackPage() {
       })
       .catch((err) => {
         console.error("Google login error:", err);
-        setError(err.message || "Google login failed.");
+        setError(err.message || t("authCallback.failed"));
       });
-  }, [searchParams, navigate, onLoggedIn]);
+  }, [searchParams, navigate, onLoggedIn, t]);
 
   return (
     <div className="page-narrow">
       <div className="form-panel">
-        <h4>Signing you in with Google…</h4>
+        <h4>{t("authCallback.title")}</h4>
         {error ? (
           <>
             <p className="error-text">{error}</p>
             <Link to="/login" className="primary-btn login-link">
-              Back to login
+              {t("authCallback.backToLogin")}
             </Link>
           </>
         ) : (
-          <p>Please wait while we complete your login.</p>
+          <p>{t("authCallback.wait")}</p>
         )}
       </div>
     </div>

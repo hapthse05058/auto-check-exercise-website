@@ -4,7 +4,12 @@
  * feedback back into the doc. Port of processDocs/autoCheckExercises from
  * extension/popup.js.
  */
-import { fetchStudentDocRefs, gradeAnswers } from "../api/backend.js";
+import {
+  consumePoints,
+  fetchMyPoint,
+  fetchStudentDocRefs,
+  gradeAnswers,
+} from "../api/backend.js";
 import { getTabContent } from "../api/googleDocs.js";
 import { ensureValidGoogleToken } from "../auth/tokens.js";
 import {
@@ -44,6 +49,7 @@ export async function processDocs({
   onStatus,
   useCache = true,
   isAdmin = false,
+  t = (key) => key, // translator from the caller (GradePage)
 }) {
   let links = [];
   const trimmed = (docLinksText || "").trim();
@@ -53,7 +59,7 @@ export async function processDocs({
     links = await fetchStudentDocRefs(classId);
   }
   if (!links.length) {
-    alert("No student documents found for this class.");
+    alert(t("grading.noDocs"));
     return false;
   }
 
@@ -61,7 +67,7 @@ export async function processDocs({
   let tableIndex = [];
   const studentsExerciseList = [];
   for (const student of links) {
-    onStatus.set(`Processing Doc: ${student.docId}...`);
+    onStatus.set(t("grading.processingDoc", { docId: student.docId }));
     try {
       // The Google Docs API needs a REAL Google token, not the backend JWT.
       // Re-check before every call: long doc lists can outlive a token.
@@ -88,16 +94,21 @@ export async function processDocs({
       }
     } catch (err) {
       console.error(err);
-      onStatus.set(`Failed ${student.docId}: ${err.message}`);
+      onStatus.set(t("grading.failedDoc", { docId: student.docId, msg: err.message }));
     }
   }
   if (studentsExerciseList.length) {
-    onStatus.set(
-      "Finished fetching content from all docs. Starting auto-check...",
-    );
+    onStatus.set(t("grading.finishedFetch"));
   }
 
-  await autoCheckExercises(studentsExerciseList, tableIndex, onStatus, useCache);
+  await autoCheckExercises(
+    studentsExerciseList,
+    tableIndex,
+    onStatus,
+    useCache,
+    isAdmin,
+    t,
+  );
   return true;
 }
 
@@ -106,6 +117,8 @@ async function autoCheckExercises(
   tableIndex,
   onStatus,
   useCache = true,
+  isAdmin = false,
+  t = (key) => key,
 ) {
   if (!studentsExerciseList.length) return;
 
@@ -114,15 +127,34 @@ async function autoCheckExercises(
   for (const item of studentsExerciseList) {
     if (wasExerciseReviewedByAI(item.student.exercise, tableIndex)) {
       onStatus.append(
-        `\n This exercise has been checked: ${item.student.docId}. Skip checking it again...`,
+        t("grading.alreadyChecked", { docId: item.student.docId }),
       );
     } else {
       pending.push(item);
     }
   }
   if (!pending.length) {
-    onStatus.append("\n All docs were already checked. Nothing to grade.");
+    onStatus.append(t("grading.allChecked"));
     return;
+  }
+
+  // 1b. Point gate (non-admins only): block the whole batch when the teacher
+  //     doesn't have enough points for every pending doc (1 point per doc).
+  if (!isAdmin) {
+    let balance = 0;
+    try {
+      balance = await fetchMyPoint();
+    } catch (err) {
+      console.error(err);
+      onStatus.set(t("grading.pointCheckFailed"));
+      return;
+    }
+    if (balance < pending.length) {
+      onStatus.set(
+        t("grading.notEnough", { need: pending.length, have: balance }),
+      );
+      return;
+    }
   }
 
   // 2. Gather every answer across the class and DEDUPE by (question, answer).
@@ -139,7 +171,7 @@ async function autoCheckExercises(
   }
   const studentAnswerArr = [...uniqueAnswers.values()];
   if (!studentAnswerArr.length) {
-    onStatus.append("\n No answered questions found to grade.");
+    onStatus.append(t("grading.noAnswers"));
     return;
   }
 
@@ -147,17 +179,20 @@ async function autoCheckExercises(
   //    caching is disabled — then every answer goes straight to the AI).
   if (isAdmin) {
     onStatus.set(
-      `Grading ${studentAnswerArr.length} unique answers${useCache ? "" : " (cache off)"}...`,
+      t("grading.gradingN", {
+        n: studentAnswerArr.length,
+        cache: useCache ? "" : t("grading.cacheOff"),
+      }),
     );
   } else {
-    onStatus.set("Grading answers...");
+    onStatus.set(t("grading.gradingAnswers"));
   }
   let graded;
   try {
     graded = await gradeAnswers(studentAnswerArr, useCache);
   } catch (err) {
     console.error(err);
-    onStatus.set(`Grading failed: ${err.message}`);
+    onStatus.set(t("grading.gradingFailed", { msg: err.message }));
     return;
   }
 
@@ -174,6 +209,7 @@ async function autoCheckExercises(
   //    matched feedback or a parseable index is skipped.
   const CONCURRENCY_LIMIT = 5;
   const chunks = chunkArray(pending, CONCURRENCY_LIMIT);
+  let successCount = 0; // student docs whose feedback was written (= points spent)
   try {
     for (const chunk of chunks) {
       // Writing to the doc needs a REAL Google token, not the JWT.
@@ -189,9 +225,7 @@ async function autoCheckExercises(
             }
           }
           if (!gradingResults.length) {
-            onStatus.append(
-              `\n No feedback matched for ${student.docId}, skipping.`,
-            );
+            onStatus.append(t("grading.noMatch", { docId: student.docId }));
             return;
           }
           try {
@@ -201,16 +235,17 @@ async function autoCheckExercises(
               googleToken,
               tableIndex,
             );
-            onStatus.append(`\n Wrote feedback to ${student.docId}.`);
+            successCount += 1; // 1 point will be spent for this doc
+            onStatus.append(t("grading.wrote", { docId: student.docId }));
           } catch (err) {
             console.error(err);
             onStatus.append(
-              `\n Failed writing to ${student.docId}: ${err.message}`,
+              t("grading.failedWrite", { docId: student.docId, msg: err.message }),
             );
           }
         }),
       );
-      onStatus.append(`\n Complete handling ${chunk.length} doc, continue...`);
+      onStatus.append(t("grading.completeChunk", { n: chunk.length }));
     }
     // Celebrate!
     const sound = new Audio("/successful_sound.mp3");
@@ -218,7 +253,16 @@ async function autoCheckExercises(
   } catch (err) {
     console.error("AutoCheck Error:", err);
   }
-  onStatus.append(
-    `\n Processing complete!\nGrading student's exercises completed! You can review the result!!`,
-  );
+
+  // Spend 1 point per successfully written doc (non-admins only).
+  if (!isAdmin && successCount > 0) {
+    try {
+      const remaining = await consumePoints(successCount);
+      onStatus.append(t("grading.spent", { n: successCount, remaining }));
+    } catch (err) {
+      console.error("Consume points failed:", err);
+    }
+  }
+
+  onStatus.append(t("grading.complete"));
 }

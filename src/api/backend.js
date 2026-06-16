@@ -322,3 +322,80 @@ export async function bulkDeleteGradingCache(ids) {
     body: { ids },
   });
 }
+
+// ---------------------------------------------------------------------------
+// Teacher points
+// ---------------------------------------------------------------------------
+
+/** Current point balance of the logged-in teacher (0 when no record). */
+export async function fetchMyPoint() {
+  const response = await authFetch("/teacher-points/me");
+  if (!response.ok) throw new Error("Failed to fetch point balance");
+  const data = await response.json();
+  return data.point ?? 0;
+}
+
+/** Spends `count` points for the logged-in teacher (after successful writes). */
+export async function consumePoints(count) {
+  const response = await authFetch("/teacher-points/consume", {
+    method: "POST",
+    body: { count },
+  });
+  if (!response.ok) throw new Error("Failed to consume points");
+  const data = await response.json();
+  return data.point ?? 0;
+}
+
+// --- admin only ---
+
+/** Teachers list for the create dropdown (`[{ id, gmail, name }]`). */
+export async function fetchTeachersForPoints() {
+  const response = await authFetch("/teachers");
+  if (!response.ok) throw new Error("Failed to fetch teachers");
+  const data = await response.json();
+  return Array.isArray(data.teachers) ? data.teachers : [];
+}
+
+/** All TeacherPoint records. */
+export async function fetchTeacherPoints() {
+  const response = await authFetch("/teacher-points");
+  if (!response.ok) throw new Error("Failed to fetch teacher points");
+  const data = await response.json();
+  return Array.isArray(data.records) ? data.records : [];
+}
+
+export async function createTeacherPoint(payload) {
+  return authFetch("/teacher-points", { method: "POST", body: payload });
+}
+
+export async function updateTeacherPoint(id, payload) {
+  return authFetch(`/teacher-points/${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    body: payload,
+  });
+}
+
+export async function deleteTeacherPoint(id) {
+  return authFetch(`/teacher-points/${encodeURIComponent(id)}`, {
+    method: "DELETE",
+  });
+}
+
+/** Tops up a teacher's points from a VND amount. */
+export async function topUpTeacherPoint(id, amountVnd) {
+  return authFetch(`/teacher-points/${encodeURIComponent(id)}/topup`, {
+    method: "POST",
+    body: { amountVnd },
+  });
+}
+
+/** Admin billing summary `{ totalTopUpVnd, commissionVnd }`. */
+export async function fetchBilling() {
+  const response = await authFetch("/teacher-points/billing");
+  if (!response.ok) throw new Error("Failed to fetch billing");
+  return response.json();
+}
+
+export async function resetBilling() {
+  return authFetch("/teacher-points/billing/reset", { method: "POST" });
+}

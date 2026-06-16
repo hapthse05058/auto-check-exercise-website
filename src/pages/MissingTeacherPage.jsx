@@ -1,13 +1,15 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../auth/AuthContext.jsx";
+import { useLanguage } from "../i18n/LanguageContext.jsx";
 
 /** Shown right after login when the account has no teacher record yet. */
 export default function MissingTeacherPage() {
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const { logout } = useAuth();
 
   const handleCancel = () => {
-    logout("Please login to use the app...");
+    logout(t("session.pleaseLogin"));
     navigate("/login");
   };
 
@@ -15,14 +17,14 @@ export default function MissingTeacherPage() {
     <div className="page-narrow">
       <div className="missing-teacher-box">
         <p className="warning-text">
-          You haven't had info in the system, please create once.
+          {t("missingTeacher.message")}
         </p>
         <div className="action-row">
           <button className="logout-btn" onClick={handleCancel}>
-            Cancel
+            {t("common.cancel")}
           </button>
           <button className="primary-btn" onClick={() => navigate("/signup")}>
-            Next
+            {t("common.next")}
           </button>
         </div>
       </div>
