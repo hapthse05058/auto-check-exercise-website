@@ -224,6 +224,8 @@ async function autoCheckExercises(
               gradingResults.push({ questionIndex, aiFeedback: feedback });
             }
           }
+          console.log("hapth");
+          console.log(gradingResults);
           if (!gradingResults.length) {
             onStatus.append(t("grading.noMatch", { docId: student.docId }));
             return;

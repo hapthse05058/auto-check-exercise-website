@@ -6,4 +6,9 @@ export default defineConfig({
   server: {
     port: 4200,
   },
+  build: {
+    // Sinh source maps cho production build để có thể debug
+    // (map code đã minify về source gốc) ngay trên website đã deploy.
+    sourcemap: true,
+  },
 });
