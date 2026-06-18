@@ -411,6 +411,7 @@ export async function fetchBilling() {
   return response.json();
 }
 
-export async function resetBilling() {
-  return authFetch("/teacher-points/billing/reset", { method: "POST" });
+/** Pays (settles) the outstanding saler commission; keeps the lifetime top-up total. */
+export async function settleCommission() {
+  return authFetch("/teacher-points/billing/settle", { method: "POST" });
 }

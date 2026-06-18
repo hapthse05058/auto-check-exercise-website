@@ -430,6 +430,23 @@
 .billing-panel .btn-cancel {
   margin-left: auto;
 }
+.billing-value-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.billing-value-link {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-primary-dark, #0f6e56);
+}
+.billing-value-link:hover {
+  text-decoration: underline;
+}
 
 /* language switcher */
 .lang-switch {

@@ -11,4 +11,9 @@ export default defineConfig({
     // (map code đã minify về source gốc) ngay trên website đã deploy.
     sourcemap: true,
   },
+  test: {
+    // Unit tests only (*.test.js). Playwright E2E lives in tests/e2e/*.spec.mjs
+    // and is run by the Playwright runner, not vitest.
+    include: ["tests/**/*.test.{js,jsx}"],
+  },
 });

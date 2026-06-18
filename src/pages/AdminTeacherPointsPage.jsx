@@ -6,13 +6,14 @@ import {
   fetchBilling,
   fetchTeacherPoints,
   fetchTeachersForPoints,
-  resetBilling,
+  settleCommission,
   topUpTeacherPoint,
   updateTeacherPoint,
 } from "../api/backend.js";
 import { useAuth } from "../auth/AuthContext.jsx";
 import { isAdminEmail } from "../config.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
+import { maskMoney, netRevenueVnd } from "../lib/billing.js";
 
 const TOPUP_STEP = 70000;
 const TOPUP_MIN = 70000;
@@ -35,7 +36,14 @@ export default function AdminTeacherPointsPage() {
   const { t } = useLanguage();
 
   const [records, setRecords] = useState([]);
-  const [billing, setBilling] = useState({ totalTopUpVnd: 0, commissionVnd: 0 });
+  const [billing, setBilling] = useState({
+    totalTopUpVnd: 0,
+    commissionVnd: 0,
+    totalCommissionVnd: 0,
+    paidCommissionVnd: 0,
+    lastSettledAt: null,
+  });
+  const [showTotal, setShowTotal] = useState(false);
   const [teachers, setTeachers] = useState([]);
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState("hasActive"); // hasActive | noActive | all
@@ -254,18 +262,27 @@ export default function AdminTeacherPointsPage() {
     }
   };
 
-  const handleResetBilling = async () => {
-    if (!window.confirm(t("points.resetConfirm"))) return;
+  const handleSettleCommission = async () => {
+    if (!window.confirm(t("points.settleConfirm"))) return;
     try {
-      const res = await resetBilling();
+      const res = await settleCommission();
       if (!res.ok) {
-        setStatus(t("points.resetFailed"));
+        setStatus(t("points.settleFailed"));
         return;
       }
-      setBilling({ totalTopUpVnd: 0, commissionVnd: 0 });
-      setStatus(t("points.reset"));
+      const data = await res.json().catch(() => ({}));
+      // Outstanding commission drops to 0; the paid amount moves into paidCommissionVnd.
+      // The lifetime totalTopUpVnd is untouched.
+      setBilling((b) => ({
+        ...b,
+        commissionVnd: 0,
+        paidCommissionVnd:
+          (b.paidCommissionVnd || 0) + (data.paidCommissionVnd || 0),
+        lastSettledAt: data.paidAt ?? b.lastSettledAt,
+      }));
+      setStatus(t("points.settled"));
     } catch (error) {
-      setStatus(t("points.resetFailed"));
+      setStatus(t("points.settleFailed"));
     }
   };
 
@@ -291,14 +308,40 @@ export default function AdminTeacherPointsPage() {
         <div className="billing-panel">
           <div className="billing-item">
             <span className="billing-label">{t("points.totalTopUp")}</span>
-            <span className="billing-value">{vnd(billing.totalTopUpVnd)}</span>
+            <span className="billing-value-row">
+              <button
+                type="button"
+                className="billing-value billing-value-link"
+                title={t("points.viewDetail")}
+                onClick={() => setModal("billingDetail")}
+              >
+                {showTotal ? vnd(billing.totalTopUpVnd) : maskMoney()}
+              </button>
+              <button
+                className="btn-icon"
+                title={showTotal ? t("points.hideTotal") : t("points.showTotal")}
+                aria-label={showTotal ? t("points.hideTotal") : t("points.showTotal")}
+                onClick={() => setShowTotal((v) => !v)}
+              >
+                <i
+                  className={showTotal ? "ti ti-eye-off" : "ti ti-eye"}
+                  aria-hidden="true"
+                ></i>
+              </button>
+            </span>
           </div>
           <div className="billing-item">
             <span className="billing-label">{t("points.commission")}</span>
             <span className="billing-value">{vnd(billing.commissionVnd)}</span>
           </div>
-          <button className="btn-cancel" onClick={handleResetBilling}>
-            {t("points.resetTotal")}
+          {billing.lastSettledAt && (
+            <div className="billing-item">
+              <span className="billing-label">{t("points.lastSettled")}</span>
+              <span className="cell-date">{formatDate(billing.lastSettledAt)}</span>
+            </div>
+          )}
+          <button className="btn-cancel" onClick={handleSettleCommission}>
+            {t("points.settle")}
           </button>
         </div>
 
@@ -534,6 +577,36 @@ export default function AdminTeacherPointsPage() {
                   </table>
                 </div>
               )}
+              <div className="modal-footer">
+                <button className="btn-cancel" onClick={closeModal}>
+                  {t("common.close")}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Top-up total detail modal */}
+        {modal === "billingDetail" && (
+          <div className="modal-bg open">
+            <div className="modal">
+              <div className="modal-header">
+                <h3>{t("points.detailTitle")}</h3>
+              </div>
+              <div className="billing-item">
+                <span className="billing-label">{t("points.totalTopUp")}</span>
+                <span className="billing-value">{vnd(billing.totalTopUpVnd)}</span>
+              </div>
+              <div className="billing-item">
+                <span className="billing-label">{t("points.salerCost")}</span>
+                <span className="billing-value">{vnd(billing.totalCommissionVnd)}</span>
+              </div>
+              <div className="billing-item">
+                <span className="billing-label">{t("points.netRevenue")}</span>
+                <span className="billing-value">
+                  {vnd(netRevenueVnd(billing.totalTopUpVnd, billing.paidCommissionVnd))}
+                </span>
+              </div>
               <div className="modal-footer">
                 <button className="btn-cancel" onClick={closeModal}>
                   {t("common.close")}
