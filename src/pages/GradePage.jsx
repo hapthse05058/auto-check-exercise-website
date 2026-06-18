@@ -61,8 +61,9 @@ export default function GradePage() {
         refreshPoint();
         const classList = await fetchClasses(teacherInfo.id);
         if (cancelled) return;
-        setClasses(classList);
-        if (classList.length === 0) {
+        const activeClasses = classList.filter((c) => c.isActive !== false);
+        setClasses(activeClasses);
+        if (activeClasses.length === 0) {
           alert(t("grade.noClasses"));
         }
         setStatus(t("grade.ready"));

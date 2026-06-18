@@ -3,6 +3,7 @@ import Layout from "./components/Layout.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import AddStudentsPage from "./pages/AddStudentsPage.jsx";
 import AdminTeacherPointsPage from "./pages/AdminTeacherPointsPage.jsx";
+import ClassManagePage from "./pages/ClassManagePage.jsx";
 import ClassStudentsPage from "./pages/ClassStudentsPage.jsx";
 import AuthCallbackPage from "./pages/AuthCallbackPage.jsx";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage.jsx";
@@ -29,6 +30,7 @@ export default function App() {
           <Route path="/classes/new" element={<NewClassPage />} />
           <Route path="/students/add" element={<AddStudentsPage />} />
           <Route path="/students/manage" element={<ClassStudentsPage />} />
+          <Route path="/classes/manage" element={<ClassManagePage />} />
           <Route path="/admin/grading-cache" element={<GradingCachePage />} />
           <Route path="/admin/teacher-points" element={<AdminTeacherPointsPage />} />
           <Route path="/missing-teacher" element={<MissingTeacherPage />} />

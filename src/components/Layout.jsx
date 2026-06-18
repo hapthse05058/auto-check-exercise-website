@@ -80,6 +80,9 @@ function NavMenu() {
           <button className="menu-option" onClick={() => go("/students/manage")}>
             {t("nav.manageStudents")}
           </button>
+          <button className="menu-option" onClick={() => go("/classes/manage")}>
+            {t("nav.manageClasses")}
+          </button>
           {isAdmin && (
             <button
               className="menu-option"

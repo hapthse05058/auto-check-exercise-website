@@ -209,6 +209,21 @@ export async function createClass({ name, classType, currentLesson, teacherId })
   });
 }
 
+/** Admin: list ALL classes (every teacher) with teacher names joined. */
+export async function fetchAllClasses() {
+  const response = await authFetch("/classes/all");
+  if (!response.ok) throw new Error("Failed to fetch all classes");
+  return response.json();
+}
+
+/** Updates a class: rename (`name`) and/or deactivate (`isActive: false`). */
+export async function updateClass(classId, payload) {
+  return authFetch(`/classes/${encodeURIComponent(classId)}`, {
+    method: "PATCH",
+    body: payload,
+  });
+}
+
 // ---------------------------------------------------------------------------
 // Students & grading
 // ---------------------------------------------------------------------------

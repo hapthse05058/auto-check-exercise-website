@@ -48,7 +48,8 @@ export default function AddStudentsPage() {
           return;
         }
         const classList = await fetchClasses(teacherInfo.id);
-        if (!cancelled) setClasses(classList);
+        if (!cancelled)
+          setClasses(classList.filter((c) => c.isActive !== false));
       } catch (error) {
         if (cancelled || error.message === "RE-AUTH_NEEDED") return;
         console.error("Error fetching classes:", error);
@@ -74,7 +75,8 @@ export default function AddStudentsPage() {
 
     const errors = {};
     if (!name) errors.name = true;
-    if (!gmail.includes("@")) errors.gmail = true;
+    // Gmail is temporarily optional; only validate when provided.
+    if (gmail && !gmail.includes("@")) errors.gmail = true;
     if (!doc.startsWith("http")) errors.doc = true;
     setFormErrors(errors);
     if (Object.keys(errors).length > 0) return;
@@ -103,7 +105,7 @@ export default function AddStudentsPage() {
 
     const studentsToSave = students
       .map((s) => ({ gmail: s.gmail, name: s.name, ggDocLink: s.doc }))
-      .filter((student) => student.gmail && student.name);
+      .filter((student) => student.name);
 
     if (!studentsToSave.length) {
       setStatus(t("addStudents.atLeastOne"));
@@ -190,10 +192,12 @@ export default function AddStudentsPage() {
                   <div className="student-info">
                     <p className="student-name">{s.name}</p>
                     <div className="student-meta">
-                      <div className="meta-item">
-                        <i className="ti ti-mail" aria-hidden="true"></i>
-                        <span>{s.gmail}</span>
-                      </div>
+                      {s.gmail && (
+                        <div className="meta-item">
+                          <i className="ti ti-mail" aria-hidden="true"></i>
+                          <span>{s.gmail}</span>
+                        </div>
+                      )}
                       <div className="meta-item">
                         <i className="ti ti-file-text" aria-hidden="true"></i>
                         <a href={s.doc} target="_blank" rel="noreferrer">
@@ -245,20 +249,7 @@ export default function AddStudentsPage() {
                   </div>
                 )}
               </div>
-              <div className="field-group">
-                <label>{t("addStudents.gmail")}</label>
-                <input
-                  type="email"
-                  placeholder={t("addStudents.gmailPlaceholder")}
-                  value={form.gmail}
-                  onChange={(e) => setForm({ ...form, gmail: e.target.value })}
-                />
-                {formErrors.gmail && (
-                  <div className="err" style={{ display: "block" }}>
-                    {t("addStudents.errGmail")}
-                  </div>
-                )}
-              </div>
+              {/* Gmail field temporarily hidden — students can be added without an email. */}
               <div className="field-group">
                 <label>{t("addStudents.docLink")}</label>
                 <input

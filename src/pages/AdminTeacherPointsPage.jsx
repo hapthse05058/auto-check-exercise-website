@@ -38,6 +38,7 @@ export default function AdminTeacherPointsPage() {
   const [billing, setBilling] = useState({ totalTopUpVnd: 0, commissionVnd: 0 });
   const [teachers, setTeachers] = useState([]);
   const [search, setSearch] = useState("");
+  const [activeFilter, setActiveFilter] = useState("hasActive"); // hasActive | noActive | all
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState(t("points.loading"));
 
@@ -99,13 +100,16 @@ export default function AdminTeacherPointsPage() {
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    if (!q) return records;
-    return records.filter(
-      (r) =>
+    return records.filter((r) => {
+      if (activeFilter === "hasActive" && !r.hasActiveClass) return false;
+      if (activeFilter === "noActive" && r.hasActiveClass) return false;
+      if (!q) return true;
+      return (
         (r.name || "").toLowerCase().includes(q) ||
-        (r.gmail || "").toLowerCase().includes(q),
-    );
-  }, [records, search]);
+        (r.gmail || "").toLowerCase().includes(q)
+      );
+    });
+  }, [records, search, activeFilter]);
 
   // Teachers that don't yet have a TeacherPoint record (for the Add dropdown).
   const teachersWithoutRecord = useMemo(() => {
@@ -305,6 +309,14 @@ export default function AdminTeacherPointsPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
+          <select
+            value={activeFilter}
+            onChange={(e) => setActiveFilter(e.target.value)}
+          >
+            <option value="hasActive">{t("points.filterHasActive")}</option>
+            <option value="noActive">{t("points.filterNoActive")}</option>
+            <option value="all">{t("points.filterAll")}</option>
+          </select>
         </div>
 
         {loading ? (

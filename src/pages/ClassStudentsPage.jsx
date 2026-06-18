@@ -55,7 +55,8 @@ export default function ClassStudentsPage() {
           return;
         }
         const classList = await fetchClasses(teacherInfo.id);
-        if (!cancelled) setClasses(classList);
+        if (!cancelled)
+          setClasses(classList.filter((c) => c.isActive !== false));
       } catch (error) {
         if (cancelled || error.message === "RE-AUTH_NEEDED") return;
         console.error("Error loading classes:", error);
