@@ -1,24 +1,21 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  createTeacherPoint,
   deleteTeacherPoint,
   fetchBilling,
   fetchTeacherPoints,
-  fetchTeachersForPoints,
-  settleCommission,
   topUpTeacherPoint,
   updateTeacherPoint,
 } from "../api/backend.js";
 import { useAuth } from "../auth/AuthContext.jsx";
 import { isAdminEmail } from "../config.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
-import { maskMoney, netRevenueVnd } from "../lib/billing.js";
+import { maskMoney } from "../lib/billing.js";
 
-const TOPUP_STEP = 70000;
-const TOPUP_MIN = 70000;
-const TOPUP_MAX = 7000000;
-const VND_PER_POINT = 700;
+const TOPUP_STEP = 60000;
+const TOPUP_MIN = 60000;
+const TOPUP_MAX = 6000000;
+const VND_PER_POINT = 600;
 
 const vnd = (n) => (Number(n) || 0).toLocaleString("vi-VN") + "đ";
 const formatDate = (iso) => {
@@ -38,13 +35,9 @@ export default function AdminTeacherPointsPage() {
   const [records, setRecords] = useState([]);
   const [billing, setBilling] = useState({
     totalTopUpVnd: 0,
-    commissionVnd: 0,
     totalCommissionVnd: 0,
-    paidCommissionVnd: 0,
-    lastSettledAt: null,
   });
   const [showTotal, setShowTotal] = useState(false);
-  const [teachers, setTeachers] = useState([]);
   const [search, setSearch] = useState("");
   const [activeFilter, setActiveFilter] = useState("hasActive"); // hasActive | noActive | all
   const [loading, setLoading] = useState(false);
@@ -88,14 +81,12 @@ export default function AdminTeacherPointsPage() {
     setLoading(true);
     setStatus(t("points.loading"));
     try {
-      const [recs, bill, teacherList] = await Promise.all([
+      const [recs, bill] = await Promise.all([
         fetchTeacherPoints(),
         fetchBilling(),
-        fetchTeachersForPoints(),
       ]);
       setRecords(recs);
       setBilling(bill);
-      setTeachers(teacherList);
       setStatus(t("points.countRecords", { n: recs.length }));
     } catch (error) {
       if (error.message === "RE-AUTH_NEEDED") return;
@@ -119,12 +110,6 @@ export default function AdminTeacherPointsPage() {
     });
   }, [records, search, activeFilter]);
 
-  // Teachers that don't yet have a TeacherPoint record (for the Add dropdown).
-  const teachersWithoutRecord = useMemo(() => {
-    const have = new Set(records.map((r) => r.teacherId));
-    return teachers.filter((t) => !have.has(t.id));
-  }, [teachers, records]);
-
   const closeModal = () => {
     setModal(null);
     setActive(null);
@@ -132,12 +117,6 @@ export default function AdminTeacherPointsPage() {
     setFormError("");
   };
 
-  const openAdd = () => {
-    setActive(null);
-    setForm({ teacherId: "", point: 0 });
-    setFormError("");
-    setModal("add");
-  };
   const openEdit = (rec) => {
     setActive(rec);
     setForm({ point: rec.point });
@@ -153,36 +132,6 @@ export default function AdminTeacherPointsPage() {
   const openHistory = (rec) => {
     setActive(rec);
     setModal("history");
-  };
-
-  const handleAdd = async () => {
-    if (!form.teacherId) {
-      setFormError(t("points.selectTeacherErr"));
-      return;
-    }
-    setSaving(true);
-    try {
-      const res = await createTeacherPoint({
-        teacherId: form.teacherId,
-        point: Number(form.point) || 0,
-      });
-      if (!res.ok) {
-        const d = await res.json().catch(() => null);
-        setFormError(
-          d?.error === "already_exists"
-            ? t("points.teacherExists")
-            : d?.error || t("points.createFailed"),
-        );
-        return;
-      }
-      closeModal();
-      setStatus(t("points.created"));
-      await reload();
-    } catch (error) {
-      setFormError(t("points.createFailed"));
-    } finally {
-      setSaving(false);
-    }
   };
 
   const handleEdit = async () => {
@@ -262,30 +211,6 @@ export default function AdminTeacherPointsPage() {
     }
   };
 
-  const handleSettleCommission = async () => {
-    if (!window.confirm(t("points.settleConfirm"))) return;
-    try {
-      const res = await settleCommission();
-      if (!res.ok) {
-        setStatus(t("points.settleFailed"));
-        return;
-      }
-      const data = await res.json().catch(() => ({}));
-      // Outstanding commission drops to 0; the paid amount moves into paidCommissionVnd.
-      // The lifetime totalTopUpVnd is untouched.
-      setBilling((b) => ({
-        ...b,
-        commissionVnd: 0,
-        paidCommissionVnd:
-          (b.paidCommissionVnd || 0) + (data.paidCommissionVnd || 0),
-        lastSettledAt: data.paidAt ?? b.lastSettledAt,
-      }));
-      setStatus(t("points.settled"));
-    } catch (error) {
-      setStatus(t("points.settleFailed"));
-    }
-  };
-
   const topupAmount = Number(form.amountVnd) || 0;
 
   return (
@@ -299,12 +224,9 @@ export default function AdminTeacherPointsPage() {
             </h2>
             <p>{t("points.subtitle")}</p>
           </div>
-          <button className="btn-add" onClick={openAdd}>
-            <i className="ti ti-plus" aria-hidden="true"></i> {t("points.addTeacher")}
-          </button>
         </div>
 
-        {/* Billing summary */}
+        {/* Revenue summary */}
         <div className="billing-panel">
           <div className="billing-item">
             <span className="billing-label">{t("points.totalTopUp")}</span>
@@ -330,19 +252,6 @@ export default function AdminTeacherPointsPage() {
               </button>
             </span>
           </div>
-          <div className="billing-item">
-            <span className="billing-label">{t("points.commission")}</span>
-            <span className="billing-value">{vnd(billing.commissionVnd)}</span>
-          </div>
-          {billing.lastSettledAt && (
-            <div className="billing-item">
-              <span className="billing-label">{t("points.lastSettled")}</span>
-              <span className="cell-date">{formatDate(billing.lastSettledAt)}</span>
-            </div>
-          )}
-          <button className="btn-cancel" onClick={handleSettleCommission}>
-            {t("points.settle")}
-          </button>
         </div>
 
         <div className="cache-search">
@@ -436,48 +345,6 @@ export default function AdminTeacherPointsPage() {
         )}
 
         <div className="status-line">{status}</div>
-
-        {/* Add modal */}
-        {modal === "add" && (
-          <div className="modal-bg open">
-            <div className="modal">
-              <div className="modal-header">
-                <h3>{t("points.addTitle")}</h3>
-              </div>
-              <div className="field-group">
-                <label>{t("points.teacher")}</label>
-                <select
-                  value={form.teacherId}
-                  onChange={(e) => setForm({ ...form, teacherId: e.target.value })}
-                >
-                  <option value="">{t("points.selectTeacher")}</option>
-                  {teachersWithoutRecord.map((t) => (
-                    <option key={t.id} value={t.id}>
-                      {t.name || t.gmail} ({t.gmail})
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="field-group">
-                <label>{t("points.initialPoint")}</label>
-                <input
-                  type="number"
-                  value={form.point}
-                  onChange={(e) => setForm({ ...form, point: e.target.value })}
-                />
-              </div>
-              {formError && <div className="err" style={{ display: "block" }}>{formError}</div>}
-              <div className="modal-footer">
-                <button className="btn-cancel" onClick={closeModal} disabled={saving}>
-                  {t("common.cancel")}
-                </button>
-                <button className="btn-confirm" onClick={handleAdd} disabled={saving}>
-                  {t("points.create")}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Edit modal */}
         {modal === "edit" && active && (
@@ -586,7 +453,7 @@ export default function AdminTeacherPointsPage() {
           </div>
         )}
 
-        {/* Top-up total detail modal */}
+        {/* Revenue detail modal */}
         {modal === "billingDetail" && (
           <div className="modal-bg open">
             <div className="modal">
@@ -594,18 +461,12 @@ export default function AdminTeacherPointsPage() {
                 <h3>{t("points.detailTitle")}</h3>
               </div>
               <div className="billing-item">
-                <span className="billing-label">{t("points.totalTopUp")}</span>
-                <span className="billing-value">{vnd(billing.totalTopUpVnd)}</span>
-              </div>
-              <div className="billing-item">
                 <span className="billing-label">{t("points.salerCost")}</span>
                 <span className="billing-value">{vnd(billing.totalCommissionVnd)}</span>
               </div>
               <div className="billing-item">
                 <span className="billing-label">{t("points.netRevenue")}</span>
-                <span className="billing-value">
-                  {vnd(netRevenueVnd(billing.totalTopUpVnd, billing.paidCommissionVnd))}
-                </span>
+                <span className="billing-value">{vnd(billing.totalTopUpVnd)}</span>
               </div>
               <div className="modal-footer">
                 <button className="btn-cancel" onClick={closeModal}>

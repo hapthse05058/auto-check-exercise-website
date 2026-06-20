@@ -208,6 +208,20 @@
   width: 100%;
   box-sizing: border-box;
 }
+/* Required-field asterisk in modal labels. */
+.required-mark {
+  color: #d33;
+  font-weight: 700;
+  margin-left: 2px;
+}
+/* Red border on a required-but-empty (or invalid) field after Save. */
+.field-group input.input-error,
+.field-group select.input-error,
+.field-group textarea.input-error {
+  border: 1px solid #d33;
+  box-shadow: 0 0 0 2px rgba(211, 51, 51, 0.18);
+  outline: none;
+}
 .modal-footer {
   display: flex;
   gap: 8px;
@@ -226,6 +240,15 @@
 }
 .btn-cancel:hover {
   background: var(--color-background-secondary);
+}
+/* Destructive text button (e.g. "Delete account"). */
+.btn-text-danger {
+  color: #a32d2d;
+  border-color: #f0c2c2;
+}
+.btn-text-danger:hover {
+  background: #fcebeb;
+  border-color: #e7a9a9;
 }
 .btn-confirm {
   background: #1d9e75;

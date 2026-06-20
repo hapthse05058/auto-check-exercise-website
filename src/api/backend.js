@@ -371,6 +371,52 @@ export async function fetchTeachersForPoints() {
   return Array.isArray(data.teachers) ? data.teachers : [];
 }
 
+// ---------------------------------------------------------------------------
+// Teacher management (admin)
+// ---------------------------------------------------------------------------
+
+/**
+ * Searches/filters teachers for the management screen. `params` may include
+ * `q`, `classId`, `isAccountActive` ("true"/"false"); empties are omitted.
+ * Returns full records (no password) with `classIds`/`classNames`.
+ */
+export async function fetchTeachersManage(params = {}) {
+  const qs = new URLSearchParams();
+  Object.entries(params).forEach(([k, v]) => {
+    if (v !== undefined && v !== null && v !== "") qs.set(k, v);
+  });
+  const suffix = qs.toString() ? `?${qs.toString()}` : "";
+  const response = await authFetch(`/teachers/manage${suffix}`);
+  if (!response.ok) throw new Error("Failed to fetch teachers");
+  const data = await response.json();
+  return Array.isArray(data.teachers) ? data.teachers : [];
+}
+
+/** Admin: create a teacher. Returns the raw response so callers can read .ok/.json(). */
+export async function createTeacher(payload) {
+  return authFetch("/teachers", { method: "POST", body: payload });
+}
+
+/** Admin: update a teacher (never username/password). Raw response. */
+export async function updateTeacher(id, payload) {
+  return authFetch(`/teachers/${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    body: payload,
+  });
+}
+
+/**
+ * Admin: permanently delete a teacher account. Raw response.
+ * Optionally cascades: `deleteClasses` removes classes the teacher solely owns,
+ * `deleteStudents` removes the students of those deleted classes.
+ */
+export async function deleteTeacher(id, { deleteClasses = false, deleteStudents = false } = {}) {
+  return authFetch(`/teachers/${encodeURIComponent(id)}`, {
+    method: "DELETE",
+    body: { deleteClasses, deleteStudents },
+  });
+}
+
 /** All TeacherPoint records. */
 export async function fetchTeacherPoints() {
   const response = await authFetch("/teacher-points");
@@ -404,14 +450,9 @@ export async function topUpTeacherPoint(id, amountVnd) {
   });
 }
 
-/** Admin billing summary `{ totalTopUpVnd, commissionVnd }`. */
+/** Admin billing summary `{ totalTopUpVnd, totalCommissionVnd }`. */
 export async function fetchBilling() {
   const response = await authFetch("/teacher-points/billing");
   if (!response.ok) throw new Error("Failed to fetch billing");
   return response.json();
-}
-
-/** Pays (settles) the outstanding saler commission; keeps the lifetime top-up total. */
-export async function settleCommission() {
-  return authFetch("/teacher-points/billing/settle", { method: "POST" });
 }

@@ -99,6 +99,14 @@ function NavMenu() {
               {t("nav.managePoints")}
             </button>
           )}
+          {isAdmin && (
+            <button
+              className="menu-option"
+              onClick={() => go("/admin/teachers")}
+            >
+              {t("nav.manageTeachers")}
+            </button>
+          )}
           <a className="menu-option" href={`mailto:${SUPPORT_EMAIL}`}>
             {t("nav.support", { email: SUPPORT_EMAIL })}
           </a>
