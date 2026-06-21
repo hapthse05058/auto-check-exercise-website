@@ -358,6 +358,15 @@ textarea {
   word-wrap: break-word;
   white-space: pre-wrap;
 }
+/* Highlighted, bold style for validation warnings (e.g. "Please select a class."). */
+.status-line.status-warning {
+  font-weight: bold;
+  color: var(--color-warning-dark, #d97706);
+  background-color: var(--color-warning-light, #fef3c7);
+  border-left: 4px solid #d97706;
+  border-radius: var(--border-radius-md);
+  padding: 0.5rem 0.75rem;
+}
 .status-output {
   margin-top: 0.5rem;
   padding: 0.75rem;

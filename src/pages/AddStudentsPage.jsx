@@ -1,8 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { fetchClasses, saveStudents } from "../api/backend.js";
+import * as XLSX from "xlsx";
+import { fetchAllClasses, fetchClasses, saveStudents } from "../api/backend.js";
 import { useAuth } from "../auth/AuthContext.jsx";
+import { isAdminEmail } from "../config.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
+import { parseStudentsFromRows, resolveStudentImport } from "../lib/importStudents.js";
 
 function initials(name) {
   const parts = name.trim().split(/\s+/);
@@ -18,7 +21,7 @@ function shortUrl(url) {
   }
 }
 
-const EMPTY_FORM = { name: "", gmail: "", doc: "" };
+const EMPTY_ROW = { name: "", gmail: "", doc: "" };
 
 export default function AddStudentsPage() {
   const { loadTeacherInfo } = useAuth();
@@ -30,10 +33,29 @@ export default function AddStudentsPage() {
   const [students, setStudents] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [editIndex, setEditIndex] = useState(-1);
-  const [form, setForm] = useState(EMPTY_FORM);
-  const [formErrors, setFormErrors] = useState({});
+  const [rows, setRows] = useState([{ ...EMPTY_ROW }]);
+  const [rowErrors, setRowErrors] = useState([]);
   const [status, setStatus] = useState(t("addStudents.intro"));
+  // "info" (default) or "warning" — drives the highlighted style on validation messages.
+  const [statusType, setStatusType] = useState("info");
+  // Import-result popup: null, or { kind: "success" | "error", text }.
+  const [notice, setNotice] = useState(null);
   const [saving, setSaving] = useState(false);
+
+  // Refs to the "Full name" input of each row so we can move focus there when a
+  // new row is added (native autoFocus only fires on mount, not on re-render).
+  const nameRefs = useRef([]);
+  const prevRowsLength = useRef(rows.length);
+  // Hidden <input type="file"> used by the "Import student list" button.
+  const fileInputRef = useRef(null);
+
+  useEffect(() => {
+    // Only auto-focus when rows GREW (user clicked +), not when a row was removed.
+    if (rows.length > prevRowsLength.current) {
+      nameRefs.current[rows.length - 1]?.focus();
+    }
+    prevRowsLength.current = rows.length;
+  }, [rows.length]);
 
   useEffect(() => {
     let cancelled = false;
@@ -47,7 +69,10 @@ export default function AddStudentsPage() {
           navigate("/missing-teacher", { replace: true });
           return;
         }
-        const classList = await fetchClasses(teacherInfo.id);
+        // Admin can add students to any class, so load every class.
+        const classList = isAdminEmail(teacherInfo.gmail)
+          ? await fetchAllClasses()
+          : await fetchClasses(teacherInfo.id);
         if (!cancelled)
           setClasses(classList.filter((c) => c.isActive !== false));
       } catch (error) {
@@ -63,32 +88,82 @@ export default function AddStudentsPage() {
 
   const openModal = (index = -1) => {
     setEditIndex(index);
-    setForm(index >= 0 ? { ...students[index] } : EMPTY_FORM);
-    setFormErrors({});
+    setRows(index >= 0 ? [{ ...students[index] }] : [{ ...EMPTY_ROW }]);
+    setRowErrors([]);
     setModalOpen(true);
+    // Defer until React has mounted the modal's inputs, then focus the first row.
+    setTimeout(() => nameRefs.current[0]?.focus(), 0);
   };
 
-  const confirmStudent = () => {
-    const name = form.name.trim();
-    const gmail = form.gmail.trim();
-    const doc = form.doc.trim();
+  const addRow = () => {
+    setRows((prev) => [...prev, { ...EMPTY_ROW }]);
+  };
 
-    const errors = {};
-    if (!name) errors.name = true;
-    // Gmail is temporarily optional; only validate when provided.
-    if (gmail && !gmail.includes("@")) errors.gmail = true;
-    if (!doc.startsWith("http")) errors.doc = true;
-    setFormErrors(errors);
-    if (Object.keys(errors).length > 0) return;
+  const removeRow = (index) => {
+    // Always keep at least one row in the form.
+    setRows((prev) => (prev.length === 1 ? prev : prev.filter((_, i) => i !== index)));
+    setRowErrors((prev) => prev.filter((_, i) => i !== index));
+  };
 
-    const student = { name, gmail, doc };
+  const updateRow = (index, field, value) => {
+    setRows((prev) => {
+      const next = [...prev];
+      next[index] = { ...next[index], [field]: value };
+      return next;
+    });
+    // Clear this field's error as soon as the user edits it again.
+    if (rowErrors[index]?.[field]) {
+      setRowErrors((prev) => {
+        const next = [...prev];
+        if (next[index]) next[index] = { ...next[index], [field]: false };
+        return next;
+      });
+    }
+  };
+
+  const isBlankRow = (r) => !r.name.trim() && !r.doc.trim();
+
+  const confirmStudents = () => {
+    // Opened the form but typed nothing → treat as cancel, close silently.
+    if (rows.length === 1 && isBlankRow(rows[0])) {
+      setModalOpen(false);
+      return;
+    }
+
+    // Validate every non-blank row; track errors by the row's original index.
+    const errors = [];
+    const valid = [];
+    let hasError = false;
+    rows.forEach((r, i) => {
+      if (isBlankRow(r)) return; // drop fully-empty rows, even in the middle
+      const name = r.name.trim();
+      const gmail = r.gmail.trim();
+      const doc = r.doc.trim();
+      const e = {};
+      if (!name) e.name = true;
+      // Gmail is temporarily optional; only validate when provided.
+      if (gmail && !gmail.includes("@")) e.gmail = true;
+      if (!doc.startsWith("http")) e.doc = true;
+      if (Object.keys(e).length > 0) {
+        errors[i] = e;
+        hasError = true;
+      } else {
+        valid.push({ name, gmail, doc });
+      }
+    });
+
+    if (hasError) {
+      setRowErrors(errors);
+      return;
+    }
+
     setStudents((prev) => {
       if (editIndex >= 0) {
         const next = [...prev];
-        next[editIndex] = student;
+        next[editIndex] = valid[0];
         return next;
       }
-      return [...prev, student];
+      return [...prev, ...valid];
     });
     setModalOpen(false);
   };
@@ -97,8 +172,52 @@ export default function AddStudentsPage() {
     setStudents((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const handleImportFile = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // reset so re-selecting the same file fires onChange again
+    if (!file) return;
+    try {
+      const buf = await file.arrayBuffer();
+      const wb = XLSX.read(buf, { type: "array" });
+      const sheet = wb.Sheets[wb.SheetNames[0]];
+      const sheetRows = XLSX.utils.sheet_to_json(sheet, { header: 1, blankrows: false });
+      const { students: parsed, skipped: skippedNoName } = parseStudentsFromRows(sheetRows);
+      const res = resolveStudentImport(parsed, students);
+
+      if (!res.ok) {
+        // Same Google Doc with different names → block the whole file.
+        setNotice({
+          kind: "error",
+          text:
+            t("addStudents.importConflict") +
+            res.conflicts.map((c) => `\n • ${c.names.join(" ↔ ")}`).join(""),
+        });
+        return;
+      }
+      if (!res.toAdd.length) {
+        setNotice({ kind: "error", text: t("addStudents.importNone") });
+        return;
+      }
+
+      setStudents((prev) => [...prev, ...res.toAdd]);
+      const skipped = skippedNoName + res.skippedNoId;
+      setNotice({
+        kind: "success",
+        text:
+          t("addStudents.importSuccess", { n: res.toAdd.length }) +
+          (skipped ? "\n" + t("addStudents.importSkipped", { m: skipped }) : "") +
+          (res.duplicates ? "\n" + t("addStudents.importDuplicates", { d: res.duplicates }) : ""),
+      });
+    } catch (error) {
+      console.error("Import students failed:", error);
+      setNotice({ kind: "error", text: t("addStudents.importError") });
+    }
+  };
+
   const handleSaveStudents = async () => {
+    setStatusType("info"); // reset; only validation branches below raise a warning
     if (!classId) {
+      setStatusType("warning");
       setStatus(t("addStudents.selectClassFirst"));
       return;
     }
@@ -108,6 +227,7 @@ export default function AddStudentsPage() {
       .filter((student) => student.name);
 
     if (!studentsToSave.length) {
+      setStatusType("warning");
       setStatus(t("addStudents.atLeastOne"));
       return;
     }
@@ -153,10 +273,22 @@ export default function AddStudentsPage() {
             </h2>
             <p>{t("addStudents.subtitle")}</p>
           </div>
-          <button className="btn-add" onClick={() => openModal()}>
-            <i className="ti ti-plus" aria-hidden="true"></i> {t("addStudents.add")}
-          </button>
+          <div className="topbar-actions">
+            <button className="btn-import" onClick={() => fileInputRef.current?.click()}>
+              <i className="ti ti-file-import" aria-hidden="true"></i> {t("addStudents.importBtn")}
+            </button>
+            <button className="btn-add" onClick={() => openModal()}>
+              <i className="ti ti-plus" aria-hidden="true"></i> {t("addStudents.add")}
+            </button>
+          </div>
         </div>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".xlsx,.xls,.csv"
+          style={{ display: "none" }}
+          onChange={handleImportFile}
+        />
 
         <div className="field-group">
           <label>{t("addStudents.className")}</label>
@@ -188,6 +320,7 @@ export default function AddStudentsPage() {
             <div>
               {students.map((s, i) => (
                 <div className="student-card" key={`${s.gmail}-${i}`}>
+                  <div className="student-index">{i + 1}</div>
                   <div className="avatar">{initials(s.name)}</div>
                   <div className="student-info">
                     <p className="student-name">{s.name}</p>
@@ -234,42 +367,99 @@ export default function AddStudentsPage() {
               <div className="modal-header">
                 <h3>{editIndex >= 0 ? t("addStudents.editTitle") : t("addStudents.addTitle")}</h3>
               </div>
-              <div className="field-group">
-                <label>{t("addStudents.fullName")}</label>
-                <input
-                  type="text"
-                  placeholder={t("addStudents.fullNamePlaceholder")}
-                  value={form.name}
-                  autoFocus
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                />
-                {formErrors.name && (
-                  <div className="err" style={{ display: "block" }}>
-                    {t("addStudents.errName")}
-                  </div>
-                )}
-              </div>
               {/* Gmail field temporarily hidden — students can be added without an email. */}
-              <div className="field-group">
-                <label>{t("addStudents.docLink")}</label>
-                <input
-                  type="url"
-                  placeholder={t("addStudents.docLinkPlaceholder")}
-                  value={form.doc}
-                  onChange={(e) => setForm({ ...form, doc: e.target.value })}
-                />
-                {formErrors.doc && (
-                  <div className="err" style={{ display: "block" }}>
-                    {t("addStudents.errDoc")}
+              <div className="modal-body">
+              {rows.map((row, i) => (
+                <div className="student-row" key={i}>
+                  <div className="student-row-fields">
+                    <div className="field-group">
+                      <label>{t("addStudents.fullName")}</label>
+                      <input
+                        type="text"
+                        placeholder={t("addStudents.fullNamePlaceholder")}
+                        value={row.name}
+                        ref={(el) => (nameRefs.current[i] = el)}
+                        onChange={(e) => updateRow(i, "name", e.target.value)}
+                      />
+                      {rowErrors[i]?.name && (
+                        <div className="err" style={{ display: "block" }}>
+                          {t("addStudents.errName")}
+                        </div>
+                      )}
+                    </div>
+                    <div className="field-group">
+                      <label>{t("addStudents.docLink")}</label>
+                      <input
+                        type="url"
+                        placeholder={t("addStudents.docLinkPlaceholder")}
+                        value={row.doc}
+                        onChange={(e) => updateRow(i, "doc", e.target.value)}
+                      />
+                      {rowErrors[i]?.doc && (
+                        <div className="err" style={{ display: "block" }}>
+                          {t("addStudents.errDoc")}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                )}
+                  {editIndex < 0 && (
+                    <button
+                      type="button"
+                      className="btn-icon danger row-remove"
+                      aria-label={t("addStudents.removeRow")}
+                      onClick={() => removeRow(i)}
+                    >
+                      <i className="ti ti-trash" aria-hidden="true"></i>
+                    </button>
+                  )}
+                </div>
+              ))}
+              {editIndex < 0 && (
+                <div className="add-row-bar">
+                  <span className="tooltip-wrap">
+                    <button
+                      type="button"
+                      className="btn-add-row"
+                      onClick={addRow}
+                      aria-label={t("addStudents.addRowTooltip")}
+                    >
+                      <i className="ti ti-plus" aria-hidden="true"></i>
+                    </button>
+                    <span className="tooltip-text">{t("addStudents.addRowTooltip")}</span>
+                  </span>
+                </div>
+              )}
               </div>
               <div className="modal-footer">
                 <button className="btn-cancel" onClick={() => setModalOpen(false)}>
                   {t("common.cancel")}
                 </button>
-                <button className="btn-confirm" onClick={confirmStudent}>
+                <button className="btn-confirm" onClick={confirmStudents}>
                   {editIndex >= 0 ? t("addStudents.saveChanges") : t("addStudents.saveStudent")}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {notice && (
+          <div className="modal-bg open" onClick={() => setNotice(null)}>
+            <div className="modal modal-notice" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <h3>
+                  {notice.kind === "error"
+                    ? t("addStudents.importErrorTitle")
+                    : t("addStudents.importResultTitle")}
+                </h3>
+              </div>
+              <div className="modal-body">
+                <p className={`notice-text${notice.kind === "error" ? " notice-error" : ""}`}>
+                  {notice.text}
+                </p>
+              </div>
+              <div className="modal-footer">
+                <button className="btn-confirm" onClick={() => setNotice(null)}>
+                  {t("common.close")}
                 </button>
               </div>
             </div>
@@ -284,7 +474,9 @@ export default function AddStudentsPage() {
             {t("addStudents.saveList")}
           </button>
         </div>
-        <div className="status-line">{status}</div>
+        <div className={`status-line${statusType === "warning" ? " status-warning" : ""}`}>
+          {status}
+        </div>
       </div>
     </div>
   );

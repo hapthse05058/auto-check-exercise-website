@@ -3,11 +3,13 @@ import { useNavigate } from "react-router-dom";
 import {
   checkClassNameExists,
   createClass,
+  fetchAllClasses,
   fetchClasses,
   fetchClassTypes,
   fetchLessons,
 } from "../api/backend.js";
 import { useAuth } from "../auth/AuthContext.jsx";
+import { isAdminEmail } from "../config.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
 
 export default function NewClassPage() {
@@ -40,7 +42,10 @@ export default function NewClassPage() {
         }
         const types = await fetchClassTypes();
         if (!cancelled) setClassTypes(types);
-        const classList = await fetchClasses(teacherInfo.id);
+        // Admin's duplicate-name check spans all classes, not just their own.
+        const classList = isAdminEmail(teacherInfo.gmail)
+          ? await fetchAllClasses()
+          : await fetchClasses(teacherInfo.id);
         if (!cancelled) setExistingClasses(classList);
       } catch (error) {
         if (cancelled || error.message === "RE-AUTH_NEEDED") return;

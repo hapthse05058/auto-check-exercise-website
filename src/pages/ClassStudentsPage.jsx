@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
+  fetchAllClasses,
   fetchClasses,
   fetchCurrentLesson,
   fetchLessons,
@@ -8,9 +9,11 @@ import {
 } from "../api/backend.js";
 import { getTabContent } from "../api/googleDocs.js";
 import { useAuth } from "../auth/AuthContext.jsx";
+import { isAdminEmail } from "../config.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
 import { ensureValidGoogleToken } from "../auth/tokens.js";
 import { LESSON_OPTIONS } from "../shared/constant.js";
+import { extractDocId } from "../lib/googleDoc.js";
 
 /** "lesson05" -> "BUỔI 05" (falls back to the raw value / a dash). */
 function gradedLabel(currentLesson) {
@@ -19,10 +22,6 @@ function gradedLabel(currentLesson) {
     LESSON_OPTIONS.find((o) => o.value === currentLesson)?.label ||
     currentLesson
   );
-}
-
-function extractDocId(url) {
-  return String(url || "").match(/\/document\/d\/([a-zA-Z0-9_-]+)/)?.[1] || "";
 }
 
 export default function ClassStudentsPage() {
@@ -54,7 +53,10 @@ export default function ClassStudentsPage() {
           navigate("/missing-teacher", { replace: true });
           return;
         }
-        const classList = await fetchClasses(teacherInfo.id);
+        // Admin can view students of any class, so load every class.
+        const classList = isAdminEmail(teacherInfo.gmail)
+          ? await fetchAllClasses()
+          : await fetchClasses(teacherInfo.id);
         if (!cancelled)
           setClasses(classList.filter((c) => c.isActive !== false));
       } catch (error) {

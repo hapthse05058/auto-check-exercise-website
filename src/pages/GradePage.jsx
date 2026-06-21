@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
+  fetchAllClasses,
   fetchClasses,
   fetchCurrentLesson,
   fetchLessons,
@@ -57,9 +58,13 @@ export default function GradePage() {
           navigate("/missing-teacher", { replace: true });
           return;
         }
-        setIsAdmin(isAdminEmail(teacherInfo.gmail));
+        const admin = isAdminEmail(teacherInfo.gmail);
+        setIsAdmin(admin);
         refreshPoint();
-        const classList = await fetchClasses(teacherInfo.id);
+        // Admin can grade any class, so load every class; teachers see their own.
+        const classList = admin
+          ? await fetchAllClasses()
+          : await fetchClasses(teacherInfo.id);
         if (cancelled) return;
         const activeClasses = classList.filter((c) => c.isActive !== false);
         setClasses(activeClasses);

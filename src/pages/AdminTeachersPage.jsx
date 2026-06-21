@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   createTeacher,
@@ -8,9 +8,28 @@ import {
   updateTeacher,
 } from "../api/backend.js";
 import { useAuth } from "../auth/AuthContext.jsx";
+import { storageGet, storageSet } from "../auth/storage.js";
 import { isAdminEmail } from "../config.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
 import { validateTeacherForm } from "../lib/teacherForm.js";
+
+// Toggleable table columns (Action is always shown). Header labels via i18n.
+const COLUMN_DEFS = [
+  { key: "name", labelKey: "teachers.colName" },
+  { key: "username", labelKey: "teachers.colUsername" },
+  { key: "gmail", labelKey: "teachers.colGmail" },
+  { key: "phone", labelKey: "teachers.colPhone" },
+  { key: "classes", labelKey: "teachers.colClasses" },
+  { key: "status", labelKey: "teachers.colStatus" },
+];
+const DEFAULT_COLS = {
+  name: true,
+  username: true,
+  gmail: true,
+  phone: false,
+  classes: false,
+  status: false,
+};
 
 const SEARCH_DEBOUNCE_MS = 1000;
 const EMPTY_FORM = {
@@ -50,6 +69,34 @@ export default function AdminTeachersPage() {
   // Delete-confirm cascade options (modal === "delete").
   const [delClasses, setDelClasses] = useState(false);
   const [delStudents, setDelStudents] = useState(false);
+
+  // Column-visibility chooser (persisted in localStorage).
+  const [visibleCols, setVisibleCols] = useState(() => ({
+    ...DEFAULT_COLS,
+    ...(storageGet(["teacherCols"]).teacherCols || {}),
+  }));
+  const [colMenuOpen, setColMenuOpen] = useState(false);
+  const colMenuRef = useRef(null);
+
+  const toggleCol = (key) => {
+    setVisibleCols((prev) => {
+      const next = { ...prev, [key]: !prev[key] };
+      storageSet({ teacherCols: next });
+      return next;
+    });
+  };
+
+  // Close the column menu when clicking outside it.
+  useEffect(() => {
+    if (!colMenuOpen) return undefined;
+    const onDown = (e) => {
+      if (colMenuRef.current && !colMenuRef.current.contains(e.target)) {
+        setColMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", onDown);
+    return () => document.removeEventListener("mousedown", onDown);
+  }, [colMenuOpen]);
 
   // Admin guard + load the class list (for the filter dropdown + multi-select).
   useEffect(() => {
@@ -317,35 +364,61 @@ export default function AdminTeachersPage() {
             <p>{t("teachers.empty")}</p>
           </div>
         ) : (
-          <div className="cache-table-wrap">
+          <>
+            <div className="menu-wrapper" ref={colMenuRef} style={{ marginBottom: "0.5rem" }}>
+              <button className="menu-btn" onClick={() => setColMenuOpen((o) => !o)}>
+                <i className="ti ti-columns" aria-hidden="true"></i> {t("teachers.columns")}
+              </button>
+              {colMenuOpen && (
+                <div className="menu-options" style={{ left: 0, right: "auto" }}>
+                  {COLUMN_DEFS.map((c) => (
+                    <label className="cache-toggle" key={c.key}>
+                      <input
+                        type="checkbox"
+                        checked={!!visibleCols[c.key]}
+                        onChange={() => toggleCol(c.key)}
+                      />
+                      <span>{t(c.labelKey)}</span>
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="cache-table-wrap">
             <table className="cache-table">
               <thead>
                 <tr>
-                  <th>{t("teachers.colName")}</th>
-                  <th>{t("teachers.colGmail")}</th>
-                  <th>{t("teachers.colPhone")}</th>
-                  <th>{t("teachers.colClasses")}</th>
-                  <th>{t("teachers.colStatus")}</th>
+                  {visibleCols.name && <th>{t("teachers.colName")}</th>}
+                  {visibleCols.username && <th>{t("teachers.colUsername")}</th>}
+                  {visibleCols.gmail && <th>{t("teachers.colGmail")}</th>}
+                  {visibleCols.phone && <th>{t("teachers.colPhone")}</th>}
+                  {visibleCols.classes && <th>{t("teachers.colClasses")}</th>}
+                  {visibleCols.status && <th>{t("teachers.colStatus")}</th>}
                   <th>{t("teachers.colAction")}</th>
                 </tr>
               </thead>
               <tbody>
                 {teachers.map((tch) => (
                   <tr key={tch.id}>
-                    <td>{tch.name || "—"}</td>
-                    <td className="cell-date">{tch.gmail}</td>
-                    <td>{tch.phone || "—"}</td>
-                    <td>
-                      {(tch.classNames && tch.classNames.length
-                        ? tch.classNames
-                        : (tch.classIds || []).map((id) => classNameById.get(id) || id)
-                      ).join(", ") || "—"}
-                    </td>
-                    <td>
-                      {tch.isAccountActive
-                        ? t("teachers.statusActive")
-                        : t("teachers.statusInactive")}
-                    </td>
+                    {visibleCols.name && <td>{tch.name || "—"}</td>}
+                    {visibleCols.username && <td>{tch.username || "—"}</td>}
+                    {visibleCols.gmail && <td className="cell-date">{tch.gmail}</td>}
+                    {visibleCols.phone && <td>{tch.phone || "—"}</td>}
+                    {visibleCols.classes && (
+                      <td>
+                        {(tch.classNames && tch.classNames.length
+                          ? tch.classNames
+                          : (tch.classIds || []).map((id) => classNameById.get(id) || id)
+                        ).join(", ") || "—"}
+                      </td>
+                    )}
+                    {visibleCols.status && (
+                      <td>
+                        {tch.isAccountActive
+                          ? t("teachers.statusActive")
+                          : t("teachers.statusInactive")}
+                      </td>
+                    )}
                     <td className="cell-actions">
                       <button
                         className="btn-icon"
@@ -374,7 +447,8 @@ export default function AdminTeachersPage() {
                 ))}
               </tbody>
             </table>
-          </div>
+            </div>
+          </>
         )}
 
         <div className="status-line">{status}</div>
