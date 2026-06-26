@@ -150,7 +150,7 @@ function getQuesAndAnsForLesson23(exercisePart4) {
     if (![0, 1].includes(i)) {
       const item = exercisePart4[i];
       let qna = item.tableCells[0].content.map(
-        (cell) => cell.paragraph.elements[0].textRun,
+        (cell) => cell?.paragraph?.elements[0].textRun,
       );
 
       if (qna.length < 3) {
@@ -182,7 +182,7 @@ function getQuesAndAnsForSpecialLesson(exercisePart4) {
     if (![0, 1].includes(i)) {
       const item = exercisePart4[i];
       let qna = item.tableCells[0].content.map(
-        (cell) => cell.paragraph.elements[0].textRun,
+        (cell) => cell?.paragraph?.elements[0].textRun,
       );
       if (qna.length < 4) {
         let qnaObj = getNormalSentence(qna);
@@ -192,10 +192,10 @@ function getQuesAndAnsForSpecialLesson(exercisePart4) {
         }
       } else {
         qna = item.tableCells[0].content.map((cell) => {
-          if (cell.paragraph.elements.length === 1) {
-            return cell.paragraph.elements[0].textRun.content;
+          if (cell?.paragraph?.elements.length === 1) {
+            return cell?.paragraph?.elements[0].textRun.content;
           }
-          const content = cell.paragraph.elements
+          const content = cell?.paragraph?.elements
             .map((el) => el.textRun?.content)
             .join("");
           return content;
@@ -276,6 +276,7 @@ export function getQesAndAnsFromPartIVOfTheTargetTab(targetTab, tableIndex) {
     quesAndAnsArrPartIV = getQuesAndAnsForNormalLession(exercisePart4);
   }
 
+  // console.log(quesAndAnsArrPartIV)
   const finalArr = [];
   quesAndAnsArrPartIV.forEach((item) => {
     const answer = item.answer?.trim();
