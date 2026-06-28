@@ -4,6 +4,8 @@
  * intentionally identical so grading results do not change.
  */
 
+import { ENVIRONMENT } from "../config";
+
 export const IS_CORRECT_ANSWER = "✅ Đúng";
 
 export function startsWithNumberDot(sentence) {
@@ -193,7 +195,7 @@ function getQuesAndAnsForSpecialLesson(exercisePart4) {
       } else {
         qna = item.tableCells[0].content.map((cell) => {
           if (cell?.paragraph?.elements.length === 1) {
-            return cell?.paragraph?.elements[0].textRun.content;
+            return cell?.paragraph?.elements[0]?.textRun?.content;
           }
           const content = cell?.paragraph?.elements
             .map((el) => el.textRun?.content)
@@ -223,17 +225,17 @@ function getQuesAndAnsForNormalLession(exercisePart4) {
         const qnaChild = qna[j];
         if (qnaChild.length > 0) {
           const question = qnaChild.find((qa) =>
-            startsWithNumberDot(qa.textRun.content),
+            startsWithNumberDot(qa?.textRun?.content),
           );
           if (question) {
-            qnaObj.question = question.textRun.content;
+            qnaObj.question = question?.textRun?.content;
             continue;
           }
           const answer = qnaChild.find((qa) =>
-            startsWithArrow(qa.textRun.content),
+            startsWithArrow(qa?.textRun?.content),
           );
           if (answer) {
-            qnaObj.answer = qnaChild.map((ans) => ans.textRun.content).join("");
+            qnaObj.answer = qnaChild.map((ans) => ans?.textRun?.content).join("");
           }
           if (qnaObj?.question && qnaObj?.answer) {
             quesAndAnsArrPartIV.push(qnaObj);
@@ -276,7 +278,9 @@ export function getQesAndAnsFromPartIVOfTheTargetTab(targetTab, tableIndex) {
     quesAndAnsArrPartIV = getQuesAndAnsForNormalLession(exercisePart4);
   }
 
-  // console.log(quesAndAnsArrPartIV)
+  if (ENVIRONMENT === "DEV") {
+  console.log(quesAndAnsArrPartIV)
+  }
   const finalArr = [];
   quesAndAnsArrPartIV.forEach((item) => {
     const answer = item.answer?.trim();

@@ -24,10 +24,16 @@ export const translations = {
       manageCache: "Manage grading cache",
       managePoints: "Manage teacher points",
       manageTeachers: "Manage teachers",
+      gradeSpeaking: "Grade speaking",
       support: "Contact for support: {email}",
       logout: "Logout",
       hi: "Hi {name}!",
       there: "there",
+    },
+    speaking: {
+      title: "Speaking grading",
+      openNewTab: "Open in new tab",
+      loading: "Loading grader.io.vn…",
     },
     session: { pleaseLogin: "Please login to use the app..." },
     login: {
@@ -475,10 +481,16 @@ export const translations = {
       manageCache: "Quản lý cache chấm bài",
       managePoints: "Quản lý point giáo viên",
       manageTeachers: "Quản lý giáo viên",
+      gradeSpeaking: "Chấm speaking",
       support: "Liên hệ hỗ trợ: {email}",
       logout: "Đăng xuất",
       hi: "Chào {name}!",
       there: "bạn",
+    },
+    speaking: {
+      title: "Chấm speaking",
+      openNewTab: "Mở trong tab mới",
+      loading: "Đang tải grader.io.vn…",
     },
     session: { pleaseLogin: "Vui lòng đăng nhập để sử dụng ứng dụng..." },
     login: {

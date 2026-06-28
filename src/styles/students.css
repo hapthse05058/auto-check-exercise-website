@@ -630,3 +630,56 @@
   background: var(--color-primary, #00977b);
   color: #fff;
 }
+
+/* "Chấm speaking" — full-height embedded iframe (admin only). */
+/* Make .app-main a flex column only when it hosts the speaking page, so the
+   iframe fills the remaining height without a hardcoded calc(100vh - …). */
+.app-main:has(.speaking-page) {
+  display: flex;
+  flex-direction: column;
+}
+.speaking-page {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.speaking-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+.speaking-bar h2 {
+  font-size: 18px;
+  font-weight: 500;
+  margin: 0;
+  color: var(--color-text-primary);
+}
+.speaking-frame-wrap {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 480px;
+}
+.iframe-spinner {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--color-text-secondary);
+  background: var(--color-background-primary, #fff);
+}
+.speaking-frame {
+  flex: 1;
+  width: 100%;
+  border: 1px solid var(--color-border-secondary);
+  border-radius: var(--border-radius-md);
+  background: #fff;
+}

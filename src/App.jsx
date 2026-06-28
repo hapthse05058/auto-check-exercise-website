@@ -16,6 +16,7 @@ import NewClassPage from "./pages/NewClassPage.jsx";
 import PosterMarketingPage from "./pages/PosterMarketingPage.jsx";
 import ResetPasswordPage from "./pages/ResetPasswordPage.jsx";
 import SignupPage from "./pages/SignupPage.jsx";
+import SpeakingPage from "./pages/SpeakingPage.jsx";
 
 export default function App() {
   return (
@@ -40,6 +41,7 @@ export default function App() {
           <Route path="/admin/grading-cache" element={<GradingCachePage />} />
           <Route path="/admin/teacher-points" element={<AdminTeacherPointsPage />} />
           <Route path="/admin/teachers" element={<AdminTeachersPage />} />
+          <Route path="/speaking" element={<SpeakingPage />} />
           <Route path="/missing-teacher" element={<MissingTeacherPage />} />
           <Route path="/signup" element={<SignupPage />} />
         </Route>
