@@ -1,0 +1,283 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #f0e4ea; font-family: 'Segoe UI', system-ui, sans-serif; padding: 24px; }
+  .card {
+    max-width: 620px;
+    margin: 0 auto;
+    background: #FDE8EF;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 8px 40px rgba(123,20,72,0.13);
+  }
+
+  /* Header */
+  .header {
+    background: #7B1448;
+    padding: 20px 28px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .header-logo {
+    background: #FDE8EF;
+    border-radius: 10px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 900;
+    color: #7B1448;
+    letter-spacing: 1px;
+  }
+  .header-name { color: #fff; font-size: 15px; font-weight: 700; letter-spacing: 0.5px; }
+  .header-tag {
+    margin-left: auto;
+    background: #FDE8EF;
+    color: #7B1448;
+    font-size: 10px;
+    font-weight: 800;
+    border-radius: 20px;
+    padding: 4px 12px;
+    letter-spacing: 1px;
+  }
+
+  /* Body */
+  .body { padding: 28px 28px 8px; }
+
+  /* Hook */
+  .hook {
+    font-size: 20px;
+    font-weight: 900;
+    color: #7B1448;
+    line-height: 1.35;
+    margin-bottom: 16px;
+    border-left: 4px solid #8B1A5A;
+    padding-left: 14px;
+  }
+
+  /* Lead */
+  .lead {
+    font-size: 14px;
+    color: #4a1030;
+    line-height: 1.7;
+    margin-bottom: 20px;
+  }
+  .lead strong { color: #7B1448; }
+  .highlight-inline {
+    background: #f5c6d8;
+    color: #7B1448;
+    font-weight: 700;
+    border-radius: 4px;
+    padding: 1px 6px;
+  }
+
+  /* Section title */
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+    font-weight: 800;
+    color: #7B1448;
+    margin: 20px 0 12px;
+    letter-spacing: 0.3px;
+  }
+  .section-title .icon {
+    width: 28px; height: 28px;
+    background: #7B1448;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  /* Feature rows */
+  .feature {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    background: #fff;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    border-left: 4px solid #8B1A5A;
+  }
+  .feature-icon { font-size: 22px; flex-shrink: 0; margin-top: 1px; }
+  .feature-content {}
+  .feature-label { font-size: 13px; font-weight: 800; color: #7B1448; margin-bottom: 4px; }
+  .feature-desc { font-size: 12.5px; color: #5a1535; line-height: 1.55; }
+  .feature-desc .arrow { color: #8B1A5A; font-weight: 700; }
+
+  /* Flow row */
+  .flow {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 6px;
+  }
+  .flow-step {
+    background: #FDE8EF;
+    border: 1.5px solid #d4a0b8;
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #7B1448;
+  }
+  .flow-arrow { color: #8B1A5A; font-size: 13px; font-weight: 700; }
+
+  /* Stat row */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin: 20px 0;
+  }
+  .stat {
+    background: #7B1448;
+    border-radius: 14px;
+    padding: 14px 10px;
+    text-align: center;
+  }
+  .stat-num { font-size: 24px; font-weight: 900; color: #fff; line-height: 1; }
+  .stat-label { font-size: 10px; color: #f5c6d8; margin-top: 5px; line-height: 1.4; }
+
+  /* CTA box */
+  .cta {
+    background: #8B1A5A;
+    border-radius: 16px;
+    padding: 20px 22px;
+    margin: 20px 0 28px;
+  }
+  .cta-title { font-size: 16px; font-weight: 900; color: #fff; margin-bottom: 8px; }
+  .cta-desc { font-size: 13px; color: #f5c6d8; line-height: 1.6; margin-bottom: 14px; }
+  .cta-badges { display: flex; gap: 10px; flex-wrap: wrap; }
+  .cta-badge {
+    background: #FDE8EF;
+    color: #7B1448;
+    font-size: 12px;
+    font-weight: 700;
+    border-radius: 20px;
+    padding: 6px 16px;
+  }
+
+  /* Footer */
+  .footer {
+    background: #7B1448;
+    padding: 12px 28px;
+    text-align: center;
+    font-size: 11px;
+    color: #f5c6d8;
+    letter-spacing: 1px;
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+<div class="card">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-logo">MEB</div>
+    <div class="header-name">My English Buddy</div>
+    <div class="header-tag">AI · B2B</div>
+  </div>
+
+  <div class="body">
+
+    <!-- Hook -->
+    <div class="hook">
+      ⏱️ Giáo viên của bạn đang mất bao nhiêu tiếng đồng hồ mỗi tuần chỉ để chấm bài?
+    </div>
+
+    <!-- Lead -->
+    <div class="lead">
+      Tôi đã nói chuyện với nhiều giám đốc trung tâm tiếng Anh và nhận ra một điểm chung: giáo viên giỏi đang bị <span class="highlight-inline">"ngốn" thời gian</span> bởi công việc có thể tự động hóa — chấm bài viết, đánh giá speaking, tổng hợp tiến độ học viên.<br><br>
+      Đó là lý do tôi xây dựng <strong>công cụ AI chấm bài tự động</strong> dành riêng cho các trung tâm tiếng Anh.
+    </div>
+
+    <!-- What it does -->
+    <div class="section-title">
+      <div class="icon">🤖</div>
+      Nó làm được gì?
+    </div>
+
+    <div class="feature">
+      <div class="feature-icon">✍️</div>
+      <div class="feature-content">
+        <div class="feature-label">Chấm bài viết tự động từ Google Docs</div>
+        <div class="flow">
+          <span class="flow-step">Đọc bài</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-step">Phân tích ngữ pháp, từ vựng</span>
+          <span class="flow-arrow">→</span>
+          <span class="flow-step">Ghi feedback vào file</span>
+        </div>
+        <div class="feature-desc" style="margin-top:8px;">⚡ Toàn bộ trong <strong>1 phút</strong>, thay vì 15–20 phút mỗi bài.</div>
+      </div>
+    </div>
+
+    <div class="feature">
+      <div class="feature-icon">🎙️</div>
+      <div class="feature-content">
+        <div class="feature-label">Chấm Speaking thông minh</div>
+        <div class="feature-desc">Phân tích lỗi phát âm · độ trôi chảy · liệt kê từng từ phát âm sai.<br>Giáo viên chỉ cần <strong>review và xác nhận</strong> — không phải nghe đi nghe lại.</div>
+      </div>
+    </div>
+
+    <div class="feature">
+      <div class="feature-icon">📋</div>
+      <div class="feature-content">
+        <div class="feature-label">TOEIC / IELTS — 4 kỹ năng chuẩn</div>
+        <div class="feature-desc">Mô phỏng đề thi · chấm điểm tự động · xuất báo cáo tiến độ để tư vấn phụ huynh.</div>
+      </div>
+    </div>
+
+    <div class="feature">
+      <div class="feature-icon">📊</div>
+      <div class="feature-content">
+        <div class="feature-label">Audit định kỳ trình độ học viên & giáo viên</div>
+        <div class="feature-desc">Giúp Ban Giám đốc có <strong>dữ liệu khách quan</strong> để kiểm soát chất lượng đào tạo.</div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-num">80%</div>
+        <div class="stat-label">Giảm thời gian chấm bài</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">1'</div>
+        <div class="stat-label">Chấm xong 1 bài viết</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">4 KN</div>
+        <div class="stat-label">TOEIC / IELTS đầy đủ</div>
+      </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta">
+      <div class="cta-title">🎯 Tôi đang tìm 5 trung tâm đầu tiên</div>
+      <div class="cta-desc">
+        Hợp tác thử nghiệm hoàn toàn <strong style="color:#fff;">miễn phí</strong>, không ràng buộc.<br>
+        Nếu anh/chị quản lý trung tâm hoặc biết ai đang cần — <strong style="color:#fff;">inbox hoặc để lại số điện thoại</strong>, tôi sẽ liên hệ trong ngày.
+      </div>
+      <div class="cta-badges">
+        <span class="cta-badge">✅ Không mất phí</span>
+        <span class="cta-badge">✅ Không ràng buộc</span>
+        <span class="cta-badge">✅ Hỗ trợ setup tận nơi</span>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer">MY ENGLISH BUDDY · SMART WAY TO STUDY</div>
+</div>
+</body>
+</html>

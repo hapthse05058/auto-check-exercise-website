@@ -13,12 +13,17 @@ import GradingCachePage from "./pages/GradingCachePage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import MissingTeacherPage from "./pages/MissingTeacherPage.jsx";
 import NewClassPage from "./pages/NewClassPage.jsx";
+import PosterMarketingPage from "./pages/PosterMarketingPage.jsx";
 import ResetPasswordPage from "./pages/ResetPasswordPage.jsx";
 import SignupPage from "./pages/SignupPage.jsx";
 
 export default function App() {
   return (
     <Routes>
+      <Route
+        path="/contact-us"
+        element={<PosterMarketingPage />}
+      />
       <Route element={<Layout />}>
         <Route index element={<Navigate to="/grade" replace />} />
         <Route path="/login" element={<LoginPage />} />
