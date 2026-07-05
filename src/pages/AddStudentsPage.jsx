@@ -163,7 +163,36 @@ export default function AddStudentsPage() {
         next[editIndex] = valid[0];
         return next;
       }
-      return [...prev, ...valid];
+
+      // 1. Create a fresh copy of the previous state array to avoid direct mutation
+      const nextStudents = [...prev];
+      /** @type {typeof valid} */
+      const duplicateElements = [];
+
+      valid.forEach((v) => {
+        // Check against our growing list of students
+        const isDuplicate = nextStudents.some((element) => element.doc === v.doc);
+
+        if (!isDuplicate) {
+          nextStudents.push(v);
+        } else {
+          duplicateElements.push(v); // Push the actual object, not an array [v]
+        }
+      });
+
+      // 2. Trigger the notification if duplicates exist
+      if (duplicateElements.length > 0) {
+        setNotice({
+          kind: "error",
+          text: t("addStudents.duplicateDoc", {
+            doc: duplicateElements[0].doc,
+            dublicatedNames: duplicateElements.map(e => e.name).join(", ")
+          })
+        });
+      }
+
+      // 3. Return the brand new state array
+      return nextStudents;
     });
     setModalOpen(false);
   };
@@ -369,66 +398,66 @@ export default function AddStudentsPage() {
               </div>
               {/* Gmail field temporarily hidden — students can be added without an email. */}
               <div className="modal-body">
-              {rows.map((row, i) => (
-                <div className="student-row" key={i}>
-                  <div className="student-row-fields">
-                    <div className="field-group">
-                      <label>{t("addStudents.fullName")}</label>
-                      <input
-                        type="text"
-                        placeholder={t("addStudents.fullNamePlaceholder")}
-                        value={row.name}
-                        ref={(el) => (nameRefs.current[i] = el)}
-                        onChange={(e) => updateRow(i, "name", e.target.value)}
-                      />
-                      {rowErrors[i]?.name && (
-                        <div className="err" style={{ display: "block" }}>
-                          {t("addStudents.errName")}
-                        </div>
-                      )}
+                {rows.map((row, i) => (
+                  <div className="student-row" key={i}>
+                    <div className="student-row-fields">
+                      <div className="field-group">
+                        <label>{t("addStudents.fullName")}</label>
+                        <input
+                          type="text"
+                          placeholder={t("addStudents.fullNamePlaceholder")}
+                          value={row.name}
+                          ref={(el) => (nameRefs.current[i] = el)}
+                          onChange={(e) => updateRow(i, "name", e.target.value)}
+                        />
+                        {rowErrors[i]?.name && (
+                          <div className="err" style={{ display: "block" }}>
+                            {t("addStudents.errName")}
+                          </div>
+                        )}
+                      </div>
+                      <div className="field-group">
+                        <label>{t("addStudents.docLink")}</label>
+                        <input
+                          type="url"
+                          placeholder={t("addStudents.docLinkPlaceholder")}
+                          value={row.doc}
+                          onChange={(e) => updateRow(i, "doc", e.target.value)}
+                        />
+                        {rowErrors[i]?.doc && (
+                          <div className="err" style={{ display: "block" }}>
+                            {t("addStudents.errDoc")}
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    <div className="field-group">
-                      <label>{t("addStudents.docLink")}</label>
-                      <input
-                        type="url"
-                        placeholder={t("addStudents.docLinkPlaceholder")}
-                        value={row.doc}
-                        onChange={(e) => updateRow(i, "doc", e.target.value)}
-                      />
-                      {rowErrors[i]?.doc && (
-                        <div className="err" style={{ display: "block" }}>
-                          {t("addStudents.errDoc")}
-                        </div>
-                      )}
-                    </div>
+                    {editIndex < 0 && (
+                      <button
+                        type="button"
+                        className="btn-icon danger row-remove"
+                        aria-label={t("addStudents.removeRow")}
+                        onClick={() => removeRow(i)}
+                      >
+                        <i className="ti ti-trash" aria-hidden="true"></i>
+                      </button>
+                    )}
                   </div>
-                  {editIndex < 0 && (
-                    <button
-                      type="button"
-                      className="btn-icon danger row-remove"
-                      aria-label={t("addStudents.removeRow")}
-                      onClick={() => removeRow(i)}
-                    >
-                      <i className="ti ti-trash" aria-hidden="true"></i>
-                    </button>
-                  )}
-                </div>
-              ))}
-              {editIndex < 0 && (
-                <div className="add-row-bar">
-                  <span className="tooltip-wrap">
-                    <button
-                      type="button"
-                      className="btn-add-row"
-                      onClick={addRow}
-                      aria-label={t("addStudents.addRowTooltip")}
-                    >
-                      <i className="ti ti-plus" aria-hidden="true"></i>
-                    </button>
-                    <span className="tooltip-text">{t("addStudents.addRowTooltip")}</span>
-                  </span>
-                </div>
-              )}
+                ))}
+                {editIndex < 0 && (
+                  <div className="add-row-bar">
+                    <span className="tooltip-wrap">
+                      <button
+                        type="button"
+                        className="btn-add-row"
+                        onClick={addRow}
+                        aria-label={t("addStudents.addRowTooltip")}
+                      >
+                        <i className="ti ti-plus" aria-hidden="true"></i>
+                      </button>
+                      <span className="tooltip-text">{t("addStudents.addRowTooltip")}</span>
+                    </span>
+                  </div>
+                )}
               </div>
               <div className="modal-footer">
                 <button className="btn-cancel" onClick={() => setModalOpen(false)}>

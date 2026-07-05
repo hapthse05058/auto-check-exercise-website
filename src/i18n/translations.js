@@ -165,6 +165,7 @@ export const translations = {
       importSuccess: "Imported {n} students.",
       importSkipped: "(skipped {m} invalid rows)",
       importDuplicates: "(removed {d} duplicates)",
+      duplicateDoc: "Duplicate Google Doc link found: {doc} Students with the same link: {dublicatedNames}. Removed the entry for: {dublicatedNames}.",
       importNone: "No valid students found in the file.",
       importConflict:
         "Found the same Google Doc with different student names — the whole file import was blocked:",
@@ -622,6 +623,7 @@ export const translations = {
       importSuccess: "Đã import {n} học sinh.",
       importSkipped: "(bỏ qua {m} dòng không hợp lệ)",
       importDuplicates: "(bỏ {d} dòng trùng)",
+      duplicateDoc: "Phát hiện trùng link Google Doc: {doc} Tên học sinh bị trùng link: {dublicatedNames}. Đã bỏ bản ghi của: {dublicatedNames}.",
       importNone: "Không tìm thấy học sinh hợp lệ trong file.",
       importConflict:
         "Phát hiện cùng một Google Doc nhưng khác tên học sinh — đã chặn import toàn bộ file:",
