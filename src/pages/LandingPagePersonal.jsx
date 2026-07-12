@@ -314,9 +314,9 @@ export default function LandingPagePersonal() {
 
                     {/* CTA (Đổi số lượng trung tâm thành số lượng học viên) */}
                     <div className="pm-cta">
-                        <div className="pm-cta-title">🎯 Tìm kiếm 50 học viên trải nghiệm sớm</div>
+                        <div className="pm-cta-title">🎯 Tìm kiếm cho 50 học viên đăng ký sớm nhất.</div>
                         <div className="pm-cta-desc">
-                            Hợp tác thử nghiệm tính năng hoàn toàn <strong style={{ color: "#fff" }}>miễn phí</strong>, không ràng buộc chi phí nào.
+                            Tặng voucher giảm <strong style={{ color: "#fff" }}>10% học phí</strong>.
                             <br />
                             Nếu bạn đang tự học IELTS/TOEIC và muốn bứt phá điểm số —{" "}
                             <strong style={{ color: "#fff" }}>
@@ -325,9 +325,9 @@ export default function LandingPagePersonal() {
                             , tôi sẽ kích hoạt tài khoản ngay trong ngày.
                         </div>
                         <div className="pm-cta-badges">
-                            <span className="pm-cta-badge">✅ Không mất phí</span>
-                            <span className="pm-cta-badge">✅ Không ràng buộc</span>
-                            <span className="pm-cta-badge">✅ Hỗ trợ hướng dẫn 1-1</span>
+                            <span className="pm-cta-badge">✅ Hưởng ưu đãi 10%</span>
+                            <span className="pm-cta-badge">✅ Học cùng AI kết hợp với giáo viên</span>
+                            <span className="pm-cta-badge">✅ Học khôn ngoan, bớt gian nan</span>
                         </div>
                     </div>
 
