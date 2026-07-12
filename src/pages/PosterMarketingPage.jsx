@@ -99,8 +99,8 @@ const STYLES = `
     border-left: 4px solid #8B1A5A;
   }
   .pm-feature-icon { font-size: 22px; flex-shrink: 0; margin-top: 1px; }
-  .pm-feature-label { font-size: 13px; font-weight: 800; color: #7B1448; margin-bottom: 4px; }
-  .pm-feature-desc { font-size: 12.5px; color: #5a1535; line-height: 1.55; }
+  .pm-feature-label { font-size: 15px; font-weight: 800; color: #7B1448; margin-bottom: 4px; }
+  .pm-feature-desc { font-size: 14.5px; color: #5a1535; line-height: 1.55; }
 
   /* Flow row */
   .pm-flow {
@@ -119,7 +119,7 @@ const STYLES = `
     font-weight: 600;
     color: #7B1448;
   }
-  .pm-flow-arrow { color: #8B1A5A; font-size: 13px; font-weight: 700; }
+  .pm-flow-arrow { color: #8B1A5A; font-size: 14px; font-weight: 700; }
 
   /* Stat row */
   .pm-stats {
@@ -135,7 +135,7 @@ const STYLES = `
     text-align: center;
   }
   .pm-stat-num { font-size: 24px; font-weight: 900; color: #fff; line-height: 1; }
-  .pm-stat-label { font-size: 10px; color: #f5c6d8; margin-top: 5px; line-height: 1.4; }
+  .pm-stat-label { font-size: 14px; color: #f5c6d8; margin-top: 5px; line-height: 1.4; }
 
   /* CTA box */
   .pm-cta {
@@ -145,7 +145,7 @@ const STYLES = `
     margin: 20px 0 28px;
   }
   .pm-cta-title { font-size: 16px; font-weight: 900; color: #fff; margin-bottom: 8px; }
-  .pm-cta-desc { font-size: 13px; color: #f5c6d8; line-height: 1.6; margin-bottom: 14px; }
+  .pm-cta-desc { font-size: 14px; color: #f5c6d8; line-height: 1.6; margin-bottom: 14px; }
   .pm-cta-badges { display: flex; gap: 10px; flex-wrap: wrap; }
   .pm-cta-badge {
     background: #FDE8EF;
@@ -177,7 +177,7 @@ const STYLES = `
     display: flex;
     align-items: center;
     gap: 10px;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
     color: #5a1535;
     text-decoration: none;
@@ -194,7 +194,7 @@ const STYLES = `
     text-decoration: none;
     border-radius: 24px;
     padding: 9px 18px;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 700;
     color: #fff;
     transition: transform 0.12s ease, opacity 0.12s ease;
@@ -224,7 +224,8 @@ export default function PosterMarketingPage() {
         <div className="pm-header">
           <div className="pm-header-logo">MEB</div>
           <div className="pm-header-name">My English Buddy</div>
-          <div className="pm-header-tag">AI · B2B</div>
+          {/* <div className="pm-header-tag">AI · B2B</div>
+          <div className="pm-header-tag">AI · B2C</div> */}
         </div>
 
         <div className="pm-body">

@@ -17,6 +17,7 @@ import PosterMarketingPage from "./pages/PosterMarketingPage.jsx";
 import ResetPasswordPage from "./pages/ResetPasswordPage.jsx";
 import SignupPage from "./pages/SignupPage.jsx";
 import SpeakingPage from "./pages/SpeakingPage.jsx";
+import LandingPagePersonal from "./pages/LandingPagePersonal.jsx";
 
 export default function App() {
   return (
@@ -24,6 +25,10 @@ export default function App() {
       <Route
         path="/contact-us"
         element={<PosterMarketingPage />}
+      />
+      <Route
+        path="/personal"
+        element={<LandingPagePersonal />}
       />
       <Route element={<Layout />}>
         <Route index element={<Navigate to="/grade" replace />} />
