@@ -343,7 +343,7 @@ export default function PosterMarketingPage() {
               <strong style={{ color: "#fff" }}>
                 inbox hoặc để lại số điện thoại
               </strong>
-              , tôi sẽ liên hệ trong ngày.
+              , chúng tôi sẽ liên hệ lại trong thời gian sớm nhất.
             </div>
             <div className="pm-cta-badges">
               <span className="pm-cta-badge">✅ Không mất phí</span>
