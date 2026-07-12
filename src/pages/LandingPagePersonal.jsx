@@ -281,6 +281,18 @@ export default function LandingPagePersonal() {
                             </div>
                         </div>
                     </div>
+                    {/* Feature 3 */}
+                    <div className="pm-feature">
+                        <div className="pm-feature-icon">📱</div>
+                        <div className="pm-feature-content">
+                            <div className="pm-feature-label">
+                                Học online mọi lúc mọi nơi, trên máy tính, tablet hoặc laptop
+                            </div>
+                            <div className="pm-feature-desc">
+                                Không tốn thời gian di chuyển, giúp tập trung tối đa thời gian vào việc học.
+                            </div>
+                        </div>
+                    </div>
 
                     {/* Feature 4 */}
                     <div className="pm-feature">
