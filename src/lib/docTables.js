@@ -7,6 +7,7 @@
  */
 export const CLASS_TYPE_BASIC_SINCE_01042026 = "basic_since_01042026";
 export const CLASS_TYPE_BASIC_BEFORE_31032026 = "basic_before_31032026";
+export const CLASS_TYPE_BASIC_SINCE_20072026 = "basic_since_20072026";
 
 export const TAB_NAME_LIST = [
   { tableIndex: [5, 6], tabName: "BUỔI 02" },
@@ -51,7 +52,7 @@ export const TAB_NAME_LIST_FOR_BASIC_CLASS_BEFORE_31032026 = [
 /** Resolves the exercise-table indexes for a tab, based on the class type. */
 export function getTableIndexOfExercise(tabName, classType) {
   let foundTab;
-  if (classType === CLASS_TYPE_BASIC_SINCE_01042026) {
+  if ([CLASS_TYPE_BASIC_SINCE_01042026, CLASS_TYPE_BASIC_SINCE_20072026].includes(classType)) {
     foundTab = TAB_NAME_LIST.find((item) => tabName.includes(item.tabName));
   } else if (classType === CLASS_TYPE_BASIC_BEFORE_31032026) {
     foundTab = TAB_NAME_LIST_FOR_BASIC_CLASS_BEFORE_31032026.find((item) =>
