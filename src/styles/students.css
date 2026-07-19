@@ -430,9 +430,11 @@
   margin-bottom: 1rem;
   flex-wrap: wrap;
 }
-.cache-search select {
+.cache-search select,
+.cache-search .searchable-select {
   flex: 0 0 auto;
-  min-width: 140px;
+  width: auto;
+  min-width: 160px;
 }
 .cache-search input {
   flex: 1 1 220px;

@@ -267,6 +267,104 @@ select:focus {
   border-color: var(--color-primary);
 }
 
+/* Searchable single-select combobox (thay cho <select> gốc, cho phép gõ lọc). */
+.searchable-select {
+  position: relative;
+  width: 100%;
+}
+.searchable-select-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.5rem;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  text-align: left;
+  color: var(--color-text-primary);
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
+}
+.searchable-select-trigger:hover:not(:disabled) {
+  border-color: var(--color-border-secondary);
+}
+.searchable-select-trigger:focus {
+  outline: 2px solid rgba(0, 151, 123, 0.35);
+  border-color: var(--color-primary);
+}
+.searchable-select-trigger:disabled {
+  background: var(--color-background-secondary);
+  color: var(--color-text-tertiary);
+  cursor: not-allowed;
+}
+.searchable-select-trigger > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.searchable-select-placeholder {
+  color: var(--color-text-tertiary);
+}
+.searchable-select-trigger .ti {
+  flex-shrink: 0;
+  color: var(--color-text-tertiary);
+}
+.searchable-select-dropdown {
+  position: absolute;
+  z-index: 50;
+  top: calc(100% + 2px);
+  left: 0;
+  width: 100%;
+  background: #fff;
+  border: 1px solid var(--color-border-secondary);
+  border-radius: var(--border-radius-md);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+}
+.searchable-select-input {
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid var(--color-border-tertiary);
+  border-radius: 0;
+  padding: 0.5rem;
+}
+.searchable-select-input:focus {
+  outline: none;
+  border-bottom-color: var(--color-primary);
+}
+.searchable-select-list {
+  list-style: none;
+  margin: 0;
+  padding: 0.25rem 0;
+  max-height: 240px;
+  overflow-y: auto;
+}
+.searchable-select-option {
+  padding: 0.5rem;
+  font-size: 14px;
+  color: var(--color-text-primary);
+  cursor: pointer;
+}
+.searchable-select-option.highlighted {
+  background: rgba(0, 151, 123, 0.1);
+}
+.searchable-select-option.selected {
+  color: var(--color-primary-dark);
+  font-weight: 600;
+}
+.searchable-select-option-empty {
+  color: var(--color-text-tertiary);
+}
+.searchable-select-no-results {
+  padding: 0.5rem;
+  font-size: 14px;
+  color: var(--color-text-tertiary);
+  text-align: center;
+}
+
 textarea {
   display: inline-block;
   resize: vertical;

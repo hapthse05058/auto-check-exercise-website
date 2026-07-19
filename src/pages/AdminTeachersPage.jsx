@@ -7,6 +7,7 @@ import {
   fetchTeachersManage,
   updateTeacher,
 } from "../api/backend.js";
+import SearchableSelect from "../components/SearchableSelect.jsx";
 import { useAuth } from "../auth/AuthContext.jsx";
 import { storageGet, storageSet } from "../auth/storage.js";
 import { isAdminEmail } from "../config.js";
@@ -338,14 +339,14 @@ export default function AdminTeachersPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-          <select value={classId} onChange={(e) => setClassId(e.target.value)}>
-            <option value="">{t("teachers.allClasses")}</option>
-            {classes.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
+          <SearchableSelect
+            value={classId}
+            onChange={setClassId}
+            options={classes}
+            placeholder={t("teachers.allClasses")}
+            searchPlaceholder={t("common.searchClassPlaceholder")}
+            noResultsText={t("common.noClassesFound")}
+          />
           <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
             <option value="true">{t("teachers.statusActive")}</option>
             <option value="false">{t("teachers.statusInactive")}</option>

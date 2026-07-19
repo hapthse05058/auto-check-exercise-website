@@ -8,7 +8,7 @@ import { expect, request, test } from "@playwright/test";
 
 const TOKEN = (process.env.ADMIN_TOKEN || "").trim();
 const BE_URL = process.env.BE_URL || "http://localhost:3000";
-const API_KEY = process.env.EXTENSION_SECRET_KEY || "SuperSecretKey_321__hongHa";
+const API_KEY = "SuperSecretKey_hongHa_321";
 
 const vnd = (n) => (Number(n) || 0).toLocaleString("vi-VN") + "đ";
 

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import * as XLSX from "xlsx";
 import { fetchAllClasses, fetchClasses, saveStudents } from "../api/backend.js";
+import SearchableSelect from "../components/SearchableSelect.jsx";
 import { useAuth } from "../auth/AuthContext.jsx";
 import { isAdminEmail } from "../config.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
@@ -321,18 +322,15 @@ export default function AddStudentsPage() {
 
         <div className="field-group">
           <label>{t("addStudents.className")}</label>
-          <select
+          <SearchableSelect
             className="mb-1"
             value={classId}
-            onChange={(e) => setClassId(e.target.value)}
-          >
-            <option value="">{t("addStudents.selectClass")}</option>
-            {classes.map((cls) => (
-              <option key={cls.id} value={cls.id}>
-                {cls.name}
-              </option>
-            ))}
-          </select>
+            onChange={setClassId}
+            options={classes}
+            placeholder={t("addStudents.selectClass")}
+            searchPlaceholder={t("common.searchClassPlaceholder")}
+            noResultsText={t("common.noClassesFound")}
+          />
         </div>
 
         <div id="listArea">

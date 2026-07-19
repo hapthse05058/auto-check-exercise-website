@@ -8,6 +8,7 @@ import {
   fetchMyPoint,
   updateCurrentLessonForClass,
 } from "../api/backend.js";
+import SearchableSelect from "../components/SearchableSelect.jsx";
 import { useAuth } from "../auth/AuthContext.jsx";
 import { isAdminEmail } from "../config.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
@@ -83,8 +84,7 @@ export default function GradePage() {
     };
   }, [loadTeacherInfo, navigate]);
 
-  const handleClassChange = async (event) => {
-    const classId = event.target.value;
+  const handleClassChange = async (classId) => {
     setSelectedClassId(classId);
     setSelectedLessonId("");
     setLessons([]);
@@ -177,19 +177,16 @@ export default function GradePage() {
             </span>
           ))}
       </h2>
-      <select
+      <SearchableSelect
         className="mb-1"
         value={selectedClassId}
         onChange={handleClassChange}
+        options={classes}
         disabled={processing}
-      >
-        <option value="">{t("grade.selectClass")}</option>
-        {classes.map((cls) => (
-          <option key={cls.id} value={cls.id}>
-            {cls.name}
-          </option>
-        ))}
-      </select>
+        placeholder={t("grade.selectClass")}
+        searchPlaceholder={t("common.searchClassPlaceholder")}
+        noResultsText={t("common.noClassesFound")}
+      />
       <select
         className="mb-1"
         value={selectedLessonId}

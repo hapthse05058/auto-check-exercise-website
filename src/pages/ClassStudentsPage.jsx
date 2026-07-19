@@ -8,6 +8,7 @@ import {
   fetchStudents,
 } from "../api/backend.js";
 import { getTabContent } from "../api/googleDocs.js";
+import SearchableSelect from "../components/SearchableSelect.jsx";
 import { useAuth } from "../auth/AuthContext.jsx";
 import { isAdminEmail } from "../config.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
@@ -70,8 +71,7 @@ export default function ClassStudentsPage() {
     };
   }, [loadTeacherInfo, navigate]);
 
-  const handleClassChange = async (event) => {
-    const classId = event.target.value;
+  const handleClassChange = async (classId) => {
     setSelectedClassId(classId);
     setSelectedLessonId("");
     setLessons([]);
@@ -170,14 +170,14 @@ export default function ClassStudentsPage() {
         </div>
 
         <div className="cache-search">
-          <select value={selectedClassId} onChange={handleClassChange}>
-            <option value="">{t("classStudents.selectClass")}</option>
-            {classes.map((cls) => (
-              <option key={cls.id} value={cls.id}>
-                {cls.name}
-              </option>
-            ))}
-          </select>
+          <SearchableSelect
+            value={selectedClassId}
+            onChange={handleClassChange}
+            options={classes}
+            placeholder={t("classStudents.selectClass")}
+            searchPlaceholder={t("common.searchClassPlaceholder")}
+            noResultsText={t("common.noClassesFound")}
+          />
           <select
             value={selectedLessonId}
             onChange={(e) => setSelectedLessonId(e.target.value)}

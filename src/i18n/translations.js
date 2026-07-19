@@ -14,6 +14,8 @@ export const translations = {
       backHome: "Back To Homepage",
       goBack: "Go Back",
       next: "Next",
+      searchClassPlaceholder: "Search class...",
+      noClassesFound: "No classes found",
     },
     nav: {
       grade: "Grade exercises",
@@ -472,6 +474,8 @@ export const translations = {
       backHome: "Về trang chủ",
       goBack: "Quay lại",
       next: "Tiếp tục",
+      searchClassPlaceholder: "Tìm lớp...",
+      noClassesFound: "Không tìm thấy lớp",
     },
     nav: {
       grade: "Chấm bài",
