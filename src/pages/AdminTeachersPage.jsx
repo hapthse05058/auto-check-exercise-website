@@ -221,7 +221,8 @@ export default function AdminTeachersPage() {
   };
 
   const firstErrorMessage = (errors) => {
-    if (Object.values(errors).includes("invalidGmail")) return t("teachers.errGmail");
+    if (Object.values(errors).includes("invalidGmail"))
+      return t("teachers.errGmail");
     return t("teachers.errRequired");
   };
 
@@ -265,7 +266,8 @@ export default function AdminTeachersPage() {
       setStatus(isCreate ? t("teachers.created") : t("teachers.updated"));
       await load();
     } catch (error) {
-      if (error.message !== "RE-AUTH_NEEDED") setFormError(t("teachers.saveFailed"));
+      if (error.message !== "RE-AUTH_NEEDED")
+        setFormError(t("teachers.saveFailed"));
     } finally {
       setSaving(false);
     }
@@ -273,7 +275,9 @@ export default function AdminTeachersPage() {
 
   const handleToggleActive = async (rec) => {
     const closing = rec.isAccountActive;
-    const msg = closing ? t("teachers.closeConfirm", { who: rec.name || rec.gmail }) : t("teachers.reopenConfirm", { who: rec.name || rec.gmail });
+    const msg = closing
+      ? t("teachers.closeConfirm", { who: rec.name || rec.gmail })
+      : t("teachers.reopenConfirm", { who: rec.name || rec.gmail });
     if (!window.confirm(msg)) return;
     try {
       const res = await updateTeacher(rec.id, { isAccountActive: !closing });
@@ -284,7 +288,8 @@ export default function AdminTeachersPage() {
       setStatus(closing ? t("teachers.closed") : t("teachers.reopened"));
       await load();
     } catch (error) {
-      if (error.message !== "RE-AUTH_NEEDED") setStatus(t("teachers.saveFailed"));
+      if (error.message !== "RE-AUTH_NEEDED")
+        setStatus(t("teachers.saveFailed"));
     }
   };
 
@@ -310,7 +315,8 @@ export default function AdminTeachersPage() {
       setStatus(t("teachers.deleted"));
       await load();
     } catch (error) {
-      if (error.message !== "RE-AUTH_NEEDED") setStatus(t("teachers.deleteFailed"));
+      if (error.message !== "RE-AUTH_NEEDED")
+        setStatus(t("teachers.deleteFailed"));
     } finally {
       setSaving(false);
     }
@@ -328,7 +334,8 @@ export default function AdminTeachersPage() {
             <p>{t("teachers.subtitle")}</p>
           </div>
           <button className="btn-add" onClick={openCreate}>
-            <i className="ti ti-plus" aria-hidden="true"></i> {t("teachers.add")}
+            <i className="ti ti-plus" aria-hidden="true"></i>{" "}
+            {t("teachers.add")}
           </button>
         </div>
 
@@ -347,7 +354,10 @@ export default function AdminTeachersPage() {
             searchPlaceholder={t("common.searchClassPlaceholder")}
             noResultsText={t("common.noClassesFound")}
           />
-          <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+          >
             <option value="true">{t("teachers.statusActive")}</option>
             <option value="false">{t("teachers.statusInactive")}</option>
             <option value="">{t("teachers.statusAll")}</option>
@@ -366,12 +376,23 @@ export default function AdminTeachersPage() {
           </div>
         ) : (
           <>
-            <div className="menu-wrapper" ref={colMenuRef} style={{ marginBottom: "0.5rem" }}>
-              <button className="menu-btn" onClick={() => setColMenuOpen((o) => !o)}>
-                <i className="ti ti-columns" aria-hidden="true"></i> {t("teachers.columns")}
+            <div
+              className="menu-wrapper"
+              ref={colMenuRef}
+              style={{ marginBottom: "0.5rem" }}
+            >
+              <button
+                className="menu-btn"
+                onClick={() => setColMenuOpen((o) => !o)}
+              >
+                <i className="ti ti-columns" aria-hidden="true"></i>{" "}
+                {t("teachers.columns")}
               </button>
               {colMenuOpen && (
-                <div className="menu-options" style={{ left: 0, right: "auto" }}>
+                <div
+                  className="menu-options"
+                  style={{ left: 0, right: "auto" }}
+                >
                   {COLUMN_DEFS.map((c) => (
                     <label className="cache-toggle" key={c.key}>
                       <input
@@ -386,68 +407,74 @@ export default function AdminTeachersPage() {
               )}
             </div>
             <div className="cache-table-wrap">
-            <table className="cache-table">
-              <thead>
-                <tr>
-                  {visibleCols.name && <th>{t("teachers.colName")}</th>}
-                  {visibleCols.username && <th>{t("teachers.colUsername")}</th>}
-                  {visibleCols.gmail && <th>{t("teachers.colGmail")}</th>}
-                  {visibleCols.phone && <th>{t("teachers.colPhone")}</th>}
-                  {visibleCols.classes && <th>{t("teachers.colClasses")}</th>}
-                  {visibleCols.status && <th>{t("teachers.colStatus")}</th>}
-                  <th>{t("teachers.colAction")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {teachers.map((tch) => (
-                  <tr key={tch.id}>
-                    {visibleCols.name && <td>{tch.name || "—"}</td>}
-                    {visibleCols.username && <td>{tch.username || "—"}</td>}
-                    {visibleCols.gmail && <td className="cell-date">{tch.gmail}</td>}
-                    {visibleCols.phone && <td>{tch.phone || "—"}</td>}
-                    {visibleCols.classes && (
-                      <td>
-                        {(tch.classNames && tch.classNames.length
-                          ? tch.classNames
-                          : (tch.classIds || []).map((id) => classNameById.get(id) || id)
-                        ).join(", ") || "—"}
-                      </td>
+              <table className="cache-table">
+                <thead>
+                  <tr>
+                    {visibleCols.name && <th>{t("teachers.colName")}</th>}
+                    {visibleCols.username && (
+                      <th>{t("teachers.colUsername")}</th>
                     )}
-                    {visibleCols.status && (
-                      <td>
-                        {tch.isAccountActive
-                          ? t("teachers.statusActive")
-                          : t("teachers.statusInactive")}
-                      </td>
-                    )}
-                    <td className="cell-actions">
-                      <button
-                        className="btn-icon"
-                        title={t("teachers.edit")}
-                        aria-label={t("teachers.edit")}
-                        onClick={() => openEdit(tch)}
-                      >
-                        <i className="ti ti-edit" aria-hidden="true"></i>
-                      </button>
-                      <button
-                        className="btn-cancel"
-                        onClick={() => handleToggleActive(tch)}
-                      >
-                        {tch.isAccountActive
-                          ? t("teachers.closeAccount")
-                          : t("teachers.reopenAccount")}
-                      </button>
-                      <button
-                        className="btn-cancel btn-text-danger"
-                        onClick={() => openDelete(tch)}
-                      >
-                        {t("teachers.deleteAccount")}
-                      </button>
-                    </td>
+                    {visibleCols.gmail && <th>{t("teachers.colGmail")}</th>}
+                    {visibleCols.phone && <th>{t("teachers.colPhone")}</th>}
+                    {visibleCols.classes && <th>{t("teachers.colClasses")}</th>}
+                    {visibleCols.status && <th>{t("teachers.colStatus")}</th>}
+                    <th>{t("teachers.colAction")}</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {teachers.map((tch) => (
+                    <tr key={tch.id}>
+                      {visibleCols.name && <td>{tch.name || "—"}</td>}
+                      {visibleCols.username && <td>{tch.username || "—"}</td>}
+                      {visibleCols.gmail && (
+                        <td className="cell-date">{tch.gmail}</td>
+                      )}
+                      {visibleCols.phone && <td>{tch.phone || "—"}</td>}
+                      {visibleCols.classes && (
+                        <td>
+                          {(tch.classNames && tch.classNames.length
+                            ? tch.classNames
+                            : (tch.classIds || []).map(
+                                (id) => classNameById.get(id) || id,
+                              )
+                          ).join(", ") || "—"}
+                        </td>
+                      )}
+                      {visibleCols.status && (
+                        <td>
+                          {tch.isAccountActive
+                            ? t("teachers.statusActive")
+                            : t("teachers.statusInactive")}
+                        </td>
+                      )}
+                      <td className="cell-actions">
+                        <button
+                          className="btn-icon"
+                          title={t("teachers.edit")}
+                          aria-label={t("teachers.edit")}
+                          onClick={() => openEdit(tch)}
+                        >
+                          <i className="ti ti-edit" aria-hidden="true"></i>
+                        </button>
+                        <button
+                          className="btn-cancel"
+                          onClick={() => handleToggleActive(tch)}
+                        >
+                          {tch.isAccountActive
+                            ? t("teachers.closeAccount")
+                            : t("teachers.reopenAccount")}
+                        </button>
+                        <button
+                          className="btn-cancel btn-text-danger"
+                          onClick={() => openDelete(tch)}
+                        >
+                          {t("teachers.deleteAccount")}
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </>
         )}
@@ -458,13 +485,22 @@ export default function AdminTeachersPage() {
           <div className="modal-bg open">
             <div className="modal">
               <div className="modal-header">
-                <h3>{modal === "create" ? t("teachers.addTitle") : t("teachers.editTitle")}</h3>
+                <h3>
+                  {modal === "create"
+                    ? t("teachers.addTitle")
+                    : t("teachers.editTitle")}
+                </h3>
               </div>
 
               <div className="field-group">
                 <label>
                   {t("teachers.fName")}{" "}
-                  <span className="required-mark" title={t("teachers.requiredField")}>*</span>
+                  <span
+                    className="required-mark"
+                    title={t("teachers.requiredField")}
+                  >
+                    *
+                  </span>
                 </label>
                 <input
                   type="text"
@@ -477,7 +513,12 @@ export default function AdminTeachersPage() {
               <div className="field-group">
                 <label>
                   {t("teachers.fGmail")}{" "}
-                  <span className="required-mark" title={t("teachers.requiredField")}>*</span>
+                  <span
+                    className="required-mark"
+                    title={t("teachers.requiredField")}
+                  >
+                    *
+                  </span>
                 </label>
                 <input
                   type="email"
@@ -489,7 +530,12 @@ export default function AdminTeachersPage() {
               <div className="field-group">
                 <label>
                   {t("teachers.fPhone")}{" "}
-                  <span className="required-mark" title={t("teachers.requiredField")}>*</span>
+                  <span
+                    className="required-mark"
+                    title={t("teachers.requiredField")}
+                  >
+                    *
+                  </span>
                 </label>
                 <input
                   type="text"
@@ -501,7 +547,12 @@ export default function AdminTeachersPage() {
               <div className="field-group">
                 <label>
                   {t("teachers.fDob")}{" "}
-                  <span className="required-mark" title={t("teachers.requiredField")}>*</span>
+                  <span
+                    className="required-mark"
+                    title={t("teachers.requiredField")}
+                  >
+                    *
+                  </span>
                 </label>
                 <input
                   type="text"
@@ -533,7 +584,12 @@ export default function AdminTeachersPage() {
                   <div className="field-group">
                     <label>
                       {t("teachers.fUsername")}{" "}
-                      <span className="required-mark" title={t("teachers.requiredField")}>*</span>
+                      <span
+                        className="required-mark"
+                        title={t("teachers.requiredField")}
+                      >
+                        *
+                      </span>
                     </label>
                     <input
                       type="text"
@@ -545,7 +601,12 @@ export default function AdminTeachersPage() {
                   <div className="field-group">
                     <label>
                       {t("teachers.fPassword")}{" "}
-                      <span className="required-mark" title={t("teachers.requiredField")}>*</span>
+                      <span
+                        className="required-mark"
+                        title={t("teachers.requiredField")}
+                      >
+                        *
+                      </span>
                     </label>
                     <input
                       type="password"
@@ -579,10 +640,18 @@ export default function AdminTeachersPage() {
                 </div>
               )}
               <div className="modal-footer">
-                <button className="btn-cancel" onClick={closeModal} disabled={saving}>
+                <button
+                  className="btn-cancel"
+                  onClick={closeModal}
+                  disabled={saving}
+                >
                   {t("common.cancel")}
                 </button>
-                <button className="btn-confirm" onClick={handleSave} disabled={saving}>
+                <button
+                  className="btn-confirm"
+                  onClick={handleSave}
+                  disabled={saving}
+                >
                   {t("common.save")}
                 </button>
               </div>
@@ -596,7 +665,11 @@ export default function AdminTeachersPage() {
               <div className="modal-header">
                 <h3>{t("teachers.deleteAccount")}</h3>
               </div>
-              <p>{t("teachers.deleteConfirm", { who: active.name || active.gmail })}</p>
+              <p>
+                {t("teachers.deleteConfirm", {
+                  who: active.name || active.gmail,
+                })}
+              </p>
               <div className="field-group">
                 <label className="cache-toggle">
                   <input
@@ -621,7 +694,11 @@ export default function AdminTeachersPage() {
                 </label>
               </div>
               <div className="modal-footer">
-                <button className="btn-cancel" onClick={closeModal} disabled={saving}>
+                <button
+                  className="btn-cancel"
+                  onClick={closeModal}
+                  disabled={saving}
+                >
                   {t("common.cancel")}
                 </button>
                 <button

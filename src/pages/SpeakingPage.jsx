@@ -45,8 +45,14 @@ export default function SpeakingPage() {
     <div className="speaking-page">
       <div className="speaking-bar">
         <h2>{t("speaking.title")}</h2>
-        <a href={SPEAKING_URL} target="_blank" rel="noreferrer" className="btn-import">
-          <i className="ti ti-external-link" aria-hidden="true"></i> {t("speaking.openNewTab")}
+        <a
+          href={SPEAKING_URL}
+          target="_blank"
+          rel="noreferrer"
+          className="btn-import"
+        >
+          <i className="ti ti-external-link" aria-hidden="true"></i>{" "}
+          {t("speaking.openNewTab")}
         </a>
       </div>
       <div className="speaking-frame-wrap">

@@ -42,7 +42,9 @@ export default function ClassStudentsPage() {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState(t("classStudents.initial"));
 
-  const selectedLessonName = lessons.find((l) => l.id === selectedLessonId)?.name;
+  const selectedLessonName = lessons.find(
+    (l) => l.id === selectedLessonId,
+  )?.name;
 
   useEffect(() => {
     let cancelled = false;
@@ -181,10 +183,14 @@ export default function ClassStudentsPage() {
           <select
             value={selectedLessonId}
             onChange={(e) => setSelectedLessonId(e.target.value)}
-            disabled={!selectedClassId || lessonsLoading || lessons.length === 0}
+            disabled={
+              !selectedClassId || lessonsLoading || lessons.length === 0
+            }
           >
             <option value="">
-              {lessonsLoading ? t("classStudents.loadingLessons") : t("classStudents.selectLessonOptional")}
+              {lessonsLoading
+                ? t("classStudents.loadingLessons")
+                : t("classStudents.selectLessonOptional")}
             </option>
             {lessons.map((lesson) => (
               <option key={lesson.id} value={lesson.id}>

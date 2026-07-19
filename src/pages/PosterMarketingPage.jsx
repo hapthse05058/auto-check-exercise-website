@@ -231,8 +231,8 @@ export default function PosterMarketingPage() {
         <div className="pm-body">
           {/* Hook */}
           <div className="pm-hook">
-            ⏱️ Giáo viên của bạn đang mất bao nhiêu tiếng đồng hồ mỗi tuần chỉ để
-            chấm bài?
+            ⏱️ Giáo viên của bạn đang mất bao nhiêu tiếng đồng hồ mỗi tuần chỉ
+            để chấm bài?
           </div>
 
           {/* Lead */}
@@ -240,13 +240,13 @@ export default function PosterMarketingPage() {
             Tôi đã nói chuyện với nhiều giám đốc trung tâm tiếng Anh và nhận ra
             một điểm chung: giáo viên giỏi đang bị{" "}
             <span className="pm-highlight-inline">"ngốn" thời gian</span> bởi
-            công việc có thể tự động hóa — chấm bài viết, đánh giá speaking, tổng
-            hợp tiến độ học viên.
+            công việc có thể tự động hóa — chấm bài viết, đánh giá speaking,
+            tổng hợp tiến độ học viên.
             <br />
             <br />
             Đó là lý do chúng tôi xây dựng{" "}
-            <strong>công cụ AI chấm bài tự động</strong> dành riêng cho các trung
-            tâm tiếng Anh.
+            <strong>công cụ AI chấm bài tự động</strong> dành riêng cho các
+            trung tâm tiếng Anh.
           </div>
 
           {/* What it does */}
@@ -264,7 +264,9 @@ export default function PosterMarketingPage() {
               <div className="pm-flow">
                 <span className="pm-flow-step">Đọc bài</span>
                 <span className="pm-flow-arrow">→</span>
-                <span className="pm-flow-step">Phân tích ngữ pháp, từ vựng</span>
+                <span className="pm-flow-step">
+                  Phân tích ngữ pháp, từ vựng
+                </span>
                 <span className="pm-flow-arrow">→</span>
                 <span className="pm-flow-step">Ghi feedback vào file</span>
               </div>
@@ -333,7 +335,9 @@ export default function PosterMarketingPage() {
 
           {/* CTA */}
           <div className="pm-cta">
-            <div className="pm-cta-title">🎯 Tôi đang tìm 5 trung tâm đầu tiên</div>
+            <div className="pm-cta-title">
+              🎯 Tôi đang tìm 5 trung tâm đầu tiên
+            </div>
             <div className="pm-cta-desc">
               Hợp tác thử nghiệm hoàn toàn{" "}
               <strong style={{ color: "#fff" }}>miễn phí</strong>, không ràng

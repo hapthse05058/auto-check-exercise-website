@@ -111,9 +111,7 @@ export default function GradingCachePage() {
       setTotal(data.total);
       setSelected(new Set()); // selection is stale after a new page/search
       setStatus(
-        data.total
-          ? t("cache.found", { n: data.total })
-          : t("cache.none"),
+        data.total ? t("cache.found", { n: data.total }) : t("cache.none"),
       );
     } catch (error) {
       if (error.message === "RE-AUTH_NEEDED") return;
@@ -249,13 +247,13 @@ export default function GradingCachePage() {
         <div className="topbar">
           <div className="topbar-left">
             <h2>
-              {t("cache.title")}{" "}
-              <span className="count-badge">{total}</span>
+              {t("cache.title")} <span className="count-badge">{total}</span>
             </h2>
             <p>{t("cache.subtitle")}</p>
           </div>
           <button className="btn-add" onClick={openAdd}>
-            <i className="ti ti-plus" aria-hidden="true"></i> {t("cache.addRecord")}
+            <i className="ti ti-plus" aria-hidden="true"></i>{" "}
+            {t("cache.addRecord")}
           </button>
         </div>
 
@@ -286,13 +284,16 @@ export default function GradingCachePage() {
 
         {rows.length > 0 && (
           <div className="cache-bulkbar">
-            <span className="cache-bulk-count">{t("cache.selected", { n: selected.size })}</span>
+            <span className="cache-bulk-count">
+              {t("cache.selected", { n: selected.size })}
+            </span>
             <button
               className="logout-btn"
               disabled={selected.size === 0 || bulkDeleting}
               onClick={() => handleBulkDelete([...selected])}
             >
-              <i className="ti ti-trash" aria-hidden="true"></i> {t("cache.deleteSelected")}
+              <i className="ti ti-trash" aria-hidden="true"></i>{" "}
+              {t("cache.deleteSelected")}
             </button>
           </div>
         )}
@@ -332,7 +333,12 @@ export default function GradingCachePage() {
               </thead>
               <tbody>
                 {rows.map((row) => (
-                  <tr key={row.id} className={selected.has(row.id) ? "row-selected" : undefined}>
+                  <tr
+                    key={row.id}
+                    className={
+                      selected.has(row.id) ? "row-selected" : undefined
+                    }
+                  >
                     <td className="cell-check">
                       <input
                         type="checkbox"
@@ -341,9 +347,15 @@ export default function GradingCachePage() {
                         aria-label="Select record"
                       />
                     </td>
-                    <td className="cell-clip" title={row.question}>{row.question}</td>
-                    <td className="cell-clip" title={row.answer}>{row.answer}</td>
-                    <td className="cell-clip" title={row.feedback}>{row.feedback}</td>
+                    <td className="cell-clip" title={row.question}>
+                      {row.question}
+                    </td>
+                    <td className="cell-clip" title={row.answer}>
+                      {row.answer}
+                    </td>
+                    <td className="cell-clip" title={row.feedback}>
+                      {row.feedback}
+                    </td>
                     <td>{row.model}</td>
                     <td>{row.promptVersion}</td>
                     <td>{row.hitCount}</td>
@@ -378,7 +390,8 @@ export default function GradingCachePage() {
               disabled={page <= 1 || loading}
               onClick={() => goToPage(page - 1)}
             >
-              <i className="ti ti-chevron-left" aria-hidden="true"></i> {t("cache.prev")}
+              <i className="ti ti-chevron-left" aria-hidden="true"></i>{" "}
+              {t("cache.prev")}
             </button>
             <span className="cache-pager-info">
               {t("cache.pageInfo", { page, total: totalPages })}
@@ -388,7 +401,8 @@ export default function GradingCachePage() {
               disabled={page >= totalPages || loading}
               onClick={() => goToPage(page + 1)}
             >
-              {t("cache.next")} <i className="ti ti-chevron-right" aria-hidden="true"></i>
+              {t("cache.next")}{" "}
+              <i className="ti ti-chevron-right" aria-hidden="true"></i>
             </button>
           </div>
         )}
@@ -404,7 +418,9 @@ export default function GradingCachePage() {
                 <textarea
                   rows={2}
                   value={form.question}
-                  onChange={(e) => setForm({ ...form, question: e.target.value })}
+                  onChange={(e) =>
+                    setForm({ ...form, question: e.target.value })
+                  }
                 />
                 {formErrors.question && (
                   <div className="err" style={{ display: "block" }}>
@@ -430,7 +446,9 @@ export default function GradingCachePage() {
                 <textarea
                   rows={3}
                   value={form.feedback}
-                  onChange={(e) => setForm({ ...form, feedback: e.target.value })}
+                  onChange={(e) =>
+                    setForm({ ...form, feedback: e.target.value })
+                  }
                 />
                 {formErrors.feedback && (
                   <div className="err" style={{ display: "block" }}>
@@ -469,9 +487,7 @@ export default function GradingCachePage() {
                   }
                 />
               </div>
-              {editId && (
-                <p className="field-note">{t("cache.reKeyNote")}</p>
-              )}
+              {editId && <p className="field-note">{t("cache.reKeyNote")}</p>}
               <div className="modal-footer">
                 <button
                   className="btn-cancel"

@@ -165,7 +165,12 @@ export default function SignupPage() {
           <label htmlFor="dob">
             {t("signup.dob")} <span className="required-star">*</span>
           </label>
-          <input id="dob" type="date" value={form.dob} onChange={update("dob")} />
+          <input
+            id="dob"
+            type="date"
+            value={form.dob}
+            onChange={update("dob")}
+          />
         </div>
         <div className="form-field">
           <label htmlFor="address">{t("signup.address")}</label>
@@ -191,7 +196,11 @@ export default function SignupPage() {
           <button className="logout-btn" onClick={() => navigate(-1)}>
             {t("common.goBack")}
           </button>
-          <button className="primary-btn" onClick={handleSave} disabled={saving}>
+          <button
+            className="primary-btn"
+            onClick={handleSave}
+            disabled={saving}
+          >
             {t("common.save")}
           </button>
         </div>

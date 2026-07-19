@@ -35,13 +35,18 @@ export default function SearchableSelect({
   const filteredOptions = useMemo(() => {
     const cleanSearch = removeAccents(search);
     if (!cleanSearch) return options;
-    return options.filter((opt) => removeAccents(opt.name).includes(cleanSearch));
+    return options.filter((opt) =>
+      removeAccents(opt.name).includes(cleanSearch),
+    );
   }, [search, options]);
 
   // Đóng khi click ra ngoài.
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (containerRef.current && !containerRef.current.contains(event.target)) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target)
+      ) {
         setIsOpen(false);
       }
     };
@@ -65,7 +70,9 @@ export default function SearchableSelect({
   // Cuộn để mục đang highlight không bị khuất.
   useEffect(() => {
     if (highlightedIndex < 0 || !listRef.current) return;
-    const el = listRef.current.querySelector(`[data-index="${highlightedIndex}"]`);
+    const el = listRef.current.querySelector(
+      `[data-index="${highlightedIndex}"]`,
+    );
     if (el) el.scrollIntoView({ block: "nearest" });
   }, [highlightedIndex]);
 
@@ -93,10 +100,7 @@ export default function SearchableSelect({
   };
 
   return (
-    <div
-      ref={containerRef}
-      className={`searchable-select ${className}`.trim()}
-    >
+    <div ref={containerRef} className={`searchable-select ${className}`.trim()}>
       <button
         type="button"
         className="searchable-select-trigger"

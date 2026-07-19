@@ -36,7 +36,8 @@ export default function GradePage() {
     try {
       setPoint(await fetchMyPoint());
     } catch (error) {
-      if (error.message !== "RE-AUTH_NEEDED") console.error("Point fetch failed:", error);
+      if (error.message !== "RE-AUTH_NEEDED")
+        console.error("Point fetch failed:", error);
     }
   };
 
@@ -120,7 +121,9 @@ export default function GradePage() {
     if (!selectedClassId || !lessonId) return;
 
     const lessonName = lessons.find((item) => item.id === lessonId)?.name;
-    const confirmed = window.confirm(t("grade.confirmLesson", { name: lessonName }));
+    const confirmed = window.confirm(
+      t("grade.confirmLesson", { name: lessonName }),
+    );
     if (!confirmed) {
       // Revert to the class's saved current lesson.
       setSelectedLessonId(currentLessonRef.current || "");
@@ -154,7 +157,9 @@ export default function GradePage() {
     } catch (error) {
       if (error.message !== "RE-AUTH_NEEDED") {
         console.error("Processing error:", error);
-        onStatus.append(`\n${t("grade.processFailed", { msg: error.message })}`);
+        onStatus.append(
+          `\n${t("grade.processFailed", { msg: error.message })}`,
+        );
       }
     } finally {
       setProcessing(false);
@@ -218,7 +223,9 @@ export default function GradePage() {
             onChange={(e) => setSaveCache(e.target.checked)}
             disabled={processing}
           />
-          <span>{saveCache ? t("grade.saveCacheOn") : t("grade.saveCacheOff")}</span>
+          <span>
+            {saveCache ? t("grade.saveCacheOn") : t("grade.saveCacheOff")}
+          </span>
         </label>
       )}
       <button

@@ -157,7 +157,12 @@ export function createStyledTextRequests(text, baseIndex, tabId) {
  * Builds the full batchUpdate request list for one student's doc: feedback
  * per answered question plus the overall teacher comment row.
  */
-export function buildFeedbackRequests(gradingResults, exercise, tabId, tableIndex) {
+export function buildFeedbackRequests(
+  gradingResults,
+  exercise,
+  tabId,
+  tableIndex,
+) {
   const contentContainer = getTablesWhichContainStudentExercise(
     exercise,
     tableIndex,
@@ -175,7 +180,9 @@ export function buildFeedbackRequests(gradingResults, exercise, tabId, tableInde
         const row = contentContainer.at(-1);
         const firstCellText = row.tableCells[0].content
           .map((p) =>
-            p?.paragraph?.elements?.map((e) => e.textRun?.content || "").join(""),
+            p?.paragraph?.elements
+              ?.map((e) => e.textRun?.content || "")
+              .join(""),
           )
           .join("")
           .trim();
@@ -201,7 +208,9 @@ export function buildFeedbackRequests(gradingResults, exercise, tabId, tableInde
         const row = contentContainer[j];
         const firstCellText = row.tableCells[0].content
           .map((p) =>
-            p?.paragraph?.elements?.map((e) => e.textRun?.content || "").join(""),
+            p?.paragraph?.elements
+              ?.map((e) => e.textRun?.content || "")
+              .join(""),
           )
           .join("")
           .trim();

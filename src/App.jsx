@@ -22,14 +22,8 @@ import LandingPagePersonal from "./pages/LandingPagePersonal.jsx";
 export default function App() {
   return (
     <Routes>
-      <Route
-        path="/contact-us"
-        element={<PosterMarketingPage />}
-      />
-      <Route
-        path="/personal"
-        element={<LandingPagePersonal />}
-      />
+      <Route path="/contact-us" element={<PosterMarketingPage />} />
+      <Route path="/personal" element={<LandingPagePersonal />} />
       <Route element={<Layout />}>
         <Route index element={<Navigate to="/grade" replace />} />
         <Route path="/login" element={<LoginPage />} />
@@ -44,7 +38,10 @@ export default function App() {
           <Route path="/students/manage" element={<ClassStudentsPage />} />
           <Route path="/classes/manage" element={<ClassManagePage />} />
           <Route path="/admin/grading-cache" element={<GradingCachePage />} />
-          <Route path="/admin/teacher-points" element={<AdminTeacherPointsPage />} />
+          <Route
+            path="/admin/teacher-points"
+            element={<AdminTeacherPointsPage />}
+          />
           <Route path="/admin/teachers" element={<AdminTeachersPage />} />
           <Route path="/speaking" element={<SpeakingPage />} />
           <Route path="/missing-teacher" element={<MissingTeacherPage />} />

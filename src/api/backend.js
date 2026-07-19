@@ -43,7 +43,10 @@ export async function loginWithUsernamePassword(username, password) {
   }
   if (!response.ok) {
     const data = await response.json().catch(() => null);
-    return { ok: false, error: data?.error || "Login failed. Please try again." };
+    return {
+      ok: false,
+      error: data?.error || "Login failed. Please try again.",
+    };
   }
 
   const data = await response.json();
@@ -182,7 +185,9 @@ export async function fetchLessons(classType) {
 export async function fetchCurrentLesson(classId) {
   const response = await authFetch(`/current-lesson?classId=${classId}`);
   if (!response.ok) {
-    console.warn("No current lesson available or failed to fetch current lesson");
+    console.warn(
+      "No current lesson available or failed to fetch current lesson",
+    );
     return null;
   }
   const data = await response.json();
@@ -196,13 +201,22 @@ export async function updateCurrentLessonForClass(classId, lessonId) {
   });
   if (!response.ok) {
     const errorBody = await response.text();
-    console.error("Failed to update current lesson:", response.status, errorBody);
+    console.error(
+      "Failed to update current lesson:",
+      response.status,
+      errorBody,
+    );
     return false;
   }
   return true;
 }
 
-export async function createClass({ name, classType, currentLesson, teacherId }) {
+export async function createClass({
+  name,
+  classType,
+  currentLesson,
+  teacherId,
+}) {
   return authFetch("/classes", {
     method: "POST",
     body: { name, classType, currentLesson, teacherId },
@@ -410,7 +424,10 @@ export async function updateTeacher(id, payload) {
  * Optionally cascades: `deleteClasses` removes classes the teacher solely owns,
  * `deleteStudents` removes the students of those deleted classes.
  */
-export async function deleteTeacher(id, { deleteClasses = false, deleteStudents = false } = {}) {
+export async function deleteTeacher(
+  id,
+  { deleteClasses = false, deleteStudents = false } = {},
+) {
   return authFetch(`/teachers/${encodeURIComponent(id)}`, {
     method: "DELETE",
     body: { deleteClasses, deleteStudents },

@@ -1,9 +1,11 @@
 ## Project Rules
 
 ### Testing
+
 - **MUST manually test every change before considering it done.** After finishing any code change, run the app and verify the affected feature works correctly end-to-end. Do not rely on type-checking or linting alone.
 
 ### .env Files
+
 - **NEVER delete a line from any `.env` file.** If a variable value needs to change, comment out the old line with `#` and add a new line below with the updated value. Example:
   ```
   # OLD_VALUE (updated 2026-06-15)
@@ -12,6 +14,7 @@
   ```
 
 <!-- gitnexus:start -->
+
 # GitNexus — Code Intelligence
 
 This project is indexed by GitNexus as **auto-check-exercise-website** (485 symbols, 1409 relationships, 39 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
@@ -36,22 +39,22 @@ This project is indexed by GitNexus as **auto-check-exercise-website** (485 symb
 
 ## Resources
 
-| Resource | Use for |
-|----------|---------|
-| `gitnexus://repo/auto-check-exercise-website/context` | Codebase overview, check index freshness |
-| `gitnexus://repo/auto-check-exercise-website/clusters` | All functional areas |
-| `gitnexus://repo/auto-check-exercise-website/processes` | All execution flows |
-| `gitnexus://repo/auto-check-exercise-website/process/{name}` | Step-by-step execution trace |
+| Resource                                                     | Use for                                  |
+| ------------------------------------------------------------ | ---------------------------------------- |
+| `gitnexus://repo/auto-check-exercise-website/context`        | Codebase overview, check index freshness |
+| `gitnexus://repo/auto-check-exercise-website/clusters`       | All functional areas                     |
+| `gitnexus://repo/auto-check-exercise-website/processes`      | All execution flows                      |
+| `gitnexus://repo/auto-check-exercise-website/process/{name}` | Step-by-step execution trace             |
 
 ## CLI
 
-| Task | Read this skill file |
-|------|---------------------|
-| Understand architecture / "How does X work?" | `.claude/skills/gitnexus/gitnexus-exploring/SKILL.md` |
-| Blast radius / "What breaks if I change X?" | `.claude/skills/gitnexus/gitnexus-impact-analysis/SKILL.md` |
-| Trace bugs / "Why is X failing?" | `.claude/skills/gitnexus/gitnexus-debugging/SKILL.md` |
-| Rename / extract / split / refactor | `.claude/skills/gitnexus/gitnexus-refactoring/SKILL.md` |
-| Tools, resources, schema reference | `.claude/skills/gitnexus/gitnexus-guide/SKILL.md` |
-| Index, status, clean, wiki CLI commands | `.claude/skills/gitnexus/gitnexus-cli/SKILL.md` |
+| Task                                         | Read this skill file                                        |
+| -------------------------------------------- | ----------------------------------------------------------- |
+| Understand architecture / "How does X work?" | `.claude/skills/gitnexus/gitnexus-exploring/SKILL.md`       |
+| Blast radius / "What breaks if I change X?"  | `.claude/skills/gitnexus/gitnexus-impact-analysis/SKILL.md` |
+| Trace bugs / "Why is X failing?"             | `.claude/skills/gitnexus/gitnexus-debugging/SKILL.md`       |
+| Rename / extract / split / refactor          | `.claude/skills/gitnexus/gitnexus-refactoring/SKILL.md`     |
+| Tools, resources, schema reference           | `.claude/skills/gitnexus/gitnexus-guide/SKILL.md`           |
+| Index, status, clean, wiki CLI commands      | `.claude/skills/gitnexus/gitnexus-cli/SKILL.md`             |
 
 <!-- gitnexus:end -->

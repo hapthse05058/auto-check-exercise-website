@@ -30,11 +30,16 @@ test.beforeEach(async ({ context }) => {
   // Seed the token store before any app script runs.
   await context.addInitScript((tok) => {
     localStorage.setItem("ace_access_token", JSON.stringify(tok));
-    localStorage.setItem("ace_expiry_date", JSON.stringify(Date.now() + 7200000));
+    localStorage.setItem(
+      "ace_expiry_date",
+      JSON.stringify(Date.now() + 7200000),
+    );
   }, TOKEN);
 });
 
-test("Tổng tiền đã nạp is masked by default; eye toggle reveals/hides it", async ({ page }) => {
+test("Tổng tiền đã nạp is masked by default; eye toggle reveals/hides it", async ({
+  page,
+}) => {
   await page.goto("/admin/teacher-points", { waitUntil: "networkidle" });
   const totalBtn = page.locator(".billing-value-link").first();
   await expect(totalBtn).toHaveText("••••••");
@@ -46,7 +51,9 @@ test("Tổng tiền đã nạp is masked by default; eye toggle reveals/hides it
   await expect(totalBtn).toHaveText("••••••");
 });
 
-test('hover tooltip "Xem chi tiết"; click opens detail popup with correct figures', async ({ page }) => {
+test('hover tooltip "Xem chi tiết"; click opens detail popup with correct figures', async ({
+  page,
+}) => {
   await page.goto("/admin/teacher-points", { waitUntil: "networkidle" });
   const totalBtn = page.locator(".billing-value-link").first();
   await expect(totalBtn).toHaveAttribute("title", "Xem chi tiết");
@@ -70,7 +77,9 @@ test('settle button reads "Thanh toán hoa hồng"', async ({ page }) => {
   ).toBeVisible();
 });
 
-test("settle pays commission → shows 0đ, keeps total (gated)", async ({ page }) => {
+test("settle pays commission → shows 0đ, keeps total (gated)", async ({
+  page,
+}) => {
   test.skip(
     !process.env.ALLOW_SETTLE,
     "Set ALLOW_SETTLE=1 (non-prod DB only) — this writes to AdminBilling",

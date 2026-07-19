@@ -35,7 +35,9 @@ export function makeNormalLessonTab({ answered = true, feedback = "" } = {}) {
     documentTab: {
       body: {
         content: [
-          { table: { tableRows: [headerRow1, headerRow2, q1, q2, overallRow] } },
+          {
+            table: { tableRows: [headerRow1, headerRow2, q1, q2, overallRow] },
+          },
         ],
       },
     },

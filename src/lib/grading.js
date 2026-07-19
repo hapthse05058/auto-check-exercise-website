@@ -83,9 +83,15 @@ export async function processDocs({
       student.exercise = doc;
       student.tabId = doc.tabProperties.tabId;
       if (!tableIndex.length) {
-        tableIndex = getTableIndexOfExercise(doc.tabProperties.title, classType);
+        tableIndex = getTableIndexOfExercise(
+          doc.tabProperties.title,
+          classType,
+        );
       }
-      const quesAndAnsArr = getQesAndAnsFromPartIVOfTheTargetTab(doc, tableIndex);
+      const quesAndAnsArr = getQesAndAnsFromPartIVOfTheTargetTab(
+        doc,
+        tableIndex,
+      );
       if (quesAndAnsArr && quesAndAnsArr.length > 0) {
         studentsExerciseList.push({
           quesAndAnsArr: quesAndAnsArr,
@@ -94,7 +100,9 @@ export async function processDocs({
       }
     } catch (err) {
       console.error(err);
-      onStatus.set(t("grading.failedDoc", { docId: student.docId, msg: err.message }));
+      onStatus.set(
+        t("grading.failedDoc", { docId: student.docId, msg: err.message }),
+      );
     }
   }
   if (studentsExerciseList.length) {
@@ -218,7 +226,9 @@ async function autoCheckExercises(
         chunk.map(async ({ quesAndAnsArr, student }) => {
           const gradingResults = [];
           for (const qa of quesAndAnsArr) {
-            const feedback = feedbackByKey.get(makeAnswerKey(qa.question, qa.answer));
+            const feedback = feedbackByKey.get(
+              makeAnswerKey(qa.question, qa.answer),
+            );
             const questionIndex = extractQuestionIndex(qa.question);
             if (feedback != null && questionIndex != null) {
               gradingResults.push({ questionIndex, aiFeedback: feedback });
@@ -242,7 +252,10 @@ async function autoCheckExercises(
           } catch (err) {
             console.error(err);
             onStatus.append(
-              t("grading.failedWrite", { docId: student.docId, msg: err.message }),
+              t("grading.failedWrite", {
+                docId: student.docId,
+                msg: err.message,
+              }),
             );
           }
         }),
@@ -251,7 +264,9 @@ async function autoCheckExercises(
     }
     // Celebrate!
     const sound = new Audio("/successful_sound.mp3");
-    await sound.play().catch((err) => console.error("Error playing sound:", err));
+    await sound
+      .play()
+      .catch((err) => console.error("Error playing sound:", err));
   } catch (err) {
     console.error("AutoCheck Error:", err);
   }

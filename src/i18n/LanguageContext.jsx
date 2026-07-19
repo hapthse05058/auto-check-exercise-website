@@ -1,4 +1,10 @@
-import { createContext, useCallback, useContext, useMemo, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from "react";
 import { translations } from "./translations.js";
 
 const LanguageContext = createContext(null);
@@ -50,7 +56,9 @@ export function LanguageProvider({ children }) {
 
   const value = useMemo(() => ({ lang, setLang, t }), [lang, setLang, t]);
   return (
-    <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>
+    <LanguageContext.Provider value={value}>
+      {children}
+    </LanguageContext.Provider>
   );
 }
 

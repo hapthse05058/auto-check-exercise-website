@@ -141,7 +141,9 @@ export default function AdminTeacherPointsPage() {
     }
     setSaving(true);
     try {
-      const res = await updateTeacherPoint(active.id, { point: Number(form.point) });
+      const res = await updateTeacherPoint(active.id, {
+        point: Number(form.point),
+      });
       if (!res.ok) {
         setFormError(t("points.updateFailed"));
         return;
@@ -197,7 +199,10 @@ export default function AdminTeacherPointsPage() {
   };
 
   const handleDelete = async (rec) => {
-    if (!window.confirm(t("points.deleteConfirm", { who: rec.name || rec.gmail }))) return;
+    if (
+      !window.confirm(t("points.deleteConfirm", { who: rec.name || rec.gmail }))
+    )
+      return;
     try {
       const res = await deleteTeacherPoint(rec.id);
       if (!res.ok) {
@@ -241,8 +246,12 @@ export default function AdminTeacherPointsPage() {
               </button>
               <button
                 className="btn-icon"
-                title={showTotal ? t("points.hideTotal") : t("points.showTotal")}
-                aria-label={showTotal ? t("points.hideTotal") : t("points.showTotal")}
+                title={
+                  showTotal ? t("points.hideTotal") : t("points.showTotal")
+                }
+                aria-label={
+                  showTotal ? t("points.hideTotal") : t("points.showTotal")
+                }
                 onClick={() => setShowTotal((v) => !v)}
               >
                 <i
@@ -351,7 +360,9 @@ export default function AdminTeacherPointsPage() {
           <div className="modal-bg open">
             <div className="modal">
               <div className="modal-header">
-                <h3>{t("points.editTitle", { who: active.name || active.gmail })}</h3>
+                <h3>
+                  {t("points.editTitle", { who: active.name || active.gmail })}
+                </h3>
               </div>
               <div className="field-group">
                 <label>{t("points.pointLabel")}</label>
@@ -362,12 +373,24 @@ export default function AdminTeacherPointsPage() {
                   autoFocus
                 />
               </div>
-              {formError && <div className="err" style={{ display: "block" }}>{formError}</div>}
+              {formError && (
+                <div className="err" style={{ display: "block" }}>
+                  {formError}
+                </div>
+              )}
               <div className="modal-footer">
-                <button className="btn-cancel" onClick={closeModal} disabled={saving}>
+                <button
+                  className="btn-cancel"
+                  onClick={closeModal}
+                  disabled={saving}
+                >
                   {t("common.cancel")}
                 </button>
-                <button className="btn-confirm" onClick={handleEdit} disabled={saving}>
+                <button
+                  className="btn-confirm"
+                  onClick={handleEdit}
+                  disabled={saving}
+                >
                   {t("common.save")}
                 </button>
               </div>
@@ -380,17 +403,23 @@ export default function AdminTeacherPointsPage() {
           <div className="modal-bg open">
             <div className="modal">
               <div className="modal-header">
-                <h3>{t("points.topUpTitle", { who: active.name || active.gmail })}</h3>
+                <h3>
+                  {t("points.topUpTitle", { who: active.name || active.gmail })}
+                </h3>
               </div>
               <div className="field-group">
-                <label>{t("points.amountLabel", { step: vnd(TOPUP_STEP) })}</label>
+                <label>
+                  {t("points.amountLabel", { step: vnd(TOPUP_STEP) })}
+                </label>
                 <input
                   type="number"
                   min={TOPUP_MIN}
                   max={TOPUP_MAX}
                   step={TOPUP_STEP}
                   value={form.amountVnd}
-                  onChange={(e) => setForm({ ...form, amountVnd: e.target.value })}
+                  onChange={(e) =>
+                    setForm({ ...form, amountVnd: e.target.value })
+                  }
                   autoFocus
                 />
               </div>
@@ -400,12 +429,24 @@ export default function AdminTeacherPointsPage() {
                   commission: vnd((topupAmount / VND_PER_POINT) * 100),
                 })}
               </p>
-              {formError && <div className="err" style={{ display: "block" }}>{formError}</div>}
+              {formError && (
+                <div className="err" style={{ display: "block" }}>
+                  {formError}
+                </div>
+              )}
               <div className="modal-footer">
-                <button className="btn-cancel" onClick={closeModal} disabled={saving}>
+                <button
+                  className="btn-cancel"
+                  onClick={closeModal}
+                  disabled={saving}
+                >
                   {t("common.cancel")}
                 </button>
-                <button className="btn-confirm" onClick={handleTopUp} disabled={saving}>
+                <button
+                  className="btn-confirm"
+                  onClick={handleTopUp}
+                  disabled={saving}
+                >
                   {t("points.doTopUp")}
                 </button>
               </div>
@@ -418,7 +459,11 @@ export default function AdminTeacherPointsPage() {
           <div className="modal-bg open">
             <div className="modal">
               <div className="modal-header">
-                <h3>{t("points.historyTitle", { who: active.name || active.gmail })}</h3>
+                <h3>
+                  {t("points.historyTitle", {
+                    who: active.name || active.gmail,
+                  })}
+                </h3>
               </div>
               {active.topUpHistory.length === 0 ? (
                 <p className="field-note">{t("points.noHistory")}</p>
@@ -462,11 +507,15 @@ export default function AdminTeacherPointsPage() {
               </div>
               <div className="billing-item">
                 <span className="billing-label">{t("points.salerCost")}</span>
-                <span className="billing-value">{vnd(billing.totalCommissionVnd)}</span>
+                <span className="billing-value">
+                  {vnd(billing.totalCommissionVnd)}
+                </span>
               </div>
               <div className="billing-item">
                 <span className="billing-label">{t("points.netRevenue")}</span>
-                <span className="billing-value">{vnd(billing.totalTopUpVnd)}</span>
+                <span className="billing-value">
+                  {vnd(billing.totalTopUpVnd)}
+                </span>
               </div>
               <div className="modal-footer">
                 <button className="btn-cancel" onClick={closeModal}>

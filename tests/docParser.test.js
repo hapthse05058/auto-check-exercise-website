@@ -20,7 +20,10 @@ describe("parseDocLinks", () => {
     const text =
       "https://docs.google.com/document/d/1qcO8zJLzD9E3MGN-lYjwegx3L8TZpX2wBClnXUjG8mI/edit?pli=1&tab=t.s4p7o0dwc0bs";
     expect(parseDocLinks(text)).toEqual([
-      { docId: "1qcO8zJLzD9E3MGN-lYjwegx3L8TZpX2wBClnXUjG8mI", tabId: "t.s4p7o0dwc0bs" },
+      {
+        docId: "1qcO8zJLzD9E3MGN-lYjwegx3L8TZpX2wBClnXUjG8mI",
+        tabId: "t.s4p7o0dwc0bs",
+      },
     ]);
   });
 
@@ -81,7 +84,10 @@ describe("getTableIndexOfExercise", () => {
 
   it("maps tabs for the old basic class type", () => {
     expect(
-      getTableIndexOfExercise("BUỔI 04 - ABC", CLASS_TYPE_BASIC_BEFORE_31032026),
+      getTableIndexOfExercise(
+        "BUỔI 04 - ABC",
+        CLASS_TYPE_BASIC_BEFORE_31032026,
+      ),
     ).toEqual([3, 4, 5, 6, 7, 8]);
   });
 

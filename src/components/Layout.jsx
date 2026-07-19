@@ -77,7 +77,10 @@ function NavMenu() {
           <button className="menu-option" onClick={() => go("/students/add")}>
             {t("nav.addStudents")}
           </button>
-          <button className="menu-option" onClick={() => go("/students/manage")}>
+          <button
+            className="menu-option"
+            onClick={() => go("/students/manage")}
+          >
             {t("nav.manageStudents")}
           </button>
           <button className="menu-option" onClick={() => go("/classes/manage")}>

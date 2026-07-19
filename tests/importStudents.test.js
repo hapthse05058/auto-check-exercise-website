@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { parseStudentsFromRows, resolveStudentImport } from "../src/lib/importStudents.js";
+import {
+  parseStudentsFromRows,
+  resolveStudentImport,
+} from "../src/lib/importStudents.js";
 
 const DOC = "https://docs.google.com/document/d/abc";
 const DOC2 = "https://docs.google.com/document/d/def";
@@ -64,7 +67,10 @@ describe("parseStudentsFromRows", () => {
     ];
     const { students, skipped } = parseStudentsFromRows(rows);
     expect(skipped).toBe(1);
-    expect(students.map((s) => s.name)).toEqual(["Trần Thị Hải", "Nguyễn Văn An"]);
+    expect(students.map((s) => s.name)).toEqual([
+      "Trần Thị Hải",
+      "Nguyễn Văn An",
+    ]);
   });
 
   it("keeps a row whose link is missing/invalid (raw value preserved)", () => {
@@ -83,7 +89,10 @@ describe("parseStudentsFromRows", () => {
   it("returns empty for an empty or non-array input (Case D)", () => {
     expect(parseStudentsFromRows([])).toEqual({ students: [], skipped: 0 });
     expect(parseStudentsFromRows(null)).toEqual({ students: [], skipped: 0 });
-    expect(parseStudentsFromRows(undefined)).toEqual({ students: [], skipped: 0 });
+    expect(parseStudentsFromRows(undefined)).toEqual({
+      students: [],
+      skipped: 0,
+    });
   });
 });
 
@@ -97,7 +106,10 @@ describe("resolveStudentImport", () => {
     const res = resolveStudentImport(parsed, []);
     expect(res.ok).toBe(true);
     expect(res.duplicates).toBe(1);
-    expect(res.toAdd.map((s) => s.name)).toEqual(["Trần Thị Hải", "Nguyễn Văn An"]);
+    expect(res.toAdd.map((s) => s.name)).toEqual([
+      "Trần Thị Hải",
+      "Nguyễn Văn An",
+    ]);
   });
 
   it("treats name differing only by case/space as a duplicate, not a conflict", () => {

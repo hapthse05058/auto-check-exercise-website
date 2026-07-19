@@ -291,7 +291,9 @@
   opacity: 0;
   visibility: hidden;
   pointer-events: none; /* never block clicks on the "+" button */
-  transition: opacity 0.15s ease, transform 0.15s ease;
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
   z-index: 50;
 }
 .tooltip-wrap:hover .tooltip-text {

@@ -118,7 +118,8 @@ export const translations = {
       noLessons: "No lessons available",
       saveClass: "Save Class",
       intro: "Create a new class for your account.",
-      duplicateName: "This class name is duplicated with another once in the system",
+      duplicateName:
+        "This class name is duplicated with another once in the system",
       verifyError: "Unable to verify class name. Please try again later.",
       nameRequired: "Class name is required.",
       fixName: "Please fix the class name before saving.",
@@ -159,7 +160,8 @@ export const translations = {
       atLeastOne: "Please add at least one student with gmail and name.",
       saving: "Saving students...",
       saveFailed: "Failed to save students.",
-      savedConfirm: "Students added successfully. Do you want to return to Homepage?",
+      savedConfirm:
+        "Students added successfully. Do you want to return to Homepage?",
       savedMore: "Students saved. You can add another batch.",
       saveError: "Unable to save students. Please try again.",
       loadFailed: "Failed to load classes.",
@@ -167,7 +169,8 @@ export const translations = {
       importSuccess: "Imported {n} students.",
       importSkipped: "(skipped {m} invalid rows)",
       importDuplicates: "(removed {d} duplicates)",
-      duplicateDoc: "Duplicate Google Doc link found: {doc} Students with the same link: {dublicatedNames}. Removed the entry for: {dublicatedNames}.",
+      duplicateDoc:
+        "Duplicate Google Doc link found: {doc} Students with the same link: {dublicatedNames}. Removed the entry for: {dublicatedNames}.",
       importNone: "No valid students found in the file.",
       importConflict:
         "Found the same Google Doc with different student names — the whole file import was blocked:",
@@ -236,7 +239,8 @@ export const translations = {
       fRequired: "Feedback is required.",
       alreadyExists:
         "A record with the same question/answer/model already exists.",
-      keyConflict: "Editing these key fields would collide with another record.",
+      keyConflict:
+        "Editing these key fields would collide with another record.",
       saveFailed: "Save failed.",
       added: "Record added.",
       updated: "Record updated.",
@@ -289,8 +293,7 @@ export const translations = {
       topUpTitle: "Top up — {who}",
       amountLabel: "Amount (đ) — multiple of {step}",
       amountHint: "= {points} points · saler commission {commission}",
-      amountErr:
-        "Amount must be a multiple of {step} between {min} and {max}.",
+      amountErr: "Amount must be a multiple of {step} between {min} and {max}.",
       topUpFailed: "Top-up failed.",
       toppedUp: "Topped up {amount} (+{points} points).",
       doTopUp: "Top up",
@@ -386,7 +389,8 @@ export const translations = {
       reopenConfirm: "Reopen account for {who}?",
       closed: "Account closed.",
       reopened: "Account reopened.",
-      deleteConfirm: "Delete {who}'s account from the system? This cannot be undone.",
+      deleteConfirm:
+        "Delete {who}'s account from the system? This cannot be undone.",
       deleteOptClasses: "Also delete classes belonging to this account?",
       deleteOptStudents: "Also delete students of those classes?",
       deleted: "Account deleted.",
@@ -439,7 +443,8 @@ export const translations = {
       noDocs: "No student documents found for this class.",
       processingDoc: "Processing Doc: {docId}...",
       failedDoc: "Failed {docId}: {msg}",
-      finishedFetch: "Finished fetching content from all docs. Starting auto-check...",
+      finishedFetch:
+        "Finished fetching content from all docs. Starting auto-check...",
       alreadyChecked:
         "\n This exercise has been checked: {docId}. Skip checking it again...",
       allChecked: "\n All docs were already checked. Nothing to grade.",
@@ -559,7 +564,8 @@ export const translations = {
       processing: "Đang xử lý...",
       loadingTeacher: "Đang tải thông tin giáo viên...",
       ready: "Sẵn sàng chấm bài...",
-      loadTeacherFailed: "Tải dữ liệu giáo viên thất bại. Vui lòng đăng nhập lại.",
+      loadTeacherFailed:
+        "Tải dữ liệu giáo viên thất bại. Vui lòng đăng nhập lại.",
       noClasses:
         "Không tìm thấy lớp nào cho tài khoản của bạn. Vui lòng tạo lớp trong hệ thống trước.",
       confirmLesson: "Cập nhật buổi học hiện tại là {name}?",
@@ -627,7 +633,8 @@ export const translations = {
       importSuccess: "Đã import {n} học sinh.",
       importSkipped: "(bỏ qua {m} dòng không hợp lệ)",
       importDuplicates: "(bỏ {d} dòng trùng)",
-      duplicateDoc: "Phát hiện trùng link Google Doc: {doc} Tên học sinh bị trùng link: {dublicatedNames}. Đã bỏ bản ghi của: {dublicatedNames}.",
+      duplicateDoc:
+        "Phát hiện trùng link Google Doc: {doc} Tên học sinh bị trùng link: {dublicatedNames}. Đã bỏ bản ghi của: {dublicatedNames}.",
       importNone: "Không tìm thấy học sinh hợp lệ trong file.",
       importConflict:
         "Phát hiện cùng một Google Doc nhưng khác tên học sinh — đã chặn import toàn bộ file:",
@@ -845,7 +852,8 @@ export const translations = {
       reopenConfirm: "Mở lại account của {who}?",
       closed: "Đã đóng account.",
       reopened: "Đã mở lại account.",
-      deleteConfirm: "Xóa account của {who} khỏi hệ thống? Hành động này không thể hoàn tác.",
+      deleteConfirm:
+        "Xóa account của {who} khỏi hệ thống? Hành động này không thể hoàn tác.",
       deleteOptClasses: "Xóa cả class liên quan đến account này?",
       deleteOptStudents: "Xóa học sinh liên quan đến các lớp học trên?",
       deleted: "Đã xóa account.",
@@ -898,7 +906,8 @@ export const translations = {
       noDocs: "Không tìm thấy tài liệu học sinh nào cho lớp này.",
       processingDoc: "Đang xử lý tài liệu: {docId}...",
       failedDoc: "Lỗi {docId}: {msg}",
-      finishedFetch: "Đã tải xong nội dung các tài liệu. Bắt đầu chấm tự động...",
+      finishedFetch:
+        "Đã tải xong nội dung các tài liệu. Bắt đầu chấm tự động...",
       alreadyChecked:
         "\n Bài này đã được chấm: {docId}. Bỏ qua, không chấm lại...",
       allChecked: "\n Tất cả tài liệu đã được chấm. Không có gì để chấm.",

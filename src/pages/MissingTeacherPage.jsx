@@ -16,9 +16,7 @@ export default function MissingTeacherPage() {
   return (
     <div className="page-narrow">
       <div className="missing-teacher-box">
-        <p className="warning-text">
-          {t("missingTeacher.message")}
-        </p>
+        <p className="warning-text">{t("missingTeacher.message")}</p>
         <div className="action-row">
           <button className="logout-btn" onClick={handleCancel}>
             {t("common.cancel")}

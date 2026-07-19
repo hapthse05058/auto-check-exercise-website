@@ -16,7 +16,8 @@ import { LESSON_OPTIONS } from "../shared/constant.js";
 function lessonLabel(currentLesson) {
   if (!currentLesson) return "—";
   return (
-    LESSON_OPTIONS.find((o) => o.value === currentLesson)?.label || currentLesson
+    LESSON_OPTIONS.find((o) => o.value === currentLesson)?.label ||
+    currentLesson
   );
 }
 

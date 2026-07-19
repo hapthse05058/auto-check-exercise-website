@@ -12,13 +12,26 @@ import { extractDocId } from "./googleDoc.js";
 
 // Substring keywords used to recognise each column from its header text.
 const NAME_KEYS = ["tên", "ten", "họ", "ho", "name", "student", "học sinh"];
-const DOC_KEYS = ["doc", "link", "liên kết", "lien ket", "tài liệu", "tai lieu", "url"];
+const DOC_KEYS = [
+  "doc",
+  "link",
+  "liên kết",
+  "lien ket",
+  "tài liệu",
+  "tai lieu",
+  "url",
+];
 
-const norm = (v) => String(v ?? "").trim().toLowerCase();
-const matchIdx = (header, keys) => header.findIndex((h) => keys.some((k) => h.includes(k)));
+const norm = (v) =>
+  String(v ?? "")
+    .trim()
+    .toLowerCase();
+const matchIdx = (header, keys) =>
+  header.findIndex((h) => keys.some((k) => h.includes(k)));
 
 export function parseStudentsFromRows(rows) {
-  if (!Array.isArray(rows) || rows.length === 0) return { students: [], skipped: 0 };
+  if (!Array.isArray(rows) || rows.length === 0)
+    return { students: [], skipped: 0 };
 
   const header = (rows[0] || []).map(norm);
   // A row that already contains an http URL is real data, not a header — guard
@@ -61,7 +74,11 @@ export function parseStudentsFromRows(rows) {
   return { students, skipped };
 }
 
-const normName = (n) => String(n || "").trim().toLowerCase().replace(/\s+/g, " ");
+const normName = (n) =>
+  String(n || "")
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, " ");
 
 /**
  * Reconcile freshly-parsed students against the ones already on screen.
@@ -79,7 +96,8 @@ export function resolveStudentImport(parsed, existing = []) {
   const docMap = new Map(); // docId -> { norm, orig } (first name seen for that doc)
   for (const s of existing) {
     const id = extractDocId(s.doc ?? s.ggDocLink);
-    if (id && !docMap.has(id)) docMap.set(id, { norm: normName(s.name), orig: s.name });
+    if (id && !docMap.has(id))
+      docMap.set(id, { norm: normName(s.name), orig: s.name });
   }
 
   const toAdd = [];

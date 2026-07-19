@@ -69,7 +69,9 @@ describe("createStyledTextRequests", () => {
     const styles = requests.filter((r) => r.updateTextStyle);
 
     expect(inserts.map((r) => r.insertText.text)).toEqual(["a ", "b", " c"]);
-    expect(inserts.map((r) => r.insertText.location.index)).toEqual([10, 12, 13]);
+    expect(inserts.map((r) => r.insertText.location.index)).toEqual([
+      10, 12, 13,
+    ]);
 
     // All style updates come after all inserts.
     const lastInsertPos = requests.findLastIndex((r) => r.insertText);

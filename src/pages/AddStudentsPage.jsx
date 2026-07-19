@@ -6,7 +6,10 @@ import SearchableSelect from "../components/SearchableSelect.jsx";
 import { useAuth } from "../auth/AuthContext.jsx";
 import { isAdminEmail } from "../config.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
-import { parseStudentsFromRows, resolveStudentImport } from "../lib/importStudents.js";
+import {
+  parseStudentsFromRows,
+  resolveStudentImport,
+} from "../lib/importStudents.js";
 
 function initials(name) {
   const parts = name.trim().split(/\s+/);
@@ -102,7 +105,9 @@ export default function AddStudentsPage() {
 
   const removeRow = (index) => {
     // Always keep at least one row in the form.
-    setRows((prev) => (prev.length === 1 ? prev : prev.filter((_, i) => i !== index)));
+    setRows((prev) =>
+      prev.length === 1 ? prev : prev.filter((_, i) => i !== index),
+    );
     setRowErrors((prev) => prev.filter((_, i) => i !== index));
   };
 
@@ -172,7 +177,9 @@ export default function AddStudentsPage() {
 
       valid.forEach((v) => {
         // Check against our growing list of students
-        const isDuplicate = nextStudents.some((element) => element.doc === v.doc);
+        const isDuplicate = nextStudents.some(
+          (element) => element.doc === v.doc,
+        );
 
         if (!isDuplicate) {
           nextStudents.push(v);
@@ -187,8 +194,8 @@ export default function AddStudentsPage() {
           kind: "error",
           text: t("addStudents.duplicateDoc", {
             doc: duplicateElements[0].doc,
-            dublicatedNames: duplicateElements.map(e => e.name).join(", ")
-          })
+            dublicatedNames: duplicateElements.map((e) => e.name).join(", "),
+          }),
         });
       }
 
@@ -210,8 +217,12 @@ export default function AddStudentsPage() {
       const buf = await file.arrayBuffer();
       const wb = XLSX.read(buf, { type: "array" });
       const sheet = wb.Sheets[wb.SheetNames[0]];
-      const sheetRows = XLSX.utils.sheet_to_json(sheet, { header: 1, blankrows: false });
-      const { students: parsed, skipped: skippedNoName } = parseStudentsFromRows(sheetRows);
+      const sheetRows = XLSX.utils.sheet_to_json(sheet, {
+        header: 1,
+        blankrows: false,
+      });
+      const { students: parsed, skipped: skippedNoName } =
+        parseStudentsFromRows(sheetRows);
       const res = resolveStudentImport(parsed, students);
 
       if (!res.ok) {
@@ -235,8 +246,12 @@ export default function AddStudentsPage() {
         kind: "success",
         text:
           t("addStudents.importSuccess", { n: res.toAdd.length }) +
-          (skipped ? "\n" + t("addStudents.importSkipped", { m: skipped }) : "") +
-          (res.duplicates ? "\n" + t("addStudents.importDuplicates", { d: res.duplicates }) : ""),
+          (skipped
+            ? "\n" + t("addStudents.importSkipped", { m: skipped })
+            : "") +
+          (res.duplicates
+            ? "\n" + t("addStudents.importDuplicates", { d: res.duplicates })
+            : ""),
       });
     } catch (error) {
       console.error("Import students failed:", error);
@@ -304,11 +319,16 @@ export default function AddStudentsPage() {
             <p>{t("addStudents.subtitle")}</p>
           </div>
           <div className="topbar-actions">
-            <button className="btn-import" onClick={() => fileInputRef.current?.click()}>
-              <i className="ti ti-file-import" aria-hidden="true"></i> {t("addStudents.importBtn")}
+            <button
+              className="btn-import"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <i className="ti ti-file-import" aria-hidden="true"></i>{" "}
+              {t("addStudents.importBtn")}
             </button>
             <button className="btn-add" onClick={() => openModal()}>
-              <i className="ti ti-plus" aria-hidden="true"></i> {t("addStudents.add")}
+              <i className="ti ti-plus" aria-hidden="true"></i>{" "}
+              {t("addStudents.add")}
             </button>
           </div>
         </div>
@@ -392,7 +412,11 @@ export default function AddStudentsPage() {
           <div className="modal-bg open">
             <div className="modal">
               <div className="modal-header">
-                <h3>{editIndex >= 0 ? t("addStudents.editTitle") : t("addStudents.addTitle")}</h3>
+                <h3>
+                  {editIndex >= 0
+                    ? t("addStudents.editTitle")
+                    : t("addStudents.addTitle")}
+                </h3>
               </div>
               {/* Gmail field temporarily hidden — students can be added without an email. */}
               <div className="modal-body">
@@ -452,17 +476,24 @@ export default function AddStudentsPage() {
                       >
                         <i className="ti ti-plus" aria-hidden="true"></i>
                       </button>
-                      <span className="tooltip-text">{t("addStudents.addRowTooltip")}</span>
+                      <span className="tooltip-text">
+                        {t("addStudents.addRowTooltip")}
+                      </span>
                     </span>
                   </div>
                 )}
               </div>
               <div className="modal-footer">
-                <button className="btn-cancel" onClick={() => setModalOpen(false)}>
+                <button
+                  className="btn-cancel"
+                  onClick={() => setModalOpen(false)}
+                >
                   {t("common.cancel")}
                 </button>
                 <button className="btn-confirm" onClick={confirmStudents}>
-                  {editIndex >= 0 ? t("addStudents.saveChanges") : t("addStudents.saveStudent")}
+                  {editIndex >= 0
+                    ? t("addStudents.saveChanges")
+                    : t("addStudents.saveStudent")}
                 </button>
               </div>
             </div>
@@ -471,7 +502,10 @@ export default function AddStudentsPage() {
 
         {notice && (
           <div className="modal-bg open" onClick={() => setNotice(null)}>
-            <div className="modal modal-notice" onClick={(e) => e.stopPropagation()}>
+            <div
+              className="modal modal-notice"
+              onClick={(e) => e.stopPropagation()}
+            >
               <div className="modal-header">
                 <h3>
                   {notice.kind === "error"
@@ -480,7 +514,9 @@ export default function AddStudentsPage() {
                 </h3>
               </div>
               <div className="modal-body">
-                <p className={`notice-text${notice.kind === "error" ? " notice-error" : ""}`}>
+                <p
+                  className={`notice-text${notice.kind === "error" ? " notice-error" : ""}`}
+                >
                   {notice.text}
                 </p>
               </div>
@@ -497,11 +533,17 @@ export default function AddStudentsPage() {
           <button className="logout-btn" onClick={() => navigate("/grade")}>
             {t("common.backHome")}
           </button>
-          <button className="btn-add" onClick={handleSaveStudents} disabled={saving}>
+          <button
+            className="btn-add"
+            onClick={handleSaveStudents}
+            disabled={saving}
+          >
             {t("addStudents.saveList")}
           </button>
         </div>
-        <div className={`status-line${statusType === "warning" ? " status-warning" : ""}`}>
+        <div
+          className={`status-line${statusType === "warning" ? " status-warning" : ""}`}
+        >
           {status}
         </div>
       </div>

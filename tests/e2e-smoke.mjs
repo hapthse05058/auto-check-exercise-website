@@ -24,25 +24,48 @@ page.on("console", (msg) => {
 page.on("pageerror", (err) => consoleErrors.push(`PAGEERROR: ${err.message}`));
 
 // --- 1. Unauthenticated: every protected route redirects to /login --------
-for (const route of ["/", "/grade", "/classes/new", "/students/add", "/missing-teacher", "/signup"]) {
+for (const route of [
+  "/",
+  "/grade",
+  "/classes/new",
+  "/students/add",
+  "/missing-teacher",
+  "/signup",
+]) {
   await page.goto(BASE + route, { waitUntil: "networkidle" });
-  check(`${route} redirects to /login when logged out`, page.url().endsWith("/login"));
+  check(
+    `${route} redirects to /login when logged out`,
+    page.url().endsWith("/login"),
+  );
 }
 
 // --- 2. Public routes render their headings -------------------------------
 await page.goto(BASE + "/login", { waitUntil: "networkidle" });
-check("/login shows Login panel", await page.locator("h4:has-text('Login')").isVisible());
-check("/login shows username tab active", await page.locator(".method-tab.active:has-text('Username/Password')").isVisible());
+check(
+  "/login shows Login panel",
+  await page.locator("h4:has-text('Login')").isVisible(),
+);
+check(
+  "/login shows username tab active",
+  await page
+    .locator(".method-tab.active:has-text('Username/Password')")
+    .isVisible(),
+);
 
 await page.click(".method-tab:has-text('Google Login')");
-check("Google tab switch shows Gmail button", await page.locator("button:has-text('Login by Gmail')").isVisible());
+check(
+  "Google tab switch shows Gmail button",
+  await page.locator("button:has-text('Login by Gmail')").isVisible(),
+);
 await page.click(".method-tab:has-text('Username/Password')");
 
 // --- 3. Login validation + real backend 401 -------------------------------
 await page.click("button:has-text('Login')");
 check(
   "empty login shows validation message",
-  await page.locator("text=Please enter both username and password.").isVisible(),
+  await page
+    .locator("text=Please enter both username and password.")
+    .isVisible(),
 );
 
 await page.fill("#loginUsername", "definitely-not-a-user-xyz");
@@ -52,7 +75,9 @@ await page.waitForTimeout(1500);
 const loginStatus = await page.locator(".status-line").textContent();
 check(
   "bad credentials hit real backend and show error",
-  /Invalid username or password|Login failed|Error connecting/.test(loginStatus || ""),
+  /Invalid username or password|Login failed|Error connecting/.test(
+    loginStatus || "",
+  ),
   (loginStatus || "").trim(),
 );
 
@@ -69,7 +94,11 @@ await page.fill("#resetIdentifier", "no-such-user-xyz@example.com");
 await page.click("button:has-text('Send Reset Email')");
 await page.waitForTimeout(1500);
 const resetStatus = await page.locator(".status-line").textContent();
-check("bogus reset identifier surfaces backend response", !!resetStatus?.trim(), (resetStatus || "").trim());
+check(
+  "bogus reset identifier surfaces backend response",
+  !!resetStatus?.trim(),
+  (resetStatus || "").trim(),
+);
 
 // --- 5. Reset-password guard (no token in sessionStorage) ------------------
 await page.goto(BASE + "/reset-password", { waitUntil: "networkidle" });
@@ -99,24 +128,42 @@ await page.evaluate(() => sessionStorage.removeItem("reset_token"));
 // --- 6. Fake session: protected pages render + error paths -----------------
 await page.goto(BASE + "/login");
 await page.evaluate(() => {
-  localStorage.setItem("ace_access_token", JSON.stringify("fake-token-for-smoke-test"));
-  localStorage.setItem("ace_expiry_date", JSON.stringify(Date.now() + 3600 * 1000));
+  localStorage.setItem(
+    "ace_access_token",
+    JSON.stringify("fake-token-for-smoke-test"),
+  );
+  localStorage.setItem(
+    "ace_expiry_date",
+    JSON.stringify(Date.now() + 3600 * 1000),
+  );
 });
 await page.goto(BASE + "/grade", { waitUntil: "networkidle" });
 await page.waitForTimeout(1000);
-check("fake session keeps /grade route (no redirect)", page.url().includes("/grade"));
+check(
+  "fake session keeps /grade route (no redirect)",
+  page.url().includes("/grade"),
+);
 const gradeStatus = await page.locator(".status-output").textContent();
 check(
   "/grade surfaces teacher-info failure for invalid JWT",
   /Failed to load teacher data|Loading teacher info/.test(gradeStatus || ""),
   (gradeStatus || "").trim(),
 );
-check("process button disabled without class+lesson", await page.locator("button:has-text('Process All Documents')").isDisabled());
+check(
+  "process button disabled without class+lesson",
+  await page.locator("button:has-text('Process All Documents')").isDisabled(),
+);
 
 await page.goto(BASE + "/students/add", { waitUntil: "networkidle" });
-check("/students/add renders student manager", await page.locator("h2:has-text('Student list')").isVisible());
+check(
+  "/students/add renders student manager",
+  await page.locator("h2:has-text('Student list')").isVisible(),
+);
 await page.click("button:has-text('Add student')");
-check("add-student modal opens", await page.locator(".modal-bg.open").isVisible());
+check(
+  "add-student modal opens",
+  await page.locator(".modal-bg.open").isVisible(),
+);
 await page.click("button:has-text('Save Student')");
 check(
   "student modal validates empty fields",
@@ -124,17 +171,34 @@ check(
 );
 await page.fill(".modal input[type='text']", "Nguyễn Văn A");
 await page.fill(".modal input[type='email']", "a@gmail.com");
-await page.fill(".modal input[type='url']", "https://docs.google.com/document/d/abc/edit");
+await page.fill(
+  ".modal input[type='url']",
+  "https://docs.google.com/document/d/abc/edit",
+);
 await page.click("button:has-text('Save Student')");
-check("student card appears after save", await page.locator(".student-card:has-text('Nguyễn Văn A')").isVisible());
-check("count badge updates", (await page.locator(".count-badge").textContent())?.includes("1 student"));
+check(
+  "student card appears after save",
+  await page.locator(".student-card:has-text('Nguyễn Văn A')").isVisible(),
+);
+check(
+  "count badge updates",
+  (await page.locator(".count-badge").textContent())?.includes("1 student"),
+);
 
 await page.goto(BASE + "/classes/new", { waitUntil: "networkidle" });
-check("/classes/new renders form", await page.locator("h4:has-text('Create New Class')").isVisible());
-check("save class disabled when empty", await page.locator("button:has-text('Save Class')").isDisabled());
+check(
+  "/classes/new renders form",
+  await page.locator("h4:has-text('Create New Class')").isVisible(),
+);
+check(
+  "save class disabled when empty",
+  await page.locator("button:has-text('Save Class')").isDisabled(),
+);
 
 // --- 7. Auth callback error handling ---------------------------------------
-await page.goto(BASE + "/auth/callback?error=access_denied", { waitUntil: "networkidle" });
+await page.goto(BASE + "/auth/callback?error=access_denied", {
+  waitUntil: "networkidle",
+});
 check(
   "auth callback shows cancellation error",
   await page.locator("text=cancelled or failed").isVisible(),
@@ -144,7 +208,9 @@ check(
 await page.goto(BASE + "/grade", { waitUntil: "networkidle" });
 await page.click("button:has-text('Logout')");
 await page.waitForURL("**/login");
-const remaining = await page.evaluate(() => localStorage.getItem("ace_access_token"));
+const remaining = await page.evaluate(() =>
+  localStorage.getItem("ace_access_token"),
+);
 check("logout clears tokens and returns to /login", remaining === null);
 
 // --- Console errors ----------------------------------------------------------
@@ -160,8 +226,16 @@ const realErrors = consoleErrors.filter(
     !e.includes("Error loading class types") &&
     !e.includes("Error fetching classes"),
 );
-check("no unexpected console/page errors", realErrors.length === 0, realErrors.slice(0, 5).join(" | "));
+check(
+  "no unexpected console/page errors",
+  realErrors.length === 0,
+  realErrors.slice(0, 5).join(" | "),
+);
 
 await browser.close();
-console.log(failures === 0 ? "\nALL SMOKE TESTS PASSED" : `\n${failures} SMOKE TEST(S) FAILED`);
+console.log(
+  failures === 0
+    ? "\nALL SMOKE TESTS PASSED"
+    : `\n${failures} SMOKE TEST(S) FAILED`,
+);
 process.exit(failures === 0 ? 0 : 1);

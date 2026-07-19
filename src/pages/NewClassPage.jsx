@@ -172,7 +172,11 @@ export default function NewClassPage() {
         </div>
         <div className="form-field">
           <label htmlFor="newClassType">{t("newClass.type")}</label>
-          <select id="newClassType" value={classType} onChange={handleTypeChange}>
+          <select
+            id="newClassType"
+            value={classType}
+            onChange={handleTypeChange}
+          >
             <option value="">{t("newClass.selectType")}</option>
             {classTypes.map((type) => (
               <option key={type.code} value={type.code}>
@@ -207,7 +211,11 @@ export default function NewClassPage() {
           <button className="logout-btn" onClick={() => navigate("/grade")}>
             {t("common.backHome")}
           </button>
-          <button className="primary-btn" onClick={handleSave} disabled={!canSave}>
+          <button
+            className="primary-btn"
+            onClick={handleSave}
+            disabled={!canSave}
+          >
             {t("newClass.saveClass")}
           </button>
         </div>

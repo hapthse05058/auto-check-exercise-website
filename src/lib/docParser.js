@@ -22,7 +22,9 @@ export function containsCorrectMark(str) {
 
 /** Normalizes a string for keying: collapse whitespace + trim. */
 export function normalizeText(value) {
-  return String(value ?? "").replace(/\s+/g, " ").trim();
+  return String(value ?? "")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 /**
@@ -235,7 +237,9 @@ function getQuesAndAnsForNormalLession(exercisePart4) {
             startsWithArrow(qa?.textRun?.content),
           );
           if (answer) {
-            qnaObj.answer = qnaChild.map((ans) => ans?.textRun?.content).join("");
+            qnaObj.answer = qnaChild
+              .map((ans) => ans?.textRun?.content)
+              .join("");
           }
           if (qnaObj?.question && qnaObj?.answer) {
             quesAndAnsArrPartIV.push(qnaObj);
@@ -279,7 +283,7 @@ export function getQesAndAnsFromPartIVOfTheTargetTab(targetTab, tableIndex) {
   }
 
   if (ENVIRONMENT === "DEV") {
-  console.log(quesAndAnsArrPartIV)
+    console.log(quesAndAnsArrPartIV);
   }
   const finalArr = [];
   quesAndAnsArrPartIV.forEach((item) => {
@@ -315,7 +319,9 @@ export function wasExerciseReviewedByAI(exercise, tableIndex) {
         const targetCell = row.tableCells[cellIndex];
         const targetCellContent = targetCell.content
           .map((p) =>
-            p?.paragraph?.elements?.map((e) => e.textRun?.content || "").join(""),
+            p?.paragraph?.elements
+              ?.map((e) => e.textRun?.content || "")
+              .join(""),
           )
           .join("")
           .trim();

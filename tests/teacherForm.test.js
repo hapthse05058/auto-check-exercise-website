@@ -34,11 +34,17 @@ describe("validateTeacherForm", () => {
     expect(validateTeacherForm(noCreds, { isCreate: false }).ok).toBe(true);
     const r = validateTeacherForm(noCreds, { isCreate: true });
     expect(r.ok).toBe(false);
-    expect(r.errors).toMatchObject({ username: "required", password: "required" });
+    expect(r.errors).toMatchObject({
+      username: "required",
+      password: "required",
+    });
   });
 
   it("rejects a malformed gmail", () => {
-    const r = validateTeacherForm({ ...full, gmail: "not-an-email" }, { isCreate: true });
+    const r = validateTeacherForm(
+      { ...full, gmail: "not-an-email" },
+      { isCreate: true },
+    );
     expect(r.ok).toBe(false);
     expect(r.errors.gmail).toBe("invalidGmail");
   });

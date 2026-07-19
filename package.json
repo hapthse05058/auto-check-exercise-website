@@ -11,8 +11,7 @@
     "sync-structure": "npx @colbymchenry/codegraph & npx gitnexus analyze",
     "test:watch": "vitest",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "format": "prettier --write .",
+    "format": "eslint . --fix && prettier --write .",
     "format:check": "prettier --check ."
   },
   "dependencies": {
