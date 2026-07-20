@@ -15,11 +15,30 @@ const INITIAL_FORM = {
   notes: "",
 };
 
-export default function SignupPage() {
+/** Reads the {gmail, name} captured at Google login (see loginWithGoogleCode). */
+function readLoginProfile() {
+  try {
+    const raw = sessionStorage.getItem("googleLoginProfile");
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+export default function SignupPage() { 
   const { t } = useLanguage();
   const navigate = useNavigate();
   const { refreshTeacherInfo } = useAuth();
-  const [form, setForm] = useState(INITIAL_FORM);
+  // Pre-fill Gmail (from the login). Read once on mount so a page refresh keeps them.
+  const [form, setForm] = useState(() => {
+    const profile = readLoginProfile();
+    const gmail = (profile?.gmail || "").trim();
+    return { ...INITIAL_FORM, gmail };
+  });
+  // Lock Gmail only when we actually have one, so signup is never blocked.
+  const [gmailLocked] = useState(() =>
+    Boolean((readLoginProfile()?.gmail || "").trim()),
+  );
   const [status, setStatus] = useState("");
   const [saving, setSaving] = useState(false);
 
@@ -135,6 +154,8 @@ export default function SignupPage() {
             placeholder={t("signup.gmailPlaceholder")}
             value={form.gmail}
             onChange={update("gmail")}
+            readOnly={gmailLocked}
+            aria-readonly={gmailLocked}
           />
         </div>
         <div className="form-field">

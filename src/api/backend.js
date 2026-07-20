@@ -87,6 +87,22 @@ export async function loginWithGoogleCode(code, redirectUri) {
     refresh_token: tokens.refresh_token,
     refresh_token_expires_date: tokens.refresh_token_expires_date,
   });
+  // Remember the Google profile so the signup screen can pre-fill Gmail/name
+  // before a teacher record exists. Tolerant to backend field naming; absent
+  // values simply leave the signup fields empty. Cleared in clearAuthStorage().
+  const gmail = tokens.email || tokens.gmail || "";
+  const name =
+    tokens.name ||
+    tokens.fullName ||
+    tokens.full_name ||
+    tokens.displayName ||
+    "";
+  if (gmail || name) {
+    sessionStorage.setItem(
+      "googleLoginProfile",
+      JSON.stringify({ gmail, name }),
+    );
+  }
   return tokens;
 }
 

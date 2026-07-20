@@ -3,7 +3,7 @@ export const DOMAIN_BE_PROD = import.meta.env.VITE_DOMAIN_BE_PROD;
 export const ENVIRONMENT = import.meta.env.VITE_ENVIRONMENT ?? "DEV";
 export const DOMAIN_BE =
   ENVIRONMENT === "PROD" ? DOMAIN_BE_PROD : DOMAIN_BE_DEV;
-export const EXTENSION_SECRET_KEY = "SuperSecretKey_hongHa_321";
+export const EXTENSION_SECRET_KEY = "SuperSecretKey_321__hongHa";
 export const PROJECT_NUMBER = "159733287448";
 
 export const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;

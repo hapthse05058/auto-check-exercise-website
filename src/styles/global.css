@@ -266,6 +266,11 @@ select:focus {
   outline: 2px solid rgba(0, 151, 123, 0.35);
   border-color: var(--color-primary);
 }
+input[readonly] {
+  background: #f3f4f6;
+  color: #6b7280;
+  cursor: not-allowed;
+}
 
 /* Searchable single-select combobox (thay cho <select> gốc, cho phép gõ lọc). */
 .searchable-select {

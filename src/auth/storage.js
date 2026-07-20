@@ -47,4 +47,5 @@ export function storageRemove(keys) {
 export function clearAuthStorage() {
   storageRemove(AUTH_KEYS);
   sessionStorage.removeItem("teacherInfo");
+  sessionStorage.removeItem("googleLoginProfile");
 }
