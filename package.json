@@ -11,6 +11,7 @@
     "sync-structure": "npx @colbymchenry/codegraph & npx gitnexus analyze",
     "test:watch": "vitest",
     "lint": "eslint .",
+    "prettier": "prettier --check .",
     "format": "eslint . --fix && prettier --write .",
     "validate": "eslint . && prettier --check .",
     "prepare": "husky"
