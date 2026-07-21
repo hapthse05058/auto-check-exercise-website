@@ -152,7 +152,7 @@ export default function AdminTeacherPointsPage() {
       closeModal();
       setStatus(t("points.updated"));
       await reload();
-    } catch (error) {
+    } catch {
       setFormError(t("points.updateFailed"));
     } finally {
       setSaving(false);
@@ -192,7 +192,7 @@ export default function AdminTeacherPointsPage() {
         }),
       );
       await reload();
-    } catch (error) {
+    } catch {
       setFormError(t("points.topUpFailed"));
     } finally {
       setSaving(false);
@@ -212,7 +212,7 @@ export default function AdminTeacherPointsPage() {
       }
       setStatus(t("points.deleted"));
       await reload();
-    } catch (error) {
+    } catch {
       setStatus(t("points.deleteFailed"));
     }
   };
@@ -480,6 +480,7 @@ export default function AdminTeacherPointsPage() {
                     </thead>
                     <tbody>
                       {[...active.topUpHistory].reverse().map((h, i) => (
+                        // eslint-disable-next-line react/no-array-index-key -- no stable id; list is display-only and never reordered
                         <tr key={i}>
                           <td className="cell-date">{formatDate(h.topUpAt)}</td>
                           <td>{vnd(h.amountVnd)}</td>

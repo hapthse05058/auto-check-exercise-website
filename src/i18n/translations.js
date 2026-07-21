@@ -31,6 +31,8 @@ export const translations = {
       logout: "Logout",
       hi: "Hi {name}!",
       there: "there",
+      installApp: "Install app",
+      installIosHint: "Tap Share → Add to Home Screen",
     },
     speaking: {
       title: "Speaking grading",
@@ -496,6 +498,8 @@ export const translations = {
       logout: "Đăng xuất",
       hi: "Chào {name}!",
       there: "bạn",
+      installApp: "Cài ứng dụng",
+      installIosHint: "Bấm Share ⎋ → Thêm vào Màn hình chính",
     },
     speaking: {
       title: "Chấm speaking",

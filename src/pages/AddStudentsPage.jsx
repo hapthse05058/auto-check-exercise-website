@@ -89,6 +89,7 @@ export default function AddStudentsPage() {
     return () => {
       cancelled = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- run once on mount; `t` is only used for status/error messages, adding it would re-fetch on language change
   }, [loadTeacherInfo, navigate]);
 
   const openModal = (index = -1) => {
@@ -367,6 +368,7 @@ export default function AddStudentsPage() {
           ) : (
             <div>
               {students.map((s, i) => (
+                // eslint-disable-next-line react/no-array-index-key -- no stable id; list is display/edit-only and never reordered
                 <div className="student-card" key={`${s.gmail}-${i}`}>
                   <div className="student-index">{i + 1}</div>
                   <div className="avatar">{initials(s.name)}</div>
@@ -422,6 +424,7 @@ export default function AddStudentsPage() {
               {/* Gmail field temporarily hidden — students can be added without an email. */}
               <div className="modal-body">
                 {rows.map((row, i) => (
+                  // eslint-disable-next-line react/no-array-index-key -- no stable id; list is display/edit-only and never reordered
                   <div className="student-row" key={i}>
                     <div className="student-row-fields">
                       <div className="field-group">

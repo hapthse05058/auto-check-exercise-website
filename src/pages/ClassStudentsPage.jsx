@@ -72,6 +72,7 @@ export default function ClassStudentsPage() {
     return () => {
       cancelled = true;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- run once on mount; `t` is only used for status/error messages, adding it would re-fetch on language change
   }, [loadTeacherInfo, navigate]);
 
   const handleClassChange = async (classId) => {

@@ -19,6 +19,7 @@ export default [
   {
     ignores: [
       "dist/**",
+      "dev-dist/**",
       "node_modules/**",
       "coverage/**",
       "public/**",
@@ -80,7 +81,10 @@ export default [
       "import/no-duplicates": "error",
 
       // JS General
-      "no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
+      "no-unused-vars": [
+        "warn",
+        { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
+      ],
       eqeqeq: ["error", "always"],
       "no-console": ["warn", { allow: ["warn", "error"] }],
       "prefer-const": "error",

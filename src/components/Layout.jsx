@@ -3,6 +3,7 @@ import { Link, Outlet, useNavigate } from "react-router-dom";
 
 import { useAuth } from "../auth/AuthContext.jsx";
 import { SUPPORT_EMAIL, isAdminEmail } from "../config.js";
+import { usePwaInstall } from "../hooks/usePwaInstall.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
 
 function initials(name) {
@@ -128,8 +129,10 @@ function NavMenu() {
 /** Avatar button → popover with hi + name, username and email. */
 function ProfileMenu({ teacherInfo }) {
   const [open, setOpen] = useState(false);
+  const [showIosHint, setShowIosHint] = useState(false);
   const wrapperRef = useRef(null);
   const { t } = useLanguage();
+  const { canInstall, isIOS, promptInstall } = usePwaInstall();
 
   useEffect(() => {
     const onClick = (event) => {
@@ -169,6 +172,34 @@ function ProfileMenu({ teacherInfo }) {
               <i className="ti ti-mail" aria-hidden="true" />
               {teacherInfo.gmail}
             </p>
+          )}
+          {canInstall && (
+            <button
+              className="menu-option install-option"
+              onClick={() => {
+                setOpen(false);
+                promptInstall();
+              }}
+            >
+              <i className="ti ti-download" aria-hidden="true" />
+              {t("nav.installApp")}
+            </button>
+          )}
+          {!canInstall && isIOS && (
+            <>
+              <button
+                className="menu-option install-option"
+                onClick={() => setShowIosHint((v) => !v)}
+              >
+                <i className="ti ti-download" aria-hidden="true" />
+                {t("nav.installApp")}
+              </button>
+              {showIosHint && (
+                <p className="profile-detail install-ios-hint">
+                  {t("nav.installIosHint")}
+                </p>
+              )}
+            </>
           )}
         </div>
       )}

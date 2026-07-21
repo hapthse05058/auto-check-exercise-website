@@ -4,8 +4,6 @@
  * intentionally identical so grading results do not change.
  */
 
-import { ENVIRONMENT } from "../config";
-
 export const IS_CORRECT_ANSWER = "✅ Đúng";
 
 export function startsWithNumberDot(sentence) {
@@ -282,9 +280,6 @@ export function getQesAndAnsFromPartIVOfTheTargetTab(targetTab, tableIndex) {
     quesAndAnsArrPartIV = getQuesAndAnsForNormalLession(exercisePart4);
   }
 
-  if (ENVIRONMENT === "DEV") {
-    console.log(quesAndAnsArrPartIV);
-  }
   const finalArr = [];
   quesAndAnsArrPartIV.forEach((item) => {
     const answer = item.answer?.trim();
