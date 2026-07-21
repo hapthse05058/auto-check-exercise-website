@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 import {
   deleteTeacherPoint,
   fetchBilling,
@@ -257,7 +258,7 @@ export default function AdminTeacherPointsPage() {
                 <i
                   className={showTotal ? "ti ti-eye-off" : "ti ti-eye"}
                   aria-hidden="true"
-                ></i>
+                />
               </button>
             </span>
           </div>
@@ -282,12 +283,12 @@ export default function AdminTeacherPointsPage() {
 
         {loading ? (
           <div className="cache-loading">
-            <span className="spinner" aria-hidden="true"></span>
+            <span className="spinner" aria-hidden="true" />
             <span>{t("points.loading")}</span>
           </div>
         ) : filtered.length === 0 ? (
           <div className="empty-state">
-            <i className="ti ti-coins" aria-hidden="true"></i>
+            <i className="ti ti-coins" aria-hidden="true" />
             <p>{t("points.empty")}</p>
           </div>
         ) : (
@@ -299,7 +300,7 @@ export default function AdminTeacherPointsPage() {
                   <th>{t("points.colPoint")}</th>
                   <th>{t("points.colTopUpCount")}</th>
                   <th>{t("points.colLastTopUp")}</th>
-                  <th></th>
+                  <th />
                 </tr>
               </thead>
               <tbody>
@@ -319,7 +320,7 @@ export default function AdminTeacherPointsPage() {
                         aria-label={t("points.topUp")}
                         onClick={() => openTopUp(r)}
                       >
-                        <i className="ti ti-coin" aria-hidden="true"></i>
+                        <i className="ti ti-coin" aria-hidden="true" />
                       </button>
                       <button
                         className="btn-icon"
@@ -327,7 +328,7 @@ export default function AdminTeacherPointsPage() {
                         aria-label={t("points.editPoint")}
                         onClick={() => openEdit(r)}
                       >
-                        <i className="ti ti-edit" aria-hidden="true"></i>
+                        <i className="ti ti-edit" aria-hidden="true" />
                       </button>
                       <button
                         className="btn-icon"
@@ -335,7 +336,7 @@ export default function AdminTeacherPointsPage() {
                         aria-label={t("points.history")}
                         onClick={() => openHistory(r)}
                       >
-                        <i className="ti ti-history" aria-hidden="true"></i>
+                        <i className="ti ti-history" aria-hidden="true" />
                       </button>
                       <button
                         className="btn-icon danger"
@@ -343,7 +344,7 @@ export default function AdminTeacherPointsPage() {
                         aria-label={t("common.delete")}
                         onClick={() => handleDelete(r)}
                       >
-                        <i className="ti ti-trash" aria-hidden="true"></i>
+                        <i className="ti ti-trash" aria-hidden="true" />
                       </button>
                     </td>
                   </tr>

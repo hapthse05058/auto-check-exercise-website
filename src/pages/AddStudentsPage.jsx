@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import * as XLSX from "xlsx";
+
 import { fetchAllClasses, fetchClasses, saveStudents } from "../api/backend.js";
-import SearchableSelect from "../components/SearchableSelect.jsx";
 import { useAuth } from "../auth/AuthContext.jsx";
+import SearchableSelect from "../components/SearchableSelect.jsx";
 import { isAdminEmail } from "../config.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
 import {
@@ -323,11 +324,11 @@ export default function AddStudentsPage() {
               className="btn-import"
               onClick={() => fileInputRef.current?.click()}
             >
-              <i className="ti ti-file-import" aria-hidden="true"></i>{" "}
+              <i className="ti ti-file-import" aria-hidden="true" />{" "}
               {t("addStudents.importBtn")}
             </button>
             <button className="btn-add" onClick={() => openModal()}>
-              <i className="ti ti-plus" aria-hidden="true"></i>{" "}
+              <i className="ti ti-plus" aria-hidden="true" />{" "}
               {t("addStudents.add")}
             </button>
           </div>
@@ -356,7 +357,7 @@ export default function AddStudentsPage() {
         <div id="listArea">
           {students.length === 0 ? (
             <div className="empty-state">
-              <i className="ti ti-users" aria-hidden="true"></i>
+              <i className="ti ti-users" aria-hidden="true" />
               <p>
                 {t("addStudents.emptyStart")}{" "}
                 <strong>{t("addStudents.emptyStartStrong")}</strong>{" "}
@@ -374,12 +375,12 @@ export default function AddStudentsPage() {
                     <div className="student-meta">
                       {s.gmail && (
                         <div className="meta-item">
-                          <i className="ti ti-mail" aria-hidden="true"></i>
+                          <i className="ti ti-mail" aria-hidden="true" />
                           <span>{s.gmail}</span>
                         </div>
                       )}
                       <div className="meta-item">
-                        <i className="ti ti-file-text" aria-hidden="true"></i>
+                        <i className="ti ti-file-text" aria-hidden="true" />
                         <a href={s.doc} target="_blank" rel="noreferrer">
                           {shortUrl(s.doc)}
                         </a>
@@ -392,14 +393,14 @@ export default function AddStudentsPage() {
                       aria-label="Edit student"
                       onClick={() => openModal(i)}
                     >
-                      <i className="ti ti-edit" aria-hidden="true"></i>
+                      <i className="ti ti-edit" aria-hidden="true" />
                     </button>
                     <button
                       className="btn-icon danger"
                       aria-label="Remove student"
                       onClick={() => removeStudent(i)}
                     >
-                      <i className="ti ti-trash" aria-hidden="true"></i>
+                      <i className="ti ti-trash" aria-hidden="true" />
                     </button>
                   </div>
                 </div>
@@ -460,7 +461,7 @@ export default function AddStudentsPage() {
                         aria-label={t("addStudents.removeRow")}
                         onClick={() => removeRow(i)}
                       >
-                        <i className="ti ti-trash" aria-hidden="true"></i>
+                        <i className="ti ti-trash" aria-hidden="true" />
                       </button>
                     )}
                   </div>
@@ -474,7 +475,7 @@ export default function AddStudentsPage() {
                         onClick={addRow}
                         aria-label={t("addStudents.addRowTooltip")}
                       >
-                        <i className="ti ti-plus" aria-hidden="true"></i>
+                        <i className="ti ti-plus" aria-hidden="true" />
                       </button>
                       <span className="tooltip-text">
                         {t("addStudents.addRowTooltip")}

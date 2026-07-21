@@ -2,12 +2,12 @@
  * Builds Google Docs batchUpdate requests that write AI feedback into the
  * "Chữa bài" column. Direct port of the extension logic (extension/popup.js).
  */
-import { batchUpdateDoc } from "../api/googleDocs.js";
 import {
   IS_CORRECT_ANSWER,
   containsCorrectMark,
   getTablesWhichContainStudentExercise,
 } from "./docParser.js";
+import { batchUpdateDoc } from "../api/googleDocs.js";
 
 /** Parses the AI's markdown table response into {questionIndex, aiFeedback}. */
 export function parseAiResponse(agentResponse) {

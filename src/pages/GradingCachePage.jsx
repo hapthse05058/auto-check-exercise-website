@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 import {
   bulkDeleteGradingCache,
   createGradingCache,
@@ -252,7 +253,7 @@ export default function GradingCachePage() {
             <p>{t("cache.subtitle")}</p>
           </div>
           <button className="btn-add" onClick={openAdd}>
-            <i className="ti ti-plus" aria-hidden="true"></i>{" "}
+            <i className="ti ti-plus" aria-hidden="true" />{" "}
             {t("cache.addRecord")}
           </button>
         </div>
@@ -292,7 +293,7 @@ export default function GradingCachePage() {
               disabled={selected.size === 0 || bulkDeleting}
               onClick={() => handleBulkDelete([...selected])}
             >
-              <i className="ti ti-trash" aria-hidden="true"></i>{" "}
+              <i className="ti ti-trash" aria-hidden="true" />{" "}
               {t("cache.deleteSelected")}
             </button>
           </div>
@@ -300,12 +301,12 @@ export default function GradingCachePage() {
 
         {loading ? (
           <div className="cache-loading">
-            <span className="spinner" aria-hidden="true"></span>
+            <span className="spinner" aria-hidden="true" />
             <span>{t("cache.searching")}</span>
           </div>
         ) : rows.length === 0 ? (
           <div className="empty-state">
-            <i className="ti ti-database" aria-hidden="true"></i>
+            <i className="ti ti-database" aria-hidden="true" />
             <p>{t("cache.empty")}</p>
           </div>
         ) : (
@@ -328,7 +329,7 @@ export default function GradingCachePage() {
                   <th>{t("cache.colPv")}</th>
                   <th>{t("cache.colHits")}</th>
                   <th>{t("cache.colCreated")}</th>
-                  <th></th>
+                  <th />
                 </tr>
               </thead>
               <tbody>
@@ -366,14 +367,14 @@ export default function GradingCachePage() {
                         aria-label="Edit record"
                         onClick={() => openEdit(row)}
                       >
-                        <i className="ti ti-edit" aria-hidden="true"></i>
+                        <i className="ti ti-edit" aria-hidden="true" />
                       </button>
                       <button
                         className="btn-icon danger"
                         aria-label="Delete record"
                         onClick={() => handleDelete(row)}
                       >
-                        <i className="ti ti-trash" aria-hidden="true"></i>
+                        <i className="ti ti-trash" aria-hidden="true" />
                       </button>
                     </td>
                   </tr>
@@ -390,7 +391,7 @@ export default function GradingCachePage() {
               disabled={page <= 1 || loading}
               onClick={() => goToPage(page - 1)}
             >
-              <i className="ti ti-chevron-left" aria-hidden="true"></i>{" "}
+              <i className="ti ti-chevron-left" aria-hidden="true" />{" "}
               {t("cache.prev")}
             </button>
             <span className="cache-pager-info">
@@ -402,7 +403,7 @@ export default function GradingCachePage() {
               onClick={() => goToPage(page + 1)}
             >
               {t("cache.next")}{" "}
-              <i className="ti ti-chevron-right" aria-hidden="true"></i>
+              <i className="ti ti-chevron-right" aria-hidden="true" />
             </button>
           </div>
         )}

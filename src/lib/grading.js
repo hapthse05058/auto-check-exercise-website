@@ -5,14 +5,6 @@
  * extension/popup.js.
  */
 import {
-  consumePoints,
-  fetchMyPoint,
-  fetchStudentDocRefs,
-  gradeAnswers,
-} from "../api/backend.js";
-import { getTabContent } from "../api/googleDocs.js";
-import { ensureValidGoogleToken } from "../auth/tokens.js";
-import {
   extractQuestionIndex,
   getQesAndAnsFromPartIVOfTheTargetTab,
   makeAnswerKey,
@@ -21,6 +13,14 @@ import {
 } from "./docParser.js";
 import { getTableIndexOfExercise } from "./docTables.js";
 import { writeGradingResultsToDoc } from "./docWriter.js";
+import {
+  consumePoints,
+  fetchMyPoint,
+  fetchStudentDocRefs,
+  gradeAnswers,
+} from "../api/backend.js";
+import { getTabContent } from "../api/googleDocs.js";
+import { ensureValidGoogleToken } from "../auth/tokens.js";
 
 const chunkArray = (array, size) => {
   const result = [];
@@ -207,7 +207,7 @@ async function autoCheckExercises(
   // 4. Map feedback back by the SAME (question, answer) key.
   const feedbackByKey = new Map();
   for (const g of graded) {
-    if (g && g.feedback != null) {
+    if (g && g.feedback !== null && g.feedback !== undefined) {
       feedbackByKey.set(makeAnswerKey(g.question, g.answer), g.feedback);
     }
   }
@@ -230,7 +230,12 @@ async function autoCheckExercises(
               makeAnswerKey(qa.question, qa.answer),
             );
             const questionIndex = extractQuestionIndex(qa.question);
-            if (feedback != null && questionIndex != null) {
+            if (
+              feedback !== null &&
+              feedback !== undefined &&
+              questionIndex !== null &&
+              questionIndex !== undefined
+            ) {
               gradingResults.push({ questionIndex, aiFeedback: feedback });
             }
           }

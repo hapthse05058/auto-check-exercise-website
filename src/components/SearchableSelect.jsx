@@ -113,7 +113,7 @@ export default function SearchableSelect({
         <span className={selectedOption ? "" : "searchable-select-placeholder"}>
           {selectedOption ? selectedOption.name : placeholder}
         </span>
-        <i className="ti ti-chevron-down" aria-hidden="true"></i>
+        <i className="ti ti-chevron-down" aria-hidden="true" />
       </button>
 
       {isOpen && !disabled && (

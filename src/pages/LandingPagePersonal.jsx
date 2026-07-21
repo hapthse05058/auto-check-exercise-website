@@ -320,7 +320,8 @@ export default function LandingPagePersonal() {
               <div className="pm-feature-desc">
                 Hệ thống lưu trữ và tổng hợp <strong>dữ liệu trực quan</strong>{" "}
                 về lịch sử làm bài, giúp bạn luôn chủ động nắm bắt được sự tiến
-                bộ của bản thân mỗi ngày.<br></br>
+                bộ của bản thân mỗi ngày.
+                <br />
                 Giáo viên gặp gỡ định kỳ để theo dõi tiến độ và đưa ra những lời
                 khuyên hữu ích giúp bạn cải thiện band điểm nhanh chóng.
               </div>

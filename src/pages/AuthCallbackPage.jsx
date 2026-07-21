@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
+
 import { loginWithGoogleCode } from "../api/backend.js";
 import { useAuth } from "../auth/AuthContext.jsx";
 import { getGoogleRedirectUri } from "../auth/googleOAuth.js";

@@ -1,15 +1,17 @@
 import { Navigate, Route, Routes } from "react-router-dom";
+
 import Layout from "./components/Layout.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import AddStudentsPage from "./pages/AddStudentsPage.jsx";
 import AdminTeacherPointsPage from "./pages/AdminTeacherPointsPage.jsx";
 import AdminTeachersPage from "./pages/AdminTeachersPage.jsx";
+import AuthCallbackPage from "./pages/AuthCallbackPage.jsx";
 import ClassManagePage from "./pages/ClassManagePage.jsx";
 import ClassStudentsPage from "./pages/ClassStudentsPage.jsx";
-import AuthCallbackPage from "./pages/AuthCallbackPage.jsx";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage.jsx";
 import GradePage from "./pages/GradePage.jsx";
 import GradingCachePage from "./pages/GradingCachePage.jsx";
+import LandingPagePersonal from "./pages/LandingPagePersonal.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import MissingTeacherPage from "./pages/MissingTeacherPage.jsx";
 import NewClassPage from "./pages/NewClassPage.jsx";
@@ -17,7 +19,6 @@ import PosterMarketingPage from "./pages/PosterMarketingPage.jsx";
 import ResetPasswordPage from "./pages/ResetPasswordPage.jsx";
 import SignupPage from "./pages/SignupPage.jsx";
 import SpeakingPage from "./pages/SpeakingPage.jsx";
-import LandingPagePersonal from "./pages/LandingPagePersonal.jsx";
 
 export default function App() {
   return (

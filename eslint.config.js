@@ -3,6 +3,7 @@ import globals from "globals";
 import react from "eslint-plugin-react";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
+import importPlugin from "eslint-plugin-import";
 import prettier from "eslint-config-prettier";
 
 // Resolve the react preset rules defensively — the plugin changed its
@@ -42,6 +43,7 @@ export default [
       react,
       "react-hooks": reactHooks,
       "react-refresh": reactRefresh,
+      import: importPlugin,
     },
     settings: { react: { version: "detect" } },
     rules: {
@@ -57,11 +59,31 @@ export default [
       "react-refresh/only-export-components": [
         "warn",
         { allowConstantExport: true },
-      ],
-      "no-unused-vars": [
+      ], // React & Hooks
+      "react/self-closing-comp": ["error", { component: true, html: true }],
+      "react/no-array-index-key": "warn",
+      // Import formatting
+      "import/order": [
         "warn",
-        { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
+        {
+          groups: [
+            "builtin",
+            "external",
+            "internal",
+            ["parent", "sibling"],
+            "index",
+          ],
+          "newlines-between": "always",
+          alphabetize: { order: "asc", caseInsensitive: true },
+        },
       ],
+      "import/no-duplicates": "error",
+
+      // JS General
+      "no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
+      eqeqeq: ["error", "always"],
+      "no-console": ["warn", { allow: ["warn", "error"] }],
+      "prefer-const": "error",
     },
   },
 

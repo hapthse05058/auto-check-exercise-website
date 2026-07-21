@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 import {
   createTeacher,
   deleteTeacher,
@@ -7,9 +8,9 @@ import {
   fetchTeachersManage,
   updateTeacher,
 } from "../api/backend.js";
-import SearchableSelect from "../components/SearchableSelect.jsx";
 import { useAuth } from "../auth/AuthContext.jsx";
 import { storageGet, storageSet } from "../auth/storage.js";
+import SearchableSelect from "../components/SearchableSelect.jsx";
 import { isAdminEmail } from "../config.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
 import { validateTeacherForm } from "../lib/teacherForm.js";
@@ -334,8 +335,7 @@ export default function AdminTeachersPage() {
             <p>{t("teachers.subtitle")}</p>
           </div>
           <button className="btn-add" onClick={openCreate}>
-            <i className="ti ti-plus" aria-hidden="true"></i>{" "}
-            {t("teachers.add")}
+            <i className="ti ti-plus" aria-hidden="true" /> {t("teachers.add")}
           </button>
         </div>
 
@@ -366,12 +366,12 @@ export default function AdminTeachersPage() {
 
         {loading ? (
           <div className="cache-loading">
-            <span className="spinner" aria-hidden="true"></span>
+            <span className="spinner" aria-hidden="true" />
             <span>{t("teachers.loading")}</span>
           </div>
         ) : teachers.length === 0 ? (
           <div className="empty-state">
-            <i className="ti ti-user-off" aria-hidden="true"></i>
+            <i className="ti ti-user-off" aria-hidden="true" />
             <p>{t("teachers.empty")}</p>
           </div>
         ) : (
@@ -385,7 +385,7 @@ export default function AdminTeachersPage() {
                 className="menu-btn"
                 onClick={() => setColMenuOpen((o) => !o)}
               >
-                <i className="ti ti-columns" aria-hidden="true"></i>{" "}
+                <i className="ti ti-columns" aria-hidden="true" />{" "}
                 {t("teachers.columns")}
               </button>
               {colMenuOpen && (
@@ -454,7 +454,7 @@ export default function AdminTeachersPage() {
                           aria-label={t("teachers.edit")}
                           onClick={() => openEdit(tch)}
                         >
-                          <i className="ti ti-edit" aria-hidden="true"></i>
+                          <i className="ti ti-edit" aria-hidden="true" />
                         </button>
                         <button
                           className="btn-cancel"

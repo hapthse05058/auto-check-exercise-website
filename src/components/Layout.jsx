@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, Outlet, useNavigate } from "react-router-dom";
+
 import { useAuth } from "../auth/AuthContext.jsx";
 import { SUPPORT_EMAIL, isAdminEmail } from "../config.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
@@ -159,13 +160,13 @@ function ProfileMenu({ teacherInfo }) {
           </p>
           {teacherInfo.username && (
             <p className="profile-detail">
-              <i className="ti ti-user" aria-hidden="true"></i>
+              <i className="ti ti-user" aria-hidden="true" />
               {teacherInfo.username}
             </p>
           )}
           {teacherInfo.gmail && (
             <p className="profile-detail">
-              <i className="ti ti-mail" aria-hidden="true"></i>
+              <i className="ti ti-mail" aria-hidden="true" />
               {teacherInfo.gmail}
             </p>
           )}

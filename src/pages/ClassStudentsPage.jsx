@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 import {
   fetchAllClasses,
   fetchClasses,
@@ -8,13 +9,13 @@ import {
   fetchStudents,
 } from "../api/backend.js";
 import { getTabContent } from "../api/googleDocs.js";
-import SearchableSelect from "../components/SearchableSelect.jsx";
 import { useAuth } from "../auth/AuthContext.jsx";
+import { ensureValidGoogleToken } from "../auth/tokens.js";
+import SearchableSelect from "../components/SearchableSelect.jsx";
 import { isAdminEmail } from "../config.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
-import { ensureValidGoogleToken } from "../auth/tokens.js";
-import { LESSON_OPTIONS } from "../shared/constant.js";
 import { extractDocId } from "../lib/googleDoc.js";
+import { LESSON_OPTIONS } from "../shared/constant.js";
 
 /** "lesson05" -> "BUỔI 05" (falls back to the raw value / a dash). */
 function gradedLabel(currentLesson) {
@@ -209,17 +210,17 @@ export default function ClassStudentsPage() {
 
         {loading ? (
           <div className="cache-loading">
-            <span className="spinner" aria-hidden="true"></span>
+            <span className="spinner" aria-hidden="true" />
             <span>{t("classStudents.searching")}</span>
           </div>
         ) : !searched ? (
           <div className="empty-state">
-            <i className="ti ti-users" aria-hidden="true"></i>
+            <i className="ti ti-users" aria-hidden="true" />
             <p>{t("classStudents.selectAndSearch")}</p>
           </div>
         ) : students.length === 0 ? (
           <div className="empty-state">
-            <i className="ti ti-users" aria-hidden="true"></i>
+            <i className="ti ti-users" aria-hidden="true" />
             <p>{t("classStudents.noStudents")}</p>
           </div>
         ) : (

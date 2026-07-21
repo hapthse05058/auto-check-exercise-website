@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+
 import { loginWithUsernamePassword } from "../api/backend.js";
 import { useAuth } from "../auth/AuthContext.jsx";
 import { startGoogleLogin } from "../auth/googleOAuth.js";

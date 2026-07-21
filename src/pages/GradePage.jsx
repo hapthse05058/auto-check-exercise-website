@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 import {
   fetchAllClasses,
   fetchClasses,
@@ -8,8 +9,8 @@ import {
   fetchMyPoint,
   updateCurrentLessonForClass,
 } from "../api/backend.js";
-import SearchableSelect from "../components/SearchableSelect.jsx";
 import { useAuth } from "../auth/AuthContext.jsx";
+import SearchableSelect from "../components/SearchableSelect.jsx";
 import { isAdminEmail } from "../config.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
 import { processDocs } from "../lib/grading.js";

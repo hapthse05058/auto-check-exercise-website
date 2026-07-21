@@ -5,6 +5,7 @@ import {
   useMemo,
   useState,
 } from "react";
+
 import { translations } from "./translations.js";
 
 const LanguageContext = createContext(null);
@@ -23,7 +24,9 @@ function readStored() {
 
 /** Resolves a dotted key path against a nested object. */
 function resolve(obj, key) {
-  return key.split(".").reduce((o, k) => (o == null ? undefined : o[k]), obj);
+  return key
+    .split(".")
+    .reduce((o, k) => (o === null || o === undefined ? undefined : o[k]), obj);
 }
 
 export function LanguageProvider({ children }) {
@@ -42,8 +45,9 @@ export function LanguageProvider({ children }) {
   const t = useCallback(
     (key, vars) => {
       let str = resolve(translations[lang], key);
-      if (str == null) str = resolve(translations.en, key); // fallback to English
-      if (str == null) return key; // last resort: show the key
+      if (str === null || str === undefined)
+        str = resolve(translations.en, key); // fallback to English
+      if (str === null || str === undefined) return key; // last resort: show the key
       if (vars) {
         for (const [k, v] of Object.entries(vars)) {
           str = str.split(`{${k}}`).join(String(v));

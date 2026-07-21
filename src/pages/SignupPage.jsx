@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 import { signupTeacher } from "../api/backend.js";
 import { useAuth } from "../auth/AuthContext.jsx";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
@@ -25,7 +26,7 @@ function readLoginProfile() {
   }
 }
 
-export default function SignupPage() { 
+export default function SignupPage() {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const { refreshTeacherInfo } = useAuth();

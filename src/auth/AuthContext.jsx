@@ -6,13 +6,14 @@ import {
   useMemo,
   useState,
 } from "react";
-import { fetchTeacherInfo } from "../api/backend.js";
+
 import { clearAuthStorage } from "./storage.js";
 import {
   AUTH_EXPIRED_EVENT,
   hasStoredSession,
   proactiveTokenRefresh,
 } from "./tokens.js";
+import { fetchTeacherInfo } from "../api/backend.js";
 
 const AuthContext = createContext(null);
 

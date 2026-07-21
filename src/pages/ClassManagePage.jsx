@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 import {
   fetchAllClasses,
   fetchClasses,
@@ -225,12 +226,12 @@ export default function ClassManagePage() {
 
         {loading ? (
           <div className="cache-loading">
-            <span className="spinner" aria-hidden="true"></span>
+            <span className="spinner" aria-hidden="true" />
             <span>{t("classManage.loading")}</span>
           </div>
         ) : filtered.length === 0 ? (
           <div className="empty-state">
-            <i className="ti ti-school" aria-hidden="true"></i>
+            <i className="ti ti-school" aria-hidden="true" />
             <p>{t("classManage.empty")}</p>
           </div>
         ) : (
@@ -273,7 +274,7 @@ export default function ClassManagePage() {
                             aria-label={t("classManage.edit")}
                             onClick={() => openEdit(c)}
                           >
-                            <i className="ti ti-edit" aria-hidden="true"></i>
+                            <i className="ti ti-edit" aria-hidden="true" />
                           </button>
                           <button
                             className="btn-cancel"

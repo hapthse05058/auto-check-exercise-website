@@ -1,5 +1,5 @@
-import { PROJECT_NUMBER } from "../config.js";
 import { isServiceAccountGoogleToken } from "../auth/tokens.js";
+import { PROJECT_NUMBER } from "../config.js";
 import { findTabByTitle } from "../lib/docParser.js";
 
 /**

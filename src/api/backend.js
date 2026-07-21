@@ -1,6 +1,6 @@
-import { DOMAIN_BE, EXTENSION_SECRET_KEY } from "../config.js";
-import { ensureValidToken } from "../auth/tokens.js";
 import { storageSet } from "../auth/storage.js";
+import { ensureValidToken } from "../auth/tokens.js";
+import { DOMAIN_BE, EXTENSION_SECRET_KEY } from "../config.js";
 
 /** Authenticated fetch against the backend (Bearer JWT + API key). */
 async function authFetch(path, { method = "GET", body } = {}) {

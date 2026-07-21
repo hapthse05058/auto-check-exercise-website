@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 import { useAuth } from "../auth/AuthContext.jsx";
 import { isAdminEmail } from "../config.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
@@ -51,14 +52,14 @@ export default function SpeakingPage() {
           rel="noreferrer"
           className="btn-import"
         >
-          <i className="ti ti-external-link" aria-hidden="true"></i>{" "}
+          <i className="ti ti-external-link" aria-hidden="true" />{" "}
           {t("speaking.openNewTab")}
         </a>
       </div>
       <div className="speaking-frame-wrap">
         {iframeLoading && (
           <div className="iframe-spinner">
-            <span className="spinner" aria-hidden="true"></span>
+            <span className="spinner" aria-hidden="true" />
             <span>{t("speaking.loading")}</span>
           </div>
         )}
