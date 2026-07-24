@@ -3,6 +3,7 @@ import { IS_CORRECT_ANSWER } from "../src/lib/docParser.js";
 import {
   buildFeedbackRequests,
   createStyledTextRequests,
+  formatFeedbackForDoc,
   generateOverallFeedback,
   parseAiResponse,
 } from "../src/lib/docWriter.js";
@@ -58,6 +59,125 @@ describe("generateOverallFeedback", () => {
 
   it("returns empty for empty input", () => {
     expect(generateOverallFeedback([])).toBe("");
+  });
+});
+
+describe("formatFeedbackForDoc", () => {
+  it("puts the reason on its own line", () => {
+    expect(
+      formatFeedbackForDoc("She **has lost** the phone (giải thích)"),
+    ).toBe("She **has lost** the phone\n(giải thích)");
+  });
+
+  it("leaves a correct answer untouched", () => {
+    expect(formatFeedbackForDoc(IS_CORRECT_ANSWER)).toBe(IS_CORRECT_ANSWER);
+  });
+
+  it("leaves feedback without a reason untouched", () => {
+    expect(formatFeedbackForDoc("The sun rises")).toBe("The sun rises");
+  });
+
+  it("breaks before both reasons of a câu đơn + câu phức cell", () => {
+    expect(
+      formatFeedbackForDoc(
+        "Câu đơn đúng là: The man **lost** the key. (Vbqt: lose - lost.) " +
+          "Câu phức đúng là: The man who **lost** the key is new. (Vbqt: lose - lost.)",
+      ),
+    ).toBe(
+      "Câu đơn đúng là: The man **lost** the key.\n" +
+        "(Vbqt: lose - lost.)\n" +
+        "Câu phức đúng là: The man who **lost** the key is new.\n" +
+        "(Vbqt: lose - lost.)",
+    );
+  });
+
+  it("emits the breaks in ascending order: sentence, reason, câu phức, reason", () => {
+    expect(
+      formatFeedbackForDoc(
+        "Câu đơn đúng là: A. (lý do 1) Câu phức đúng là: B. (lý do 2)",
+      ),
+    ).toBe("Câu đơn đúng là: A.\n(lý do 1)\nCâu phức đúng là: B.\n(lý do 2)");
+  });
+
+  it("treats a full stop outside the parentheses the same way", () => {
+    expect(
+      formatFeedbackForDoc(
+        "Câu đơn đúng là: X. (lý do 1). Câu phức đúng là: Y. (lý do 2).",
+      ),
+    ).toBe("Câu đơn đúng là: X.\n(lý do 1).\nCâu phức đúng là: Y.\n(lý do 2).");
+  });
+
+  it("does not open the cell with a blank line when câu phức comes first", () => {
+    expect(formatFeedbackForDoc("Câu phức đúng là: Y. (lý do.)")).toBe(
+      "Câu phức đúng là: Y.\n(lý do.)",
+    );
+  });
+
+  it("breaks before câu phức even without any reason", () => {
+    expect(formatFeedbackForDoc("Câu đơn: ✅ Đúng Câu phức: ✅ Đúng")).toBe(
+      "Câu đơn: ✅ Đúng\nCâu phức: ✅ Đúng",
+    );
+  });
+
+  it("accepts the loose prefix variants the AI may produce", () => {
+    expect(
+      formatFeedbackForDoc("Câu đơn: ✅ Đúng Câu phức  đúng  là : Y."),
+    ).toBe("Câu đơn: ✅ Đúng\nCâu phức  đúng  là : Y.");
+    expect(formatFeedbackForDoc("Câu đơn: ✅ Đúng Câu phức đúng là Y.")).toBe(
+      "Câu đơn: ✅ Đúng\nCâu phức đúng là Y.",
+    );
+    expect(formatFeedbackForDoc("Câu đơn: ✅ Đúng Câu phức - Y.")).toBe(
+      "Câu đơn: ✅ Đúng\nCâu phức - Y.",
+    );
+  });
+
+  it("never splits a reason that merely mentions câu phức", () => {
+    // Inside parentheses...
+    expect(
+      formatFeedbackForDoc(
+        "The woman whom I love is my mother. (Câu phức là IC + DC, thiếu sub làm O nhé)",
+      ),
+    ).toBe(
+      "The woman whom I love is my mother.\n(Câu phức là IC + DC, thiếu sub làm O nhé)",
+    );
+    // ...and bare, with no delimiter after "Câu phức".
+    expect(
+      formatFeedbackForDoc(
+        "The woman whom I love is my mother. Câu phức là IC + DC, thiếu sub làm O nhé",
+      ),
+    ).toBe(
+      "The woman whom I love is my mother. Câu phức là IC + DC, thiếu sub làm O nhé",
+    );
+  });
+
+  it("ignores parentheses that belong to the sentence, nested ones included", () => {
+    expect(
+      formatFeedbackForDoc("She (who lives in (Hanoi)) left. (giải thích)"),
+    ).toBe("She (who lives in (Hanoi)) left.\n(giải thích)");
+  });
+
+  it("keeps a ✅ on one form and breaks before câu phức and the reason", () => {
+    expect(
+      formatFeedbackForDoc(
+        "Câu đơn: ✅ Đúng Câu phức đúng là: The man **who** is wearing a black hat is my teacher. (DCadj đứng sau N nó bổ nghĩa.)",
+      ),
+    ).toBe(
+      "Câu đơn: ✅ Đúng\nCâu phức đúng là: The man **who** is wearing a black hat is my teacher.\n(DCadj đứng sau N nó bổ nghĩa.)",
+    );
+  });
+
+  it("collapses stray newlines and handles empty input", () => {
+    expect(formatFeedbackForDoc("The sun rises\n(S số ít -> V số ít)")).toBe(
+      "The sun rises\n(S số ít -> V số ít)",
+    );
+    expect(formatFeedbackForDoc(null)).toBe("");
+    expect(formatFeedbackForDoc("")).toBe("");
+  });
+
+  it("never starts the feedback with a line break", () => {
+    expect(formatFeedbackForDoc("(chỉ có giải thích)")).toBe(
+      "(chỉ có giải thích)",
+    );
   });
 });
 
@@ -123,6 +243,34 @@ describe("buildFeedbackRequests", () => {
       (r) => r.insertText.text === IS_CORRECT_ANSWER,
     );
     expect(correctInsert.insertText.location.index).toBe(80);
+  });
+
+  it("keeps a câu đơn + câu phức cell intact, line break included", () => {
+    const exercise = makeNormalLessonTab({ answered: true });
+    const aiFeedback = formatFeedbackForDoc(
+      "Câu đơn: ✅ Đúng Câu phức đúng là: The man **who** is wearing a black hat is my teacher. (DCadj đứng sau N nó bổ nghĩa.)",
+    );
+
+    const requests = buildFeedbackRequests(
+      [{ questionIndex: "1", aiFeedback }],
+      exercise,
+      "t.x",
+      [0],
+    );
+
+    const written = requests
+      .filter((r) => r.insertText)
+      .map((r) => r.insertText.text)
+      .join("");
+
+    // The ✅ on the câu đơn must NOT swallow the câu phức correction.
+    expect(written).toContain("Câu phức đúng là:");
+    expect(written).toContain("who");
+    // Câu phức and the reason each sit on their own line.
+    expect(written).toContain("Câu đơn: ✅ Đúng\nCâu phức đúng là:");
+    expect(written).toContain(
+      "is my teacher.\n(DCadj đứng sau N nó bổ nghĩa.)",
+    );
   });
 
   it("returns no requests when the AI response has no table", () => {

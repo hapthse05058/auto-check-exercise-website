@@ -58,6 +58,84 @@ export function generateOverallFeedback(gradingResults) {
   return "";
 }
 
+// What may follow a reason: nothing (bar punctuation), or the next graded form.
+const REASON_ENDS_TEXT = /^[.,;:!?\s]*$/;
+const REASON_BEFORE_NEXT_FORM = /^[.,;:!?\s]*Câu (đơn|phức)\b/i;
+// The "câu phức" half of a buổi 15/16/17 cell. The delimiter is only optional
+// after "đúng là", which is unambiguous on its own — otherwise a bare
+// explanation like "Câu phức là IC + DC, thiếu sub" would be split mid-sentence.
+const COMPLEX_FORM_PREFIX =
+  /^Câu[ \t]+phức(?:[ \t]+đúng[ \t]+là[ \t]*[:.\-–—]?|[ \t]*[:.\-–—])/i;
+
+/** Index of the ")" closing the group opened at `start`, or -1 when unbalanced. */
+function findGroupEnd(text, start) {
+  let depth = 0;
+  for (let i = start; i < text.length; i++) {
+    if (text[i] === "(") depth += 1;
+    else if (text[i] === ")") {
+      depth -= 1;
+      if (depth === 0) return i;
+    }
+  }
+  return -1;
+}
+
+/**
+ * Breaks the AI's one-line feedback into the lines the doc should show.
+ *
+ * Feedback always arrives on ONE line (it is a single Markdown table cell):
+ * "<câu tiếng Anh đúng>. (giải thích lý do.)". A line break goes before:
+ *   1. every top-level parenthetical acting as the reason — one that ends the
+ *      text, or is followed by the next graded form. Trailing punctuation may
+ *      sit inside OR outside the parentheses;
+ *   2. the "Câu phức..." half of a buổi 15/16/17 cell.
+ *
+ * Both are only detected OUTSIDE parentheses, so a reason that happens to
+ * mention "Câu phức" is never split. A break is skipped when nothing but
+ * whitespace precedes it, so the cell never opens with a blank line.
+ *
+ * Left untouched: "✅ Đúng", feedback without a reason, and parentheses that
+ * belong to the sentence itself (they are followed by more sentence text).
+ */
+export function formatFeedbackForDoc(feedback) {
+  const text = String(feedback ?? "")
+    .replace(/\s*\n\s*/g, " ")
+    .trim();
+  if (!text) return text;
+
+  let result = "";
+  let cursor = 0;
+  // One left-to-right walk, so break positions come out in ascending order and
+  // a single cursor is enough to reassemble the text.
+  const breakHere = (i) => {
+    const before = text.slice(cursor, i);
+    if (!before.trim()) return; // nothing in front of it — no line to break
+    result += `${before.replace(/\s+$/, "")}\n`;
+    cursor = i;
+  };
+
+  for (let i = 0; i < text.length; i++) {
+    if (text[i] === "(") {
+      // Span the whole group so nested parentheses never shift the depth.
+      const end = findGroupEnd(text, i);
+      if (end === -1) break; // unbalanced: leave the remainder as-is
+      const rest = text.slice(end + 1);
+      if (REASON_ENDS_TEXT.test(rest) || REASON_BEFORE_NEXT_FORM.test(rest)) {
+        breakHere(i);
+      }
+      i = end; // continue after this group either way
+    } else if (
+      (text[i] === "C" || text[i] === "c") &&
+      COMPLEX_FORM_PREFIX.test(text.slice(i))
+    ) {
+      breakHere(i);
+    }
+  }
+
+  if (!result) return text;
+  return result + text.slice(cursor);
+}
+
 function setStyleForTeacherFeedBack(baseIndex, feedbackText, tabId) {
   return [
     {
@@ -219,9 +297,15 @@ export function buildFeedbackRequests(
           firstCellText === item.questionIndex ||
           firstCellText.startsWith(`${item.questionIndex}.`)
         ) {
-          feedbackText = containsCorrectMark(item.aiFeedback)
-            ? IS_CORRECT_ANSWER
-            : item.aiFeedback;
+          // Buổi 15/16/17 grade two forms in one cell, so a ✅ on one of them
+          // must NOT collapse the whole cell (that would drop the correction).
+          const isDualSentenceFeedback = /Câu (đơn|phức)/i.test(
+            item.aiFeedback,
+          );
+          feedbackText =
+            !isDualSentenceFeedback && containsCorrectMark(item.aiFeedback)
+              ? IS_CORRECT_ANSWER
+              : item.aiFeedback;
           const cellIndex = row.tableCells.length - 1;
           const targetCell = row.tableCells[cellIndex];
 
@@ -234,8 +318,10 @@ export function buildFeedbackRequests(
     }
 
     if (targetStartIndex !== -1 && feedbackText !== undefined) {
+      // Newlines are kept on purpose: formatFeedbackForDoc puts the reason on
+      // its own line, and the Docs API counts "\n" as a single index unit.
       const styledReqs = createStyledTextRequests(
-        feedbackText.replace(/\n/g, ""),
+        feedbackText,
         targetStartIndex,
         tabId,
       );

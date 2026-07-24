@@ -12,7 +12,7 @@ import {
   wasExerciseReviewedByAI,
 } from "./docParser.js";
 import { getTableIndexOfExercise } from "./docTables.js";
-import { writeGradingResultsToDoc } from "./docWriter.js";
+import { formatFeedbackForDoc, writeGradingResultsToDoc } from "./docWriter.js";
 import {
   consumePoints,
   fetchMyPoint,
@@ -204,11 +204,18 @@ async function autoCheckExercises(
     return;
   }
 
-  // 4. Map feedback back by the SAME (question, answer) key.
+  // 4. Map feedback back by the SAME (question, answer) key. The AI answers on
+  //    a single line (one Markdown table cell); formatFeedbackForDoc moves the
+  //    "(giải thích lý do.)" part onto its own line before it reaches the doc.
+  //    Cached feedback goes through this too, so old entries also get the
+  //    line break without being re-graded.
   const feedbackByKey = new Map();
   for (const g of graded) {
     if (g && g.feedback !== null && g.feedback !== undefined) {
-      feedbackByKey.set(makeAnswerKey(g.question, g.answer), g.feedback);
+      feedbackByKey.set(
+        makeAnswerKey(g.question, g.answer),
+        formatFeedbackForDoc(g.feedback),
+      );
     }
   }
 
