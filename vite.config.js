@@ -11,7 +11,7 @@ export default defineConfig({
       includeAssets: ["check-exercise.png"],
       // Uncomment to exercise the SW/install flow under `npm run dev`
       // (leave OFF normally — a dev SW can cache-interfere with live-reload):
-      // devOptions: { enabled: true },
+      devOptions: { enabled: true },
       manifest: {
         name: "AI Exercise Checker",
         short_name: "Checker",

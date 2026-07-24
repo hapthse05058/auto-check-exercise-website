@@ -181,6 +181,8 @@
   /* Wider than the old single-field modal so a 2-column row + delete button
      doesn't get cramped on small laptop screens. */
   max-width: 520px;
+  max-height: 80vh;
+  overflow-y: scroll;
 }
 .modal-header {
   display: flex;
