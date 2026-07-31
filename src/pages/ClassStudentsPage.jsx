@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import {
@@ -7,6 +7,7 @@ import {
   fetchCurrentLesson,
   fetchLessons,
   fetchStudents,
+  fetchTeachersManage,
 } from "../api/backend.js";
 import { getTabContent } from "../api/googleDocs.js";
 import { useAuth } from "../auth/AuthContext.jsx";
@@ -14,6 +15,7 @@ import { ensureValidGoogleToken } from "../auth/tokens.js";
 import SearchableSelect from "../components/SearchableSelect.jsx";
 import { isAdminEmail } from "../config.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
+import { filterClasses } from "../lib/classSearch.js";
 import { extractDocId } from "../lib/googleDoc.js";
 import { LESSON_OPTIONS } from "../shared/constant.js";
 
@@ -32,6 +34,10 @@ export default function ClassStudentsPage() {
   const navigate = useNavigate();
 
   const [classes, setClasses] = useState([]);
+  const [classQuery, setClassQuery] = useState("");
+  // classId (chuỗi) -> [{ name, gmail }]. Chỉ admin mới tải được danh sách GV,
+  // và chỉ set MỘT lần để tham chiếu ổn định cho useMemo bên dưới.
+  const [teachersByClassId, setTeachersByClassId] = useState(() => new Map());
   const [selectedClassId, setSelectedClassId] = useState("");
   const [lessons, setLessons] = useState([]);
   const [selectedLessonId, setSelectedLessonId] = useState("");
@@ -47,8 +53,43 @@ export default function ClassStudentsPage() {
     (l) => l.id === selectedLessonId,
   )?.name;
 
+  // Narrows the class picker by class name/code, current lesson, or teacher
+  // name/gmail. The selected class is always kept so the trigger stays labelled.
+  const filteredClasses = useMemo(
+    () =>
+      filterClasses(classes, classQuery, teachersByClassId, selectedClassId),
+    [classes, classQuery, teachersByClassId, selectedClassId],
+  );
+
   useEffect(() => {
     let cancelled = false;
+
+    // Builds classId -> teachers so the search box can match a teacher's name or
+    // gmail. Failing here must not block the class list, so it swallows errors.
+    const loadTeachers = async () => {
+      try {
+        const teachers = await fetchTeachersManage();
+        if (cancelled) return;
+        const map = new Map();
+        teachers.forEach((teacher) => {
+          (teacher.classIds || []).forEach((classId) => {
+            // Ids can be numbers here but strings on the class record.
+            const key = String(classId);
+            if (!map.has(key)) map.set(key, []);
+            // Append: a class may have co-teachers.
+            map.get(key).push({
+              name: teacher.name || "",
+              gmail: teacher.gmail || "",
+            });
+          });
+        });
+        setTeachersByClassId(map);
+      } catch (error) {
+        if (error.message === "RE-AUTH_NEEDED") return;
+        console.warn("Could not load teachers for search:", error);
+      }
+    };
+
     (async () => {
       try {
         const teacherInfo = await loadTeacherInfo();
@@ -58,11 +99,15 @@ export default function ClassStudentsPage() {
           return;
         }
         // Admin can view students of any class, so load every class.
-        const classList = isAdminEmail(teacherInfo.gmail)
+        const isAdmin = isAdminEmail(teacherInfo.gmail);
+        const classList = isAdmin
           ? await fetchAllClasses()
           : await fetchClasses(teacherInfo.id);
-        if (!cancelled)
-          setClasses(classList.filter((c) => c.isActive !== false));
+        if (cancelled) return;
+        setClasses(classList.filter((c) => c.isActive !== false));
+        // Teacher name/email search only matters for admins (a normal teacher
+        // sees their own classes only) and /teachers/manage is admin-only.
+        if (isAdmin) await loadTeachers();
       } catch (error) {
         if (cancelled || error.message === "RE-AUTH_NEEDED") return;
         console.error("Error loading classes:", error);
@@ -174,10 +219,21 @@ export default function ClassStudentsPage() {
         </div>
 
         <div className="cache-search">
+          <input
+            type="search"
+            value={classQuery}
+            onChange={(e) => setClassQuery(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") {
+                setClassQuery("");
+              }
+            }}
+            placeholder={t("classStudents.searchPlaceholder")}
+          />
           <SearchableSelect
             value={selectedClassId}
             onChange={handleClassChange}
-            options={classes}
+            options={filteredClasses}
             placeholder={t("classStudents.selectClass")}
             searchPlaceholder={t("common.searchClassPlaceholder")}
             noResultsText={t("common.noClassesFound")}
