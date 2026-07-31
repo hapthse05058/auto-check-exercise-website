@@ -1,14 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 
-// Bỏ dấu tiếng Việt để lọc không phân biệt dấu: gõ "lop 10" vẫn khớp "Lớp 10".
-const removeAccents = (str = "") =>
-  str
-    .normalize("NFD") // tách dấu thành ký tự tổ hợp
-    .replace(/[̀-ͯ]/g, "") // bỏ các dấu tổ hợp (dùng escape hex, không viết ký tự thô)
-    .replace(/đ/g, "d")
-    .replace(/Đ/g, "D") // NFD không tách được "đ" → xử lý riêng
-    .toLowerCase()
-    .trim();
+import { removeAccents } from "../lib/text.js";
 
 /**
  * Combobox chọn 1 mục có ô tìm kiếm để lọc.

@@ -7,6 +7,7 @@
 import {
   extractQuestionIndex,
   getQesAndAnsFromPartIVOfTheTargetTab,
+  getUnreadableQuestions,
   makeAnswerKey,
   parseDocLinks,
   wasExerciseReviewedByAI,
@@ -97,6 +98,17 @@ export async function processDocs({
           quesAndAnsArr: quesAndAnsArr,
           student: student,
         });
+      }
+      // Rows holding text we could not turn into an answer are skipped, not
+      // guessed at — tell the teacher so they can check those by hand.
+      const unreadable = getUnreadableQuestions(doc, tableIndex);
+      if (unreadable.length) {
+        onStatus.append(
+          t("grading.unreadableAnswers", {
+            docId: student.docId,
+            list: unreadable.join(", "),
+          }),
+        );
       }
     } catch (err) {
       console.error(err);

@@ -184,6 +184,7 @@ export const translations = {
       title: "Students",
       count: "{n}",
       subtitle: "Search students by class and open their exercise docs.",
+      searchPlaceholder: "Search by class, lesson, or teacher name/email…",
       selectClass: "Select class",
       selectLessonOptional: "Select lesson (optional)",
       loadingLessons: "Loading lessons…",
@@ -459,6 +460,8 @@ export const translations = {
       gradingAnswers: "Grading answers...",
       gradingFailed: "Grading failed: {msg}",
       noMatch: "\n No feedback matched for {docId}, skipping.",
+      unreadableAnswers:
+        "\n {docId}: could not read the answer for question {list}. Please check manually.",
       wrote: "\n Wrote feedback to {docId}.",
       failedWrite: "\n Failed writing to {docId}: {msg}",
       completeChunk: "\n Complete handling {n} doc, continue...",
@@ -650,6 +653,7 @@ export const translations = {
       title: "Học sinh",
       count: "{n}",
       subtitle: "Tìm học sinh theo lớp và mở tài liệu bài tập của họ.",
+      searchPlaceholder: "Tìm theo lớp, buổi học, hoặc tên/email giáo viên…",
       selectClass: "Chọn lớp",
       selectLessonOptional: "Chọn buổi học (không bắt buộc)",
       loadingLessons: "Đang tải buổi học…",
@@ -924,6 +928,8 @@ export const translations = {
       gradingAnswers: "Đang chấm bài...",
       gradingFailed: "Chấm bài thất bại: {msg}",
       noMatch: "\n Không khớp feedback cho {docId}, bỏ qua.",
+      unreadableAnswers:
+        "\n {docId}: không đọc được câu trả lời của câu {list}. Vui lòng kiểm tra tay.",
       wrote: "\n Đã ghi feedback vào {docId}.",
       failedWrite: "\n Ghi {docId} thất bại: {msg}",
       completeChunk: "\n Đã xử lý xong {n} tài liệu, tiếp tục...",

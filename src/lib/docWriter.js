@@ -5,6 +5,7 @@
 import {
   IS_CORRECT_ANSWER,
   containsCorrectMark,
+  extractQuestionIndex,
   getTablesWhichContainStudentExercise,
 } from "./docParser.js";
 import { batchUpdateDoc } from "../api/googleDocs.js";
@@ -293,9 +294,11 @@ export function buildFeedbackRequests(
           .join("")
           .trim();
 
+        // Same numbering rule as the parser, so a question we could READ is a
+        // question we can WRITE back to — including "7 ." and "7)".
         if (
           firstCellText === item.questionIndex ||
-          firstCellText.startsWith(`${item.questionIndex}.`)
+          extractQuestionIndex(firstCellText) === item.questionIndex
         ) {
           // Buổi 15/16/17 grade two forms in one cell, so a ✅ on one of them
           // must NOT collapse the whole cell (that would drop the correction).

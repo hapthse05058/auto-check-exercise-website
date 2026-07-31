@@ -7,7 +7,12 @@ import {
   generateOverallFeedback,
   parseAiResponse,
 } from "../src/lib/docWriter.js";
-import { makeNormalLessonTab } from "./fixtures.js";
+import {
+  P,
+  makeNormalLessonTab,
+  makeTabWithRows,
+  questionRow,
+} from "./fixtures.js";
 
 const MOCK_AI_RESPONSE = `| STT | Câu tiếng Việt | Câu tiếng Anh sai | Chữa bài |
 |-----|----------------|-------------------|----------|
@@ -276,5 +281,25 @@ describe("buildFeedbackRequests", () => {
   it("returns no requests when the AI response has no table", () => {
     const exercise = makeNormalLessonTab({ answered: true });
     expect(buildFeedbackRequests([], exercise, "t.x", [0])).toEqual([]);
+  });
+
+  it("finds the row whatever punctuation follows the question number", () => {
+    // A question we could READ must be a question we can WRITE back to: the
+    // row lookup uses the same numbering rule as the parser.
+    for (const numbering of ["7.", "7 .", "7)"]) {
+      const exercise = makeTabWithRows([
+        questionRow([P(`${numbering} Câu hỏi bảy`), P("→ My answer")], "", 50),
+      ]);
+      const requests = buildFeedbackRequests(
+        [{ questionIndex: "7", aiFeedback: IS_CORRECT_ANSWER }],
+        exercise,
+        "t.x",
+        [0],
+      );
+      const texts = requests
+        .filter((r) => r.insertText)
+        .map((r) => r.insertText.text);
+      expect(texts, numbering).toContain(IS_CORRECT_ANSWER);
+    }
   });
 });
