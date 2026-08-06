@@ -8,7 +8,10 @@
  *
  * Kept free of DOM/XLSX so it can be unit-tested directly.
  */
-import { extractDocId } from "./googleDoc.js";
+import {
+  findDocIdDuplicates,
+  groupDuplicatesByDoc,
+} from "./studentDuplicates.js";
 
 // Substring keywords used to recognise each column from its header text.
 const NAME_KEYS = ["tên", "ten", "họ", "ho", "name", "student", "học sinh"];
@@ -74,64 +77,29 @@ export function parseStudentsFromRows(rows) {
   return { students, skipped };
 }
 
-const normName = (n) =>
-  String(n || "")
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, " ");
-
 /**
- * Reconcile freshly-parsed students against the ones already on screen.
+ * Reconcile freshly-parsed students against the students already staged on
+ * screen AND the ones already saved in the selected class.
  *
- * - Same Google Doc id AND same name  → duplicate, dropped (counted).
- * - Same Google Doc id, DIFFERENT name → conflict; the WHOLE file is blocked
- *   (toAdd is emptied) and every clashing name for that doc is collected.
- * - No extractable Doc id              → invalid row, skipped (counted).
+ * - Repeated Google Doc id → conflict; the WHOLE file is blocked (toAdd is
+ *   emptied) and every name attached to that doc is collected for the report.
+ *   Identical rows (same doc AND same name) count as a conflict too: the
+ *   teacher must fix the file rather than have rows silently disappear.
+ * - No extractable Doc id  → invalid row, skipped (counted).
  *
  * @param {{name:string, gmail?:string, doc:string}[]} parsed
  * @param {{name:string, doc?:string, ggDocLink?:string}[]} existing students already added
- * @returns {{ok:boolean, toAdd:object[], conflicts:{docId:string,names:string[],doc:string}[], skippedNoId:number, duplicates:number}}
+ * @returns {{ok:boolean, toAdd:object[], conflicts:{docId:string,names:string[],doc:string}[], skippedNoId:number}}
  */
 export function resolveStudentImport(parsed, existing = []) {
-  const docMap = new Map(); // docId -> { norm, orig } (first name seen for that doc)
-  for (const s of existing) {
-    const id = extractDocId(s.doc ?? s.ggDocLink);
-    if (id && !docMap.has(id))
-      docMap.set(id, { norm: normName(s.name), orig: s.name });
-  }
-
-  const toAdd = [];
-  const conflicts = [];
-  let skippedNoId = 0;
-  let duplicates = 0;
-
-  for (const s of parsed) {
-    const id = extractDocId(s.doc);
-    if (!id) {
-      skippedNoId += 1; // invalid/empty link → can't dedup by doc, drop it
-      continue;
-    }
-    const norm = normName(s.name);
-    const prev = docMap.get(id);
-    if (prev) {
-      if (prev.norm === norm) {
-        duplicates += 1; // same doc + same name → exact duplicate
-        continue;
-      }
-      // Same doc, different name → conflict. Collect EVERY clashing name for this
-      // doc so the report lists them all, not just the first pair.
-      const entry = conflicts.find((c) => c.docId === id);
-      if (entry) {
-        if (!entry.names.includes(s.name)) entry.names.push(s.name);
-      } else {
-        conflicts.push({ docId: id, names: [prev.orig, s.name], doc: s.doc });
-      }
-      continue;
-    }
-    docMap.set(id, { norm, orig: s.name });
-    toAdd.push({ name: s.name, gmail: s.gmail ?? "", doc: s.doc });
-  }
-
+  const { unique, noDocId, duplicates } = findDocIdDuplicates(parsed, existing);
+  const conflicts = groupDuplicatesByDoc(duplicates);
   const ok = conflicts.length === 0;
-  return { ok, toAdd: ok ? toAdd : [], conflicts, skippedNoId, duplicates };
+  const toAdd = unique.map((s) => ({
+    name: s.name,
+    gmail: s.gmail ?? "",
+    doc: s.doc,
+  }));
+
+  return { ok, toAdd: ok ? toAdd : [], conflicts, skippedNoId: noDocId.length };
 }

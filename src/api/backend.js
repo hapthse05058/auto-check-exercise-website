@@ -1,6 +1,7 @@
 import { storageSet } from "../auth/storage.js";
 import { ensureValidToken } from "../auth/tokens.js";
 import { DOMAIN_BE, EXTENSION_SECRET_KEY } from "../config.js";
+import { extractDocId } from "../lib/googleDoc.js";
 
 /** Authenticated fetch against the backend (Bearer JWT + API key). */
 async function authFetch(path, { method = "GET", body } = {}) {
@@ -265,9 +266,9 @@ export async function fetchStudentDocRefs(classId) {
   const students = await response.json();
   const links = [];
   students.forEach((student) => {
-    const match = student.ggDocLink.match(/\/document\/d\/([a-zA-Z0-9-_]+)/);
-    if (match) {
-      links.push({ docId: match[1], tabId: "t.0" });
+    const docId = extractDocId(student.ggDocLink);
+    if (docId) {
+      links.push({ docId, tabId: "t.0" });
     }
   });
   return links;
@@ -277,6 +278,22 @@ export async function saveStudents(classId, students) {
   return authFetch("/students", {
     method: "POST",
     body: { classId, students },
+  });
+}
+
+/**
+ * Removes one student from their class. A student belongs to a class through
+ * their own `classId`, so this deletes the student record.
+ */
+export async function deleteStudent(id) {
+  return authFetch(`/students/${encodeURIComponent(id)}`, { method: "DELETE" });
+}
+
+/** Removes many students from their class at once. */
+export async function bulkDeleteStudents(ids) {
+  return authFetch("/students/bulk-delete", {
+    method: "POST",
+    body: { ids },
   });
 }
 
@@ -488,4 +505,59 @@ export async function fetchBilling() {
   const response = await authFetch("/teacher-points/billing");
   if (!response.ok) throw new Error("Failed to fetch billing");
   return response.json();
+}
+
+// ---------------------------------------------------------------------------
+// Audit log (admin)
+// ---------------------------------------------------------------------------
+
+/**
+ * Paged audit trail for the /admin/audit-logs screen. `params` may include
+ * `field`, `q`, `from`, `to`, `page`, `pageSize`; empties are omitted.
+ * Entries are written server-side by the audit middleware — never from here.
+ */
+export async function fetchAuditLogs(params = {}) {
+  const qs = new URLSearchParams();
+  Object.entries(params).forEach(([k, v]) => {
+    if (v !== undefined && v !== null && v !== "") qs.set(k, v);
+  });
+  const suffix = qs.toString() ? `?${qs.toString()}` : "";
+  const response = await authFetch(`/audit-logs${suffix}`);
+  if (!response.ok) throw new Error("Failed to fetch audit logs");
+  const data = await response.json();
+  return {
+    results: Array.isArray(data.results) ? data.results : [],
+    total: data.total ?? 0,
+    page: data.page ?? 1,
+    pageSize: data.pageSize ?? 50,
+    totalPages: data.totalPages ?? 1,
+  };
+}
+
+/**
+ * Values for the multiselect filters (`{ fields, options }`), derived on the
+ * backend from its action table so the screen never hard-codes action names.
+ */
+export async function fetchAuditFilterOptions() {
+  const response = await authFetch("/audit-logs/filter-options");
+  if (!response.ok) throw new Error("Failed to fetch audit filter options");
+  return response.json();
+}
+
+/**
+ * Records an action that produces no request of its own (logout), so the audit
+ * middleware cannot see it. Only whitelisted action names are accepted and the
+ * actor comes from the token, not from us.
+ *
+ * NEVER throws: audit logging is secondary and must not block the real action.
+ */
+export async function logClientEvent(action) {
+  try {
+    await authFetch("/audit-logs/client-event", {
+      method: "POST",
+      body: { action },
+    });
+  } catch {
+    // Offline, expired token, backend down — losing one log line is acceptable.
+  }
 }

@@ -13,7 +13,7 @@ import {
   hasStoredSession,
   proactiveTokenRefresh,
 } from "./tokens.js";
-import { fetchTeacherInfo } from "../api/backend.js";
+import { fetchTeacherInfo, logClientEvent } from "../api/backend.js";
 
 const AuthContext = createContext(null);
 
@@ -41,7 +41,13 @@ export function AuthProvider({ children }) {
   );
   const [sessionMessage, setSessionMessage] = useState("");
 
-  const logout = useCallback((message = "") => {
+  const logout = useCallback(async (message = "") => {
+    // Logout produces no request of its own, so the backend audit middleware
+    // cannot see it — report it explicitly. This MUST happen before
+    // clearAuthStorage(): the call is authenticated with the stored token, and
+    // once storage is cleared the backend would answer 401 and the entry would
+    // be lost. logClientEvent never throws, so a failure cannot block logout.
+    await logClientEvent("auth.logout");
     clearAuthStorage();
     setIsAuthenticated(false);
     setTeacherInfo(null);

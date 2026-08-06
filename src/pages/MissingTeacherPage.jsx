@@ -9,8 +9,10 @@ export default function MissingTeacherPage() {
   const navigate = useNavigate();
   const { logout } = useAuth();
 
-  const handleCancel = () => {
-    logout(t("session.pleaseLogin"));
+  // logout() is async (it records the audit entry while the token is still
+  // valid), so wait for it before navigating.
+  const handleCancel = async () => {
+    await logout(t("session.pleaseLogin"));
     navigate("/login");
   };
 

@@ -97,30 +97,42 @@ describe("parseStudentsFromRows", () => {
 });
 
 describe("resolveStudentImport", () => {
-  it("keeps distinct students and drops exact (doc + name) duplicates", () => {
+  it("keeps distinct students", () => {
     const parsed = [
       { name: "Trần Thị Hải", gmail: "", doc: DOC },
-      { name: "Trần Thị Hải", gmail: "", doc: DOC }, // exact dup
       { name: "Nguyễn Văn An", gmail: "", doc: DOC2 },
     ];
     const res = resolveStudentImport(parsed, []);
     expect(res.ok).toBe(true);
-    expect(res.duplicates).toBe(1);
+    expect(res.conflicts).toEqual([]);
     expect(res.toAdd.map((s) => s.name)).toEqual([
       "Trần Thị Hải",
       "Nguyễn Văn An",
     ]);
   });
 
-  it("treats name differing only by case/space as a duplicate, not a conflict", () => {
+  it("blocks the file on an exact (doc + name) duplicate instead of dropping it", () => {
     const parsed = [
       { name: "Trần Thị Hải", gmail: "", doc: DOC },
-      { name: "  trần thị   hải ", gmail: "", doc: DOC },
+      { name: "Trần Thị Hải", gmail: "", doc: DOC }, // exact dup
+      { name: "Nguyễn Văn An", gmail: "", doc: DOC2 },
     ];
     const res = resolveStudentImport(parsed, []);
-    expect(res.ok).toBe(true);
-    expect(res.duplicates).toBe(1);
-    expect(res.toAdd).toHaveLength(1);
+    expect(res.ok).toBe(false);
+    expect(res.toAdd).toEqual([]);
+    // One name, listed once — the report must not read "Hải ↔ Hải".
+    expect(res.conflicts).toHaveLength(1);
+    expect(res.conflicts[0].names).toEqual(["Trần Thị Hải"]);
+  });
+
+  it("blocks a repeated doc even when the link differs by tab/suffix", () => {
+    const parsed = [
+      { name: "Trần Thị Hải", gmail: "", doc: DOC },
+      { name: "Nguyễn Văn An", gmail: "", doc: `${DOC}/edit?tab=t.99` },
+    ];
+    const res = resolveStudentImport(parsed, []);
+    expect(res.ok).toBe(false);
+    expect(res.conflicts[0].names).toEqual(["Trần Thị Hải", "Nguyễn Văn An"]);
   });
 
   it("blocks the whole file when one doc id maps to different names", () => {
@@ -147,16 +159,16 @@ describe("resolveStudentImport", () => {
     expect(res.conflicts[0].names).toEqual(["A", "B", "C"]);
   });
 
-  it("dedups against students already on screen (existing)", () => {
+  it("blocks against a student already on screen (existing)", () => {
     const existing = [{ name: "Trần Thị Hải", doc: DOC }];
     const parsed = [
       { name: "Trần Thị Hải", gmail: "", doc: DOC }, // already present
       { name: "Nguyễn Văn An", gmail: "", doc: DOC2 },
     ];
     const res = resolveStudentImport(parsed, existing);
-    expect(res.ok).toBe(true);
-    expect(res.duplicates).toBe(1);
-    expect(res.toAdd.map((s) => s.name)).toEqual(["Nguyễn Văn An"]);
+    expect(res.ok).toBe(false);
+    expect(res.toAdd).toEqual([]);
+    expect(res.conflicts[0].names).toEqual(["Trần Thị Hải"]);
   });
 
   it("conflicts against existing (same doc via ggDocLink, different name) → blocked", () => {

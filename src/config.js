@@ -1,6 +1,7 @@
 export const DOMAIN_BE_DEV = "http://localhost:3000";
 export const DOMAIN_BE_PROD = import.meta.env.VITE_DOMAIN_BE_PROD;
-export const ENVIRONMENT = import.meta.env.VITE_ENVIRONMENT ?? "DEV";
+// export const ENVIRONMENT = import.meta.env.VITE_ENVIRONMENT ?? "DEV";
+export const ENVIRONMENT = "DEV";
 export const DOMAIN_BE =
   ENVIRONMENT === "PROD" ? DOMAIN_BE_PROD : DOMAIN_BE_DEV;
 export const EXTENSION_SECRET_KEY = "SuperSecretKey_321__hongHa";

@@ -117,6 +117,14 @@ function NavMenu() {
               {t("nav.gradeSpeaking")}
             </button>
           )}
+          {isAdmin && (
+            <button
+              className="menu-option"
+              onClick={() => go("/admin/audit-logs")}
+            >
+              {t("nav.auditLog")}
+            </button>
+          )}
           <a className="menu-option" href={`mailto:${SUPPORT_EMAIL}`}>
             {t("nav.support", { email: SUPPORT_EMAIL })}
           </a>
@@ -212,8 +220,10 @@ export default function Layout() {
   const { t } = useLanguage();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    logout(t("session.pleaseLogin"));
+  // logout() is async (it records the audit entry while the token is still
+  // valid), so wait for it before navigating.
+  const handleLogout = async () => {
+    await logout(t("session.pleaseLogin"));
     navigate("/login");
   };
 

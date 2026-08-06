@@ -2,15 +2,25 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import * as XLSX from "xlsx";
 
-import { fetchAllClasses, fetchClasses, saveStudents } from "../api/backend.js";
+import {
+  fetchAllClasses,
+  fetchClasses,
+  fetchStudents,
+  saveStudents,
+} from "../api/backend.js";
 import { useAuth } from "../auth/AuthContext.jsx";
 import SearchableSelect from "../components/SearchableSelect.jsx";
 import { isAdminEmail } from "../config.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
+import { extractDocId } from "../lib/googleDoc.js";
 import {
   parseStudentsFromRows,
   resolveStudentImport,
 } from "../lib/importStudents.js";
+import {
+  findDocIdDuplicates,
+  groupDuplicatesByDoc,
+} from "../lib/studentDuplicates.js";
 
 function initials(name) {
   const parts = name.trim().split(/\s+/);
@@ -36,6 +46,10 @@ export default function AddStudentsPage() {
   const [classes, setClasses] = useState([]);
   const [classId, setClassId] = useState("");
   const [students, setStudents] = useState([]);
+  // Students already saved in the selected class. Every new Google Doc id is
+  // checked against these (and against the staged list) so the same student
+  // can't be added to the class twice.
+  const [classStudents, setClassStudents] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
   const [editIndex, setEditIndex] = useState(-1);
   const [rows, setRows] = useState([{ ...EMPTY_ROW }]);
@@ -43,7 +57,7 @@ export default function AddStudentsPage() {
   const [status, setStatus] = useState(t("addStudents.intro"));
   // "info" (default) or "warning" — drives the highlighted style on validation messages.
   const [statusType, setStatusType] = useState("info");
-  // Import-result popup: null, or { kind: "success" | "error", text }.
+  // Result popup: null, or { kind: "success" | "error", text, title? }.
   const [notice, setNotice] = useState(null);
   const [saving, setSaving] = useState(false);
 
@@ -53,6 +67,10 @@ export default function AddStudentsPage() {
   const prevRowsLength = useRef(rows.length);
   // Hidden <input type="file"> used by the "Import student list" button.
   const fileInputRef = useRef(null);
+  // Mirrors `students` so the class-change effect can re-check the staged list
+  // without re-fetching the class every time a student is added.
+  const studentsRef = useRef(students);
+  studentsRef.current = students;
 
   useEffect(() => {
     // Only auto-focus when rows GREW (user clicked +), not when a row was removed.
@@ -91,6 +109,74 @@ export default function AddStudentsPage() {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- run once on mount; `t` is only used for status/error messages, adding it would re-fetch on language change
   }, [loadTeacherInfo, navigate]);
+
+  /**
+   * Turns clashes into one line per Google Doc, e.g.
+   *   • Trần Thị Hải ↔ Nguyễn Văn An — already in this class
+   * `groups` is `[{docId, names}]`, either built locally or returned by the
+   * backend's 409; `savedInClass` are the class's saved students, used only to
+   * tell the teacher which side the clash comes from.
+   */
+  const duplicateNoticeText = (groups, savedInClass = []) => {
+    const classDocIds = new Set(
+      savedInClass.map((s) => extractDocId(s.ggDocLink)).filter(Boolean),
+    );
+    return (
+      t("addStudents.duplicateBlocked") +
+      groups
+        .map((group) => {
+          const names = group.names.join(" ↔ ");
+          return (
+            "\n • " +
+            (classDocIds.has(group.docId)
+              ? t("addStudents.duplicateInClass", { names })
+              : t("addStudents.duplicateInList", { names }))
+          );
+        })
+        .join("")
+    );
+  };
+
+  const showDuplicateNotice = (groups, savedInClass) => {
+    setNotice({
+      kind: "error",
+      title: t("addStudents.duplicateTitle"),
+      text: duplicateNoticeText(groups, savedInClass),
+    });
+  };
+
+  // Load the students already saved in the class so the duplicate check has
+  // something to compare against, and warn straight away if a student staged
+  // before the class was picked is already in it.
+  useEffect(() => {
+    if (!classId) {
+      setClassStudents([]);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const saved = await fetchStudents(classId);
+        if (cancelled) return;
+        setClassStudents(saved);
+        const { duplicates } = findDocIdDuplicates(studentsRef.current, saved);
+        if (duplicates.length) {
+          showDuplicateNotice(groupDuplicatesByDoc(duplicates), saved);
+          setStatusType("warning");
+          setStatus(t("addStudents.duplicateStatus"));
+        }
+      } catch (error) {
+        if (cancelled || error.message === "RE-AUTH_NEEDED") return;
+        // Not fatal: the backend rejects duplicates on save as well.
+        console.error("Error loading students of the class:", error);
+        setClassStudents([]);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- reload only when the class changes; `t` is used for messages only
+  }, [classId]);
 
   const openModal = (index = -1) => {
     setEditIndex(index);
@@ -141,6 +227,7 @@ export default function AddStudentsPage() {
     // Validate every non-blank row; track errors by the row's original index.
     const errors = [];
     const valid = [];
+    const validRowIndex = []; // valid[k] came from rows[validRowIndex[k]]
     let hasError = false;
     rows.forEach((r, i) => {
       if (isBlankRow(r)) return; // drop fully-empty rows, even in the middle
@@ -157,11 +244,32 @@ export default function AddStudentsPage() {
         hasError = true;
       } else {
         valid.push({ name, gmail, doc });
+        validRowIndex.push(i);
       }
     });
 
     if (hasError) {
       setRowErrors(errors);
+      return;
+    }
+
+    // Compare Google Doc ids (not raw links — the same doc has many URLs) against
+    // the students already staged and the ones already saved in the class. When
+    // editing, the row being edited must not clash with itself.
+    const { duplicates } = findDocIdDuplicates(valid, [
+      ...students.filter((_, i) => i !== editIndex),
+      ...classStudents,
+    ]);
+
+    if (duplicates.length) {
+      // Keep the modal open with the offending links flagged: nothing is added
+      // until the teacher resolves every clash.
+      const duplicateErrors = [];
+      duplicates.forEach((d) => {
+        duplicateErrors[validRowIndex[d.index]] = { doc: true };
+      });
+      setRowErrors(duplicateErrors);
+      showDuplicateNotice(groupDuplicatesByDoc(duplicates), classStudents);
       return;
     }
 
@@ -171,38 +279,7 @@ export default function AddStudentsPage() {
         next[editIndex] = valid[0];
         return next;
       }
-
-      // 1. Create a fresh copy of the previous state array to avoid direct mutation
-      const nextStudents = [...prev];
-      /** @type {typeof valid} */
-      const duplicateElements = [];
-
-      valid.forEach((v) => {
-        // Check against our growing list of students
-        const isDuplicate = nextStudents.some(
-          (element) => element.doc === v.doc,
-        );
-
-        if (!isDuplicate) {
-          nextStudents.push(v);
-        } else {
-          duplicateElements.push(v); // Push the actual object, not an array [v]
-        }
-      });
-
-      // 2. Trigger the notification if duplicates exist
-      if (duplicateElements.length > 0) {
-        setNotice({
-          kind: "error",
-          text: t("addStudents.duplicateDoc", {
-            doc: duplicateElements[0].doc,
-            dublicatedNames: duplicateElements.map((e) => e.name).join(", "),
-          }),
-        });
-      }
-
-      // 3. Return the brand new state array
-      return nextStudents;
+      return [...prev, ...valid];
     });
     setModalOpen(false);
   };
@@ -225,16 +302,11 @@ export default function AddStudentsPage() {
       });
       const { students: parsed, skipped: skippedNoName } =
         parseStudentsFromRows(sheetRows);
-      const res = resolveStudentImport(parsed, students);
+      const res = resolveStudentImport(parsed, [...students, ...classStudents]);
 
       if (!res.ok) {
-        // Same Google Doc with different names → block the whole file.
-        setNotice({
-          kind: "error",
-          text:
-            t("addStudents.importConflict") +
-            res.conflicts.map((c) => `\n • ${c.names.join(" ↔ ")}`).join(""),
-        });
+        // One Google Doc used by more than one student → block the whole file.
+        showDuplicateNotice(res.conflicts, classStudents);
         return;
       }
       if (!res.toAdd.length) {
@@ -250,9 +322,6 @@ export default function AddStudentsPage() {
           t("addStudents.importSuccess", { n: res.toAdd.length }) +
           (skipped
             ? "\n" + t("addStudents.importSkipped", { m: skipped })
-            : "") +
-          (res.duplicates
-            ? "\n" + t("addStudents.importDuplicates", { d: res.duplicates })
             : ""),
       });
     } catch (error) {
@@ -282,13 +351,42 @@ export default function AddStudentsPage() {
     setStatus(t("addStudents.saving"));
     setSaving(true);
     try {
+      // Re-read the class right before writing: the list may have been staged a
+      // while ago, Save may be clicked twice, or a co-teacher may have added the
+      // same student meanwhile. A failure here isn't fatal — the backend rejects
+      // duplicates too (409 below).
+      try {
+        const saved = await fetchStudents(classId);
+        setClassStudents(saved);
+        const { duplicates } = findDocIdDuplicates(students, saved);
+        if (duplicates.length) {
+          showDuplicateNotice(groupDuplicatesByDoc(duplicates), saved);
+          setStatusType("warning");
+          setStatus(t("addStudents.duplicateStatus"));
+          return;
+        }
+      } catch (error) {
+        if (error.message === "RE-AUTH_NEEDED") throw error;
+        console.error("Duplicate pre-check failed:", error);
+      }
+
       const response = await saveStudents(classId, studentsToSave);
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
+        if (response.status === 409 && Array.isArray(errorData?.duplicates)) {
+          showDuplicateNotice(errorData.duplicates, classStudents);
+          setStatusType("warning");
+          setStatus(t("addStudents.duplicateStatus"));
+          return;
+        }
         setStatus(errorData?.error || t("addStudents.saveFailed"));
         return;
       }
+
+      // The saved students are now part of the class, so the next batch must be
+      // checked against them too.
+      setClassStudents((prev) => [...prev, ...studentsToSave]);
 
       const confirmed = window.confirm(t("addStudents.savedConfirm"));
       if (confirmed) {
@@ -512,9 +610,10 @@ export default function AddStudentsPage() {
             >
               <div className="modal-header">
                 <h3>
-                  {notice.kind === "error"
-                    ? t("addStudents.importErrorTitle")
-                    : t("addStudents.importResultTitle")}
+                  {notice.title ||
+                    (notice.kind === "error"
+                      ? t("addStudents.importErrorTitle")
+                      : t("addStudents.importResultTitle"))}
                 </h3>
               </div>
               <div className="modal-body">

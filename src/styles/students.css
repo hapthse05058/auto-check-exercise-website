@@ -567,6 +567,67 @@
   cursor: pointer;
 }
 
+/* MultiSelect: a checkbox row inside the shared searchable-select dropdown.
+   Alignment is set explicitly so the row never inherits centering. */
+.multiselect-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: left;
+  gap: 8px;
+}
+.multiselect-row input {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  pointer-events: none;
+}
+.multiselect-row-label {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* audit log screen — severity badge + the actor's secondary email line */
+.audit-date {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--color-text-secondary, #51615c);
+  white-space: nowrap;
+}
+/* Must not inherit .cache-toggle's 16px checkbox sizing. */
+.audit-date input[type="date"] {
+  width: auto;
+  height: auto;
+}
+.audit-severity {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.audit-severity-info {
+  background: #eef2f1;
+  color: #51615c;
+}
+.audit-severity-warn {
+  background: #fdf1dc;
+  color: #8a6116;
+}
+.audit-severity-critical {
+  background: #fbe4e4;
+  color: #a32020;
+}
+.audit-actor-email {
+  font-size: 11px;
+  color: var(--color-text-tertiary, #8a948f);
+}
+
 /* teacher-points billing panel */
 .billing-panel {
   display: flex;

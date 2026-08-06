@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import {
+  bulkDeleteStudents,
+  deleteStudent,
   fetchAllClasses,
   fetchClasses,
   fetchCurrentLesson,
@@ -48,6 +50,12 @@ export default function ClassStudentsPage() {
   const [searched, setSearched] = useState(false);
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState(t("classStudents.initial"));
+
+  // Removal: ids ticked in the table, and the pending confirmation — a student
+  // record for a single row, or the string "bulk" for the ticked selection.
+  const [selectedIds, setSelectedIds] = useState(() => new Set());
+  const [removeTarget, setRemoveTarget] = useState(null);
+  const [removing, setRemoving] = useState(false);
 
   const selectedLessonName = lessons.find(
     (l) => l.id === selectedLessonId,
@@ -125,6 +133,7 @@ export default function ClassStudentsPage() {
     setSelectedLessonId("");
     setLessons([]);
     setStudents([]);
+    setSelectedIds(new Set());
     setSearched(false);
     if (!classId) return;
 
@@ -151,6 +160,7 @@ export default function ClassStudentsPage() {
   const handleSearch = async () => {
     if (!selectedClassId || loading) return;
     setLoading(true);
+    setSelectedIds(new Set());
     setStatus(t("classStudents.searching"));
     try {
       const [studentList, current] = await Promise.all([
@@ -200,6 +210,67 @@ export default function ClassStudentsPage() {
       console.error("Open doc error:", err);
       if (win) win.location.href = ggDocLink;
       else window.open(ggDocLink, "_blank", "noopener");
+    }
+  };
+
+  const toggleSelected = (id) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const allSelected =
+    students.length > 0 && selectedIds.size === students.length;
+
+  const toggleSelectAll = () => {
+    setSelectedIds(
+      allSelected ? new Set() : new Set(students.map((s) => s.id)),
+    );
+  };
+
+  // Removing a student from the class deletes their record — a student belongs
+  // to exactly one class through their own `classId`.
+  const confirmRemove = async () => {
+    const ids =
+      removeTarget === "bulk"
+        ? [...selectedIds]
+        : [removeTarget?.id].filter(Boolean);
+    if (!ids.length) {
+      setRemoveTarget(null);
+      return;
+    }
+    setRemoving(true);
+    try {
+      const response =
+        removeTarget === "bulk"
+          ? await bulkDeleteStudents(ids)
+          : await deleteStudent(ids[0]);
+      if (!response.ok) {
+        setStatus(t("classStudents.removeFailed"));
+        return;
+      }
+      // Drop the rows locally instead of re-searching: the list isn't paged, so
+      // the count badge and the table stay correct without another round trip.
+      const removed = new Set(ids);
+      setStudents((prev) => prev.filter((s) => !removed.has(s.id)));
+      setSelectedIds(
+        (prev) => new Set([...prev].filter((id) => !removed.has(id))),
+      );
+      setStatus(
+        ids.length === 1
+          ? t("classStudents.removed")
+          : t("classStudents.removedMany", { n: ids.length }),
+      );
+    } catch (error) {
+      if (error.message === "RE-AUTH_NEEDED") return;
+      console.error("Remove student error:", error);
+      setStatus(t("classStudents.removeFailed"));
+    } finally {
+      setRemoving(false);
+      setRemoveTarget(null);
     }
   };
 
@@ -263,6 +334,16 @@ export default function ClassStudentsPage() {
           >
             {t("common.search")}
           </button>
+          {selectedIds.size > 0 && (
+            <button
+              className="btn-cancel btn-text-danger"
+              onClick={() => setRemoveTarget("bulk")}
+              disabled={removing}
+            >
+              <i className="ti ti-trash" aria-hidden="true" />{" "}
+              {t("classStudents.removeSelected", { n: selectedIds.size })}
+            </button>
+          )}
         </div>
 
         {loading ? (
@@ -285,14 +366,42 @@ export default function ClassStudentsPage() {
             <table className="cache-table">
               <thead>
                 <tr>
+                  <th className="cell-check">
+                    <input
+                      type="checkbox"
+                      checked={allSelected}
+                      ref={(el) => {
+                        // Half-ticked box when only some rows are selected.
+                        if (el)
+                          el.indeterminate =
+                            selectedIds.size > 0 && !allSelected;
+                      }}
+                      onChange={toggleSelectAll}
+                      aria-label={t("classStudents.selectAll")}
+                    />
+                  </th>
                   <th>{t("classStudents.colName")}</th>
                   <th>{t("classStudents.colDoc")}</th>
                   <th>{t("classStudents.colGraded")}</th>
+                  <th>{t("classStudents.colActions")}</th>
                 </tr>
               </thead>
               <tbody>
                 {students.map((s) => (
-                  <tr key={s.id}>
+                  <tr
+                    key={s.id}
+                    className={
+                      selectedIds.has(s.id) ? "row-selected" : undefined
+                    }
+                  >
+                    <td className="cell-check">
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.has(s.id)}
+                        onChange={() => toggleSelected(s.id)}
+                        aria-label={s.name}
+                      />
+                    </td>
                     <td>{s.name}</td>
                     <td>
                       {s.ggDocLink ? (
@@ -309,10 +418,57 @@ export default function ClassStudentsPage() {
                       )}
                     </td>
                     <td>{gradedLabel(currentLesson)}</td>
+                    <td className="cell-actions">
+                      <button
+                        className="btn-icon danger"
+                        aria-label={t("classStudents.remove")}
+                        onClick={() => setRemoveTarget(s)}
+                        disabled={removing}
+                      >
+                        <i className="ti ti-trash" aria-hidden="true" />
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {removeTarget && (
+          <div className="modal-bg open">
+            <div className="modal">
+              <div className="modal-header">
+                <h3>{t("classStudents.removeTitle")}</h3>
+              </div>
+              <div className="modal-body">
+                <p>
+                  {removeTarget === "bulk"
+                    ? t("classStudents.removeSelectedConfirm", {
+                        n: selectedIds.size,
+                      })
+                    : t("classStudents.removeConfirm", {
+                        name: removeTarget.name,
+                      })}
+                </p>
+              </div>
+              <div className="modal-footer">
+                <button
+                  className="btn-cancel"
+                  onClick={() => setRemoveTarget(null)}
+                  disabled={removing}
+                >
+                  {t("common.cancel")}
+                </button>
+                <button
+                  className="btn-confirm btn-text-danger"
+                  onClick={confirmRemove}
+                  disabled={removing}
+                >
+                  {t("common.delete")}
+                </button>
+              </div>
+            </div>
           </div>
         )}
 
