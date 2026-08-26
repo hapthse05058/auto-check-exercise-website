@@ -88,6 +88,7 @@ export const translations = {
     grade: {
       title: "Grade exercises",
       pointLeft: "Points left: {point}",
+      payerPoint: "{teacher}: {point} point(s) left",
       adminUnlimited: "Admin – unlimited",
       selectClass: "Select Class",
       selectLesson: "Select Lesson",
@@ -275,6 +276,7 @@ export const translations = {
         student_bulkDelete: "Remove students from class",
         grading_run: "Grade exercises",
         grading_runExtension: "Grade exercises (extension)",
+        grading_pointsSummary: "Points spent grading",
         points_consume: "Spend points",
         points_topup: "Top up points",
         points_create: "Create point record",
@@ -540,9 +542,9 @@ export const translations = {
       alreadyChecked:
         "\n This exercise has been checked: {docId}. Skip checking it again...",
       allChecked: "\n All docs were already checked. Nothing to grade.",
-      pointCheckFailed: "Could not check your points. Please try again.",
+      pointCheckFailed: "Could not check the point balance. Please try again.",
       notEnough:
-        "Not enough points: need {need}, have {have}. Please contact admin to top up.",
+        "Not enough points: {need} exercise(s) to grade, {teacher} has {have}. Please contact admin to top up.",
       noAnswers: "\n No answered questions found to grade.",
       gradingN: "Grading {n} unique answers{cache}...",
       cacheOff: " (cache off)",
@@ -554,7 +556,13 @@ export const translations = {
       wrote: "\n Wrote feedback to {docId}.",
       failedWrite: "\n Failed writing to {docId}: {msg}",
       completeChunk: "\n Complete handling {n} doc, continue...",
-      spent: "\n Spent {n} point(s). Points left: {remaining}.",
+      spentBatch: "\n Spent {n} point(s). Points left: {remaining}.",
+      chargeFailed:
+        "\n Could not spend points for: {list}. Will retry at the end.",
+      stoppedNoPoints:
+        "\n Out of points — stopped grading the remaining docs. Please contact admin to top up.",
+      unsettled:
+        "\n Points were NOT spent for: {list}. Please report this to admin.",
       complete:
         "\n Processing complete!\nGrading student's exercises completed! You can review the result!!",
     },
@@ -647,6 +655,7 @@ export const translations = {
     grade: {
       title: "Chấm bài",
       pointLeft: "Point còn lại: {point}",
+      payerPoint: "{teacher}: còn {point} point",
       adminUnlimited: "Admin – không giới hạn",
       selectClass: "Chọn lớp",
       selectLesson: "Chọn buổi học",
@@ -833,6 +842,7 @@ export const translations = {
         student_bulkDelete: "Xóa nhiều học sinh khỏi lớp",
         grading_run: "Chấm bài",
         grading_runExtension: "Chấm bài (extension)",
+        grading_pointsSummary: "Tổng point trừ sau khi chấm bài",
         points_consume: "Trừ điểm",
         points_topup: "Nạp điểm",
         points_create: "Tạo bản ghi điểm",
@@ -1099,7 +1109,7 @@ export const translations = {
       allChecked: "\n Tất cả tài liệu đã được chấm. Không có gì để chấm.",
       pointCheckFailed: "Không kiểm tra được số point. Vui lòng thử lại.",
       notEnough:
-        "Không đủ point: cần {need}, còn {have}. Vui lòng liên hệ admin để nạp thêm point.",
+        "Không đủ point: cần chấm {need} bài, {teacher} còn {have} point. Vui lòng liên hệ admin để nạp thêm point.",
       noAnswers: "\n Không tìm thấy câu trả lời nào để chấm.",
       gradingN: "Đang chấm {n} câu trả lời{cache}...",
       cacheOff: " (tắt cache)",
@@ -1111,7 +1121,11 @@ export const translations = {
       wrote: "\n Đã ghi feedback vào {docId}.",
       failedWrite: "\n Ghi {docId} thất bại: {msg}",
       completeChunk: "\n Đã xử lý xong {n} tài liệu, tiếp tục...",
-      spent: "\n Đã trừ {n} point. Point còn lại: {remaining}.",
+      spentBatch: "\n Đã trừ {n} point. Point còn lại: {remaining}.",
+      chargeFailed: "\n Chưa trừ được point cho: {list}. Sẽ thử lại ở cuối.",
+      stoppedNoPoints:
+        "\n Hết point — dừng chấm các bài còn lại. Vui lòng liên hệ admin để nạp thêm point.",
+      unsettled: "\n CHƯA trừ được point cho: {list}. Vui lòng báo admin.",
       complete:
         "\n Hoàn tất xử lý!\nĐã chấm xong bài của học sinh! Bạn có thể xem lại kết quả!!",
     },

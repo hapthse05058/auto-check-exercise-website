@@ -7,6 +7,7 @@ import {
   fetchCurrentLesson,
   fetchLessons,
   fetchMyPoint,
+  fetchPayerPoint,
   updateCurrentLessonForClass,
 } from "../api/backend.js";
 import { useAuth } from "../auth/AuthContext.jsx";
@@ -31,6 +32,9 @@ export default function GradePage() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [saveCache, setSaveCache] = useState(true);
   const [point, setPoint] = useState(null);
+  // Who actually pays for the selected class. An admin grading someone else's
+  // class spends THAT teacher's points, so the badge must show their balance.
+  const [payer, setPayer] = useState(null);
   const currentLessonRef = useRef(null);
 
   const refreshPoint = async () => {
@@ -39,6 +43,20 @@ export default function GradePage() {
     } catch (error) {
       if (error.message !== "RE-AUTH_NEEDED")
         console.error("Point fetch failed:", error);
+    }
+  };
+
+  const refreshPayer = async (classId) => {
+    if (!classId) {
+      setPayer(null);
+      return;
+    }
+    try {
+      setPayer(await fetchPayerPoint(classId));
+    } catch (error) {
+      if (error.message !== "RE-AUTH_NEEDED")
+        console.error("Payer point fetch failed:", error);
+      setPayer(null);
     }
   };
 
@@ -92,6 +110,7 @@ export default function GradePage() {
     setSelectedLessonId("");
     setLessons([]);
     currentLessonRef.current = null;
+    refreshPayer(classId);
     if (!classId) return;
 
     const cls = classes.find((c) => c.id === classId);
@@ -150,6 +169,7 @@ export default function GradePage() {
         classId: selectedClassId,
         classType: selectedClass?.classType,
         lessonName,
+        lessonId: selectedLessonId,
         onStatus,
         // Non-admins always use the cache; admins control it via the toggle.
         useCache: isAdmin ? saveCache : true,
@@ -165,7 +185,9 @@ export default function GradePage() {
       }
     } finally {
       setProcessing(false);
-      refreshPoint(); // balance changed if any docs were graded
+      // Balances changed if any docs were graded.
+      refreshPoint();
+      refreshPayer(selectedClassId);
     }
   };
 
@@ -175,14 +197,25 @@ export default function GradePage() {
     <div className="page-wide">
       <h2 className="page-title">
         {t("grade.title")}{" "}
-        {point !== null &&
+        {/* Once a class is picked, show the balance of whoever pays for it —
+            for an admin that is the class's teacher, not the admin. */}
+        {payer ? (
+          <span className="count-badge">
+            {t("grade.payerPoint", {
+              teacher: payer.teacherName,
+              point: payer.point,
+            })}
+          </span>
+        ) : (
+          point !== null &&
           (isAdmin ? (
             <span className="count-badge">{t("grade.adminUnlimited")}</span>
           ) : (
             <span className="count-badge">
               {t("grade.pointLeft", { point })}
             </span>
-          ))}
+          ))
+        )}
       </h2>
       <SearchableSelect
         className="mb-1"

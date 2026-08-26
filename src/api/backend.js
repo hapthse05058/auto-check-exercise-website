@@ -312,10 +312,15 @@ export async function fetchStudents(classId) {
  * The backend reuses gradingCache feedback and only sends genuine misses to
  * the AI. `feedback` can be null when the AI returned nothing for a pair.
  */
-export async function gradeAnswers(items, useCache = true) {
+export async function gradeAnswers(
+  items,
+  { useCache = true, classId, lessonId, pendingCount } = {},
+) {
   const response = await authFetch("/grade-cached", {
     method: "POST",
-    body: { items, useCache },
+    // classId/lessonId/pendingCount are not used for grading — they let the
+    // backend write a readable audit detail instead of dumping the answers.
+    body: { items, useCache, classId, lessonId, pendingCount },
   });
   if (!response.ok) {
     const data = await response.json().catch(() => null);
@@ -397,15 +402,51 @@ export async function fetchMyPoint() {
   return data.point ?? 0;
 }
 
-/** Spends `count` points for the logged-in teacher (after successful writes). */
-export async function consumePoints(count) {
+/**
+ * Spends 1 point per student doc just written. Send the docs, not an amount —
+ * the backend prices them and its ledger makes a repeat call a no-op.
+ * Throws INSUFFICIENT_POINTS on 402 so the caller can stop the run.
+ */
+export async function consumeDocPoints({ classId, docIds, lessonId }) {
   const response = await authFetch("/teacher-points/consume", {
     method: "POST",
-    body: { count },
+    body: { classId, docIds, lessonId },
   });
+  if (response.status === 402) throw new Error("INSUFFICIENT_POINTS");
   if (!response.ok) throw new Error("Failed to consume points");
+  return response.json(); // { point, charged, payerTeacherId, payerName }
+}
+
+/**
+ * Balance of whoever pays for this class — the class's teacher when an admin is
+ * grading, the caller otherwise. Resolved server-side from the class record.
+ */
+export async function fetchPayerPoint(classId) {
+  const response = await authFetch(
+    `/teacher-points/payer?classId=${encodeURIComponent(classId || "")}`,
+  );
+  if (!response.ok) throw new Error("Failed to fetch payer point balance");
   const data = await response.json();
-  return data.point ?? 0;
+  return {
+    point: data.point ?? 0,
+    teacherId: data.teacherId || "",
+    teacherName: data.teacherName || "",
+  };
+}
+
+/**
+ * One audit line closing out a grading run. Never throws: the points are
+ * already settled in the ledger, and losing a log line must not fail the run.
+ */
+export async function recordGradingSummary({ classId, lessonId, totalPoints }) {
+  try {
+    await authFetch("/grading-summary", {
+      method: "POST",
+      body: { classId, lessonId, totalPoints },
+    });
+  } catch {
+    // Offline, expired token, backend down — losing one log line is acceptable.
+  }
 }
 
 // --- admin only ---

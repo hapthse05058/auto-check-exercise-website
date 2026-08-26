@@ -15,13 +15,24 @@ import {
 import { getTableIndexOfExercise } from "./docTables.js";
 import { formatFeedbackForDoc, writeGradingResultsToDoc } from "./docWriter.js";
 import {
-  consumePoints,
-  fetchMyPoint,
+  consumeDocPoints,
+  fetchPayerPoint,
   fetchStudentDocRefs,
   gradeAnswers,
+  recordGradingSummary,
 } from "../api/backend.js";
 import { getTabContent } from "../api/googleDocs.js";
 import { ensureValidGoogleToken } from "../auth/tokens.js";
+
+/** Student docs written in parallel within one chunk. */
+const CONCURRENCY_LIMIT = 5;
+
+/**
+ * Docs billed per charge. Every charge hits the same TeacherPoint document, so
+ * pairing them halves that write pressure; the cost is that a run cancelled
+ * mid-pair leaves at most ONE written doc unpaid.
+ */
+const CHARGE_BATCH_SIZE = 2;
 
 const chunkArray = (array, size) => {
   const result = [];
@@ -47,6 +58,7 @@ export async function processDocs({
   classId,
   classType,
   lessonName,
+  lessonId,
   onStatus,
   useCache = true,
   isAdmin = false,
@@ -121,25 +133,29 @@ export async function processDocs({
     onStatus.set(t("grading.finishedFetch"));
   }
 
-  await autoCheckExercises(
+  await autoCheckExercises({
     studentsExerciseList,
     tableIndex,
     onStatus,
+    classId,
+    lessonId,
     useCache,
     isAdmin,
     t,
-  );
+  });
   return true;
 }
 
-async function autoCheckExercises(
+async function autoCheckExercises({
   studentsExerciseList,
   tableIndex,
   onStatus,
+  classId,
+  lessonId,
   useCache = true,
   isAdmin = false,
   t = (key) => key,
-) {
+}) {
   if (!studentsExerciseList.length) return;
 
   // 1. Skip docs that were already graded; only work on the rest.
@@ -158,23 +174,29 @@ async function autoCheckExercises(
     return;
   }
 
-  // 1b. Point gate (non-admins only): block the whole batch when the teacher
-  //     doesn't have enough points for every pending doc (1 point per doc).
-  if (!isAdmin) {
-    let balance = 0;
-    try {
-      balance = await fetchMyPoint();
-    } catch (err) {
-      console.error(err);
-      onStatus.set(t("grading.pointCheckFailed"));
-      return;
-    }
-    if (balance < pending.length) {
-      onStatus.set(
-        t("grading.notEnough", { need: pending.length, have: balance }),
-      );
-      return;
-    }
+  // 1b. Point gate: 1 point per doc that still needs grading. `pending` is
+  //     already filtered by wasExerciseReviewedByAI, so it is exactly the
+  //     number of docs about to be written — and the number of points to spend.
+  //     The payer is the CLASS's teacher, which is not the caller when an admin
+  //     is grading, so admins are gated too. Nothing has been written yet, so
+  //     stopping here costs nothing.
+  let payer;
+  try {
+    payer = await fetchPayerPoint(classId);
+  } catch (err) {
+    console.error(err);
+    onStatus.set(t("grading.pointCheckFailed"));
+    return;
+  }
+  if (pending.length > payer.point) {
+    onStatus.set(
+      t("grading.notEnough", {
+        need: pending.length,
+        have: payer.point,
+        teacher: payer.teacherName,
+      }),
+    );
+    return;
   }
 
   // 2. Gather every answer across the class and DEDUPE by (question, answer).
@@ -209,7 +231,12 @@ async function autoCheckExercises(
   }
   let graded;
   try {
-    graded = await gradeAnswers(studentAnswerArr, useCache);
+    graded = await gradeAnswers(studentAnswerArr, {
+      useCache,
+      classId,
+      lessonId,
+      pendingCount: pending.length,
+    });
   } catch (err) {
     console.error(err);
     onStatus.set(t("grading.gradingFailed", { msg: err.message }));
@@ -234,15 +261,80 @@ async function autoCheckExercises(
   // 5. Write each pending student's feedback into their doc, targeting rows by
   //    question index (unique within a doc). Never guess: an answer without a
   //    matched feedback or a parseable index is skipped.
-  const CONCURRENCY_LIMIT = 5;
   const chunks = chunkArray(pending, CONCURRENCY_LIMIT);
-  let successCount = 0; // student docs whose feedback was written (= points spent)
+  let totalCharged = 0; // points actually spent, for the run's audit line
+  let stopped = false; // the payer ran out mid-run — stop writing more docs
+  const unbilled = []; // written, waiting for a pair to complete
+  const unsettled = []; // a charge failed; retried at the end of the run
+
+  // Every charge lands on the SAME TeacherPoint document, and Firestore only
+  // sustains ~1 write/sec per document. Funnel charges through one chain so at
+  // most one is ever in flight, even though 5 docs are written in parallel.
+  let chargeTail = Promise.resolve();
+  const enqueueCharge = (task) => {
+    const run = chargeTail.then(task, task);
+    chargeTail = run.catch(() => {});
+    return run;
+  };
+
+  /**
+   * Settles `docIds`, retrying once. Retrying is safe because the backend keys
+   * a ledger receipt per doc: a repeat call for a doc that was already charged
+   * bills nothing.
+   */
+  async function chargeDocs(docIds) {
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+      try {
+        const { charged = 0, point } = await consumeDocPoints({
+          classId,
+          docIds,
+          lessonId,
+        });
+        totalCharged += charged;
+        if (charged > 0) {
+          onStatus.append(
+            t("grading.spentBatch", { n: charged, remaining: point }),
+          );
+        }
+        return;
+      } catch (err) {
+        if (err.message === "INSUFFICIENT_POINTS") {
+          stopped = true;
+          onStatus.append(t("grading.stoppedNoPoints"));
+          return;
+        }
+        console.error(err);
+        if (attempt === 1) {
+          unsettled.push(...docIds);
+          onStatus.append(
+            t("grading.chargeFailed", { list: docIds.join(", ") }),
+          );
+        }
+      }
+    }
+  }
+
+  /** Records a written doc and bills as soon as a pair is complete. */
+  function noteWritten(docId) {
+    unbilled.push(docId);
+    // Out of points already: hold the doc back rather than firing a charge that
+    // can only fail again. It is reported as unsettled at the end of the run.
+    if (stopped) return Promise.resolve();
+    if (unbilled.length < CHARGE_BATCH_SIZE) return Promise.resolve();
+    // splice() runs before any await, so two docs finishing at the same moment
+    // can never grab the same pair.
+    const pair = unbilled.splice(0, CHARGE_BATCH_SIZE);
+    return enqueueCharge(() => chargeDocs(pair));
+  }
+
   try {
     for (const chunk of chunks) {
+      if (stopped) break;
       // Writing to the doc needs a REAL Google token, not the JWT.
       const googleToken = await ensureValidGoogleToken();
       await Promise.all(
         chunk.map(async ({ quesAndAnsArr, student }) => {
+          if (stopped) return;
           const gradingResults = [];
           for (const qa of quesAndAnsArr) {
             const feedback = feedbackByKey.get(
@@ -269,8 +361,11 @@ async function autoCheckExercises(
               googleToken,
               tableIndex,
             );
-            successCount += 1; // 1 point will be spent for this doc
             onStatus.append(t("grading.wrote", { docId: student.docId }));
+            // Bill immediately. From here on, a run that is cancelled (tab
+            // closed, network lost) leaves at most ONE written doc unpaid
+            // instead of the whole class.
+            await noteWritten(student.docId);
           } catch (err) {
             console.error(err);
             onStatus.append(
@@ -293,14 +388,35 @@ async function autoCheckExercises(
     console.error("AutoCheck Error:", err);
   }
 
-  // Spend 1 point per successfully written doc (non-admins only).
-  if (!isAdmin && successCount > 0) {
-    try {
-      const remaining = await consumePoints(successCount);
-      onStatus.append(t("grading.spent", { n: successCount, remaining }));
-    } catch (err) {
-      console.error("Consume points failed:", err);
+  // Settle the leftovers OUTSIDE the loop's try/catch, so an error mid-run can
+  // never skip them: the odd doc of an incomplete pair, then a retry of any
+  // charge that failed. Skipped once the payer is out of points — another
+  // charge would only fail the same way.
+  if (!stopped && unbilled.length) {
+    const rest = unbilled.splice(0, unbilled.length);
+    await enqueueCharge(() => chargeDocs(rest));
+  }
+  if (!stopped && unsettled.length) {
+    for (const batch of chunkArray(
+      unsettled.splice(0, unsettled.length),
+      CHARGE_BATCH_SIZE,
+    )) {
+      await enqueueCharge(() => chargeDocs(batch));
     }
+  }
+  const leftover = [...unbilled, ...unsettled];
+  if (leftover.length) {
+    onStatus.append(t("grading.unsettled", { list: leftover.join(", ") }));
+  }
+
+  // One audit line for the whole run. The per-doc money trail is the backend's
+  // TeacherPointLedger, so the individual charges are not audited.
+  if (totalCharged > 0) {
+    await recordGradingSummary({
+      classId,
+      lessonId,
+      totalPoints: totalCharged,
+    });
   }
 
   onStatus.append(t("grading.complete"));
