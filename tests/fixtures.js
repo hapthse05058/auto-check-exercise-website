@@ -73,3 +73,63 @@ export function makeNormalLessonTab({ answered = true, feedback = "" } = {}) {
     },
   };
 }
+
+/**
+ * Paragraph whose ELEMENTS carry startIndex/endIndex, the way the Docs API
+ * actually returns them. `P` above only indexes the paragraph, which is enough
+ * for the write path; the clear path resolves ranges from element indexes, so
+ * it needs these.
+ */
+export const PIndexed = (text, start) => ({
+  startIndex: start,
+  endIndex: start + text.length,
+  paragraph: {
+    elements: [
+      {
+        startIndex: start,
+        endIndex: start + text.length,
+        textRun: { content: text },
+      },
+    ],
+  },
+});
+
+/** Paragraph split into several indexed runs, contiguous from `start`. */
+export const PIndexedRuns = (start, ...texts) => {
+  let cursor = start;
+  const elements = texts.map((content) => {
+    const el = {
+      startIndex: cursor,
+      endIndex: cursor + content.length,
+      textRun: { content },
+    };
+    cursor += content.length;
+    return el;
+  });
+  return { startIndex: start, endIndex: cursor, paragraph: { elements } };
+};
+
+/** A non-text element (smart chip) occupying real index space. */
+export const PRichLink = (start, title) => ({
+  startIndex: start,
+  endIndex: start + title.length,
+  paragraph: {
+    elements: [
+      {
+        startIndex: start,
+        endIndex: start + title.length,
+        richLink: { richLinkProperties: { title } },
+      },
+    ],
+  },
+});
+
+/** Wraps rows in a one-table tab, WITHOUT adding header rows. */
+export function makeRawTab(rows, title = "BUỔI 10 - Lesson") {
+  return {
+    tabProperties: { title, tabId: "t.x" },
+    documentTab: {
+      body: { content: [{ table: { tableRows: rows } }] },
+    },
+  };
+}

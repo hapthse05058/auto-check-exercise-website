@@ -101,6 +101,8 @@ export const translations = {
         "When off, AI feedback is not stored in or read from the grading cache.",
       process: "Process All Documents",
       processing: "Processing...",
+      clearFeedback: "Clear feedback",
+      clearing: "Clearing...",
       loadingTeacher: "Loading teacher info...",
       ready: "Ready to process...",
       loadTeacherFailed: "Failed to load teacher data. Please login again.",
@@ -277,6 +279,7 @@ export const translations = {
         grading_run: "Grade exercises",
         grading_runExtension: "Grade exercises (extension)",
         grading_pointsSummary: "Points spent grading",
+        doc_feedback_clear: "Clear doc feedback",
         points_consume: "Spend points",
         points_topup: "Top up points",
         points_create: "Create point record",
@@ -533,6 +536,20 @@ export const translations = {
       backToLogin: "Back to login",
       wait: "Please wait while we complete your login.",
     },
+    clearFeedback: {
+      scanning: "Checking {docId}...",
+      clearingDoc: "Clearing {docId}...",
+      confirm:
+        'This will clear {cells} "Chữa bài" cell(s) across {docs} document(s), in {lesson} — class {class}.\n\nEVERYTHING in that column for this lesson goes, INCLUDING anything a teacher typed by hand.\nThis CANNOT be undone. Continue?',
+      noTable: "\n {docId}: no exercise table found for this lesson, skipping.",
+      nothing: "\n {docId}: no feedback to clear.",
+      nothingAtAll: "No feedback found to clear for this lesson.",
+      cleared: "\n Cleared {n} cell(s) in {docId}.",
+      failed: "\n Failed clearing {docId}: {msg}",
+      complete: "\n Done! Cleared {cells} cell(s) across {docs} document(s).",
+      cacheHint:
+        '\n Note: re-grading reuses the cached feedback. To make the AI grade from scratch, turn off "Save to grading cache" first.',
+    },
     grading: {
       noDocs: "No student documents found for this class.",
       processingDoc: "Processing Doc: {docId}...",
@@ -668,6 +685,8 @@ export const translations = {
         "Khi tắt, feedback AI sẽ không được lưu vào và không đọc từ cache chấm bài.",
       process: "Chấm tất cả tài liệu",
       processing: "Đang xử lý...",
+      clearFeedback: "Xóa feedback",
+      clearing: "Đang xóa...",
       loadingTeacher: "Đang tải thông tin giáo viên...",
       ready: "Sẵn sàng chấm bài...",
       loadTeacherFailed:
@@ -843,6 +862,7 @@ export const translations = {
         grading_run: "Chấm bài",
         grading_runExtension: "Chấm bài (extension)",
         grading_pointsSummary: "Tổng point trừ sau khi chấm bài",
+        doc_feedback_clear: "Xóa feedback trong Google Doc",
         points_consume: "Trừ điểm",
         points_topup: "Nạp điểm",
         points_create: "Tạo bản ghi điểm",
@@ -1097,6 +1117,20 @@ export const translations = {
       failed: "Đăng nhập Google thất bại.",
       backToLogin: "Quay lại đăng nhập",
       wait: "Vui lòng chờ trong khi hoàn tất đăng nhập.",
+    },
+    clearFeedback: {
+      scanning: "Đang kiểm tra {docId}...",
+      clearingDoc: "Đang xóa {docId}...",
+      confirm:
+        'Sẽ xóa {cells} ô "Chữa bài" trong {docs} tài liệu, ở {lesson} — lớp {class}.\n\nToàn bộ nội dung cột "Chữa bài" của buổi này sẽ bị xóa, KỂ CẢ chữ giáo viên tự gõ.\nThao tác này KHÔNG hoàn tác được. Tiếp tục?',
+      noTable: "\n {docId}: không tìm thấy bảng bài tập cho buổi này, bỏ qua.",
+      nothing: "\n {docId}: không có feedback nào để xóa.",
+      nothingAtAll: "Không tìm thấy feedback nào để xóa ở buổi này.",
+      cleared: "\n Đã xóa {n} ô trong {docId}.",
+      failed: "\n Xóa {docId} thất bại: {msg}",
+      complete: "\n Hoàn tất! Đã xóa {cells} ô ở {docs} tài liệu.",
+      cacheHint:
+        '\n Lưu ý: chấm lại sẽ dùng feedback cũ trong cache. Nếu muốn AI chấm lại từ đầu, hãy tắt "Lưu vào cache chấm bài" trước khi chấm.',
     },
     grading: {
       noDocs: "Không tìm thấy tài liệu học sinh nào cho lớp này.",

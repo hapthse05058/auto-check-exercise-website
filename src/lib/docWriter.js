@@ -7,6 +7,7 @@ import {
   containsCorrectMark,
   extractQuestionIndex,
   getTablesWhichContainStudentExercise,
+  startsWithNumberDot,
 } from "./docParser.js";
 import { batchUpdateDoc } from "../api/googleDocs.js";
 
@@ -370,4 +371,156 @@ export async function writeGradingResultsToDoc(
     console.error(error);
     throw error;
   }
+}
+
+// ---------------------------------------------------------------------------
+// Clearing feedback back out of a doc (admin "Xóa feedback")
+// ---------------------------------------------------------------------------
+
+/**
+ * The one literal marker in the layout. `buildFeedbackRequests` appends the
+ * overall comment right after it, so clearing means cutting everything that
+ * follows it while leaving the label itself in place.
+ */
+export const OVERALL_FEEDBACK_LABEL = "Nhận xét chung của Giáo viên";
+
+/**
+ * A cell's paragraph elements with the index range Docs reported for each one.
+ *
+ * Ranges are built ONLY from these API-provided indexes — never by adding a
+ * character offset to a container's startIndex, which silently drifts as soon
+ * as a cell holds a smart chip or several runs. Elements without a range cannot
+ * be located, so they are dropped rather than guessed at.
+ *
+ * `text` is null for anything that is not a plain text run (richLink, person):
+ * such an element still occupies index space but its length cannot be derived
+ * from a string, so callers must refuse to do offset arithmetic across it.
+ */
+function cellElements(cell) {
+  return (cell?.content || [])
+    .flatMap((entry) => entry?.paragraph?.elements || [])
+    .filter((el) => el?.startIndex !== undefined && el?.endIndex !== undefined)
+    .map((el) => ({
+      start: el.startIndex,
+      end: el.endIndex,
+      text: el.textRun?.content ?? null,
+    }));
+}
+
+/**
+ * Range covering everything from `els[fromIndex]` to the end of the cell, minus
+ * the ONE trailing newline that terminates it — Docs rejects deleting that one.
+ *
+ * Every other newline is included on purpose: feedback arrives with "\n" in it
+ * (formatFeedbackForDoc puts the reason on its own line), and an insertText
+ * carrying "\n" splits the cell into extra paragraphs. Those breaks have to go
+ * too, or a cleared cell keeps the height of the feedback it used to hold.
+ */
+function textRange(els, fromIndex = 0) {
+  const slice = els.slice(fromIndex);
+  if (!slice.length) return null;
+  const last = slice.at(-1);
+  // Exactly one, not /\n+$/: in "abc\n\n" the first newline is a paragraph
+  // break that should go; only the very last one terminates the cell.
+  const keep = last.text?.endsWith("\n") ? 1 : 0;
+  return { start: slice[0].start, end: last.end - keep };
+}
+
+/**
+ * Range starting just past the overall-comment label. `labelEnd` is an offset
+ * into the cell's concatenated text; it is resolved to (the element holding it)
+ * + (the offset WITHIN that element), so the only arithmetic happens inside a
+ * single text run, where endIndex - startIndex === content.length holds exactly
+ * (UTF-16 units, so surrogate pairs like 💯 stay aligned).
+ *
+ * Returns null when the label lands in a non-text element, or when nothing but
+ * whitespace follows it — a cell already cleared must produce no request at all.
+ */
+function rangeAfterLabel(els, labelEnd) {
+  let seen = 0;
+  for (let i = 0; i < els.length; i++) {
+    const el = els[i];
+    if (el.text === null) return null; // cannot map characters — do not guess
+    const next = seen + el.text.length;
+    if (labelEnd <= next) {
+      const rest =
+        el.text.slice(labelEnd - seen) +
+        els
+          .slice(i + 1)
+          .map((e) => e.text ?? "")
+          .join("");
+      if (!rest.trim()) return null; // nothing appended yet
+      const tail = textRange(els, i);
+      const start = el.start + (labelEnd - seen);
+      return tail && start < tail.end ? { start, end: tail.end } : null;
+    }
+    seen = next;
+  }
+  return null;
+}
+
+/**
+ * batchUpdate requests that strip what grading wrote into one lesson tab: the
+ * "Chữa bài" cell of every numbered row, plus whatever was appended after the
+ * overall-comment label.
+ *
+ * Scoping to a single lesson is the CALLER's job — it passes the tab found by
+ * title, so other lessons in the same document are never touched.
+ *
+ * A row only produces a request when its target cell actually holds text, so
+ * running this twice is a genuine no-op: the second pass returns [] and the
+ * caller skips the API call entirely.
+ *
+ * Verified against a live document before this was written (see the plan's
+ * "Bước 0"): paragraph elements carry startIndex/endIndex, endIndex - startIndex
+ * equals content.length, and one deleteContentRange may span paragraph breaks
+ * inside a cell.
+ */
+export function buildClearFeedbackRequests(exercise, tabId, tableIndex) {
+  const rows = getTablesWhichContainStudentExercise(exercise, tableIndex) || [];
+  const ranges = [];
+
+  for (const row of rows) {
+    const cells = row.tableCells || [];
+    if (!cells.length) continue;
+
+    const headEls = cellElements(cells[0]);
+    const headText = headEls.map((e) => e.text ?? "").join("");
+
+    // The overall-comment row is checked FIRST: it is often a single merged
+    // cell, so the "needs a last column" rule below would skip it.
+    const at = headText.indexOf(OVERALL_FEEDBACK_LABEL);
+    if (at !== -1) {
+      let labelEnd = at + OVERALL_FEEDBACK_LABEL.length;
+      // The ":" after the label is the document template's own punctuation, not
+      // something grading appended (it writes AFTER the existing text). Keeping
+      // it is what makes a re-run on a cleared cell produce nothing at all.
+      if (headText[labelEnd] === ":") labelEnd += 1;
+      const r = rangeAfterLabel(headEls, labelEnd);
+      if (r) ranges.push(r);
+      continue;
+    }
+
+    // Feedback lives in the LAST cell, so a one-cell row has nowhere to hold it.
+    if (cells.length < 2) continue;
+    // Same rule the parser and wasExerciseReviewedByAI use to spot a question.
+    if (!startsWithNumberDot(headText)) continue;
+
+    const els = cellElements(cells.at(-1));
+    if (!els.some((e) => (e.text ?? "").trim())) continue; // already empty
+    const r = textRange(els);
+    if (r && r.end > r.start) ranges.push(r);
+  }
+
+  // Delete bottom-up so each range's indexes are still valid when it runs:
+  // removing a later range never shifts an earlier one. Same reasoning as the
+  // insert path above, and the ranges are disjoint, so one global sort is
+  // enough regardless of which cell or column they came from.
+  return ranges
+    .sort((a, b) => b.start - a.start)
+    .map((r) => ({
+      deleteContentRange: {
+        range: { startIndex: r.start, endIndex: r.end, tabId },
+      },
+    }));
 }

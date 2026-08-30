@@ -8,12 +8,17 @@ import {
   fetchLessons,
   fetchMyPoint,
   fetchPayerPoint,
+  recordFeedbackClearSummary,
   updateCurrentLessonForClass,
 } from "../api/backend.js";
 import { useAuth } from "../auth/AuthContext.jsx";
 import SearchableSelect from "../components/SearchableSelect.jsx";
 import { isAdminEmail } from "../config.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
+import {
+  executeFeedbackClear,
+  planFeedbackClear,
+} from "../lib/feedbackClear.js";
 import { processDocs } from "../lib/grading.js";
 
 export default function GradePage() {
@@ -29,6 +34,7 @@ export default function GradePage() {
   const [docLinksText, setDocLinksText] = useState("");
   const [status, setStatus] = useState("");
   const [processing, setProcessing] = useState(false);
+  const [clearing, setClearing] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [saveCache, setSaveCache] = useState(true);
   const [point, setPoint] = useState(null);
@@ -158,7 +164,7 @@ export default function GradePage() {
   };
 
   const handleProcessAllDocs = async () => {
-    if (processing) return;
+    if (processing || clearing) return;
     const lessonName = lessons.find(
       (item) => item.id === selectedLessonId,
     )?.name;
@@ -191,7 +197,78 @@ export default function GradePage() {
     }
   };
 
-  const canProcess = selectedClassId && selectedLessonId && !processing;
+  /**
+   * Admin-only: strip the feedback grading wrote into the selected lesson.
+   * Two passes — the first only reads, so the confirm dialog can quote real
+   * numbers before anything irreversible happens.
+   */
+  const handleClearFeedback = async () => {
+    if (processing || clearing) return;
+    const lessonName = lessons.find(
+      (item) => item.id === selectedLessonId,
+    )?.name;
+    setClearing(true);
+    try {
+      const plan = await planFeedbackClear({
+        docLinksText,
+        classId: selectedClassId,
+        classType: selectedClass?.classType,
+        lessonName,
+        onStatus,
+        t,
+      });
+      if (!plan) return; // no docs at all — planFeedbackClear already alerted
+      if (!plan.cells) {
+        onStatus.append(`\n${t("clearFeedback.nothingAtAll")}`);
+        return;
+      }
+      // The "Chữa bài" column holds hand-typed teacher notes too, and they
+      // cannot be told apart from AI feedback — so show the count and ask.
+      const confirmed = window.confirm(
+        t("clearFeedback.confirm", {
+          cells: plan.cells,
+          docs: plan.plans.length,
+          lesson: lessonName,
+          class: selectedClass?.name,
+        }),
+      );
+      if (!confirmed) return;
+
+      const { clearedDocs, clearedCells } = await executeFeedbackClear({
+        plans: plan.plans,
+        classType: selectedClass?.classType,
+        lessonName,
+        onStatus,
+        t,
+      });
+      onStatus.append(
+        t("clearFeedback.complete", { cells: clearedCells, docs: clearedDocs }),
+      );
+      if (clearedDocs > 0) {
+        // Re-grading hits the shared grading cache and hands back the SAME
+        // feedback; point at the toggle that forces a fresh AI pass.
+        onStatus.append(t("clearFeedback.cacheHint"));
+        await recordFeedbackClearSummary({
+          classId: selectedClassId,
+          lessonId: selectedLessonId,
+          clearedDocs,
+          clearedCells,
+        });
+      }
+    } catch (error) {
+      if (error.message !== "RE-AUTH_NEEDED") {
+        console.error("Clear feedback error:", error);
+        onStatus.append(
+          `\n${t("grade.processFailed", { msg: error.message })}`,
+        );
+      }
+    } finally {
+      setClearing(false);
+    }
+  };
+
+  const canProcess =
+    selectedClassId && selectedLessonId && !processing && !clearing;
 
   return (
     <div className="page-wide">
@@ -222,7 +299,7 @@ export default function GradePage() {
         value={selectedClassId}
         onChange={handleClassChange}
         options={classes}
-        disabled={processing}
+        disabled={processing || clearing}
         placeholder={t("grade.selectClass")}
         searchPlaceholder={t("common.searchClassPlaceholder")}
         noResultsText={t("common.noClassesFound")}
@@ -231,7 +308,9 @@ export default function GradePage() {
         className="mb-1"
         value={selectedLessonId}
         onChange={handleLessonChange}
-        disabled={lessonsLoading || lessons.length === 0 || processing}
+        disabled={
+          lessonsLoading || lessons.length === 0 || processing || clearing
+        }
       >
         <option value="">
           {lessonsLoading ? t("grade.loadingLessons") : t("grade.selectLesson")}
@@ -248,7 +327,7 @@ export default function GradePage() {
         rows={10}
         value={docLinksText}
         onChange={(e) => setDocLinksText(e.target.value)}
-        disabled={processing}
+        disabled={processing || clearing}
       />
       {isAdmin && (
         <label className="cache-toggle mb-1" title={t("grade.saveCacheTitle")}>
@@ -256,20 +335,31 @@ export default function GradePage() {
             type="checkbox"
             checked={saveCache}
             onChange={(e) => setSaveCache(e.target.checked)}
-            disabled={processing}
+            disabled={processing || clearing}
           />
           <span>
             {saveCache ? t("grade.saveCacheOn") : t("grade.saveCacheOff")}
           </span>
         </label>
       )}
-      <button
-        className="mb-1 primary-btn"
-        onClick={handleProcessAllDocs}
-        disabled={!canProcess}
-      >
-        {processing ? t("grade.processing") : t("grade.process")}
-      </button>
+      <div className="button-row mb-1">
+        <button
+          className="primary-btn"
+          onClick={handleProcessAllDocs}
+          disabled={!canProcess}
+        >
+          {processing ? t("grade.processing") : t("grade.process")}
+        </button>
+        {isAdmin && (
+          <button
+            className="danger-btn"
+            onClick={handleClearFeedback}
+            disabled={!canProcess}
+          >
+            {clearing ? t("grade.clearing") : t("grade.clearFeedback")}
+          </button>
+        )}
+      </div>
       <div className="status-output">{status}</div>
     </div>
   );

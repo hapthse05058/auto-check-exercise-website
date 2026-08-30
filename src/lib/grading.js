@@ -43,6 +43,16 @@ const chunkArray = (array, size) => {
 };
 
 /**
+ * Which docs an action applies to: the pasted links when the textarea has any,
+ * otherwise every student saved on the class. Shared with the feedback-clearing
+ * flow so both act on exactly the same set.
+ */
+export async function resolveDocRefs(docLinksText, classId) {
+  const trimmed = (docLinksText || "").trim();
+  return trimmed ? parseDocLinks(trimmed) : fetchStudentDocRefs(classId);
+}
+
+/**
  * Processes all docs for a lesson.
  *
  * @param {object} params
@@ -64,13 +74,7 @@ export async function processDocs({
   isAdmin = false,
   t = (key) => key, // translator from the caller (GradePage)
 }) {
-  let links = [];
-  const trimmed = (docLinksText || "").trim();
-  if (trimmed) {
-    links = parseDocLinks(trimmed);
-  } else {
-    links = await fetchStudentDocRefs(classId);
-  }
+  const links = await resolveDocRefs(docLinksText, classId);
   if (!links.length) {
     alert(t("grading.noDocs"));
     return false;

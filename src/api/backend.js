@@ -449,6 +449,27 @@ export async function recordGradingSummary({ classId, lessonId, totalPoints }) {
   }
 }
 
+/**
+ * One audit line closing out a "clear feedback" run. The docs are edited
+ * browser-side, so nothing else would record it. Never throws, for the same
+ * reason as above: the deletion already happened.
+ */
+export async function recordFeedbackClearSummary({
+  classId,
+  lessonId,
+  clearedDocs,
+  clearedCells,
+}) {
+  try {
+    await authFetch("/feedback-clear-summary", {
+      method: "POST",
+      body: { classId, lessonId, clearedDocs, clearedCells },
+    });
+  } catch {
+    // Offline, expired token, backend down — losing one log line is acceptable.
+  }
+}
+
 // --- admin only ---
 
 /** Teachers list for the create dropdown (`[{ id, gmail, name }]`). */
