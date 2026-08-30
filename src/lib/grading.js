@@ -3,6 +3,10 @@
  * answered part-IV questions, send them to the AI grader, and write the
  * feedback back into the doc. Port of processDocs/autoCheckExercises from
  * extension/popup.js.
+ *
+ * Nothing here touches the UI. A run reports itself once, through the value it
+ * returns — the screen only shows a spinner while it is in flight, so streaming
+ * per-doc progress would be text written and never read.
  */
 import {
   extractQuestionIndex,
@@ -60,8 +64,13 @@ export async function resolveDocRefs(docLinksText, classId) {
  * @param {string} params.classId       Selected class id.
  * @param {string} params.classType     Selected class type code.
  * @param {string} params.lessonName    Selected lesson name ("BUỔI XX ...").
- * @param {object} params.onStatus      {set(text), append(text)} UI reporter.
- * @returns {boolean} false when there was nothing to process.
+ * @param {Function} params.t           Translator from the caller (GradePage).
+ * @returns {Promise<{graded: number, warnings: string[], error: ?string,
+ *                    notice: ?string}>}
+ *   `graded` is how many students were actually written to. `error` is set when
+ *   something stopped the whole run, `notice` when there was simply nothing to
+ *   do, and `warnings` holds per-doc problems that did not stop the run. Every
+ *   string is already translated.
  */
 export async function processDocs({
   docLinksText,
@@ -69,34 +78,34 @@ export async function processDocs({
   classType,
   lessonName,
   lessonId,
-  onStatus,
   useCache = true,
-  isAdmin = false,
   t = (key) => key, // translator from the caller (GradePage)
 }) {
+  const warnings = [];
+  const warn = (text) => warnings.push(text);
+
   const links = await resolveDocRefs(docLinksText, classId);
   if (!links.length) {
     alert(t("grading.noDocs"));
-    return false;
+    return { graded: 0, warnings, error: null, notice: null };
   }
 
   let accessToken;
   let tableIndex = [];
   const studentsExerciseList = [];
   for (const student of links) {
-    onStatus.set(t("grading.processingDoc", { docId: student.docId }));
     try {
       // The Google Docs API needs a REAL Google token, not the backend JWT.
       // Re-check before every call: long doc lists can outlive a token.
       accessToken = await ensureValidGoogleToken();
 
-      const doc = await getTabContent(
-        student.docId,
-        accessToken,
-        lessonName,
-        onStatus,
-      );
-      if (!doc) continue;
+      const doc = await getTabContent(student.docId, accessToken, lessonName);
+      if (!doc) {
+        // Either the doc has no tab for this lesson or the fetch failed. Both
+        // leave this student ungraded, so say so; details go to the console.
+        warn(t("grading.tabMissing", { docId: student.docId }));
+        continue;
+      }
       student.exercise = doc;
       student.tabId = doc.tabProperties.tabId;
       if (!tableIndex.length) {
@@ -119,7 +128,7 @@ export async function processDocs({
       // guessed at — tell the teacher so they can check those by hand.
       const unreadable = getUnreadableQuestions(doc, tableIndex);
       if (unreadable.length) {
-        onStatus.append(
+        warn(
           t("grading.unreadableAnswers", {
             docId: student.docId,
             list: unreadable.join(", "),
@@ -128,55 +137,44 @@ export async function processDocs({
       }
     } catch (err) {
       console.error(err);
-      onStatus.set(
-        t("grading.failedDoc", { docId: student.docId, msg: err.message }),
-      );
+      warn(t("grading.failedDoc", { docId: student.docId, msg: err.message }));
     }
   }
-  if (studentsExerciseList.length) {
-    onStatus.set(t("grading.finishedFetch"));
-  }
 
-  await autoCheckExercises({
+  const result = await autoCheckExercises({
     studentsExerciseList,
     tableIndex,
-    onStatus,
     classId,
     lessonId,
     useCache,
-    isAdmin,
+    warn,
     t,
   });
-  return true;
+  return { ...result, warnings };
 }
 
+/** @returns {Promise<{graded: number, error: ?string, notice: ?string}>} */
 async function autoCheckExercises({
   studentsExerciseList,
   tableIndex,
-  onStatus,
   classId,
   lessonId,
   useCache = true,
-  isAdmin = false,
+  warn = () => {},
   t = (key) => key,
 }) {
-  if (!studentsExerciseList.length) return;
+  // "Nothing to do" and "it broke" read very differently on screen, so they are
+  // separate fields rather than one message.
+  const nothingToDo = (notice) => ({ graded: 0, error: null, notice });
+  const runFailed = (error) => ({ graded: 0, error, notice: null });
+
+  if (!studentsExerciseList.length) return nothingToDo(t("grading.noAnswers"));
 
   // 1. Skip docs that were already graded; only work on the rest.
-  const pending = [];
-  for (const item of studentsExerciseList) {
-    if (wasExerciseReviewedByAI(item.student.exercise, tableIndex)) {
-      onStatus.append(
-        t("grading.alreadyChecked", { docId: item.student.docId }),
-      );
-    } else {
-      pending.push(item);
-    }
-  }
-  if (!pending.length) {
-    onStatus.append(t("grading.allChecked"));
-    return;
-  }
+  const pending = studentsExerciseList.filter(
+    (item) => !wasExerciseReviewedByAI(item.student.exercise, tableIndex),
+  );
+  if (!pending.length) return nothingToDo(t("grading.allChecked"));
 
   // 1b. Point gate: 1 point per doc that still needs grading. `pending` is
   //     already filtered by wasExerciseReviewedByAI, so it is exactly the
@@ -189,18 +187,16 @@ async function autoCheckExercises({
     payer = await fetchPayerPoint(classId);
   } catch (err) {
     console.error(err);
-    onStatus.set(t("grading.pointCheckFailed"));
-    return;
+    return runFailed(t("grading.pointCheckFailed"));
   }
   if (pending.length > payer.point) {
-    onStatus.set(
+    return runFailed(
       t("grading.notEnough", {
         need: pending.length,
         have: payer.point,
         teacher: payer.teacherName,
       }),
     );
-    return;
   }
 
   // 2. Gather every answer across the class and DEDUPE by (question, answer).
@@ -216,23 +212,10 @@ async function autoCheckExercises({
     }
   }
   const studentAnswerArr = [...uniqueAnswers.values()];
-  if (!studentAnswerArr.length) {
-    onStatus.append(t("grading.noAnswers"));
-    return;
-  }
+  if (!studentAnswerArr.length) return nothingToDo(t("grading.noAnswers"));
 
   // 3. Grade on the backend (gradingCache lookup + AI for misses, unless
   //    caching is disabled — then every answer goes straight to the AI).
-  if (isAdmin) {
-    onStatus.set(
-      t("grading.gradingN", {
-        n: studentAnswerArr.length,
-        cache: useCache ? "" : t("grading.cacheOff"),
-      }),
-    );
-  } else {
-    onStatus.set(t("grading.gradingAnswers"));
-  }
   let graded;
   try {
     graded = await gradeAnswers(studentAnswerArr, {
@@ -243,8 +226,7 @@ async function autoCheckExercises({
     });
   } catch (err) {
     console.error(err);
-    onStatus.set(t("grading.gradingFailed", { msg: err.message }));
-    return;
+    return runFailed(t("grading.gradingFailed", { msg: err.message }));
   }
 
   // 4. Map feedback back by the SAME (question, answer) key. The AI answers on
@@ -266,6 +248,7 @@ async function autoCheckExercises({
   //    question index (unique within a doc). Never guess: an answer without a
   //    matched feedback or a parseable index is skipped.
   const chunks = chunkArray(pending, CONCURRENCY_LIMIT);
+  let wroteCount = 0; // docs actually written — the count the teacher is shown
   let totalCharged = 0; // points actually spent, for the run's audit line
   let stopped = false; // the payer ran out mid-run — stop writing more docs
   const unbilled = []; // written, waiting for a pair to complete
@@ -289,31 +272,23 @@ async function autoCheckExercises({
   async function chargeDocs(docIds) {
     for (let attempt = 0; attempt < 2; attempt += 1) {
       try {
-        const { charged = 0, point } = await consumeDocPoints({
+        const { charged = 0 } = await consumeDocPoints({
           classId,
           docIds,
           lessonId,
         });
         totalCharged += charged;
-        if (charged > 0) {
-          onStatus.append(
-            t("grading.spentBatch", { n: charged, remaining: point }),
-          );
-        }
         return;
       } catch (err) {
         if (err.message === "INSUFFICIENT_POINTS") {
           stopped = true;
-          onStatus.append(t("grading.stoppedNoPoints"));
+          warn(t("grading.stoppedNoPoints"));
           return;
         }
         console.error(err);
-        if (attempt === 1) {
-          unsettled.push(...docIds);
-          onStatus.append(
-            t("grading.chargeFailed", { list: docIds.join(", ") }),
-          );
-        }
+        // Not reported here: these are retried at the end of the run, and only
+        // the ones still unsettled after that are worth telling the teacher.
+        if (attempt === 1) unsettled.push(...docIds);
       }
     }
   }
@@ -355,7 +330,7 @@ async function autoCheckExercises({
             }
           }
           if (!gradingResults.length) {
-            onStatus.append(t("grading.noMatch", { docId: student.docId }));
+            warn(t("grading.noMatch", { docId: student.docId }));
             return;
           }
           try {
@@ -365,14 +340,14 @@ async function autoCheckExercises({
               googleToken,
               tableIndex,
             );
-            onStatus.append(t("grading.wrote", { docId: student.docId }));
+            wroteCount += 1;
             // Bill immediately. From here on, a run that is cancelled (tab
             // closed, network lost) leaves at most ONE written doc unpaid
             // instead of the whole class.
             await noteWritten(student.docId);
           } catch (err) {
             console.error(err);
-            onStatus.append(
+            warn(
               t("grading.failedWrite", {
                 docId: student.docId,
                 msg: err.message,
@@ -381,13 +356,7 @@ async function autoCheckExercises({
           }
         }),
       );
-      onStatus.append(t("grading.completeChunk", { n: chunk.length }));
     }
-    // Celebrate!
-    const sound = new Audio("/successful_sound.mp3");
-    await sound
-      .play()
-      .catch((err) => console.error("Error playing sound:", err));
   } catch (err) {
     console.error("AutoCheck Error:", err);
   }
@@ -410,7 +379,7 @@ async function autoCheckExercises({
   }
   const leftover = [...unbilled, ...unsettled];
   if (leftover.length) {
-    onStatus.append(t("grading.unsettled", { list: leftover.join(", ") }));
+    warn(t("grading.unsettled", { list: leftover.join(", ") }));
   }
 
   // One audit line for the whole run. The per-doc money trail is the backend's
@@ -423,5 +392,10 @@ async function autoCheckExercises({
     });
   }
 
-  onStatus.append(t("grading.complete"));
+  return {
+    graded: wroteCount,
+    error: null,
+    // Every doc failed or matched nothing — otherwise the box would be blank.
+    notice: wroteCount ? null : t("grading.noneGraded"),
+  };
 }

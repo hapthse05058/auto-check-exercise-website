@@ -510,6 +510,27 @@ textarea {
   border-radius: var(--border-radius-md);
   padding: 0.5rem 0.75rem;
 }
+/* Spinner + label while a run is in flight. .spinner is global (students.css). */
+.status-loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+/* Problems that did NOT stop the run, listed under the summary line. Same
+   amber language as .status-warning, which other pages own. */
+.status-warnings {
+  margin: 0.5rem 0 0;
+  padding-left: 0;
+  list-style: none;
+}
+.status-warnings li {
+  border-left: 3px solid #d97706;
+  background-color: #fef3c7;
+  color: #92400e;
+  border-radius: var(--border-radius-md);
+  padding: 0.35rem 0.6rem;
+  margin-top: 0.35rem;
+}
 .status-output {
   margin-top: 0.5rem;
   padding: 0.75rem;

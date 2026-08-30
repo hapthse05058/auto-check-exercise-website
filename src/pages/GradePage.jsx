@@ -20,6 +20,7 @@ import {
   planFeedbackClear,
 } from "../lib/feedbackClear.js";
 import { processDocs } from "../lib/grading.js";
+import { playSuccessSound } from "../lib/sound.js";
 
 export default function GradePage() {
   const { loadTeacherInfo } = useAuth();
@@ -32,7 +33,14 @@ export default function GradePage() {
   const [selectedLessonId, setSelectedLessonId] = useState("");
   const [lessonsLoading, setLessonsLoading] = useState(false);
   const [docLinksText, setDocLinksText] = useState("");
-  const [status, setStatus] = useState("");
+  // { phase: "idle" | "running" | "done" | "error", text, warnings: string[] }
+  // A run shows a spinner while it works and one summary line when it stops;
+  // per-doc chatter would only bury the part the teacher is looking for.
+  const [status, setStatus] = useState({
+    phase: "idle",
+    text: "",
+    warnings: [],
+  });
   const [processing, setProcessing] = useState(false);
   const [clearing, setClearing] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -68,17 +76,15 @@ export default function GradePage() {
 
   const selectedClass = classes.find((cls) => cls.id === selectedClassId);
 
-  const onStatus = {
-    set: (text) => setStatus(text),
-    append: (text) => setStatus((prev) => prev + text),
-  };
+  /** Plain message, no spinner — page loading and setup errors. */
+  const say = (text) => setStatus({ phase: "idle", text, warnings: [] });
 
   // Load teacher info + classes once on entry.
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        setStatus(t("grade.loadingTeacher"));
+        say(t("grade.loadingTeacher"));
         const teacherInfo = await loadTeacherInfo();
         if (cancelled) return;
         if (!teacherInfo) {
@@ -98,11 +104,11 @@ export default function GradePage() {
         if (activeClasses.length === 0) {
           alert(t("grade.noClasses"));
         }
-        setStatus(t("grade.ready"));
+        say(t("grade.ready"));
       } catch (error) {
         if (cancelled || error.message === "RE-AUTH_NEEDED") return;
         console.error("Post-login error:", error);
-        setStatus(t("grade.loadTeacherFailed"));
+        say(t("grade.loadTeacherFailed"));
       }
     })();
     return () => {
@@ -136,7 +142,7 @@ export default function GradePage() {
     } catch (error) {
       if (error.message === "RE-AUTH_NEEDED") return;
       console.error("Error fetching lessons:", error);
-      setStatus(t("grade.loadLessonsFailed"));
+      say(t("grade.loadLessonsFailed"));
     } finally {
       setLessonsLoading(false);
     }
@@ -169,25 +175,43 @@ export default function GradePage() {
       (item) => item.id === selectedLessonId,
     )?.name;
     setProcessing(true);
+    setStatus({
+      phase: "running",
+      text: t("grading.gradingAnswers"),
+      warnings: [],
+    });
     try {
-      await processDocs({
+      const { graded, warnings, error, notice } = await processDocs({
         docLinksText,
         classId: selectedClassId,
         classType: selectedClass?.classType,
         lessonName,
         lessonId: selectedLessonId,
-        onStatus,
         // Non-admins always use the cache; admins control it via the toggle.
         useCache: isAdmin ? saveCache : true,
-        isAdmin,
         t,
       });
+      if (error) {
+        setStatus({ phase: "error", text: error, warnings });
+      } else if (graded > 0) {
+        setStatus({
+          phase: "done",
+          text: t("grading.doneCount", { n: graded }),
+          warnings,
+        });
+        playSuccessSound();
+      } else {
+        // Nothing was written — say why rather than claiming "0 students".
+        setStatus({ phase: "done", text: notice ?? "", warnings });
+      }
     } catch (error) {
       if (error.message !== "RE-AUTH_NEEDED") {
         console.error("Processing error:", error);
-        onStatus.append(
-          `\n${t("grade.processFailed", { msg: error.message })}`,
-        );
+        setStatus({
+          phase: "error",
+          text: t("grade.processFailed", { msg: error.message }),
+          warnings: [],
+        });
       }
     } finally {
       setProcessing(false);
@@ -208,18 +232,30 @@ export default function GradePage() {
       (item) => item.id === selectedLessonId,
     )?.name;
     setClearing(true);
+    setStatus({
+      phase: "running",
+      text: t("clearFeedback.inProgress"),
+      warnings: [],
+    });
     try {
       const plan = await planFeedbackClear({
         docLinksText,
         classId: selectedClassId,
         classType: selectedClass?.classType,
         lessonName,
-        onStatus,
         t,
       });
-      if (!plan) return; // no docs at all — planFeedbackClear already alerted
+      if (!plan) {
+        // No document at all — planFeedbackClear already alerted.
+        say("");
+        return;
+      }
       if (!plan.cells) {
-        onStatus.append(`\n${t("clearFeedback.nothingAtAll")}`);
+        setStatus({
+          phase: "done",
+          text: t("clearFeedback.nothingAtAll"),
+          warnings: plan.warnings,
+        });
         return;
       }
       // The "Chữa bài" column holds hand-typed teacher notes too, and they
@@ -232,22 +268,32 @@ export default function GradePage() {
           class: selectedClass?.name,
         }),
       );
-      if (!confirmed) return;
+      if (!confirmed) {
+        say("");
+        return;
+      }
 
-      const { clearedDocs, clearedCells } = await executeFeedbackClear({
-        plans: plan.plans,
-        classType: selectedClass?.classType,
-        lessonName,
-        onStatus,
-        t,
+      const { clearedDocs, clearedCells, warnings } =
+        await executeFeedbackClear({
+          plans: plan.plans,
+          classType: selectedClass?.classType,
+          lessonName,
+          t,
+        });
+      setStatus({
+        phase: "done",
+        text: clearedDocs
+          ? // Re-grading hits the shared grading cache and hands back the SAME
+            // feedback, so point at the toggle that forces a fresh AI pass.
+            `${t("clearFeedback.complete", {
+              cells: clearedCells,
+              docs: clearedDocs,
+            })}\n${t("clearFeedback.cacheHint")}`
+          : t("clearFeedback.nothingAtAll"),
+        warnings: [...plan.warnings, ...warnings],
       });
-      onStatus.append(
-        t("clearFeedback.complete", { cells: clearedCells, docs: clearedDocs }),
-      );
       if (clearedDocs > 0) {
-        // Re-grading hits the shared grading cache and hands back the SAME
-        // feedback; point at the toggle that forces a fresh AI pass.
-        onStatus.append(t("clearFeedback.cacheHint"));
+        playSuccessSound();
         await recordFeedbackClearSummary({
           classId: selectedClassId,
           lessonId: selectedLessonId,
@@ -258,9 +304,11 @@ export default function GradePage() {
     } catch (error) {
       if (error.message !== "RE-AUTH_NEEDED") {
         console.error("Clear feedback error:", error);
-        onStatus.append(
-          `\n${t("grade.processFailed", { msg: error.message })}`,
-        );
+        setStatus({
+          phase: "error",
+          text: t("grade.processFailed", { msg: error.message }),
+          warnings: [],
+        });
       }
     } finally {
       setClearing(false);
@@ -360,7 +408,24 @@ export default function GradePage() {
           </button>
         )}
       </div>
-      <div className="status-output">{status}</div>
+      <div className="status-output">
+        {status.phase === "running" ? (
+          <span className="status-loading">
+            <span className="spinner" aria-hidden="true" />
+            <span>{status.text}</span>
+          </span>
+        ) : (
+          status.text
+        )}
+        {status.warnings.length > 0 && (
+          <ul className="status-warnings">
+            {status.warnings.map((warning, i) => (
+              // eslint-disable-next-line react/no-array-index-key -- the list is replaced wholesale at the end of a run, never reordered or spliced
+              <li key={i}>{warning}</li>
+            ))}
+          </ul>
+        )}
+      </div>
     </div>
   );
 }

@@ -537,51 +537,41 @@ export const translations = {
       wait: "Please wait while we complete your login.",
     },
     clearFeedback: {
-      scanning: "Checking {docId}...",
-      clearingDoc: "Clearing {docId}...",
+      inProgress: "Clearing feedback...",
       confirm:
         'This will clear {cells} "Chữa bài" cell(s) across {docs} document(s), in {lesson} — class {class}.\n\nEVERYTHING in that column for this lesson goes, INCLUDING anything a teacher typed by hand.\nThis CANNOT be undone. Continue?',
-      noTable: "\n {docId}: no exercise table found for this lesson, skipping.",
-      nothing: "\n {docId}: no feedback to clear.",
+      tabMissing:
+        "{docId}: this lesson was not found in the document, skipped.",
+      noTable: "{docId}: no exercise table found for this lesson, skipped.",
       nothingAtAll: "No feedback found to clear for this lesson.",
-      cleared: "\n Cleared {n} cell(s) in {docId}.",
-      failed: "\n Failed clearing {docId}: {msg}",
-      complete: "\n Done! Cleared {cells} cell(s) across {docs} document(s).",
+      failed: "Failed clearing {docId}: {msg}",
+      complete: "Done! Cleared {cells} cell(s) across {docs} document(s).",
       cacheHint:
-        '\n Note: re-grading reuses the cached feedback. To make the AI grade from scratch, turn off "Save to grading cache" first.',
+        'Note: re-grading reuses the cached feedback. To make the AI grade from scratch, turn off "Save to grading cache" first.',
     },
     grading: {
       noDocs: "No student documents found for this class.",
-      processingDoc: "Processing Doc: {docId}...",
-      failedDoc: "Failed {docId}: {msg}",
-      finishedFetch:
-        "Finished fetching content from all docs. Starting auto-check...",
-      alreadyChecked:
-        "\n This exercise has been checked: {docId}. Skip checking it again...",
-      allChecked: "\n All docs were already checked. Nothing to grade.",
+      gradingAnswers: "Grading answers...",
+      doneCount:
+        "Finished grading for {n} student(s)!\nGrading student's exercises completed! You can review the result!!",
+      allChecked: "All docs were already checked. Nothing to grade.",
+      noAnswers: "No answered questions found to grade.",
+      noneGraded: "No exercise was graded. See the warnings below.",
       pointCheckFailed: "Could not check the point balance. Please try again.",
       notEnough:
         "Not enough points: {need} exercise(s) to grade, {teacher} has {have}. Please contact admin to top up.",
-      noAnswers: "\n No answered questions found to grade.",
-      gradingN: "Grading {n} unique answers{cache}...",
-      cacheOff: " (cache off)",
-      gradingAnswers: "Grading answers...",
       gradingFailed: "Grading failed: {msg}",
-      noMatch: "\n No feedback matched for {docId}, skipping.",
+      failedDoc: "Failed {docId}: {msg}",
+      tabMissing:
+        "{docId}: this lesson was not found in the document, skipped.",
       unreadableAnswers:
-        "\n {docId}: could not read the answer for question {list}. Please check manually.",
-      wrote: "\n Wrote feedback to {docId}.",
-      failedWrite: "\n Failed writing to {docId}: {msg}",
-      completeChunk: "\n Complete handling {n} doc, continue...",
-      spentBatch: "\n Spent {n} point(s). Points left: {remaining}.",
-      chargeFailed:
-        "\n Could not spend points for: {list}. Will retry at the end.",
+        "{docId}: could not read the answer for question {list}. Please check manually.",
+      noMatch: "No feedback matched for {docId}, skipped.",
+      failedWrite: "Failed writing to {docId}: {msg}",
       stoppedNoPoints:
-        "\n Out of points — stopped grading the remaining docs. Please contact admin to top up.",
+        "Out of points — stopped grading the remaining docs. Please contact admin to top up.",
       unsettled:
-        "\n Points were NOT spent for: {list}. Please report this to admin.",
-      complete:
-        "\n Processing complete!\nGrading student's exercises completed! You can review the result!!",
+        "Points were NOT spent for: {list}. Please report this to admin.",
     },
   },
 
@@ -1119,49 +1109,40 @@ export const translations = {
       wait: "Vui lòng chờ trong khi hoàn tất đăng nhập.",
     },
     clearFeedback: {
-      scanning: "Đang kiểm tra {docId}...",
-      clearingDoc: "Đang xóa {docId}...",
+      inProgress: "Đang xóa feedback...",
       confirm:
         'Sẽ xóa {cells} ô "Chữa bài" trong {docs} tài liệu, ở {lesson} — lớp {class}.\n\nToàn bộ nội dung cột "Chữa bài" của buổi này sẽ bị xóa, KỂ CẢ chữ giáo viên tự gõ.\nThao tác này KHÔNG hoàn tác được. Tiếp tục?',
-      noTable: "\n {docId}: không tìm thấy bảng bài tập cho buổi này, bỏ qua.",
-      nothing: "\n {docId}: không có feedback nào để xóa.",
+      tabMissing:
+        "{docId}: không tìm thấy buổi học này trong tài liệu, bỏ qua.",
+      noTable: "{docId}: không tìm thấy bảng bài tập cho buổi này, bỏ qua.",
       nothingAtAll: "Không tìm thấy feedback nào để xóa ở buổi này.",
-      cleared: "\n Đã xóa {n} ô trong {docId}.",
-      failed: "\n Xóa {docId} thất bại: {msg}",
-      complete: "\n Hoàn tất! Đã xóa {cells} ô ở {docs} tài liệu.",
+      failed: "Xóa {docId} thất bại: {msg}",
+      complete: "Hoàn tất! Đã xóa {cells} ô ở {docs} tài liệu.",
       cacheHint:
-        '\n Lưu ý: chấm lại sẽ dùng feedback cũ trong cache. Nếu muốn AI chấm lại từ đầu, hãy tắt "Lưu vào cache chấm bài" trước khi chấm.',
+        'Lưu ý: chấm lại sẽ dùng feedback cũ trong cache. Nếu muốn AI chấm lại từ đầu, hãy tắt "Lưu vào cache chấm bài" trước khi chấm.',
     },
     grading: {
       noDocs: "Không tìm thấy tài liệu học sinh nào cho lớp này.",
-      processingDoc: "Đang xử lý tài liệu: {docId}...",
-      failedDoc: "Lỗi {docId}: {msg}",
-      finishedFetch:
-        "Đã tải xong nội dung các tài liệu. Bắt đầu chấm tự động...",
-      alreadyChecked:
-        "\n Bài này đã được chấm: {docId}. Bỏ qua, không chấm lại...",
-      allChecked: "\n Tất cả tài liệu đã được chấm. Không có gì để chấm.",
+      gradingAnswers: "Đang chấm bài...",
+      doneCount:
+        "Hoàn tất chấm bài cho {n} học sinh!\nĐã chấm xong bài của học sinh! Bạn có thể xem lại kết quả!!",
+      allChecked: "Tất cả tài liệu đã được chấm. Không có gì để chấm.",
+      noAnswers: "Không tìm thấy câu trả lời nào để chấm.",
+      noneGraded: "Không có bài nào được chấm. Xem cảnh báo bên dưới.",
       pointCheckFailed: "Không kiểm tra được số point. Vui lòng thử lại.",
       notEnough:
         "Không đủ point: cần chấm {need} bài, {teacher} còn {have} point. Vui lòng liên hệ admin để nạp thêm point.",
-      noAnswers: "\n Không tìm thấy câu trả lời nào để chấm.",
-      gradingN: "Đang chấm {n} câu trả lời{cache}...",
-      cacheOff: " (tắt cache)",
-      gradingAnswers: "Đang chấm bài...",
       gradingFailed: "Chấm bài thất bại: {msg}",
-      noMatch: "\n Không khớp feedback cho {docId}, bỏ qua.",
+      failedDoc: "Lỗi {docId}: {msg}",
+      tabMissing:
+        "{docId}: không tìm thấy buổi học này trong tài liệu, bỏ qua.",
       unreadableAnswers:
-        "\n {docId}: không đọc được câu trả lời của câu {list}. Vui lòng kiểm tra tay.",
-      wrote: "\n Đã ghi feedback vào {docId}.",
-      failedWrite: "\n Ghi {docId} thất bại: {msg}",
-      completeChunk: "\n Đã xử lý xong {n} tài liệu, tiếp tục...",
-      spentBatch: "\n Đã trừ {n} point. Point còn lại: {remaining}.",
-      chargeFailed: "\n Chưa trừ được point cho: {list}. Sẽ thử lại ở cuối.",
+        "{docId}: không đọc được câu trả lời của câu {list}. Vui lòng kiểm tra tay.",
+      noMatch: "Không khớp feedback cho {docId}, bỏ qua.",
+      failedWrite: "Ghi {docId} thất bại: {msg}",
       stoppedNoPoints:
-        "\n Hết point — dừng chấm các bài còn lại. Vui lòng liên hệ admin để nạp thêm point.",
-      unsettled: "\n CHƯA trừ được point cho: {list}. Vui lòng báo admin.",
-      complete:
-        "\n Hoàn tất xử lý!\nĐã chấm xong bài của học sinh! Bạn có thể xem lại kết quả!!",
+        "Hết point — dừng chấm các bài còn lại. Vui lòng liên hệ admin để nạp thêm point.",
+      unsettled: "CHƯA trừ được point cho: {list}. Vui lòng báo admin.",
     },
   },
 };
