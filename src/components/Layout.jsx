@@ -3,8 +3,11 @@ import { Link, Outlet, useNavigate } from "react-router-dom";
 
 import { useAuth } from "../auth/AuthContext.jsx";
 import { SUPPORT_EMAIL, isAdminEmail } from "../config.js";
+import NotificationBell from "./NotificationBell.jsx";
+import { usePushNotifications } from "../hooks/usePushNotifications.js";
 import { usePwaInstall } from "../hooks/usePwaInstall.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
+import { refreshPushToken, startForegroundPushListener } from "../lib/push.js";
 
 function initials(name) {
   if (!name) return "?";
@@ -141,6 +144,7 @@ function ProfileMenu({ teacherInfo }) {
   const wrapperRef = useRef(null);
   const { t } = useLanguage();
   const { canInstall, isIOS, promptInstall } = usePwaInstall();
+  const push = usePushNotifications();
 
   useEffect(() => {
     const onClick = (event) => {
@@ -209,6 +213,47 @@ function ProfileMenu({ teacherInfo }) {
               )}
             </>
           )}
+          {/* Push opt-in sits next to "Install app": same class of browser
+              capability, same gesture requirement, same iOS caveat. Offered to
+              every signed-in user — teachers get notified when an admin grades
+              their class. NEVER auto-prompted: a dismissed prompt blocks the
+              origin for good in Chrome. */}
+          {push.canEnable && (
+            <button
+              className="menu-option install-option"
+              disabled={push.busy}
+              onClick={() => {
+                setOpen(false);
+                push.enable();
+              }}
+            >
+              <i className="ti ti-bell-plus" aria-hidden="true" />
+              {t("notif.enablePush")}
+            </button>
+          )}
+          {push.supported && push.enabled && (
+            <button
+              className="menu-option install-option"
+              disabled={push.busy}
+              onClick={() => {
+                setOpen(false);
+                push.disable();
+              }}
+            >
+              <i className="ti ti-bell-off" aria-hidden="true" />
+              {t("notif.disablePush")}
+            </button>
+          )}
+          {push.permission === "denied" && (
+            <p className="profile-detail install-ios-hint">
+              {t("notif.pushBlocked")}
+            </p>
+          )}
+          {push.supported && push.isIOS && !push.isStandalone && (
+            <p className="profile-detail install-ios-hint">
+              {t("notif.pushIosHint")}
+            </p>
+          )}
         </div>
       )}
     </div>
@@ -219,6 +264,15 @@ export default function Layout() {
   const { isAuthenticated, teacherInfo, logout } = useAuth();
   const { t } = useLanguage();
   const navigate = useNavigate();
+  // On app start, re-assert this browser's FCM token (tokens rotate; saveDevice
+  // is an idempotent merge and push.js rate-limits it to once a day) and start
+  // the foreground listener so a push arriving on a focused tab updates the bell
+  // instead of being dropped. No-ops unless push is already enabled here.
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    refreshPushToken();
+    startForegroundPushListener();
+  }, [isAuthenticated]);
 
   // logout() is async (it records the audit entry while the token is still
   // valid), so wait for it before navigating.
@@ -237,6 +291,7 @@ export default function Layout() {
         <div className="header-right">
           <LanguageSwitcher />
           {isAuthenticated && <NavMenu />}
+          {isAuthenticated && <NotificationBell />}
           {isAuthenticated && <ProfileMenu teacherInfo={teacherInfo} />}
           {isAuthenticated && (
             <button className="logout-btn" onClick={handleLogout}>

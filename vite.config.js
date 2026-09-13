@@ -12,6 +12,13 @@ export default defineConfig({
       // Uncomment to exercise the SW/install flow under `npm run dev`
       // (leave OFF normally — a dev SW can cache-interfere with live-reload):
       devOptions: { enabled: true },
+      // The FCM background-message worker (public/firebase-messaging-sw.js) has
+      // its OWN registration at /fcm-push-scope/ — see src/lib/push.js. Workbox
+      // must not precache it, or the Workbox SW would serve a stale cached copy
+      // of a file the browser is meant to re-fetch on every update check.
+      workbox: {
+        globIgnores: ["**/firebase-messaging-sw.js"],
+      },
       manifest: {
         name: "AI Exercise Checker",
         short_name: "Checker",

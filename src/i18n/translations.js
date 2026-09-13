@@ -35,6 +35,40 @@ export const translations = {
       installApp: "Install app",
       installIosHint: "Tap Share → Add to Home Screen",
     },
+    notif: {
+      title: "Notifications",
+      empty: "No notifications",
+      loadFailed: "Could not load notifications",
+      unread: "{n} unread",
+      enablePush: "Enable push notifications",
+      disablePush: "Turn off push notifications",
+      pushEnabled: "Push notifications enabled",
+      pushFailed: "Could not enable notifications",
+      pushBlocked:
+        "Notifications are blocked. Re-enable them in your browser settings.",
+      pushUnsupported: "This browser does not support push notifications",
+      pushIosHint: "On iPhone/iPad, add the app to the Home Screen first",
+      justNow: "just now",
+      minutesAgo: "{n} min ago",
+      hoursAgo: "{n} h ago",
+      daysAgo: "{n} d ago",
+      type: {
+        deepseekLowBalance: "DeepSeek balance is low",
+        deepseekLowBalanceBody:
+          "{balance} {currency} left (threshold {threshold} {currency}). Top up the DeepSeek account.",
+        deepseekUnavailable: "DeepSeek account can no longer serve requests",
+        deepseekUnavailableBody:
+          "Grading will fail until the account is topped up.",
+        deepseekBalanceRecovered: "DeepSeek balance is back to normal",
+        deepseekBalanceRecoveredBody: "Current balance {balance} {currency}.",
+        deepseekBalanceCheckFailed: "Cannot read the DeepSeek balance",
+        deepseekBalanceCheckFailedBody:
+          "The balance API failed several times in a row. Check AI_API_KEY.",
+        gradingDoneByAdmin: "An admin graded your class",
+        gradingDoneByAdminBody:
+          "Class {className} · Lesson {lessonName} · {totalPoints} exercise(s) graded.",
+      },
+    },
     speaking: {
       title: "Speaking grading",
       openNewTab: "Open in new tab",
@@ -608,6 +642,41 @@ export const translations = {
       there: "bạn",
       installApp: "Cài ứng dụng",
       installIosHint: "Bấm Share ⎋ → Thêm vào Màn hình chính",
+    },
+    notif: {
+      title: "Thông báo",
+      empty: "Chưa có thông báo nào",
+      loadFailed: "Không tải được thông báo",
+      unread: "{n} chưa đọc",
+      enablePush: "Bật thông báo đẩy",
+      disablePush: "Tắt thông báo đẩy",
+      pushEnabled: "Đã bật thông báo đẩy",
+      pushFailed: "Không bật được thông báo",
+      pushBlocked:
+        "Trình duyệt đang chặn thông báo. Vui lòng bật lại trong cài đặt trình duyệt.",
+      pushUnsupported: "Trình duyệt này không hỗ trợ thông báo đẩy",
+      pushIosHint:
+        "Trên iPhone/iPad, hãy thêm ứng dụng vào Màn hình chính trước",
+      justNow: "vừa xong",
+      minutesAgo: "{n} phút trước",
+      hoursAgo: "{n} giờ trước",
+      daysAgo: "{n} ngày trước",
+      type: {
+        deepseekLowBalance: "Số dư DeepSeek sắp hết",
+        deepseekLowBalanceBody:
+          "Còn {balance} {currency} (ngưỡng {threshold} {currency}). Vui lòng nạp thêm tài khoản DeepSeek.",
+        deepseekUnavailable: "Tài khoản DeepSeek không còn khả dụng",
+        deepseekUnavailableBody:
+          "Việc chấm bài sẽ lỗi cho tới khi nạp thêm tiền.",
+        deepseekBalanceRecovered: "Số dư DeepSeek đã ổn định trở lại",
+        deepseekBalanceRecoveredBody: "Số dư hiện tại {balance} {currency}.",
+        deepseekBalanceCheckFailed: "Không đọc được số dư DeepSeek",
+        deepseekBalanceCheckFailedBody:
+          "Gọi API số dư lỗi nhiều lần liên tiếp. Kiểm tra lại AI_API_KEY.",
+        gradingDoneByAdmin: "Admin đã chấm bài giúp bạn",
+        gradingDoneByAdminBody:
+          "Lớp {className} · Buổi {lessonName} · {totalPoints} bài đã được chấm.",
+      },
     },
     speaking: {
       title: "Chấm speaking",

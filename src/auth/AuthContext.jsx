@@ -14,6 +14,7 @@ import {
   proactiveTokenRefresh,
 } from "./tokens.js";
 import { fetchTeacherInfo, logClientEvent } from "../api/backend.js";
+import { disablePush } from "../lib/push.js";
 
 const AuthContext = createContext(null);
 
@@ -48,6 +49,12 @@ export function AuthProvider({ children }) {
     // once storage is cleared the backend would answer 401 and the entry would
     // be lost. logClientEvent never throws, so a failure cannot block logout.
     await logClientEvent("auth.logout");
+    // Unregister this browser from push BEFORE clearing storage, for the same
+    // reason: the DELETE is authenticated with the stored token. Otherwise a
+    // shared machine keeps receiving admin alerts after logout. disablePush
+    // deletes the FCM token client-side first, so the subscription is really
+    // gone and not just the server row. It never throws.
+    await disablePush();
     clearAuthStorage();
     setIsAuthenticated(false);
     setTeacherInfo(null);

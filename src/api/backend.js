@@ -623,3 +623,87 @@ export async function logClientEvent(action) {
     // Offline, expired token, backend down — losing one log line is acceptable.
   }
 }
+
+// ---------------------------------------------------------------------------
+// Notifications (admin) — the bell and the FCM device registry.
+// ---------------------------------------------------------------------------
+
+/**
+ * Notifications addressed to the signed-in admin, newest first.
+ * Returns `{ results, unreadCount, total }`.
+ */
+export async function fetchNotifications({ status = "all", limit = 50 } = {}) {
+  const params = new URLSearchParams({ status, limit: String(limit) });
+  const response = await authFetch(`/notifications?${params}`);
+  if (!response.ok) throw new Error("Failed to fetch notifications");
+  return response.json();
+}
+
+export async function markNotificationRead(id) {
+  const response = await authFetch(
+    `/notifications/${encodeURIComponent(id)}/read`,
+    {
+      method: "POST",
+    },
+  );
+  if (!response.ok) throw new Error("Failed to mark notification read");
+  return response.json();
+}
+
+export async function markAllNotificationsRead() {
+  const response = await authFetch("/notifications/read-all", {
+    method: "POST",
+  });
+  if (!response.ok) throw new Error("Failed to mark notifications read");
+  return response.json();
+}
+
+/**
+ * Registers this browser's FCM token so the backend can push to it.
+ *
+ * The field MUST be named `token`: the backend's audit logger redacts that key
+ * by name, which is what keeps the registration token — a capability to push to
+ * this device — out of the audit trail. Returns the SHA-256 `tokenHash`, which
+ * is what we store locally and what the unregister URL carries.
+ *
+ * NEVER throws: push is an enhancement, and a failure here must not break the
+ * page that called it.
+ */
+export async function registerPushDevice({ token, platform = "web" }) {
+  try {
+    const response = await authFetch("/notifications/devices", {
+      method: "POST",
+      body: { token, platform },
+    });
+    if (!response.ok) return null;
+    const data = await response.json();
+    return data.tokenHash || null;
+  } catch {
+    return null;
+  }
+}
+
+/** Unregisters one device by its hash. Never throws (used during logout). */
+export async function unregisterPushDevice(tokenHash) {
+  try {
+    await authFetch(`/notifications/devices/${encodeURIComponent(tokenHash)}`, {
+      method: "DELETE",
+    });
+  } catch {
+    // Logging out offline is fine — the token is pruned on its next failed send.
+  }
+}
+
+/**
+ * Admin-only manual DeepSeek balance check. `force` bypasses both the hourly
+ * throttle and the re-alert window; used from the admin UI to verify the alert
+ * path without waiting for the next grading run.
+ */
+export async function triggerBalanceCheck({ force = false } = {}) {
+  const response = await authFetch(
+    `/admin/deepseek-balance/check${force ? "?force=1" : ""}`,
+    { method: "POST" },
+  );
+  if (!response.ok) throw new Error("Balance check failed");
+  return response.json();
+}
