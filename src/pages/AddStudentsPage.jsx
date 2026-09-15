@@ -8,7 +8,9 @@ import {
   fetchStudents,
   saveStudents,
 } from "../api/backend.js";
+import { getDocTitle } from "../api/googleDocs.js";
 import { useAuth } from "../auth/AuthContext.jsx";
+import { ensureValidGoogleToken } from "../auth/tokens.js";
 import SearchableSelect from "../components/SearchableSelect.jsx";
 import { isAdminEmail } from "../config.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
@@ -17,6 +19,7 @@ import {
   parseStudentsFromRows,
   resolveStudentImport,
 } from "../lib/importStudents.js";
+import { parseNameFromDocTitle } from "../lib/studentDocName.js";
 import {
   findDocIdDuplicates,
   groupDuplicatesByDoc,
@@ -36,7 +39,26 @@ function shortUrl(url) {
   }
 }
 
-const EMPTY_ROW = { name: "", gmail: "", doc: "" };
+/**
+ * Reads a Google Doc's title and pulls the student's name out of it. Returns ""
+ * for anything that doesn't work out: a link that isn't a Google Doc, no access
+ * to it, an expired token, or a title that doesn't follow the
+ * `fullname_phone_class` convention. Auto-filling the name is a convenience, so
+ * failures stay in the console and the teacher just types the name themselves.
+ */
+async function lookupNameFromDoc(docId) {
+  try {
+    const token = await ensureValidGoogleToken();
+    return parseNameFromDocTitle(await getDocTitle(docId, token));
+  } catch (error) {
+    console.warn("Could not read the Google Doc title:", error);
+    return "";
+  }
+}
+
+// `nameAuto` marks a name that was filled in from the doc title rather than
+// typed by the teacher: only those may be overwritten or cleared later.
+const EMPTY_ROW = { name: "", gmail: "", doc: "", nameAuto: false };
 
 export default function AddStudentsPage() {
   const { loadTeacherInfo } = useAuth();
@@ -61,9 +83,21 @@ export default function AddStudentsPage() {
   const [notice, setNotice] = useState(null);
   const [saving, setSaving] = useState(false);
 
-  // Refs to the "Full name" input of each row so we can move focus there when a
-  // new row is added (native autoFocus only fires on mount, not on re-render).
-  const nameRefs = useRef([]);
+  // Refs to the "Google Doc link" input of each row (the first field) so we can
+  // move focus there when a new row is added (native autoFocus only fires on
+  // mount, not on re-render).
+  const docRefs = useRef([]);
+  // docId -> name parsed from its title ("" when unusable). Keeps a re-render,
+  // a removed row or a re-pasted link from hitting the Docs API again. It is
+  // state, not a ref, because a doc id that is NOT in here yet means "still
+  // looking that one up" — which is what drives the spinner.
+  const [docNames, setDocNames] = useState(() => new Map());
+  // Mirror so the lookup effect can read the map without taking it as a dep.
+  const docNamesRef = useRef(docNames);
+  docNamesRef.current = docNames;
+  // Guards the state writes that happen after an await: the page itself can
+  // unmount mid-lookup (navigating home, or the unregistered-teacher redirect).
+  const mountedRef = useRef(true);
   const prevRowsLength = useRef(rows.length);
   // Hidden <input type="file"> used by the "Import student list" button.
   const fileInputRef = useRef(null);
@@ -72,10 +106,20 @@ export default function AddStudentsPage() {
   const studentsRef = useRef(students);
   studentsRef.current = students;
 
+  // Set on mount as well as cleared on unmount: StrictMode mounts, unmounts and
+  // remounts in dev, and a route revisit remounts in production — without the
+  // re-set the flag would stay false and every lookup result be thrown away.
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
   useEffect(() => {
     // Only auto-focus when rows GREW (user clicked +), not when a row was removed.
     if (rows.length > prevRowsLength.current) {
-      nameRefs.current[rows.length - 1]?.focus();
+      docRefs.current[rows.length - 1]?.focus();
     }
     prevRowsLength.current = rows.length;
   }, [rows.length]);
@@ -180,11 +224,15 @@ export default function AddStudentsPage() {
 
   const openModal = (index = -1) => {
     setEditIndex(index);
-    setRows(index >= 0 ? [{ ...students[index] }] : [{ ...EMPTY_ROW }]);
+    // Spread over EMPTY_ROW so an edited student starts with nameAuto: false — a
+    // name that is already saved must never be overwritten by the doc title.
+    setRows([
+      index >= 0 ? { ...EMPTY_ROW, ...students[index] } : { ...EMPTY_ROW },
+    ]);
     setRowErrors([]);
     setModalOpen(true);
     // Defer until React has mounted the modal's inputs, then focus the first row.
-    setTimeout(() => nameRefs.current[0]?.focus(), 0);
+    setTimeout(() => docRefs.current[0]?.focus(), 0);
   };
 
   const addRow = () => {
@@ -199,12 +247,20 @@ export default function AddStudentsPage() {
     setRowErrors((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const updateRow = (index, field, value) => {
+  const patchRow = (index, patch) => {
     setRows((prev) => {
       const next = [...prev];
-      next[index] = { ...next[index], [field]: value };
+      next[index] = { ...next[index], ...patch };
       return next;
     });
+  };
+
+  const updateRow = (index, field, value) => {
+    // Typing in the name field takes it out of the auto-fill's hands for good.
+    patchRow(
+      index,
+      field === "name" ? { name: value, nameAuto: false } : { [field]: value },
+    );
     // Clear this field's error as soon as the user edits it again.
     if (rowErrors[index]?.[field]) {
       setRowErrors((prev) => {
@@ -213,6 +269,93 @@ export default function AddStudentsPage() {
         return next;
       });
     }
+  };
+
+  /**
+   * Writes the name parsed from `docId`'s title into row `i`. Skips the row if
+   * its link changed (or the row went away) while the request was in flight, and
+   * never touches a name the teacher typed themselves.
+   */
+  const applyDocName = (i, docId, parsed) => {
+    setRows((prev) => {
+      const row = prev[i];
+      if (!row || extractDocId(row.doc) !== docId) return prev;
+      const patch = parsed
+        ? row.name.trim() && !row.nameAuto
+          ? null // typed by hand — leave it alone
+          : { name: parsed, nameAuto: true }
+        : row.nameAuto
+          ? { name: "", nameAuto: false } // title no longer usable
+          : null;
+      if (
+        !patch ||
+        (patch.name === row.name && patch.nameAuto === row.nameAuto)
+      )
+        return prev;
+      const next = [...prev];
+      next[i] = { ...row, ...patch };
+      return next;
+    });
+  };
+
+  // Fill "Full name" from the Google Doc's title as soon as a link is pasted.
+  useEffect(() => {
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      // Group rows by doc id: two rows may share a link (the duplicate check
+      // only runs on Save), and each id is then looked up once.
+      const byDocId = new Map();
+      rows.forEach((row, i) => {
+        const docId = extractDocId(row.doc);
+        if (!docId) return;
+        byDocId.set(docId, [...(byDocId.get(docId) || []), i]);
+      });
+
+      const misses = [...byDocId.keys()].filter(
+        (id) => !docNamesRef.current.has(id),
+      );
+      // In parallel: pasting five links shouldn't make the last row wait for the
+      // first. lookupNameFromDoc swallows its errors, so this never rejects.
+      const names = await Promise.all(misses.map(lookupNameFromDoc));
+      if (!mountedRef.current) return;
+      // What this run knows now. `docNamesRef` only catches up on the next
+      // render, so read names from here rather than from the ref.
+      const resolved = new Map(docNamesRef.current);
+      misses.forEach((id, k) => resolved.set(id, names[k]));
+      // Record the results even when this run has been superseded: they are
+      // keyed by doc id so they stay correct, and this is what switches the
+      // row's spinner off. Skipping it would leave the spinner up until some
+      // later run happened to fetch the same id again.
+      setDocNames((prev) => {
+        const next = new Map(prev);
+        misses.forEach((id, k) => next.set(id, names[k]));
+        return next;
+      });
+      if (cancelled) return; // only the writes into `rows` are dropped
+
+      byDocId.forEach((indexes, docId) => {
+        const parsed = resolved.get(docId) ?? "";
+        indexes.forEach((i) => applyDocName(i, docId, parsed));
+      });
+    }, 500);
+    return () => {
+      // Debounce, and drop late responses when the link changed again or the
+      // modal closed before the request came back.
+      cancelled = true;
+      clearTimeout(timer);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- re-run only when a link changes; the effect writes `name` only, so it cannot loop
+  }, [rows.map((r) => r.doc).join("\n")]);
+
+  /**
+   * True while the row's Google Doc link is waiting on a name. A valid doc id
+   * that has no entry in `docNames` yet is exactly that state, so this turns
+   * true on the keystroke that completes the link — before the debounce even
+   * fires — and false again as soon as a result (or a failure) is recorded.
+   */
+  const isNameLoading = (row) => {
+    const docId = extractDocId(row.doc);
+    return !!docId && !docNames.has(docId);
   };
 
   const isBlankRow = (r) => !r.name.trim() && !r.doc.trim();
@@ -526,31 +669,45 @@ export default function AddStudentsPage() {
                   <div className="student-row" key={i}>
                     <div className="student-row-fields">
                       <div className="field-group">
-                        <label>{t("addStudents.fullName")}</label>
-                        <input
-                          type="text"
-                          placeholder={t("addStudents.fullNamePlaceholder")}
-                          value={row.name}
-                          ref={(el) => (nameRefs.current[i] = el)}
-                          onChange={(e) => updateRow(i, "name", e.target.value)}
-                        />
-                        {rowErrors[i]?.name && (
-                          <div className="err" style={{ display: "block" }}>
-                            {t("addStudents.errName")}
-                          </div>
-                        )}
-                      </div>
-                      <div className="field-group">
                         <label>{t("addStudents.docLink")}</label>
                         <input
                           type="url"
                           placeholder={t("addStudents.docLinkPlaceholder")}
                           value={row.doc}
+                          ref={(el) => (docRefs.current[i] = el)}
                           onChange={(e) => updateRow(i, "doc", e.target.value)}
                         />
                         {rowErrors[i]?.doc && (
                           <div className="err" style={{ display: "block" }}>
                             {t("addStudents.errDoc")}
+                          </div>
+                        )}
+                      </div>
+                      <div className="field-group">
+                        <label>{t("addStudents.fullName")}</label>
+                        {/* Stays editable while the name is being fetched: the
+                            nameAuto flag keeps a hand-typed name from being
+                            overwritten when the lookup lands. */}
+                        <div className="input-with-spinner">
+                          <input
+                            type="text"
+                            placeholder={t("addStudents.fullNamePlaceholder")}
+                            value={row.name}
+                            onChange={(e) =>
+                              updateRow(i, "name", e.target.value)
+                            }
+                          />
+                          {isNameLoading(row) && (
+                            <span
+                              className="spinner spinner-inline"
+                              role="status"
+                              aria-label={t("addStudents.lookingUpName")}
+                            />
+                          )}
+                        </div>
+                        {rowErrors[i]?.name && (
+                          <div className="err" style={{ display: "block" }}>
+                            {t("addStudents.errName")}
                           </div>
                         )}
                       </div>

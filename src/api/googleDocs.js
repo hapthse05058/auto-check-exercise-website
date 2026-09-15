@@ -37,6 +37,31 @@ export async function getTabContent(docId, accessToken, tabTitle) {
 }
 
 /**
+ * Returns a Google Doc's title (the file name shown in Drive), or "" when the
+ * document has none. `?fields=title` keeps the response tiny — unlike
+ * getTabContent, none of the body is needed. No `x-goog-user-project` header:
+ * reads work for both login modes without it (see batchUpdateDoc below).
+ * Throws on a failed request so the caller can decide how to recover.
+ */
+export async function getDocTitle(docId, accessToken) {
+  const url = `https://docs.googleapis.com/v1/documents/${docId}?fields=title`;
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  const data = await response.json();
+  return data.title || "";
+}
+
+/**
  * Sends a batchUpdate to a Google Doc. Only end-user (Gmail) tokens need a
  * quota project header; the service-account token (username/password login)
  * 403s with it, so it is omitted in that case.

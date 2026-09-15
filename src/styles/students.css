@@ -532,6 +532,26 @@
     transform: rotate(360deg);
   }
 }
+/* Lets a spinner sit inside an input, at its right edge. The 32px gutter keeps
+   the spinner clear of the text; the other three sides keep the 0.5rem the base
+   `input` rule gives them. */
+.input-with-spinner {
+  position: relative;
+}
+.input-with-spinner input {
+  padding-right: 32px;
+}
+/* Smaller than the standalone .spinner, and pinned inside the field. Declared
+   after .spinner so it wins at equal specificity. */
+.spinner-inline {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  margin-top: -7px;
+  pointer-events: none;
+}
 .cache-pager {
   display: flex;
   align-items: center;
