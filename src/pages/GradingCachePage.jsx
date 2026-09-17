@@ -18,6 +18,7 @@ const SEARCH_FIELD_KEYS = [
   { value: "feedback", key: "fieldFeedback" },
   { value: "model", key: "fieldModel" },
   { value: "promptVersion", key: "fieldPromptVersion" },
+  { value: "taskType", key: "fieldTaskType" },
 ];
 
 const EMPTY_FORM = {
@@ -26,6 +27,7 @@ const EMPTY_FORM = {
   feedback: "",
   model: "",
   promptVersion: "",
+  taskType: "",
   hitCount: 0,
 };
 
@@ -179,6 +181,7 @@ export default function GradingCachePage() {
       feedback: row.feedback ?? "",
       model: row.model ?? "",
       promptVersion: row.promptVersion ?? "",
+      taskType: row.taskType ?? "",
       hitCount: row.hitCount ?? 0,
     });
     setFormErrors({});
@@ -327,6 +330,7 @@ export default function GradingCachePage() {
                   <th>{t("cache.colFeedback")}</th>
                   <th>{t("cache.colModel")}</th>
                   <th>{t("cache.colPv")}</th>
+                  <th>{t("cache.colTaskType")}</th>
                   <th>{t("cache.colHits")}</th>
                   <th>{t("cache.colCreated")}</th>
                   <th />
@@ -359,6 +363,7 @@ export default function GradingCachePage() {
                     </td>
                     <td>{row.model}</td>
                     <td>{row.promptVersion}</td>
+                    <td>{row.taskType || "vi_en"}</td>
                     <td>{row.hitCount}</td>
                     <td className="cell-date">{formatDate(row.createdAt)}</td>
                     <td className="cell-actions">
@@ -476,6 +481,18 @@ export default function GradingCachePage() {
                     setForm({ ...form, promptVersion: e.target.value })
                   }
                 />
+              </div>
+              <div className="field-group">
+                <label>{t("cache.taskTypeOptional")}</label>
+                <select
+                  value={form.taskType}
+                  onChange={(e) =>
+                    setForm({ ...form, taskType: e.target.value })
+                  }
+                >
+                  <option value="">vi_en</option>
+                  <option value="active_passive">active_passive</option>
+                </select>
               </div>
               <div className="field-group">
                 <label>{t("cache.hitCount")}</label>

@@ -3,7 +3,7 @@ import {
   extractQuestionIndex,
   findTabByTitle,
   getCellLines,
-  getQesAndAnsFromPartIVOfTheTargetTab,
+  getQuesAndAnsFromRows,
   getUnreadableQuestions,
   hasAnswer,
   isPromptInstruction,
@@ -23,15 +23,22 @@ import {
   makeNormalLessonTab,
   makeTabWithRows,
   questionRow,
+  rowsOf,
 } from "./fixtures.js";
 
 /** Builds a one-table tab out of cell-0 paragraphs, one array per row. */
 const tabOf = (...rowParagraphs) =>
   makeTabWithRows(rowParagraphs.map((paragraphs) => questionRow(paragraphs)));
 
+/** Answered question/answer pairs of a tab, stripped to what parsing is about. */
+const pairsOf = (tab) =>
+  getQuesAndAnsFromRows(rowsOf(tab)).map(({ question, answer }) => ({
+    question,
+    answer,
+  }));
+
 /** Question/answer pairs of a single exercise row. */
-const parseRow = (...paragraphs) =>
-  getQesAndAnsFromPartIVOfTheTargetTab(tabOf(paragraphs), [0]);
+const parseRow = (...paragraphs) => pairsOf(tabOf(paragraphs));
 
 describe("parseDocLinks", () => {
   it("extracts docId and tabId from a full URL", () => {
@@ -235,7 +242,7 @@ describe("findTabByTitle", () => {
 describe("getQesAndAnsFromPartIVOfTheTargetTab", () => {
   it("extracts answered questions for a normal lesson", () => {
     const tab = makeNormalLessonTab({ answered: true });
-    const result = getQesAndAnsFromPartIVOfTheTargetTab(tab, [0]);
+    const result = pairsOf(tab);
     expect(result).toEqual([
       { question: "1. Câu hỏi một", answer: "→ My answer one" },
       { question: "2. Câu hỏi hai", answer: "→ My answer two" },
@@ -244,18 +251,20 @@ describe("getQesAndAnsFromPartIVOfTheTargetTab", () => {
 
   it("returns empty array when nothing is answered", () => {
     const tab = makeNormalLessonTab({ answered: false });
-    expect(getQesAndAnsFromPartIVOfTheTargetTab(tab, [0])).toEqual([]);
+    expect(pairsOf(tab)).toEqual([]);
   });
 
-  it("returns undefined when tableIndex is missing", () => {
-    const tab = makeNormalLessonTab();
-    expect(getQesAndAnsFromPartIVOfTheTargetTab(tab, null)).toBeUndefined();
+  it("returns nothing for a tab that holds no exercise table at all", () => {
+    const tab = { tabProperties: { title: "BUỔI 10", tabId: "t.x" } };
+    expect(pairsOf(tab)).toEqual([]);
   });
 
-  it("ignores a table index the doc does not have", () => {
-    expect(
-      getQesAndAnsFromPartIVOfTheTargetTab(makeNormalLessonTab(), [9]),
-    ).toEqual([]);
+  it("tags each pair with its own table, row and exercise type", () => {
+    const [first, second] = getQuesAndAnsFromRows(
+      rowsOf(makeNormalLessonTab({ answered: true })),
+    );
+    expect(first).toMatchObject({ type: "vi_en", tableIdx: 0, rowIdx: 2 });
+    expect(second).toMatchObject({ type: "vi_en", tableIdx: 0, rowIdx: 3 });
   });
 });
 
@@ -325,7 +334,7 @@ describe("reading answers students typed off-format", () => {
       questionRow([{ table: {} }]),
       questionRow([P("1. Câu hỏi"), P("→ My answer")]),
     ]);
-    expect(getQesAndAnsFromPartIVOfTheTargetTab(tab, [0])).toEqual([
+    expect(pairsOf(tab)).toEqual([
       { question: "1. Câu hỏi", answer: "→ My answer" },
     ]);
   });
@@ -367,10 +376,7 @@ describe("buổi 23, where the prompt itself contains English", () => {
   // "12. Rút gọn DCN trong câu sau:" is followed by the English sentence the
   // student has to reduce — that sentence is the QUESTION, not their answer.
   const lesson23 = (...rows) =>
-    getQesAndAnsFromPartIVOfTheTargetTab(
-      makeTabWithRows(rows.map(questionRow), "BUỔI 23"),
-      [0],
-    );
+    pairsOf(makeTabWithRows(rows.map(questionRow), "BUỔI 23"));
 
   it("does not grade the English prompt sentence of an unanswered row", () => {
     expect(
@@ -448,13 +454,16 @@ describe("getUnreadableQuestions", () => {
   it("reports a row whose answer could not be told apart from the prompt", () => {
     // No marker AND answered in Vietnamese — the parser refuses to guess.
     const tab = tabOf([P("5. Tôi sống ở Hà Nội."), P("Tôi sống ở thủ đô.")]);
-    expect(getUnreadableQuestions(tab, [0])).toEqual(["5"]);
-    expect(getQesAndAnsFromPartIVOfTheTargetTab(tab, [0])).toEqual([]);
+    // Kèm cả bảng, vì số thứ tự có thể trùng giữa các bảng trong cùng một tab.
+    expect(getUnreadableQuestions(rowsOf(tab))).toEqual([
+      { tableIdx: 0, questionIndex: "5" },
+    ]);
+    expect(pairsOf(tab)).toEqual([]);
   });
 
   it("stays quiet on an untouched exercise", () => {
     expect(
-      getUnreadableQuestions(makeNormalLessonTab({ answered: false }), [0]),
+      getUnreadableQuestions(rowsOf(makeNormalLessonTab({ answered: false }))),
     ).toEqual([]);
   });
 
@@ -468,27 +477,27 @@ describe("getUnreadableQuestions", () => {
       ],
       "BUỔI 23",
     );
-    expect(getUnreadableQuestions(tab, [0])).toEqual([]);
+    expect(getUnreadableQuestions(rowsOf(tab))).toEqual([]);
   });
 
   it("stays quiet when the answer was read despite the missing arrow", () => {
     const tab = tabOf([P("5. Tôi sống ở Hà Nội."), P("I live in Hanoi.")]);
-    expect(getUnreadableQuestions(tab, [0])).toEqual([]);
+    expect(getUnreadableQuestions(rowsOf(tab))).toEqual([]);
   });
 
-  it("returns empty when tableIndex is missing", () => {
-    expect(getUnreadableQuestions(makeNormalLessonTab(), null)).toEqual([]);
+  it("returns empty when there are no rows at all", () => {
+    expect(getUnreadableQuestions([])).toEqual([]);
   });
 });
 
 describe("wasExerciseReviewedByAI", () => {
   it("is false when the feedback column is empty", () => {
     const tab = makeNormalLessonTab({ feedback: "" });
-    expect(wasExerciseReviewedByAI(tab, [0])).toBe(false);
+    expect(wasExerciseReviewedByAI(rowsOf(tab))).toBe(false);
   });
 
   it("is true when a question row already has feedback", () => {
     const tab = makeNormalLessonTab({ feedback: "✅ Đúng" });
-    expect(wasExerciseReviewedByAI(tab, [0])).toBe(true);
+    expect(wasExerciseReviewedByAI(rowsOf(tab))).toBe(true);
   });
 });

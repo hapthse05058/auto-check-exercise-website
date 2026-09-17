@@ -341,6 +341,7 @@ export const translations = {
       fieldFeedback: "Feedback",
       fieldModel: "Model",
       fieldPromptVersion: "Prompt version",
+      fieldTaskType: "Exercise type",
       selected: "{n} selected",
       deleteSelected: "Delete selected",
       colQuestion: "Question",
@@ -348,6 +349,7 @@ export const translations = {
       colFeedback: "Feedback",
       colModel: "Model",
       colPv: "PV",
+      colTaskType: "Type",
       colHits: "Hits",
       colCreated: "Created",
       empty: "No records. Adjust your search or add a new record.",
@@ -362,6 +364,7 @@ export const translations = {
       feedback: "Feedback",
       modelOptional: "Model (leave blank for default)",
       pvOptional: "Prompt version (leave blank for default)",
+      taskTypeOptional: "Exercise type (blank = translation)",
       hitCount: "Hit count",
       reKeyNote:
         "Note: editing question / answer / model / prompt version re-keys the record so grading still finds it.",
@@ -590,6 +593,14 @@ export const translations = {
       doneCount:
         "Finished grading for {n} student(s)!\nGrading student's exercises completed! You can review the result!!",
       allChecked: "All docs were already checked. Nothing to grade.",
+      allSkippedOldFeedback:
+        "{count} doc(s) were skipped because they already hold older feedback, and still have ungraded exercises. See the warnings below.",
+      skippedHasOldFeedback:
+        '{docId}: skipped because the doc already holds older feedback, but {count} exercise table(s) are still ungraded (likely the newly added ones). Run "Clear feedback" first to grade them — note that this also removes the older feedback.',
+      unclassifiedTable:
+        "{docId}: table(s) {list} hold questions but could not be recognised as an exercise table, so they were not graded. Please check the layout.",
+      noTable: "{docId}: no exercise table found in this lesson tab.",
+      tableQuestionRef: "table {table} question {question}",
       noAnswers: "No answered questions found to grade.",
       noneGraded: "No exercise was graded. See the warnings below.",
       pointCheckFailed: "Could not check the point balance. Please try again.",
@@ -950,6 +961,7 @@ export const translations = {
       fieldFeedback: "Feedback",
       fieldModel: "Model",
       fieldPromptVersion: "Phiên bản prompt",
+      fieldTaskType: "Loại bài tập",
       selected: "Đã chọn {n}",
       deleteSelected: "Xóa mục đã chọn",
       colQuestion: "Câu hỏi",
@@ -957,6 +969,7 @@ export const translations = {
       colFeedback: "Feedback",
       colModel: "Model",
       colPv: "PV",
+      colTaskType: "Loại",
       colHits: "Lượt dùng",
       colCreated: "Ngày tạo",
       empty: "Không có bản ghi. Điều chỉnh tìm kiếm hoặc thêm bản ghi mới.",
@@ -971,6 +984,7 @@ export const translations = {
       feedback: "Feedback",
       modelOptional: "Model (để trống dùng mặc định)",
       pvOptional: "Phiên bản prompt (để trống dùng mặc định)",
+      taskTypeOptional: "Loại bài tập (để trống là bài dịch)",
       hitCount: "Số lượt dùng",
       reKeyNote:
         "Lưu ý: sửa câu hỏi / câu trả lời / model / phiên bản prompt sẽ tạo lại khóa bản ghi để việc chấm vẫn tìm thấy.",
@@ -1198,6 +1212,14 @@ export const translations = {
       doneCount:
         "Hoàn tất chấm bài cho {n} học sinh!\nĐã chấm xong bài của học sinh! Bạn có thể xem lại kết quả!!",
       allChecked: "Tất cả tài liệu đã được chấm. Không có gì để chấm.",
+      allSkippedOldFeedback:
+        "{count} tài liệu bị bỏ qua vì đã có feedback cũ, trong đó vẫn còn bài tập chưa chấm. Xem cảnh báo bên dưới.",
+      skippedHasOldFeedback:
+        '{docId}: tài liệu đã có feedback cũ nên được bỏ qua, nhưng vẫn còn {count} bảng bài tập chưa chấm (nhiều khả năng là dạng bài mới bổ sung). Để chấm các bài này, vui lòng dùng chức năng "Xóa feedback" trước — lưu ý thao tác đó xóa cả feedback cũ.',
+      unclassifiedTable:
+        "{docId}: bảng {list} có câu hỏi nhưng không nhận ra được là bảng bài tập nên chưa được chấm. Vui lòng kiểm tra lại bố cục.",
+      noTable: "{docId}: không tìm thấy bảng bài tập nào trong buổi học này.",
+      tableQuestionRef: "bảng {table} câu {question}",
       noAnswers: "Không tìm thấy câu trả lời nào để chấm.",
       noneGraded: "Không có bài nào được chấm. Xem cảnh báo bên dưới.",
       pointCheckFailed: "Không kiểm tra được số point. Vui lòng thử lại.",

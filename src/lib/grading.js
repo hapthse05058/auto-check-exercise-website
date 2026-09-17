@@ -9,14 +9,14 @@
  * per-doc progress would be text written and never read.
  */
 import {
+  describeGradedState,
   extractQuestionIndex,
-  getQesAndAnsFromPartIVOfTheTargetTab,
+  getQuesAndAnsFromRows,
   getUnreadableQuestions,
   makeAnswerKey,
   parseDocLinks,
-  wasExerciseReviewedByAI,
 } from "./docParser.js";
-import { getTableIndexOfExercise } from "./docTables.js";
+import { collectExerciseRows } from "./docTableDetect.js";
 import { formatFeedbackForDoc, writeGradingResultsToDoc } from "./docWriter.js";
 import {
   consumeDocPoints,
@@ -91,7 +91,6 @@ export async function processDocs({
   }
 
   let accessToken;
-  let tableIndex = [];
   const studentsExerciseList = [];
   for (const student of links) {
     try {
@@ -108,16 +107,30 @@ export async function processDocs({
       }
       student.exercise = doc;
       student.tabId = doc.tabProperties.tabId;
-      if (!tableIndex.length) {
-        tableIndex = getTableIndexOfExercise(
-          doc.tabProperties.title,
-          classType,
+      // Nhận diện lại theo TỪNG doc: vị trí bảng có thể khác nhau giữa các học
+      // sinh, nên không được tính một lần từ doc đầu rồi dùng cho cả lớp.
+      const { rows, unclassifiedWithQuestions } = collectExerciseRows(
+        doc,
+        classType,
+      );
+      student.rows = rows;
+
+      if (!rows.length) {
+        warn(t("grading.noTable", { docId: student.docId }));
+        continue;
+      }
+      // Bảng đầy câu hỏi mà không nhận ra được loại thì phải BÁO. Im lặng chính
+      // là thứ đã khiến buổi 06/07/08 chấm không ra gì suốt nhiều tháng.
+      if (unclassifiedWithQuestions.length) {
+        warn(
+          t("grading.unclassifiedTable", {
+            docId: student.docId,
+            list: unclassifiedWithQuestions.map((i) => i + 1).join(", "),
+          }),
         );
       }
-      const quesAndAnsArr = getQesAndAnsFromPartIVOfTheTargetTab(
-        doc,
-        tableIndex,
-      );
+
+      const quesAndAnsArr = getQuesAndAnsFromRows(rows);
       if (quesAndAnsArr && quesAndAnsArr.length > 0) {
         studentsExerciseList.push({
           quesAndAnsArr: quesAndAnsArr,
@@ -126,12 +139,19 @@ export async function processDocs({
       }
       // Rows holding text we could not turn into an answer are skipped, not
       // guessed at — tell the teacher so they can check those by hand.
-      const unreadable = getUnreadableQuestions(doc, tableIndex);
+      const unreadable = getUnreadableQuestions(rows);
       if (unreadable.length) {
         warn(
           t("grading.unreadableAnswers", {
             docId: student.docId,
-            list: unreadable.join(", "),
+            list: unreadable
+              .map(({ tableIdx, questionIndex }) =>
+                t("grading.tableQuestionRef", {
+                  table: tableIdx + 1,
+                  question: questionIndex,
+                }),
+              )
+              .join(", "),
           }),
         );
       }
@@ -143,7 +163,6 @@ export async function processDocs({
 
   const result = await autoCheckExercises({
     studentsExerciseList,
-    tableIndex,
     classId,
     lessonId,
     useCache,
@@ -156,7 +175,6 @@ export async function processDocs({
 /** @returns {Promise<{graded: number, error: ?string, notice: ?string}>} */
 async function autoCheckExercises({
   studentsExerciseList,
-  tableIndex,
   classId,
   lessonId,
   useCache = true,
@@ -171,10 +189,36 @@ async function autoCheckExercises({
   if (!studentsExerciseList.length) return nothingToDo(t("grading.noAnswers"));
 
   // 1. Skip docs that were already graded; only work on the rest.
-  const pending = studentsExerciseList.filter(
-    (item) => !wasExerciseReviewedByAI(item.student.exercise, tableIndex),
-  );
-  if (!pending.length) return nothingToDo(t("grading.allChecked"));
+  //    Một dòng có feedback là bỏ qua CẢ doc — giữ nguyên quy tắc cũ, vì không
+  //    có cách nào phân biệt feedback do AI ghi với chữ giáo viên tự gõ.
+  const pending = [];
+  let skippedWithUngraded = 0;
+  for (const item of studentsExerciseList) {
+    const { reviewed, ungradedTables } = describeGradedState(item.student.rows);
+    if (!reviewed) {
+      pending.push(item);
+      continue;
+    }
+    // Doc đã chấm bài cũ nhưng vẫn còn bảng bài tập trống — gần như chắc chắn
+    // là khối bài mới bổ sung. Nói thẳng ra, đừng để giáo viên đọc "tất cả đã
+    // được chấm" rồi kết luận tính năng mới hỏng.
+    if (ungradedTables.size) {
+      skippedWithUngraded += 1;
+      warn(
+        t("grading.skippedHasOldFeedback", {
+          docId: item.student.docId,
+          count: ungradedTables.size,
+        }),
+      );
+    }
+  }
+  if (!pending.length) {
+    return nothingToDo(
+      skippedWithUngraded
+        ? t("grading.allSkippedOldFeedback", { count: skippedWithUngraded })
+        : t("grading.allChecked"),
+    );
+  }
 
   // 1b. Point gate: 1 point per doc that still needs grading. `pending` is
   //     already filtered by wasExerciseReviewedByAI, so it is exactly the
@@ -202,12 +246,18 @@ async function autoCheckExercises({
   // 2. Gather every answer across the class and DEDUPE by (question, answer).
   //    Identical answers (within the class and across past runs via the cache)
   //    are graded only once.
-  const uniqueAnswers = new Map(); // key -> {question, answer}
+  const uniqueAnswers = new Map(); // key -> {question, answer, type}
   for (const { quesAndAnsArr } of pending) {
     for (const qa of quesAndAnsArr) {
-      const key = makeAnswerKey(qa.question, qa.answer);
+      // `type` thuộc về khoá: cùng một câu tiếng Anh có thể vừa là đáp án của
+      // bài dịch vừa là đề của bài bị động, và hai thứ đó chấm khác nhau.
+      const key = makeAnswerKey(qa.question, qa.answer, qa.type);
       if (!uniqueAnswers.has(key)) {
-        uniqueAnswers.set(key, { question: qa.question, answer: qa.answer });
+        uniqueAnswers.set(key, {
+          question: qa.question,
+          answer: qa.answer,
+          type: qa.type,
+        });
       }
     }
   }
@@ -234,11 +284,13 @@ async function autoCheckExercises({
   //    "(giải thích lý do.)" part onto its own line before it reaches the doc.
   //    Cached feedback goes through this too, so old entries also get the
   //    line break without being re-graded.
+  //    Backend BẮT BUỘC trả lại `taskType` nguyên văn: khoá được dựng lại từ
+  //    response, nên thiếu nó là mọi lookup trượt và KHÔNG doc nào được ghi.
   const feedbackByKey = new Map();
   for (const g of graded) {
     if (g && g.feedback !== null && g.feedback !== undefined) {
       feedbackByKey.set(
-        makeAnswerKey(g.question, g.answer),
+        makeAnswerKey(g.question, g.answer, g.taskType),
         formatFeedbackForDoc(g.feedback),
       );
     }
@@ -317,17 +369,17 @@ async function autoCheckExercises({
           const gradingResults = [];
           for (const qa of quesAndAnsArr) {
             const feedback = feedbackByKey.get(
-              makeAnswerKey(qa.question, qa.answer),
+              makeAnswerKey(qa.question, qa.answer, qa.type),
             );
-            const questionIndex = extractQuestionIndex(qa.question);
-            if (
-              feedback !== null &&
-              feedback !== undefined &&
-              questionIndex !== null &&
-              questionIndex !== undefined
-            ) {
-              gradingResults.push({ questionIndex, aiFeedback: feedback });
-            }
+            if (feedback === null || feedback === undefined) continue;
+            // `rowKey` nhắm đúng DÒNG đã đọc ra câu hỏi này, nên số thứ tự
+            // trùng nhau giữa các nhóm thì / các bảng không còn đánh lừa được
+            // ai. `questionIndex` chỉ còn là đường lùi.
+            gradingResults.push({
+              rowKey: `${qa.tableIdx}:${qa.rowIdx}`,
+              questionIndex: extractQuestionIndex(qa.question),
+              aiFeedback: feedback,
+            });
           }
           if (!gradingResults.length) {
             warn(t("grading.noMatch", { docId: student.docId }));
@@ -338,7 +390,6 @@ async function autoCheckExercises({
               gradingResults,
               student,
               googleToken,
-              tableIndex,
             );
             wroteCount += 1;
             // Bill immediately. From here on, a run that is cancelled (tab

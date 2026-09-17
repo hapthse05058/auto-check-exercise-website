@@ -10,8 +10,11 @@ import {
 import {
   P,
   makeNormalLessonTab,
+  makeTabFromTables,
   makeTabWithRows,
+  makeTranslationTable4Col,
   questionRow,
+  rowsOf,
 } from "./fixtures.js";
 
 const MOCK_AI_RESPONSE = `| STT | Câu tiếng Việt | Câu tiếng Anh sai | Chữa bài |
@@ -226,9 +229,8 @@ describe("buildFeedbackRequests", () => {
 
     const requests = buildFeedbackRequests(
       gradingResults,
-      exercise,
+      rowsOf(exercise),
       "t.x",
-      [0],
     );
 
     const inserts = requests.filter((r) => r.insertText);
@@ -258,9 +260,8 @@ describe("buildFeedbackRequests", () => {
 
     const requests = buildFeedbackRequests(
       [{ questionIndex: "1", aiFeedback }],
-      exercise,
+      rowsOf(exercise),
       "t.x",
-      [0],
     );
 
     const written = requests
@@ -280,7 +281,84 @@ describe("buildFeedbackRequests", () => {
 
   it("returns no requests when the AI response has no table", () => {
     const exercise = makeNormalLessonTab({ answered: true });
-    expect(buildFeedbackRequests([], exercise, "t.x", [0])).toEqual([]);
+    expect(buildFeedbackRequests([], rowsOf(exercise), "t.x")).toEqual([]);
+  });
+
+  it("lands each feedback on its own row when question numbers repeat", () => {
+    // Bảng dạng 1: mỗi nhóm thì đánh số lại từ 1, nên "1." và "2." đều xuất
+    // hiện hai lần trong CÙNG một bảng.
+    const tab = makeTabFromTables([makeTranslationTable4Col()]);
+    const rows = rowsOf(tab);
+    const results = rows.map((entry, i) => ({
+      rowKey: `${entry.tableIdx}:${entry.rowIdx}`,
+      questionIndex: String((i % 2) + 1),
+      aiFeedback: `sửa ${i}`,
+    }));
+
+    const requests = buildFeedbackRequests(results, rows, "t.x");
+    const written = new Map(
+      requests
+        .filter((r) => r.insertText)
+        .map((r) => [r.insertText.location.index, r.insertText.text]),
+    );
+
+    // Mỗi ô "GV sửa" nhận đúng phần sửa của dòng mình.
+    expect(written.get(50)).toBe("sửa 0");
+    expect(written.get(80)).toBe("sửa 1");
+    expect(written.get(110)).toBe("sửa 2");
+    expect(written.get(140)).toBe("sửa 3");
+  });
+
+  it("does not shift later rows when an item is dropped mid-run", () => {
+    // Đây chính là ca mà con trỏ tiến-một-chiều theo số thứ tự làm sai: bỏ mục
+    // thứ hai đi, "1." của nhóm thì sau sẽ bị khớp vào dòng còn trống ở trên.
+    const tab = makeTabFromTables([makeTranslationTable4Col()]);
+    const rows = rowsOf(tab);
+    const results = [rows[0], rows[2], rows[3]].map((entry, i) => ({
+      rowKey: `${entry.tableIdx}:${entry.rowIdx}`,
+      questionIndex: ["1", "1", "2"][i],
+      aiFeedback: `sửa ${i}`,
+    }));
+
+    const written = new Map(
+      buildFeedbackRequests(results, rows, "t.x")
+        .filter((r) => r.insertText)
+        .map((r) => [r.insertText.location.index, r.insertText.text]),
+    );
+
+    expect(written.get(50)).toBe("sửa 0");
+    expect(written.get(110)).toBe("sửa 1"); // nhóm thì sau, KHÔNG phải ô 80
+    expect(written.get(140)).toBe("sửa 2");
+    expect(written.has(80)).toBe(false); // câu bị rớt: không ghi gì cả
+  });
+
+  it("joins several graded pairs that share one cell instead of overwriting", () => {
+    const tab = makeTabFromTables([makeTranslationTable4Col()]);
+    const rows = rowsOf(tab);
+    const written = buildFeedbackRequests(
+      [
+        { rowKey: "0:2", aiFeedback: "sửa A" },
+        { rowKey: "0:2", aiFeedback: "sửa B" },
+      ],
+      rows,
+      "t.x",
+    )
+      .filter((r) => r.insertText)
+      .map((r) => r.insertText.text)
+      .join("");
+    expect(written).toBe("sửa A\nsửa B");
+  });
+
+  it("skips a row whose feedback cell carries no content instead of throwing", () => {
+    const rows = [
+      { tableIdx: 0, rowIdx: 2, isOverall: false, qCell: null, fbCell: {} },
+    ];
+    expect(() =>
+      buildFeedbackRequests([{ rowKey: "0:2", aiFeedback: "x" }], rows, "t.x"),
+    ).not.toThrow();
+    expect(
+      buildFeedbackRequests([{ rowKey: "0:2", aiFeedback: "x" }], rows, "t.x"),
+    ).toEqual([]);
   });
 
   it("finds the row whatever punctuation follows the question number", () => {
@@ -292,9 +370,8 @@ describe("buildFeedbackRequests", () => {
       ]);
       const requests = buildFeedbackRequests(
         [{ questionIndex: "7", aiFeedback: IS_CORRECT_ANSWER }],
-        exercise,
+        rowsOf(exercise),
         "t.x",
-        [0],
       );
       const texts = requests
         .filter((r) => r.insertText)

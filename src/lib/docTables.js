@@ -5,6 +5,17 @@
  * the indexes of the tables holding the part-IV exercises. The last index is
  * the table that contains the teacher's overall feedback.
  */
+/**
+ * Cần gạt thoát hiểm cho `docTableDetect`: ép cứng chỉ số bảng cho một tab cụ
+ * thể, dùng khi tài liệu của một lớp nào đó dị dạng tới mức việc nhận diện
+ * theo header không ra đúng. Bình thường để RỖNG — nhận diện theo nội dung là
+ * đường chính, và một fallback tự động sẽ kích hoạt đúng vào lúc bố cục đã
+ * trôi, tức đúng lúc chỉ số cứng sai nhất.
+ *
+ * @type {Array<{tabName: string, classType?: string, tableIndex: number[]}>}
+ */
+export const TABLE_OVERRIDES = [];
+
 export const CLASS_TYPE_BASIC_SINCE_01042026 = "basic_since_01042026";
 export const CLASS_TYPE_BASIC_BEFORE_31032026 = "basic_before_31032026";
 export const CLASS_TYPE_BASIC_SINCE_20072026 = "basic_since_20072026";

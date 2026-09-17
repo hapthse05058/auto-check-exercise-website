@@ -13,7 +13,7 @@
  * Like the grading pipeline, both passes report once through their return value
  * rather than streaming progress the screen never shows.
  */
-import { getTableIndexOfExercise } from "./docTables.js";
+import { collectExerciseRows } from "./docTableDetect.js";
 import { buildClearFeedbackRequests } from "./docWriter.js";
 import { resolveDocRefs } from "./grading.js";
 import { batchUpdateDoc, getTabContent } from "../api/googleDocs.js";
@@ -36,21 +36,14 @@ async function scanDoc(ref, { classType, lessonName, warn, t }) {
     return null;
   }
 
-  const tableIndex = getTableIndexOfExercise(
-    tab.tabProperties.title,
-    classType,
-  );
-  if (!tableIndex) {
+  const { rows } = collectExerciseRows(tab, classType);
+  if (!rows.length) {
     warn(t("clearFeedback.noTable", { docId: ref.docId }));
     return null;
   }
   return {
     token,
-    requests: buildClearFeedbackRequests(
-      tab,
-      tab.tabProperties.tabId,
-      tableIndex,
-    ),
+    requests: buildClearFeedbackRequests(rows, tab.tabProperties.tabId),
   };
 }
 

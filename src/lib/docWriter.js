@@ -4,10 +4,10 @@
  */
 import {
   IS_CORRECT_ANSWER,
+  OVERALL_FEEDBACK_LABEL,
   containsCorrectMark,
   extractQuestionIndex,
-  getTablesWhichContainStudentExercise,
-  startsWithNumberDot,
+  getCellText,
 } from "./docParser.js";
 import { batchUpdateDoc } from "../api/googleDocs.js";
 
@@ -233,105 +233,100 @@ export function createStyledTextRequests(text, baseIndex, tabId) {
   return requests;
 }
 
+/** The text actually written for one graded item. */
+function feedbackTextOf(item) {
+  // Buổi 15/16/17 grade two forms in one cell, so a ✅ on one of them must NOT
+  // collapse the whole cell (that would drop the correction).
+  const isDualSentenceFeedback = /Câu (đơn|phức)/i.test(item.aiFeedback);
+  return !isDualSentenceFeedback && containsCorrectMark(item.aiFeedback)
+    ? IS_CORRECT_ANSWER
+    : item.aiFeedback;
+}
+
 /**
- * Builds the full batchUpdate request list for one student's doc: feedback
- * per answered question plus the overall teacher comment row.
+ * Builds the full batchUpdate request list for one student's doc: feedback per
+ * answered question plus the overall teacher comment row.
+ *
+ * Targets each row by its OWN identity (`rowKey` = "tableIdx:rowIdx"), not by
+ * question number. Số thứ tự được phép trùng — bảng dạng 1 đánh số lại từ 1 ở
+ * mỗi nhóm thì, và "1." còn lặp ở các bảng khác cùng tab. Cách cũ dò tiến một
+ * chiều theo số thứ tự chỉ đúng khi mọi câu đều có feedback; chỉ cần một câu
+ * bị rớt giữa chừng là con trỏ trượt sang dòng của nhóm khác và ghi nhầm vào
+ * bài của học sinh mà không báo lỗi gì.
+ *
+ * `questionIndex` vẫn được giữ làm đường lùi cho các lời gọi chưa có `rowKey`.
  */
-export function buildFeedbackRequests(
-  gradingResults,
-  exercise,
-  tabId,
-  tableIndex,
-) {
-  const contentContainer = getTablesWhichContainStudentExercise(
-    exercise,
-    tableIndex,
+export function buildFeedbackRequests(gradingResults, rows, tabId) {
+  const entries = rows || [];
+  const questionRows = entries.filter((entry) => !entry.isOverall);
+  const byRowKey = new Map(
+    questionRows.map((entry) => [`${entry.tableIdx}:${entry.rowIdx}`, entry]),
   );
-  const groupedRequests = []; // request groups, one per graded question
 
-  let currentRowPointer = 0;
+  // Nhiều cặp Q/A có thể cùng nằm trong MỘT ô (nhóm thì gộp ô). Gom theo ô đích
+  // rồi ghi một lần, thay vì để lần ghi sau đè lên lần trước.
+  const textsByEntry = new Map();
+  let pointer = 0;
+
   for (const item of gradingResults) {
-    let feedbackText;
-    let targetStartIndex = -1;
+    let entry = item.rowKey ? byRowKey.get(item.rowKey) : undefined;
 
-    for (let j = currentRowPointer; j < contentContainer.length; j++) {
-      if (j === 1) {
-        // Handle the last row to add the teacher's overall feedback.
-        const row = contentContainer.at(-1);
-        const firstCellText = row.tableCells[0].content
-          .map((p) =>
-            p?.paragraph?.elements
-              ?.map((e) => e.textRun?.content || "")
-              .join(""),
-          )
-          .join("")
-          .trim();
-
-        if (firstCellText.includes("Nhận xét chung của Giáo viên")) {
-          const targetCell = row.tableCells[0];
-          targetStartIndex =
-            targetCell.content[0].startIndex + firstCellText.length;
-          feedbackText = generateOverallFeedback(gradingResults);
-          if (targetStartIndex !== -1) {
-            const styledReqs = setStyleForTeacherFeedBack(
-              targetStartIndex,
-              feedbackText,
-              tabId,
-            );
-            groupedRequests.push({
-              startIndex: targetStartIndex,
-              subRequests: styledReqs,
-            });
-          }
-        }
-      } else {
-        const row = contentContainer[j];
-        const firstCellText = row.tableCells[0].content
-          .map((p) =>
-            p?.paragraph?.elements
-              ?.map((e) => e.textRun?.content || "")
-              .join(""),
-          )
-          .join("")
-          .trim();
-
+    if (!entry && item.questionIndex !== undefined) {
+      for (let j = pointer; j < questionRows.length; j++) {
+        const candidate = questionRows[j];
+        const questionText = getCellText(candidate.qCell).trim();
+        const numberText = getCellText(candidate.numberCell).trim();
         // Same numbering rule as the parser, so a question we could READ is a
         // question we can WRITE back to — including "7 ." and "7)".
         if (
-          firstCellText === item.questionIndex ||
-          extractQuestionIndex(firstCellText) === item.questionIndex
+          numberText === item.questionIndex ||
+          questionText === item.questionIndex ||
+          extractQuestionIndex(numberText) === item.questionIndex ||
+          extractQuestionIndex(questionText) === item.questionIndex
         ) {
-          // Buổi 15/16/17 grade two forms in one cell, so a ✅ on one of them
-          // must NOT collapse the whole cell (that would drop the correction).
-          const isDualSentenceFeedback = /Câu (đơn|phức)/i.test(
-            item.aiFeedback,
-          );
-          feedbackText =
-            !isDualSentenceFeedback && containsCorrectMark(item.aiFeedback)
-              ? IS_CORRECT_ANSWER
-              : item.aiFeedback;
-          const cellIndex = row.tableCells.length - 1;
-          const targetCell = row.tableCells[cellIndex];
-
-          // Safe startIndex (inside the cell's first paragraph).
-          targetStartIndex = targetCell.content[0].startIndex;
-          currentRowPointer = j + 1;
+          entry = candidate;
+          pointer = j + 1;
           break;
         }
       }
     }
 
-    if (targetStartIndex !== -1 && feedbackText !== undefined) {
-      // Newlines are kept on purpose: formatFeedbackForDoc puts the reason on
-      // its own line, and the Docs API counts "\n" as a single index unit.
-      const styledReqs = createStyledTextRequests(
-        feedbackText,
+    if (!entry) continue;
+    if (!textsByEntry.has(entry)) textsByEntry.set(entry, []);
+    textsByEntry.get(entry).push(feedbackTextOf(item));
+  }
+
+  const groupedRequests = [];
+  for (const [entry, texts] of textsByEntry) {
+    // Ô giữ chỗ của một ô bị gộp có thể không có `content`. Bỏ qua dòng đó chứ
+    // đừng ném — một ô dị dạng không được phép làm hỏng cả tài liệu.
+    const targetStartIndex = entry.fbCell?.content?.[0]?.startIndex;
+    if (targetStartIndex === undefined) continue;
+    // Newlines are kept on purpose: formatFeedbackForDoc puts the reason on its
+    // own line, and the Docs API counts "\n" as a single index unit.
+    groupedRequests.push({
+      startIndex: targetStartIndex,
+      subRequests: createStyledTextRequests(
+        texts.join("\n"),
         targetStartIndex,
         tabId,
-      );
+      ),
+    });
+  }
+
+  const overall = entries.find((entry) => entry.isOverall);
+  const overallStart = overall?.overallCell?.content?.[0]?.startIndex;
+  if (overall && overallStart !== undefined && gradingResults.length) {
+    const labelText = getCellText(overall.overallCell).trim();
+    if (labelText.includes(OVERALL_FEEDBACK_LABEL)) {
+      const targetStartIndex = overallStart + labelText.length;
       groupedRequests.push({
         startIndex: targetStartIndex,
-        subRequests: styledReqs,
+        subRequests: setStyleForTeacherFeedBack(
+          targetStartIndex,
+          generateOverallFeedback(gradingResults),
+          tabId,
+        ),
       });
     }
   }
@@ -353,15 +348,13 @@ export async function writeGradingResultsToDoc(
   gradingResults,
   student,
   accessToken,
-  tableIndex,
 ) {
   if (!gradingResults || gradingResults.length === 0) return;
   try {
     const finalRequests = buildFeedbackRequests(
       gradingResults,
-      student.exercise,
+      student.rows,
       student.tabId,
-      tableIndex,
     );
 
     if (finalRequests.length > 0) {
@@ -381,8 +374,11 @@ export async function writeGradingResultsToDoc(
  * The one literal marker in the layout. `buildFeedbackRequests` appends the
  * overall comment right after it, so clearing means cutting everything that
  * follows it while leaving the label itself in place.
+ *
+ * Defined in `docParser` (the table detector needs it as well) and re-exported
+ * here, which is where every caller has always imported it from.
  */
-export const OVERALL_FEEDBACK_LABEL = "Nhận xét chung của Giáo viên";
+export { OVERALL_FEEDBACK_LABEL };
 
 /**
  * A cell's paragraph elements with the index range Docs reported for each one.
@@ -476,21 +472,17 @@ function rangeAfterLabel(els, labelEnd) {
  * equals content.length, and one deleteContentRange may span paragraph breaks
  * inside a cell.
  */
-export function buildClearFeedbackRequests(exercise, tabId, tableIndex) {
-  const rows = getTablesWhichContainStudentExercise(exercise, tableIndex) || [];
+export function buildClearFeedbackRequests(rows, tabId) {
   const ranges = [];
 
-  for (const row of rows) {
-    const cells = row.tableCells || [];
-    if (!cells.length) continue;
-
-    const headEls = cellElements(cells[0]);
-    const headText = headEls.map((e) => e.text ?? "").join("");
-
-    // The overall-comment row is checked FIRST: it is often a single merged
-    // cell, so the "needs a last column" rule below would skip it.
-    const at = headText.indexOf(OVERALL_FEEDBACK_LABEL);
-    if (at !== -1) {
+  for (const entry of rows || []) {
+    // The overall-comment row is handled apart: it is a single merged cell, so
+    // it has no feedback column of its own — only a tail to cut off the label.
+    if (entry.isOverall) {
+      const headEls = cellElements(entry.overallCell);
+      const headText = headEls.map((e) => e.text ?? "").join("");
+      const at = headText.indexOf(OVERALL_FEEDBACK_LABEL);
+      if (at === -1) continue;
       let labelEnd = at + OVERALL_FEEDBACK_LABEL.length;
       // The ":" after the label is the document template's own punctuation, not
       // something grading appended (it writes AFTER the existing text). Keeping
@@ -501,12 +493,9 @@ export function buildClearFeedbackRequests(exercise, tabId, tableIndex) {
       continue;
     }
 
-    // Feedback lives in the LAST cell, so a one-cell row has nowhere to hold it.
-    if (cells.length < 2) continue;
-    // Same rule the parser and wasExerciseReviewedByAI use to spot a question.
-    if (!startsWithNumberDot(headText)) continue;
-
-    const els = cellElements(cells.at(-1));
+    // Which cell holds the feedback was already resolved per row, so a merged
+    // "Thì" column shifting the indexes changes nothing here.
+    const els = cellElements(entry.fbCell);
     if (!els.some((e) => (e.text ?? "").trim())) continue; // already empty
     const r = textRange(els);
     if (r && r.end > r.start) ranges.push(r);

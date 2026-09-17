@@ -9,6 +9,7 @@ import {
   PRichLink,
   makeRawTab,
   row,
+  rowsOf,
 } from "./fixtures.js";
 
 /** Shorthand: the {startIndex, endIndex} of each emitted delete request. */
@@ -44,7 +45,7 @@ describe("buildClearFeedbackRequests", () => {
       qRow(2, 100, "✅ Đúng\n", 120),
     ]);
 
-    const ranges = rangesOf(buildClearFeedbackRequests(tab, "t.x", [0]));
+    const ranges = rangesOf(buildClearFeedbackRequests(rowsOf(tab), "t.x"));
 
     // Descending, and each stops one short of the cell-terminating newline.
     expect(ranges).toEqual([
@@ -55,18 +56,18 @@ describe("buildClearFeedbackRequests", () => {
 
   it("skips the two header rows", () => {
     const tab = makeRawTab([header(), spacer()]);
-    expect(buildClearFeedbackRequests(tab, "t.x", [0])).toEqual([]);
+    expect(buildClearFeedbackRequests(rowsOf(tab), "t.x")).toEqual([]);
   });
 
   it("is a true no-op on an already-cleared cell", () => {
     // What the doc looks like after the first clear: only the terminator left.
     const tab = makeRawTab([header(), spacer(), qRow(1, 30, "\n", 50)]);
-    expect(buildClearFeedbackRequests(tab, "t.x", [0])).toEqual([]);
+    expect(buildClearFeedbackRequests(rowsOf(tab), "t.x")).toEqual([]);
   });
 
   it("emits nothing for a cell holding only whitespace", () => {
     const tab = makeRawTab([header(), spacer(), qRow(1, 30, "   \n", 50)]);
-    expect(buildClearFeedbackRequests(tab, "t.x", [0])).toEqual([]);
+    expect(buildClearFeedbackRequests(rowsOf(tab), "t.x")).toEqual([]);
   });
 
   it("keeps the overall-comment label and cuts only what follows it", () => {
@@ -77,7 +78,7 @@ describe("buildClearFeedbackRequests", () => {
       row([PIndexed(`${OVERALL_FEEDBACK_LABEL}:${praise}\n`, 200)]),
     ]);
 
-    const [range] = rangesOf(buildClearFeedbackRequests(tab, "t.x", [0]));
+    const [range] = rangesOf(buildClearFeedbackRequests(rowsOf(tab), "t.x"));
 
     // Starts after the label AND its colon — both belong to the template.
     expect(range.start).toBe(200 + OVERALL_FEEDBACK_LABEL.length + 1);
@@ -91,7 +92,7 @@ describe("buildClearFeedbackRequests", () => {
       spacer(),
       row([PIndexed(`${OVERALL_FEEDBACK_LABEL}:\n`, 200)]),
     ]);
-    expect(buildClearFeedbackRequests(tab, "t.x", [0])).toEqual([]);
+    expect(buildClearFeedbackRequests(rowsOf(tab), "t.x")).toEqual([]);
   });
 
   it("covers the paragraph break inside a multi-paragraph feedback cell", () => {
@@ -106,7 +107,7 @@ describe("buildClearFeedbackRequests", () => {
       ),
     ]);
 
-    const [range] = rangesOf(buildClearFeedbackRequests(tab, "t.x", [0]));
+    const [range] = rangesOf(buildClearFeedbackRequests(rowsOf(tab), "t.x"));
 
     expect(range.start).toBe(50);
     // Spans the mid-cell "\n" at 62 and stops before the terminator at 75.
@@ -115,7 +116,7 @@ describe("buildClearFeedbackRequests", () => {
 
   it("leaves exactly one newline when the cell ends with two", () => {
     const tab = makeRawTab([header(), spacer(), qRow(1, 30, "abc\n\n", 50)]);
-    const [range] = rangesOf(buildClearFeedbackRequests(tab, "t.x", [0]));
+    const [range] = rangesOf(buildClearFeedbackRequests(rowsOf(tab), "t.x"));
     // "abc\n" goes, the final "\n" stays — proves /\n+$/ is not used.
     expect(range).toEqual({ start: 50, end: 54 });
   });
@@ -133,7 +134,7 @@ describe("buildClearFeedbackRequests", () => {
       ]),
     ]);
 
-    const [range] = rangesOf(buildClearFeedbackRequests(tab, "t.x", [0]));
+    const [range] = rangesOf(buildClearFeedbackRequests(rowsOf(tab), "t.x"));
 
     expect(range.start).toBe(200 + OVERALL_FEEDBACK_LABEL.length + 1);
     expect(range.end).toBe(
@@ -151,7 +152,7 @@ describe("buildClearFeedbackRequests", () => {
       ]),
     ]);
 
-    const [range] = rangesOf(buildClearFeedbackRequests(tab, "t.x", [0]));
+    const [range] = rangesOf(buildClearFeedbackRequests(rowsOf(tab), "t.x"));
 
     expect(range.start).toBe(200 + OVERALL_FEEDBACK_LABEL.length + 1);
     expect(range.end).toBe(
@@ -168,7 +169,7 @@ describe("buildClearFeedbackRequests", () => {
         PIndexed(`${OVERALL_FEEDBACK_LABEL}: tốt\n`, 204),
       ]),
     ]);
-    expect(buildClearFeedbackRequests(tab, "t.x", [0])).toEqual([]);
+    expect(buildClearFeedbackRequests(rowsOf(tab), "t.x")).toEqual([]);
   });
 
   it("never touches a one-cell row that is not the overall comment", () => {
@@ -177,7 +178,7 @@ describe("buildClearFeedbackRequests", () => {
       spacer(),
       row([PIndexed("1. Câu hỏi\n", 30)]),
     ]);
-    expect(buildClearFeedbackRequests(tab, "t.x", [0])).toEqual([]);
+    expect(buildClearFeedbackRequests(rowsOf(tab), "t.x")).toEqual([]);
   });
 
   it("returns disjoint ranges in strictly descending order", () => {
@@ -189,7 +190,7 @@ describe("buildClearFeedbackRequests", () => {
       row([PIndexed(`${OVERALL_FEEDBACK_LABEL}: tốt\n`, 200)]),
     ]);
 
-    const ranges = rangesOf(buildClearFeedbackRequests(tab, "t.x", [0]));
+    const ranges = rangesOf(buildClearFeedbackRequests(rowsOf(tab), "t.x"));
 
     expect(ranges.length).toBe(3);
     for (let i = 0; i < ranges.length - 1; i++) {
@@ -201,12 +202,14 @@ describe("buildClearFeedbackRequests", () => {
 
   it("carries the tabId onto every range", () => {
     const tab = makeRawTab([header(), spacer(), qRow(1, 30, "abc\n", 50)]);
-    const [req] = buildClearFeedbackRequests(tab, "t.abc", [0]);
+    const [req] = buildClearFeedbackRequests(rowsOf(tab), "t.abc");
     expect(req.deleteContentRange.range.tabId).toBe("t.abc");
   });
 
-  it("returns [] when the lesson has no table index", () => {
-    const tab = makeRawTab([header(), spacer(), qRow(1, 30, "abc\n", 50)]);
-    expect(buildClearFeedbackRequests(tab, "t.x", null)).toEqual([]);
+  it("returns [] when the tab holds no recognisable exercise table", () => {
+    // Đúng bảng đó nhưng bỏ dòng header ⇒ không nhận ra được là bảng bài tập
+    // (và không có bảng nào trước nó để kế thừa loại).
+    const tab = makeRawTab([qRow(1, 30, "abc\n", 50)]);
+    expect(buildClearFeedbackRequests(rowsOf(tab), "t.x")).toEqual([]);
   });
 });

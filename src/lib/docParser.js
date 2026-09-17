@@ -13,6 +13,14 @@
 export const IS_CORRECT_ANSWER = "✅ Đúng";
 
 /**
+ * The one literal marker in the layout: the row holding the teacher's overall
+ * comment. Lives here rather than in `docWriter` because the table detector
+ * needs it too, and `docWriter` imports from this module — putting it the
+ * other way round would close an import cycle.
+ */
+export const OVERALL_FEEDBACK_LABEL = "Nhận xét chung của Giáo viên";
+
+/**
  * Số thứ tự mở đầu một câu hỏi. Cho phép khoảng trắng đứng trước và chấp nhận
  * cả "1)" / "1 ." vì học sinh hay gõ lệch. Nhóm capture chỉ chứa CHỮ SỐ, để
  * `extractQuestionIndex` và `docWriter` luôn so khớp trên cùng một giá trị.
@@ -93,8 +101,13 @@ export function normalizeText(value) {
  * pair. Two students who answered the SAME question DIFFERENTLY get different
  * keys, so they never share feedback.
  */
-export function makeAnswerKey(question, answer) {
-  return `${normalizeText(question)}${normalizeText(answer)}`;
+export function makeAnswerKey(question, answer, type) {
+  const base = `${normalizeText(question)}${normalizeText(answer)}`;
+  // Cùng một câu tiếng Anh có thể vừa là ĐÁP ÁN của bài dịch, vừa là ĐỀ BÀI của
+  // bài chuyển sang bị động. Không tách theo loại thì hai thứ đó dùng chung
+  // feedback của nhau. Bỏ hậu tố cho "vi_en" để khoá của bài dịch — tức gần như
+  // toàn bộ kho câu hiện có — giữ nguyên từng byte.
+  return type && type !== "vi_en" ? `${base}${type}` : base;
 }
 
 /**
@@ -201,6 +214,84 @@ export function getCellLines(cell) {
     .filter((line) => line.trim() !== "");
 }
 
+/** One cell flattened to text. Same source as `getCellLines`, so both agree. */
+export function getCellText(cell) {
+  return getCellLines(cell).join("\n");
+}
+
+/**
+ * Một ô chỉ chứa số thứ tự ("1", "1.", "2)") — cột STT của layout cũ, không
+ * phải ô đề bài. Khác `QUESTION_NUMBER` ở chỗ dấu chấm là TÙY CHỌN nhưng phải
+ * hết chuỗi: "1. Tôi học tiếng Anh" không khớp, "1." thì khớp.
+ */
+const ONLY_QUESTION_NUMBER = /^\s*(\d{1,3})\s*[.)]?\s*$/;
+
+/**
+ * Tìm ô nào của MỘT DÒNG giữ đề bài, ô nào nhận feedback.
+ *
+ * Phải dò theo NỘI DUNG chứ không theo vị trí cố định, vì chỉ số ô thay đổi
+ * ngay trong cùng một bảng:
+ *   - bảng cũ 3 cột      → đề bài ở ô 0
+ *   - bảng "BÀI TẬP VIẾT CÂU" 4 cột (Thì | Tiếng Việt → Tiếng Anh | Gợi ý |
+ *     GV sửa) → đề bài ở ô 1
+ *   - và cột "Thì" bị GỘP DỌC: những dòng bị gộp đè có thể được Google Docs
+ *     trả về dưới dạng ô giữ chỗ rỗng (đề bài vẫn ở ô 1) HOẶC bị lược bỏ hẳn
+ *     (đề bài tụt về ô 0). Quét theo nội dung nên đúng ở cả hai trường hợp,
+ *     không cần biết API chọn kiểu nào.
+ *
+ * Ô feedback LUÔN là ô cuối ("Chữa bài" của bảng cũ, "GV sửa" của bảng mới).
+ *
+ * @returns {{qIndex, qCell, numberIndex, numberCell, fbIndex, fbCell}|null}
+ *   null khi dòng này không phải dòng câu hỏi (dòng header, dòng công thức
+ *   "B1:/B2:", dòng ví dụ…) — đây chính là thứ giữ cho các dòng đó không bao
+ *   giờ bị chấm và không bao giờ bị ghi đè.
+ */
+export function resolveRowCells(row) {
+  const cells = row?.tableCells || [];
+  // Một ô thì không thể vừa là đề vừa là chỗ ghi feedback.
+  if (cells.length < 2) return null;
+
+  const fbIndex = cells.length - 1;
+  let qIndex = -1;
+  let numberIndex = -1;
+
+  for (let i = 0; i < fbIndex; i++) {
+    const lines = getCellLines(cells[i]);
+    const text = lines.join("\n").trim();
+    // Cột STT riêng: nhớ lại rồi đi tiếp, đề bài nằm ở ô sau nó.
+    if (ONLY_QUESTION_NUMBER.test(text)) {
+      if (numberIndex === -1) numberIndex = i;
+      continue;
+    }
+    if (startsWithNumberDot(lines[0])) {
+      qIndex = i;
+      break;
+    }
+  }
+
+  // Layout cũ "| 1 | đề bài | Chữa bài |": đề bài không tự mang số thứ tự, lấy
+  // ô có chữ đầu tiên sau cột STT.
+  if (qIndex === -1 && numberIndex !== -1) {
+    for (let i = numberIndex + 1; i < fbIndex; i++) {
+      if (getCellText(cells[i]).trim()) {
+        qIndex = i;
+        break;
+      }
+    }
+  }
+
+  if (qIndex === -1) return null;
+
+  return {
+    qIndex,
+    qCell: cells[qIndex],
+    numberIndex,
+    numberCell: numberIndex === -1 ? null : cells[numberIndex],
+    fbIndex,
+    fbCell: cells[fbIndex],
+  };
+}
+
 /**
  * Turns one cell's lines into question/answer pairs.
  *
@@ -276,107 +367,101 @@ function buildQnaPairs(lines) {
   }));
 }
 
-/** Reads the question/answer pairs of every exercise row (rows 0-1 are headers). */
-function extractPairsFromRows(exerciseRows) {
+/**
+ * Đọc cặp đề bài / câu trả lời của từng dòng bài tập.
+ *
+ * Nhận các entry đã được `collectExerciseRows` giải sẵn, nên không còn phải
+ * đoán "bỏ 2 dòng đầu là header" hay "đề bài luôn ở ô 0" — hai giả định đã vỡ
+ * ngay khi tài liệu thêm bảng 4 cột có cột "Thì" gộp dọc.
+ *
+ * Mỗi cặp mang theo danh tính dòng (`tableIdx`/`rowIdx`) để lúc ghi feedback
+ * ngược lại doc không phải dò theo số thứ tự — số thứ tự ĐƯỢC PHÉP trùng nhau
+ * (bảng dạng 1 đánh số lại từ 1 ở mỗi nhóm thì).
+ */
+function extractPairsFromRows(rows) {
   const pairs = [];
-  for (let i = 2; i < exerciseRows.length; i++) {
-    pairs.push(
-      ...buildQnaPairs(getCellLines(exerciseRows[i]?.tableCells?.[0])),
-    );
+  for (const entry of rows || []) {
+    if (entry.isOverall) continue;
+    for (const pair of buildQnaPairs(getCellLines(entry.qCell))) {
+      pairs.push({
+        ...pair,
+        type: entry.kind,
+        tableIdx: entry.tableIdx,
+        rowIdx: entry.rowIdx,
+      });
+    }
   }
   return pairs;
 }
 
-// Buổi 23 mixes plain questions with ones whose prompt already holds an English
-// sentence ("Rút gọn DCN trong câu sau:"). Kept as its own entry point so that
-// format can be tuned without touching every other lesson — telling the two
-// apart is done per LINE (rule 4), not per lesson.
-function getQuesAndAnsForLesson23(exercisePart4) {
-  return extractPairsFromRows(exercisePart4);
-}
-
-function getQuesAndAnsForNormalLession(exercisePart4) {
-  return extractPairsFromRows(exercisePart4);
-}
-
-/** Every part-IV pair of a tab, answered or not. */
-function parseExercisePairs(targetTab, tableIndex) {
-  const exercisePart4 = getTablesWhichContainStudentExercise(
-    targetTab,
-    tableIndex,
-  );
-  if (targetTab.tabProperties.title === "BUỔI 23") {
-    return getQuesAndAnsForLesson23(exercisePart4);
-  }
-  return getQuesAndAnsForNormalLession(exercisePart4);
-}
-
 /**
- * Extracts the part-IV question/answer pairs of a tab, keeping only the
- * entries the student answered.
+ * Mọi cặp đã được học sinh trả lời trong một tab.
+ *
+ * Chỉ `{question, answer}` được gửi cho AI (nguyên văn); `type` chọn cách AI
+ * được hỏi, còn `tableIdx`/`rowIdx` chỉ dùng nội bộ để ghi ngược vào doc.
+ * Cột "Gợi ý từ vựng" KHÔNG bao giờ có mặt ở đây — nó nằm ở ô khác `qCell`.
  */
-export function getQesAndAnsFromPartIVOfTheTargetTab(targetTab, tableIndex) {
-  if (!tableIndex) return;
-
+export function getQuesAndAnsFromRows(rows) {
   const finalArr = [];
-  parseExercisePairs(targetTab, tableIndex).forEach(({ question, answer }) => {
-    if (hasAnswer(answer?.trim())) {
-      // Only {question, answer} goes out: both are sent verbatim to the AI.
-      finalArr.push({ question, answer });
-    }
-  });
+  extractPairsFromRows(rows).forEach(
+    ({ question, answer, type, tableIdx, rowIdx }) => {
+      if (hasAnswer(answer?.trim())) {
+        finalArr.push({ question, answer, type, tableIdx, rowIdx });
+      }
+    },
+  );
   return finalArr;
 }
 
 /**
- * Question numbers whose row holds text the parser had to guess about and
- * still could not turn into an answer — e.g. the student removed the "→" AND
- * answered in Vietnamese. The teacher is told to check those by hand instead
- * of the row being dropped silently. An untouched exercise reports nothing.
+ * Những câu mà parser phải đoán và vẫn không ra được câu trả lời — ví dụ học
+ * sinh xoá mất "→" VÀ trả lời bằng tiếng Việt. Báo cho giáo viên tự kiểm tra
+ * thay vì âm thầm bỏ dòng đó.
+ *
+ * Kèm `tableIdx` vì số thứ tự có thể trùng giữa các bảng: "câu 1, 2, 1, 2"
+ * không nói lên điều gì, "bảng 3 câu 1" thì có.
  */
-export function getUnreadableQuestions(targetTab, tableIndex) {
-  if (!tableIndex) return [];
-  return parseExercisePairs(targetTab, tableIndex)
+export function getUnreadableQuestions(rows) {
+  return extractPairsFromRows(rows)
     .filter(({ answer, guessed }) => guessed && !hasAnswer(answer?.trim()))
-    .map(({ question }) => extractQuestionIndex(question))
-    .filter((index) => index !== null);
+    .map(({ question, tableIdx }) => ({
+      tableIdx,
+      questionIndex: extractQuestionIndex(question),
+    }))
+    .filter((item) => item.questionIndex !== null);
 }
 
 /**
- * True when the "Chữa bài" column already contains feedback for at least one
- * answered question (the doc was graded before).
+ * Tình trạng chấm của một tab, tách theo từng bảng.
+ *
+ * `reviewed` giữ NGUYÊN ngữ nghĩa cũ (chỉ cần một dòng có feedback là cả doc bị
+ * coi như đã chấm và bị bỏ qua). Hai tập còn lại chỉ để BÁO CHO ĐÚNG: khi tài
+ * liệu đã chấm bài cũ nhưng vẫn còn bảng bài mới trống, giáo viên cần nghe
+ * "doc bị bỏ qua vì có feedback cũ", chứ không phải "tất cả đã được chấm".
  */
-export function wasExerciseReviewedByAI(exercise, tableIndex) {
-  const contentContainer = getTablesWhichContainStudentExercise(
-    exercise,
-    tableIndex,
-  );
-  for (let j = 0; j < contentContainer.length; j++) {
-    if (j > 1) {
-      const row = contentContainer[j];
-      const firstCellText = row.tableCells[0].content
-        .map((p) =>
-          p?.paragraph?.elements?.map((e) => e.textRun?.content || "").join(""),
-        )
-        .join("")
-        .trim();
+export function describeGradedState(rows) {
+  const gradedTables = new Set();
+  const ungradedTables = new Set();
 
-      if (firstCellText && startsWithNumberDot(firstCellText)) {
-        const cellIndex = row.tableCells.length - 1;
-        const targetCell = row.tableCells[cellIndex];
-        const targetCellContent = targetCell.content
-          .map((p) =>
-            p?.paragraph?.elements
-              ?.map((e) => e.textRun?.content || "")
-              .join(""),
-          )
-          .join("")
-          .trim();
-        if (targetCellContent) {
-          return true;
-        }
-      }
+  for (const entry of rows || []) {
+    if (entry.isOverall) continue;
+    if (getCellText(entry.fbCell).trim()) {
+      gradedTables.add(entry.tableIdx);
+      continue;
     }
+    const answered = buildQnaPairs(getCellLines(entry.qCell)).some(
+      ({ answer }) => hasAnswer(answer?.trim()),
+    );
+    if (answered) ungradedTables.add(entry.tableIdx);
   }
-  return false;
+
+  return { reviewed: gradedTables.size > 0, gradedTables, ungradedTables };
+}
+
+/**
+ * True khi cột "Chữa bài"/"GV sửa" đã có feedback ở ít nhất một câu đã trả lời
+ * (tài liệu từng được chấm trước đó).
+ */
+export function wasExerciseReviewedByAI(rows) {
+  return describeGradedState(rows).reviewed;
 }

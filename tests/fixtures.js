@@ -1,3 +1,5 @@
+import { collectExerciseRows } from "../src/lib/docTableDetect.js";
+
 /** Shared synthetic Google Doc structures for tests. */
 
 /** Paragraph with a single text run. */
@@ -132,4 +134,166 @@ export function makeRawTab(rows, title = "BUỔI 10 - Lesson") {
       body: { content: [{ table: { tableRows: rows } }] },
     },
   };
+}
+
+// ---------------------------------------------------------------------------
+// "III. BÀI TẬP VIẾT CÂU" — the exercise block added to BUỔI 04 → 10
+// ---------------------------------------------------------------------------
+
+/** Wraps already-built tables into a tab. */
+export function makeTabFromTables(tables, title = "BUỔI 04 - Lesson") {
+  return {
+    tabProperties: { title, tabId: "t.x" },
+    documentTab: {
+      body: { content: tables.map((tableRows) => ({ table: { tableRows } })) },
+    },
+  };
+}
+
+/**
+ * Dạng 1 (BUỔI 04/05/06): 4 columns, the "Thì" column MERGED vertically across
+ * each tense group, and question numbering restarting at 1 inside every group.
+ *
+ * `mergeMode` reproduces the two ways the Google Docs API may report a row
+ * covered by a vertical merge — as an empty placeholder cell, or by leaving the
+ * cell out entirely. The question then sits in cell 1 or cell 0 respectively,
+ * INSIDE THE SAME TABLE, which is exactly what defeats any fixed cell index.
+ */
+export function makeTranslationTable4Col({ mergeMode = "placeholder" } = {}) {
+  const titleRow = row([P("Học viên dịch câu tiếng Việt sang tiếng Anh")]);
+  const headerRow = row(
+    [P("Thì")],
+    [P("Tiếng Việt → Tiếng Anh")],
+    [P("Gợi ý từ vựng")],
+    [P("GV sửa")],
+  );
+  const ownerRow = (tense, question, answer, hint, fbIndex) =>
+    row(
+      [P(tense)],
+      [P(`${question}\n`), P(`→ ${answer}\n`)],
+      [P(hint)],
+      [P("", fbIndex)],
+    );
+  const mergedRow = (question, answer, hint, fbIndex) => {
+    const rest = [
+      [P(`${question}\n`), P(`→ ${answer}\n`)],
+      [P(hint)],
+      [P("", fbIndex)],
+    ];
+    return mergeMode === "placeholder" ? row([], ...rest) : row(...rest);
+  };
+
+  return [
+    titleRow,
+    headerRow,
+    ownerRow(
+      "HTĐ",
+      "1. Tôi học Tiếng Anh hàng ngày.",
+      "I study English every day.",
+      "learn (v) học",
+      50,
+    ),
+    mergedRow(
+      "2. Cô ấy đọc sách mỗi tối.",
+      "She read books every evening.",
+      "read (v) đọc",
+      80,
+    ),
+    ownerRow(
+      "HTTD",
+      "1. Tôi đang học Tiếng Anh bây giờ.",
+      "I am studying English now.",
+      "now (adv)",
+      110,
+    ),
+    mergedRow(
+      "2. Cô ấy đang đọc sách bây giờ.",
+      "She is reading a book now.",
+      "book (n)",
+      140,
+    ),
+  ];
+}
+
+/**
+ * Dạng 2 (BUỔI 07/08/09/10): active → passive. Carries the "Học viên thành lập
+ * công thức … bị động" band with its B1:/B2: row, which must NEVER be graded —
+ * it has no numbered question, so the row-level rule drops it on its own.
+ */
+export function makePassiveTable() {
+  return [
+    row([P("Ví dụ: I am learning English → English is being learned by me")]),
+    row(
+      [P("HTĐ chủ động")],
+      [P("Học viên thành lập công thức HTĐ bị động")],
+      [P("GV sửa")],
+    ),
+    row([P("V (s/es)")], [P("B1:\nB2:\n")], [P("", 40)]),
+    row([P("Câu Chủ động → Câu Bị động")], [P("Gợi ý")], [P("GV sửa")]),
+    row(
+      [
+        P("1. The teacher checks the lesson every day.\n"),
+        P("→ The lesson is check by the teacher.\n"),
+      ],
+      [P("")],
+      [P("", 60)],
+    ),
+    row(
+      [
+        P("2. The students clean the classrooms every afternoon.\n"),
+        P("→ The classrooms are cleaned by the students.\n"),
+      ],
+      [P("")],
+      [P("", 90)],
+    ),
+  ];
+}
+
+/** The legacy 3-column table every existing lesson still uses. */
+export function makeLegacyTable(feedback = "") {
+  return [
+    row([P("STT")], [P("Đề bài")], [P("Chữa bài")]),
+    row([P("")], [P("")], [P("")]),
+    row(
+      [P("1. Câu hỏi một\n"), P("→ My answer one\n")],
+      [P("")],
+      [P(feedback, 200)],
+    ),
+    row(
+      [P("2. Câu hỏi hai\n"), P("→ My answer two\n")],
+      [P("")],
+      [P(feedback, 230)],
+    ),
+  ];
+}
+
+/** A reference/vocabulary table: numbered rows but NO feedback column. */
+export function makeVocabTable() {
+  return [
+    row([P("Từ vựng")], [P("Nghĩa")]),
+    row([P("1. learn")], [P("học")]),
+    row([P("2. read")], [P("đọc")]),
+  ];
+}
+
+/** The teacher's overall-comment table. */
+export function makeOverallTable(startIndex = 300) {
+  return [row([P("Nhận xét chung của Giáo viên:", startIndex)])];
+}
+
+/** Legacy layout whose first cell holds only the bare STT number. */
+export function makeBareSttTable() {
+  return [
+    row([P("STT")], [P("Đề bài")], [P("Chữa bài")]),
+    row([P("")], [P("")], [P("")]),
+    row([P("1")], [P("Câu hỏi một\n"), P("→ My answer one\n")], [P("", 400)]),
+  ];
+}
+
+/**
+ * Tab → the tagged exercise rows every consumer now takes. Kept here so a test
+ * never has to know which module resolves cells.
+ */
+export function rowsOf(tab) {
+  return collectExerciseRows(tab).rows;
 }
