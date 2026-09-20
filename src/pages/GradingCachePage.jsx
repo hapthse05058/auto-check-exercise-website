@@ -50,7 +50,7 @@ export default function GradingCachePage() {
     label: t(`cache.${f.key}`),
   }));
 
-  const [field, setField] = useState("question");
+  const [field, setField] = useState("answer");
   const [query, setQuery] = useState("");
   const [rows, setRows] = useState([]);
   const [selected, setSelected] = useState(() => new Set());
