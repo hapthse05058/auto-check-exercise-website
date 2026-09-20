@@ -47,15 +47,16 @@ export function generateOverallFeedback(gradingResults) {
     (item) => item.aiFeedback === IS_CORRECT_ANSWER,
   );
   // Case 2: nothing correct.
+  const messageWhenWrong = "  Hãy rút kinh nghiệm và cố gắng hơn nữa nhé!🔥🔥";
   if (!hasAnyCorrect) {
-    return "  Cô đã chữa bài rồi, hãy rút kinh nghiệm và cố gắng hơn nữa nhé!🔥🔥";
+    return messageWhenWrong;
   }
   const hasAnyWrong = gradingResults.some(
     (item) => item.aiFeedback !== IS_CORRECT_ANSWER && item.aiFeedback,
   );
   // Case 3: mixed results.
   if (hasAnyCorrect && hasAnyWrong) {
-    return " Hãy rút kinh nghiệm và cố gắng hơn nữa nhé!🔥🔥";
+    return messageWhenWrong;
   }
   return "";
 }
