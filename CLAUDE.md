@@ -8,11 +8,11 @@
 
   Ba tài liệu, mỗi tài liệu chấm **buổi 5, 10 và 14**:
 
-  | Template   | Link                                                                            |
-  | ---------- | ------------------------------------------------------------------------------- |
-  | trước 20/9 | https://docs.google.com/document/d/1XjFYb9if1NfqQaWxbFbCXKlJhlLKo3a-CtUaxvs_U9s |
-  | sau 20/9   | https://docs.google.com/document/d/11jspLatFMaAxWcTZkswnw4Hc8YLhX1WBXcup1XCGSrA |
-  | cũ hơn     | https://docs.google.com/document/d/1SlXj5SUTcwMwUqYqJShCEfAa4PPNt3Uzr5SCAE7nZgQ |
+  | Template   | Link                                                                                                    |
+  | ---------- | ------------------------------------------------------------------------------------------------------- |
+  | trước 20/9 | https://docs.google.com/document/d/1XjFYb9if1NfqQaWxbFbCXKlJhlLKo3a-CtUaxvs_U9s                         |
+  | sau 20/9   | https://docs.google.com/document/d/11jspLatFMaAxWcTZkswnw4Hc8YLhX1WBXcup1XCGSrA                         |
+  | cũ hơn     | https://docs.google.com/document/d/1o3_WVX6kBMrMLB2uzfiuHfNc2RdRGE871xIDMuRpMPc/edit?tab=t.fkfgiit6qyss |
 
   Quy trình cho từng cặp (tài liệu × buổi):
 
