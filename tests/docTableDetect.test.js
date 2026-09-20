@@ -24,6 +24,29 @@ describe("detectTables", () => {
     expect(kinds(makeTabFromTables([makeLegacyTable()]))).toEqual([KIND_VI_EN]);
   });
 
+  it('classifies a table whose feedback column is misspelled "Chữa phải"', () => {
+    // Lỗi gõ có thật trong template buổi 14 (cả ba đời template). Trước khi sửa,
+    // nó làm cả buổi không chấm được cho mọi học viên.
+    const tab = makeTabFromTables([makeLegacyTable("", "Chữa phải")]);
+    const { tables, unclassifiedWithQuestions } = detectTables(tab);
+    expect(tables.map((x) => x.kind)).toEqual([KIND_VI_EN]);
+    expect(unclassifiedWithQuestions).toEqual([]);
+  });
+
+  it('accepts any "Chữa …" heading, not just the one typo that was reported', () => {
+    const tab = makeTabFromTables([makeLegacyTable("", "Chữa lỗi")]);
+    expect(kinds(tab)).toEqual([KIND_VI_EN]);
+  });
+
+  it('still refuses "Bài làm của học viên" — bài tập TỰ CHỌN is never graded', () => {
+    // Chốt chặn cho mọi lần nới FEEDBACK_HEADER về sau: bảng BÀI TẬP TỰ CHỌN
+    // dùng đúng header này và tuyệt đối không được chấm.
+    const tab = makeTabFromTables([
+      makeLegacyTable("", "Bài làm của học viên"),
+    ]);
+    expect(detectTables(tab).tables).toEqual([]);
+  });
+
   it("classifies the 4-column 'Tiếng Việt → Tiếng Anh' table as translation", () => {
     const tab = makeTabFromTables([makeTranslationTable4Col()]);
     expect(kinds(tab)).toEqual([KIND_VI_EN]);

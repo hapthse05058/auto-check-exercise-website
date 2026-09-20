@@ -30,9 +30,18 @@ export const KIND_ACTIVE_PASSIVE = "active_passive";
 /**
  * Cột feedback. Đây là tín hiệu CHÍNH để nhận ra một bảng có chấm được hay
  * không, cố ý chọn thay vì "Đề bài": nó phủ cả tên cũ ("Chữa bài") lẫn tên mới
- * ("GV sửa"), và mọi fixture test sẵn có cũng khớp mà không phải sửa gì.
+ * ("GV sửa").
+ *
+ * Chỉ khớp tới chữ "chữa", KHÔNG đòi "chữa bài": template buổi 14 — cả ba đời
+ * template đang lưu hành — gõ nhầm thành "Chữa phải", và một chữ sai trong
+ * header đã đủ làm cả buổi không chấm được cho MỌI học viên, lại còn im lặng ở
+ * nút "Xóa feedback" (nó dùng chung hàm này).
+ *
+ * Ràng buộc chặn đường nới rộng hơn nữa: KHÔNG được nuốt "Bài làm của học
+ * viên", header của bảng BÀI TẬP TỰ CHỌN vốn cố ý không bao giờ được chấm. Vì
+ * thế vẫn phải neo vào chữ "chữa"/"GV sửa", không nới theo cấu trúc bảng.
  */
-const FEEDBACK_HEADER = /(gv\s*s[uử]a|ch[uữ]a\s*b[aà]i)/i;
+const FEEDBACK_HEADER = /(gv\s*s[uử]a|ch[uữ]a)(?![\p{L}])/iu;
 /** Bảng dạng 2: header có cả "chủ động" lẫn "bị động". */
 const ACTIVE_HEADER = /c[aâ]u\s*ch[uủ]\s*đ[oộ]ng/i;
 const PASSIVE_HEADER = /b[iị]\s*đ[oộ]ng/i;

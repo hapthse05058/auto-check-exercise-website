@@ -4,6 +4,34 @@
 
 - **MUST manually test every change before considering it done.** After finishing any code change, run the app and verify the affected feature works correctly end-to-end. Do not rely on type-checking or linting alone.
 
+- **MUST chạy lại bộ test chấm bài trên tài liệu thật sau mỗi lần cập nhật phần mềm**, trước khi coi là xong. Việc nhận diện bảng bài tập dựa vào CHỮ trong header của Google Doc, nên một thay đổi trông vô hại vẫn có thể làm chết cả một buổi mà không unit test nào bắt được — đã xảy ra với buổi 14 (header gõ nhầm "Chữa phải").
+
+  Ba tài liệu, mỗi tài liệu chấm **buổi 5, 10 và 14**:
+
+  | Template   | Link                                                                            |
+  | ---------- | ------------------------------------------------------------------------------- |
+  | trước 20/9 | https://docs.google.com/document/d/1XjFYb9if1NfqQaWxbFbCXKlJhlLKo3a-CtUaxvs_U9s |
+  | sau 20/9   | https://docs.google.com/document/d/11jspLatFMaAxWcTZkswnw4Hc8YLhX1WBXcup1XCGSrA |
+  | cũ hơn     | https://docs.google.com/document/d/1SlXj5SUTcwMwUqYqJShCEfAa4PPNt3Uzr5SCAE7nZgQ |
+
+  Quy trình cho từng cặp (tài liệu × buổi):
+
+  1. Bấm **"Xóa feedback"** trước. Nút này dùng CHUNG cơ chế nhận diện bảng với việc chấm (`collectExerciseRows`), nên bản thân nó đã là một phép thử — và nó đảm bảo lần chấm sau ghi lên ô trống.
+  2. Chấm buổi đó.
+  3. **PASS** = chạy trót lọt, KHÔNG có cảnh báo "không nhận ra được là bảng bài tập", và feedback ghi thật vào cột cuối của **mọi** dòng học viên đã làm.
+
+  Bảng **BÀI TẬP TỰ CHỌN** ở cuối mỗi buổi phải KHÔNG bao giờ bị ghi feedback.
+
+  Số cặp câu hỏi/trả lời hiện có, để đối chiếu xem có bỏ sót dòng nào không:
+
+  |            | buổi 5 | buổi 10 | buổi 14 |
+  | ---------- | ------ | ------- | ------- |
+  | trước 20/9 | 18     | 15      | 13      |
+  | sau 20/9   | 26     | 14      | **0**   |
+  | cũ hơn     | 18     | 15      | 21      |
+
+  Tránh báo động giả: **buổi 14 của template "sau 20/9" chưa có câu trả lời nào** (21 dòng câu hỏi, 0 dòng đã làm). Chấm nó sẽ báo "Không tìm thấy câu trả lời nào để chấm" — đó là ĐÚNG, không phải lỗi. Muốn test thật buổi đó thì điền tay vài câu trước.
+
 ### .env Files
 
 - **NEVER delete a line from any `.env` file.** If a variable value needs to change, comment out the old line with `#` and add a new line below with the updated value. Example:

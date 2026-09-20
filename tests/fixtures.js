@@ -249,10 +249,16 @@ export function makePassiveTable() {
   ];
 }
 
-/** The legacy 3-column table every existing lesson still uses. */
-export function makeLegacyTable(feedback = "") {
+/**
+ * The legacy 3-column table every existing lesson still uses.
+ *
+ * `feedbackHeader` đổi được vì chính tên cột này quyết định bảng có được nhận
+ * ra hay không, và nó ĐÃ từng bị gõ sai trong template thật ("Chữa phải" ở
+ * buổi 14) — đủ để cả buổi im lặng không chấm cho mọi học viên.
+ */
+export function makeLegacyTable(feedback = "", feedbackHeader = "Chữa bài") {
   return [
-    row([P("STT")], [P("Đề bài")], [P("Chữa bài")]),
+    row([P("STT")], [P("Đề bài")], [P(feedbackHeader)]),
     row([P("")], [P("")], [P("")]),
     row(
       [P("1. Câu hỏi một\n"), P("→ My answer one\n")],
