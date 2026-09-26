@@ -8,10 +8,14 @@ import {
   fetchClasses,
   fetchClassTypes,
   fetchLessons,
+  saveGradingSchedule,
 } from "../api/backend.js";
 import { useAuth } from "../auth/AuthContext.jsx";
+import AutoGradeScheduleFields from "../components/AutoGradeScheduleFields.jsx";
 import { isAdminEmail } from "../config.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
+import { scheduleErrorText, validateDeadlines } from "../lib/autoGrade.js";
+import { fromVnInput } from "../lib/scheduleTime.js";
 
 export default function NewClassPage() {
   const { loadTeacherInfo } = useAuth();
@@ -28,6 +32,9 @@ export default function NewClassPage() {
   const [existingClasses, setExistingClasses] = useState([]);
   const [status, setStatus] = useState(t("newClass.intro"));
   const [saving, setSaving] = useState(false);
+  // Optional weekly auto-grading, saved right after the class is created.
+  const [autoGrade, setAutoGrade] = useState(false);
+  const [deadlines, setDeadlines] = useState({ student: "", grader: "" });
 
   useEffect(() => {
     let cancelled = false;
@@ -118,6 +125,11 @@ export default function NewClassPage() {
       setStatus(t("newClass.fixName"));
       return;
     }
+    const deadlineError = autoGrade ? validateDeadlines(deadlines) : null;
+    if (deadlineError) {
+      setStatus(t(deadlineError, { minHours: 2 }));
+      return;
+    }
 
     setStatus(t("newClass.saving"));
     setSaving(true);
@@ -136,8 +148,31 @@ export default function NewClassPage() {
         return;
       }
 
+      const created = await response.json().catch(() => null);
+      if (autoGrade && created?.id) {
+        try {
+          await saveGradingSchedule(created.id, {
+            studentDeadlineAt: fromVnInput(deadlines.student),
+            graderDeadlineAt: fromVnInput(deadlines.grader),
+          });
+        } catch (error) {
+          // The class exists; say what is missing and stay, so the teacher
+          // can set the schedule later from the grading screen.
+          setStatus(
+            t("autoGrade.saveAfterCreateFailed", {
+              msg: scheduleErrorText(error, t),
+            }),
+          );
+          return;
+        }
+      }
+
       setStatus(t("newClass.created"));
-      navigate("/grade");
+      navigate(
+        created?.id
+          ? `/grade?classId=${encodeURIComponent(created.id)}`
+          : "/grade",
+      );
     } catch (error) {
       console.error("Error creating class:", error);
       setStatus(t("newClass.createError"));
@@ -208,6 +243,28 @@ export default function NewClassPage() {
             ))}
           </select>
         </div>
+        <div className="form-field">
+          <label className="cache-toggle">
+            <input
+              type="checkbox"
+              checked={autoGrade}
+              onChange={(e) => setAutoGrade(e.target.checked)}
+            />
+            <span>{t("autoGrade.newClassToggle")}</span>
+          </label>
+        </div>
+        {autoGrade && (
+          <div className="form-field">
+            <p className="field-note auto-grade-intro">
+              {t("autoGrade.intro")}
+            </p>
+            <AutoGradeScheduleFields
+              value={deadlines}
+              onChange={setDeadlines}
+              disabled={saving}
+            />
+          </div>
+        )}
         <div className="action-row">
           <button className="logout-btn" onClick={() => navigate("/grade")}>
             {t("common.backHome")}

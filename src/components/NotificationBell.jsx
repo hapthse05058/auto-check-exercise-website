@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import {
   fetchNotifications,
@@ -85,6 +86,24 @@ export default function NotificationBell() {
   const justReadRef = useRef(new Set());
   const { t } = useLanguage();
   const push = usePushNotifications();
+  const navigate = useNavigate();
+
+  /** Only in-app paths are followed ("/grade?classId=…"), never a full URL. */
+  const pathOf = (item) => {
+    const path = item.data?.path;
+    return typeof path === "string" &&
+      path.startsWith("/") &&
+      !path.startsWith("//")
+      ? path
+      : null;
+  };
+  const openItem = (item) => {
+    const path = pathOf(item);
+    if (!path) return;
+    setOpen(false);
+    justReadRef.current = new Set();
+    navigate(path);
+  };
 
   const load = useCallback(async () => {
     try {
@@ -213,10 +232,21 @@ export default function NotificationBell() {
           {items.map((item) => {
             const { title, body } = renderNotification(item, t);
             const isNew = !item.read || justReadRef.current.has(item.id);
+            const linked = Boolean(pathOf(item));
             return (
               <div
                 key={item.id}
-                className={`notif-item ${isNew ? "unread" : ""} sev-${item.severity}`}
+                className={`notif-item ${isNew ? "unread" : ""} sev-${item.severity}${linked ? " clickable" : ""}`}
+                role={linked ? "link" : undefined}
+                tabIndex={linked ? 0 : undefined}
+                onClick={linked ? () => openItem(item) : undefined}
+                onKeyDown={
+                  linked
+                    ? (event) => {
+                        if (event.key === "Enter") openItem(item);
+                      }
+                    : undefined
+                }
               >
                 <span className="notif-item-title">{title}</span>
                 <span className="notif-item-body">{body}</span>

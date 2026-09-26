@@ -4,13 +4,16 @@ import { useNavigate } from "react-router-dom";
 import {
   fetchAllClasses,
   fetchClasses,
+  fetchGradingSchedules,
   fetchLessons,
   updateClass,
   updateCurrentLessonForClass,
 } from "../api/backend.js";
 import { useAuth } from "../auth/AuthContext.jsx";
+import AutoGradeScheduleModal from "../components/AutoGradeScheduleModal.jsx";
 import { isAdminEmail } from "../config.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
+import { formatVn, weekdayTime } from "../lib/scheduleTime.js";
 import { LESSON_OPTIONS } from "../shared/constant.js";
 
 /** "lesson05" -> "BUỔI 05" (falls back to the raw value / a dash). */
@@ -43,6 +46,20 @@ export default function ClassManagePage() {
   const [lessonsLoading, setLessonsLoading] = useState(false);
   const [formError, setFormError] = useState("");
   const [saving, setSaving] = useState(false);
+
+  // Auto-grading schedules by classId, and the class whose modal is open.
+  const [schedules, setSchedules] = useState({});
+  const [scheduleFor, setScheduleFor] = useState(null);
+
+  async function reloadSchedules() {
+    try {
+      const list = await fetchGradingSchedules();
+      setSchedules(Object.fromEntries(list.map((s) => [s.classId, s])));
+    } catch (error) {
+      if (error.message !== "RE-AUTH_NEEDED")
+        console.error("Schedules fetch failed:", error);
+    }
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -81,6 +98,7 @@ export default function ClassManagePage() {
       }));
       setClasses(normalized);
       setStatus(t("classManage.countClasses", { n: normalized.length }));
+      reloadSchedules();
     } catch (error) {
       if (error.message === "RE-AUTH_NEEDED") return;
       console.error("Reload error:", error);
@@ -243,6 +261,7 @@ export default function ClassManagePage() {
                   <th>{t("classManage.colCode")}</th>
                   {isAdmin && <th>{t("classManage.colTeacher")}</th>}
                   <th>{t("classManage.colCurrentLesson")}</th>
+                  <th>{t("autoGrade.colHeader")}</th>
                   <th>{t("classManage.colStatus")}</th>
                   <th>{t("classManage.colAction")}</th>
                 </tr>
@@ -260,6 +279,19 @@ export default function ClassManagePage() {
                       </td>
                     )}
                     <td>{lessonLabel(c.currentLesson)}</td>
+                    <td className="auto-grade-cell">
+                      {schedules[c.id]?.enabled && schedules[c.id].next ? (
+                        <>
+                          {weekdayTime(schedules[c.id].studentDeadline, t)}
+                          <br />
+                          {t("autoGrade.summaryOn", {
+                            runAt: formatVn(schedules[c.id].next.runAt),
+                          })}
+                        </>
+                      ) : (
+                        "—"
+                      )}
+                    </td>
                     <td>
                       {c.isActive
                         ? t("classManage.statusActive")
@@ -275,6 +307,14 @@ export default function ClassManagePage() {
                             onClick={() => openEdit(c)}
                           >
                             <i className="ti ti-edit" aria-hidden="true" />
+                          </button>
+                          <button
+                            className="btn-icon"
+                            title={t("autoGrade.button")}
+                            aria-label={t("autoGrade.button")}
+                            onClick={() => setScheduleFor(c)}
+                          >
+                            <i className="ti ti-clock" aria-hidden="true" />
                           </button>
                           <button
                             className="btn-cancel"
@@ -297,6 +337,14 @@ export default function ClassManagePage() {
         )}
 
         <div className="status-line">{status}</div>
+
+        {scheduleFor && (
+          <AutoGradeScheduleModal
+            cls={scheduleFor}
+            onClose={() => setScheduleFor(null)}
+            onSaved={reloadSchedules}
+          />
+        )}
 
         {/* Edit modal */}
         {editOpen && active && (

@@ -61,6 +61,25 @@ export const translations = {
           "Class {className} · Lesson {lessonName}: {written}/{total} document(s) written. Sign in again, then grade again.",
         gradingJobFailed: "Grading could not finish",
         gradingJobFailedBody: "Class {className} · Lesson {lessonName}.",
+        gradingAutoUpcoming: "Auto-grading soon",
+        gradingAutoUpcomingBody:
+          "Class {className} · {lessonName}: {submitted}/{total} students did the homework. Grading at {runAtText} (in about {minutes} min).",
+        gradingAutoCancelledNoSubmissions:
+          "Auto-grading cancelled: no student did the homework",
+        gradingAutoCancelledNoPoints:
+          "Auto-grading cancelled: not enough points",
+        gradingAutoCancelledNoPointsBody:
+          "Class {className} · {lessonName}: {submitted} students did the homework, {need} points needed but only {available} available. Top up, then grade by hand.",
+        gradingAutoCancelledOther: "Auto-grading cancelled",
+        gradingAutoNeedsReauth:
+          "Auto-grading cancelled: sign in with Google again",
+        gradingAutoNeedsReauthBody:
+          "Class {className} · {lessonName}: sign in with Google again, then grade this lesson by hand.",
+        gradingAutoMissed: "Auto-grading missed",
+        gradingAutoMissedBody:
+          "Class {className} · {lessonName}: could not grade before the deadline. Please grade by hand.",
+        gradingAutoDone: "Auto-grading finished",
+        gradingAutoFailed: "Auto-grading could not finish",
         deepseekLowBalance: "DeepSeek balance is low",
         deepseekLowBalanceBody:
           "{balance} {currency} left (threshold {threshold} {currency}). Top up the DeepSeek account.",
@@ -126,6 +145,76 @@ export const translations = {
       failed: "Failed to save teacher info. Please try again.",
       saved: "Teacher info saved successfully. Redirecting...",
       connectError: "Unable to connect to the backend. Please try again later.",
+    },
+    autoGrade: {
+      button: "Auto-grade",
+      modalTitle: "Auto-grading · {class}",
+      intro:
+        "Every week the system grades the class's current lesson between the two deadlines, preferably at DeepSeek's off-peak hours (23:30–07:30). You are notified 30 minutes before and again when it is done. Make-up lessons: grade them by hand.",
+      loading: "Loading schedule…",
+      studentDeadline: "Students' deadline (repeats weekly)",
+      graderDeadline: "Grading deadline (repeats weekly)",
+      repeats:
+        "Every week: students hand in by {student}, results ready by {grader}.",
+      firstRunOffPeak:
+        "First run: {runAt} (DeepSeek off-peak). Notification at {remindAt}.",
+      firstRunPeak:
+        "First run: {runAt} — this window has no off-peak hours. Notification at {remindAt}.",
+      offPeakNote:
+        "Grading runs 40+ minutes after the students' deadline, preferably between 23:30 and 07:30.",
+      estimate:
+        "Next time, {classes} scheduled class(es) can cost up to {need} points; {point} left.",
+      estimateShort:
+        "Next time, {classes} scheduled class(es) can cost up to {need} points but only {point} are left. Weeks the points cannot cover are cancelled.",
+      bothRequired: "Choose both deadlines.",
+      nextRun: "Next run: {runAt} (notification at {remindAt}).",
+      lastRun: "Last week:",
+      enable: "Turn on",
+      update: "Save schedule",
+      disable: "Turn off",
+      disableConfirm: "Turn off auto-grading for {class}?",
+      summaryOn: "Auto-grading: next run {runAt}",
+      summaryOff: "No auto-grading schedule",
+      colHeader: "Auto-grading",
+      newClassToggle: "Schedule auto-grading",
+      saveAfterCreateFailed:
+        "The class was created, but its auto-grading schedule was not saved: {msg}",
+      weekday0: "Sunday",
+      weekday1: "Monday",
+      weekday2: "Tuesday",
+      weekday3: "Wednesday",
+      weekday4: "Thursday",
+      weekday5: "Friday",
+      weekday6: "Saturday",
+      error: {
+        deadline_gap_too_short:
+          "The grading deadline must be at least {minHours} hours after the students' deadline.",
+        deadline_gap_too_long:
+          "The grading deadline must be within 7 days of the students' deadline.",
+        invalid_deadlines: "Invalid dates.",
+        google_reauth_required:
+          "Sign in with Google again so the system can grade on your behalf.",
+        no_current_lesson:
+          "The class has no current lesson yet. Choose one before scheduling.",
+        class_inactive: "This class is closed.",
+        not_your_class: "This is not one of your classes.",
+        payer_not_found: "No teacher to charge points to.",
+        class_not_found: "Class not found.",
+        generic: "Could not save the schedule ({code}).",
+      },
+      state: {
+        reminded:
+          "{runKey}: notified, about to grade {lesson} ({submitted}/{total} students did it).",
+        starting: "{runKey}: grading {lesson}…",
+        running: "{runKey}: grading {lesson}…",
+        done: "{runKey}: graded {lesson}, {written} document(s) written.",
+        failed: "{runKey}: grading {lesson} failed.",
+        cancelled_no_submissions:
+          "{runKey}: cancelled, no student did the homework.",
+        cancelled_no_points: "{runKey}: cancelled, not enough points.",
+        cancelled_other: "{runKey}: cancelled.",
+        missed: "{runKey}: missed, could not grade before the deadline.",
+      },
     },
     grade: {
       title: "Grade exercises",
@@ -705,6 +794,23 @@ export const translations = {
           "Lớp {className} · Buổi {lessonName}: đã ghi {written}/{total} tài liệu. Đăng nhập lại rồi bấm chấm lại.",
         gradingJobFailed: "Chấm bài không hoàn tất",
         gradingJobFailedBody: "Lớp {className} · Buổi {lessonName}.",
+        gradingAutoUpcoming: "Sắp chấm bài tự động",
+        gradingAutoUpcomingBody:
+          "Lớp {className} · {lessonName}: {submitted}/{total} học sinh đã làm bài. Hệ thống sẽ chấm lúc {runAtText} (còn khoảng {minutes} phút).",
+        gradingAutoCancelledNoSubmissions:
+          "Huỷ chấm tự động: không có học sinh nào làm bài",
+        gradingAutoCancelledNoPoints: "Huỷ chấm tự động: không đủ point",
+        gradingAutoCancelledNoPointsBody:
+          "Lớp {className} · {lessonName}: {submitted} học sinh làm bài, cần {need} point nhưng chỉ còn dùng được {available}. Hãy nạp thêm point rồi chấm tay.",
+        gradingAutoCancelledOther: "Huỷ chấm tự động",
+        gradingAutoNeedsReauth: "Huỷ chấm tự động: cần đăng nhập lại Google",
+        gradingAutoNeedsReauthBody:
+          "Lớp {className} · {lessonName}: đăng nhập lại bằng Google rồi chấm tay buổi này.",
+        gradingAutoMissed: "Bỏ lỡ lượt chấm tự động",
+        gradingAutoMissedBody:
+          "Lớp {className} · {lessonName}: hệ thống không kịp chấm trước hạn. Hãy chấm tay.",
+        gradingAutoDone: "Đã chấm xong (tự động)",
+        gradingAutoFailed: "Chấm bài tự động không thành công",
         deepseekLowBalance: "Số dư DeepSeek sắp hết",
         deepseekLowBalanceBody:
           "Còn {balance} {currency} (ngưỡng {threshold} {currency}). Vui lòng nạp thêm tài khoản DeepSeek.",
@@ -770,6 +876,75 @@ export const translations = {
       failed: "Lưu thông tin giáo viên thất bại. Vui lòng thử lại.",
       saved: "Lưu thông tin giáo viên thành công. Đang chuyển hướng...",
       connectError: "Không kết nối được máy chủ. Vui lòng thử lại sau.",
+    },
+    autoGrade: {
+      button: "Chấm bài tự động",
+      modalTitle: "Chấm bài tự động · {class}",
+      intro:
+        "Mỗi tuần hệ thống sẽ chấm buổi hiện tại của lớp trong khoảng giữa hai hạn, ưu tiên giờ thấp điểm của DeepSeek (23:30–07:30). Bạn được báo trước 30 phút và báo lại khi chấm xong. Buổi học bù thì hãy chấm tay.",
+      loading: "Đang tải lịch…",
+      studentDeadline: "Hạn nộp của học sinh (lặp lại hằng tuần)",
+      graderDeadline: "Hạn chấm của giáo viên (lặp lại hằng tuần)",
+      repeats:
+        "Hằng tuần: học sinh nộp trước {student}, có kết quả trước {grader}.",
+      firstRunOffPeak:
+        "Lần chấm đầu: {runAt} (giờ thấp điểm DeepSeek). Báo trước lúc {remindAt}.",
+      firstRunPeak:
+        "Lần chấm đầu: {runAt} — khoảng này không có giờ thấp điểm. Báo trước lúc {remindAt}.",
+      offPeakNote:
+        "Hệ thống chấm sau hạn nộp ít nhất 40 phút, ưu tiên khoảng 23:30–07:30.",
+      estimate:
+        "Lần chấm tới, {classes} lớp đã hẹn giờ cần tối đa {need} point; còn {point} point.",
+      estimateShort:
+        "Lần chấm tới, {classes} lớp đã hẹn giờ cần tối đa {need} point nhưng chỉ còn {point} point. Lượt nào không đủ point sẽ bị huỷ.",
+      bothRequired: "Hãy chọn cả hai hạn.",
+      nextRun: "Lần chấm tới: {runAt} (báo trước lúc {remindAt}).",
+      lastRun: "Tuần gần nhất:",
+      enable: "Bật chấm tự động",
+      update: "Lưu lịch",
+      disable: "Tắt chấm tự động",
+      disableConfirm: "Tắt chấm tự động cho lớp {class}?",
+      summaryOn: "Chấm tự động: lần tới {runAt}",
+      summaryOff: "Chưa hẹn giờ chấm tự động",
+      colHeader: "Chấm tự động",
+      newClassToggle: "Hẹn giờ chấm bài tự động",
+      saveAfterCreateFailed:
+        "Đã tạo lớp nhưng chưa lưu được lịch chấm tự động: {msg}",
+      weekday0: "Chủ nhật",
+      weekday1: "Thứ 2",
+      weekday2: "Thứ 3",
+      weekday3: "Thứ 4",
+      weekday4: "Thứ 5",
+      weekday5: "Thứ 6",
+      weekday6: "Thứ 7",
+      error: {
+        deadline_gap_too_short:
+          "Hạn chấm phải sau hạn nộp ít nhất {minHours} giờ.",
+        deadline_gap_too_long: "Hạn chấm phải trong vòng 7 ngày sau hạn nộp.",
+        invalid_deadlines: "Ngày giờ không hợp lệ.",
+        google_reauth_required:
+          "Cần đăng nhập lại bằng Google để hệ thống chấm thay bạn.",
+        no_current_lesson:
+          "Lớp chưa chọn buổi hiện tại. Hãy chọn buổi trước khi hẹn giờ.",
+        class_inactive: "Lớp này đã đóng.",
+        not_your_class: "Đây không phải lớp của bạn.",
+        payer_not_found: "Không tìm thấy giáo viên trả point.",
+        class_not_found: "Không tìm thấy lớp.",
+        generic: "Không lưu được lịch chấm ({code}).",
+      },
+      state: {
+        reminded:
+          "{runKey}: đã báo trước, sắp chấm {lesson} ({submitted}/{total} học sinh làm bài).",
+        starting: "{runKey}: đang chấm {lesson}…",
+        running: "{runKey}: đang chấm {lesson}…",
+        done: "{runKey}: đã chấm {lesson}, ghi {written} tài liệu.",
+        failed: "{runKey}: chấm {lesson} không thành công.",
+        cancelled_no_submissions:
+          "{runKey}: đã huỷ vì không có học sinh nào làm bài.",
+        cancelled_no_points: "{runKey}: đã huỷ vì không đủ point.",
+        cancelled_other: "{runKey}: đã huỷ.",
+        missed: "{runKey}: bỏ lỡ, không kịp chấm trước hạn.",
+      },
     },
     grade: {
       title: "Chấm bài",

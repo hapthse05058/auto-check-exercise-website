@@ -624,3 +624,61 @@ textarea {
   white-space: pre-wrap;
   word-wrap: break-word;
 }
+
+/* ----- Scheduled grading ------------------------------------------------ */
+.auto-grade-intro {
+  margin: -0.5rem 0 1rem;
+  line-height: 1.5;
+}
+.auto-grade-notes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-top: -0.25rem;
+}
+.auto-grade-notes .field-note {
+  margin: 0;
+  line-height: 1.45;
+}
+.auto-grade-status {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-primary-dark);
+  margin: 0 0 0.75rem;
+}
+.auto-grade-summary {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin: 0 0 0.75rem;
+}
+.secondary-btn {
+  background: none;
+  border: 1px solid var(--color-primary);
+  color: var(--color-primary-dark);
+  padding: 8px 16px;
+  border-radius: var(--border-radius-md);
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.secondary-btn:hover:not(:disabled) {
+  background: var(--color-background-secondary);
+}
+.secondary-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: none;
+}
+/* A notification that links somewhere (e.g. the class it is about). */
+.notif-item.clickable {
+  cursor: pointer;
+}
+.notif-item.clickable:hover {
+  background: var(--color-background-secondary);
+}
+.auto-grade-cell {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+}

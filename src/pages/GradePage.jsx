@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 import {
   fetchAllClasses,
   fetchClasses,
   fetchCurrentLesson,
   fetchGradingJob,
+  fetchGradingSchedule,
   fetchLatestGradingJob,
   fetchLessons,
   fetchMyPoint,
@@ -14,6 +15,7 @@ import {
   updateCurrentLessonForClass,
 } from "../api/backend.js";
 import { useAuth } from "../auth/AuthContext.jsx";
+import AutoGradeScheduleModal from "../components/AutoGradeScheduleModal.jsx";
 import SearchableSelect from "../components/SearchableSelect.jsx";
 import { isAdminEmail } from "../config.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
@@ -22,6 +24,7 @@ import {
   planFeedbackClear,
 } from "../lib/feedbackClear.js";
 import { describeJob, isJobFinished, startGradingJob } from "../lib/grading.js";
+import { formatVn } from "../lib/scheduleTime.js";
 import { playSuccessSound } from "../lib/sound.js";
 
 /** How often an open grading screen asks the backend for job progress. */
@@ -31,8 +34,14 @@ export default function GradePage() {
   const { loadTeacherInfo } = useAuth();
   const { t } = useLanguage();
   const navigate = useNavigate();
+  // A notification links here as /grade?classId=…&lessonId=… — open that class.
+  const [searchParams] = useSearchParams();
+  const linkedRef = useRef(false);
 
   const [classes, setClasses] = useState([]);
+  // The selected class's weekly auto-grading schedule (null = none / not loaded).
+  const [schedule, setSchedule] = useState(null);
+  const [scheduleOpen, setScheduleOpen] = useState(false);
   const [lessons, setLessons] = useState([]);
   const [selectedClassId, setSelectedClassId] = useState("");
   const [selectedLessonId, setSelectedLessonId] = useState("");
@@ -127,12 +136,29 @@ export default function GradePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- run once on mount; `t` is only used for status/error messages, adding it would re-fetch on language change
   }, [loadTeacherInfo, navigate]);
 
-  const handleClassChange = async (classId) => {
+  const refreshSchedule = async (classId) => {
+    setSchedule(null);
+    if (!classId) return;
+    try {
+      setSchedule(await fetchGradingSchedule(classId));
+    } catch (error) {
+      if (error.message !== "RE-AUTH_NEEDED")
+        console.error("Grading schedule fetch failed:", error);
+    }
+  };
+
+  /**
+   * `preferredLessonId` (from a notification link) is shown instead of the
+   * class's current lesson — auto-grading may already have moved the class on
+   * to the next one. It is only displayed, not saved as the current lesson.
+   */
+  const handleClassChange = async (classId, preferredLessonId = null) => {
     setSelectedClassId(classId);
     setSelectedLessonId("");
     setLessons([]);
     currentLessonRef.current = null;
     refreshPayer(classId);
+    refreshSchedule(classId);
     if (!classId) return;
 
     const cls = classes.find((c) => c.id === classId);
@@ -143,12 +169,10 @@ export default function GradePage() {
 
       const currentLesson = await fetchCurrentLesson(classId);
       currentLessonRef.current = currentLesson;
-      if (
-        currentLesson &&
-        lessonList.some((lesson) => lesson.id === currentLesson)
-      ) {
-        setSelectedLessonId(currentLesson);
-      }
+      const shown = [preferredLessonId, currentLesson].find(
+        (id) => id && lessonList.some((lesson) => lesson.id === id),
+      );
+      if (shown) setSelectedLessonId(shown);
     } catch (error) {
       if (error.message === "RE-AUTH_NEEDED") return;
       console.error("Error fetching lessons:", error);
@@ -157,6 +181,18 @@ export default function GradePage() {
       setLessonsLoading(false);
     }
   };
+
+  // Once the class list is in, follow a notification link (once per visit).
+  useEffect(() => {
+    if (linkedRef.current || !classes.length) return;
+    const linkedClass = searchParams.get("classId");
+    if (!linkedClass) return;
+    linkedRef.current = true;
+    if (classes.some((c) => c.id === linkedClass)) {
+      handleClassChange(linkedClass, searchParams.get("lessonId"));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- runs when the class list arrives
+  }, [classes, searchParams]);
 
   const handleLessonChange = async (event) => {
     const lessonId = event.target.value;
@@ -460,6 +496,14 @@ export default function GradePage() {
         >
           {starting || jobRunning ? t("grade.processing") : t("grade.process")}
         </button>
+        <button
+          className="secondary-btn"
+          onClick={() => setScheduleOpen(true)}
+          disabled={!selectedClassId || starting || clearing}
+        >
+          <i className="ti ti-clock" aria-hidden="true" />
+          {t("autoGrade.button")}
+        </button>
         {isAdmin && (
           <button
             className="danger-btn"
@@ -470,6 +514,20 @@ export default function GradePage() {
           </button>
         )}
       </div>
+      {selectedClassId && (
+        <p className="auto-grade-summary">
+          {schedule?.enabled && schedule.next
+            ? t("autoGrade.summaryOn", { runAt: formatVn(schedule.next.runAt) })
+            : t("autoGrade.summaryOff")}
+        </p>
+      )}
+      {scheduleOpen && selectedClass && (
+        <AutoGradeScheduleModal
+          cls={selectedClass}
+          onClose={() => setScheduleOpen(false)}
+          onSaved={() => refreshSchedule(selectedClassId)}
+        />
+      )}
       <div className="status-output">
         {status.phase === "running" ? (
           <span className="status-loading">

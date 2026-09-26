@@ -361,6 +361,84 @@ export async function fetchLatestGradingJob(classId, lessonId) {
 }
 
 // ---------------------------------------------------------------------------
+// Scheduled grading (backend/lib/gradingSchedules.js)
+// ---------------------------------------------------------------------------
+
+/** Throws an Error whose message is the backend's error code, params attached. */
+async function scheduleResult(response, key) {
+  const data = await response.json().catch(() => null);
+  if (!response.ok) {
+    const error = new Error(data?.error || "grading_schedule_failed");
+    error.params = data || {};
+    throw error;
+  }
+  return key ? data?.[key] : data;
+}
+
+/** One class's schedule (with how its last week went), or null. */
+export async function fetchGradingSchedule(classId) {
+  const response = await authFetch(
+    `/grading-schedules?classId=${encodeURIComponent(classId)}`,
+  );
+  return scheduleResult(response, "schedule");
+}
+
+/** Schedules of every class the caller can see. */
+export async function fetchGradingSchedules() {
+  return scheduleResult(await authFetch("/grading-schedules"), "schedules");
+}
+
+/**
+ * What saving these first-week deadlines (epoch ms) would schedule. Free of
+ * side effects on the backend, so it can be called on every edit.
+ */
+export async function previewGradingSchedule(
+  classId,
+  { studentDeadlineAt, graderDeadlineAt },
+) {
+  const query = new URLSearchParams({
+    classId,
+    studentDeadlineAt: String(studentDeadlineAt),
+    graderDeadlineAt: String(graderDeadlineAt),
+  });
+  const response = await authFetch(`/grading-schedules/preview?${query}`);
+  return scheduleResult(response, "preview");
+}
+
+export async function saveGradingSchedule(
+  classId,
+  { studentDeadlineAt, graderDeadlineAt },
+) {
+  const response = await authFetch(
+    `/grading-schedules/${encodeURIComponent(classId)}`,
+    { method: "PUT", body: { studentDeadlineAt, graderDeadlineAt } },
+  );
+  return scheduleResult(response, "schedule");
+}
+
+export async function deleteGradingSchedule(classId) {
+  const response = await authFetch(
+    `/grading-schedules/${encodeURIComponent(classId)}`,
+    { method: "DELETE" },
+  );
+  return scheduleResult(response);
+}
+
+/**
+ * The most the payer's scheduled classes can cost next time, against the
+ * balance: `{point, needMax, classes, teacherName}`. With a classId, the payer
+ * is that class's (for an admin: its teacher).
+ */
+export async function fetchScheduleEstimate(classId) {
+  const response = await authFetch(
+    `/grading-schedules/estimate${
+      classId ? `?classId=${encodeURIComponent(classId)}` : ""
+    }`,
+  );
+  return scheduleResult(response);
+}
+
+// ---------------------------------------------------------------------------
 // gradingCache management (admin only)
 // ---------------------------------------------------------------------------
 
