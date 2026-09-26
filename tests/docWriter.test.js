@@ -5,6 +5,7 @@ import {
   createStyledTextRequests,
   formatFeedbackForDoc,
   generateOverallFeedback,
+  matchesOwnFeedback,
   parseAiResponse,
 } from "../src/lib/docWriter.js";
 import {
@@ -14,6 +15,7 @@ import {
   makeTabWithRows,
   makeTranslationTable4Col,
   questionRow,
+  row,
   rowsOf,
 } from "./fixtures.js";
 
@@ -378,5 +380,80 @@ describe("buildFeedbackRequests", () => {
         .map((r) => r.insertText.text);
       expect(texts, numbering).toContain(IS_CORRECT_ANSWER);
     }
+  });
+});
+
+describe("matchesOwnFeedback", () => {
+  // Two answered questions. Row 2's feedback carries **bold** and a reason on
+  // its own line; row 3 is correct. That is what a real write looks like.
+  const results = [
+    {
+      rowKey: "0:2",
+      questionIndex: "1",
+      aiFeedback: "She **has lost** the phone.\n(Sai thì.)",
+    },
+    { rowKey: "0:3", questionIndex: "2", aiFeedback: IS_CORRECT_ANSWER },
+  ];
+  const OVERALL = generateOverallFeedback(results);
+
+  /** The doc as a re-read returns it, with the given text in each cell. */
+  const docWith = ({ fb1 = [], fb2 = [], overall = "" } = {}) =>
+    rowsOf(
+      makeTabFromTables([
+        [
+          row([P("STT")], [P("Đề bài")], [P("Chữa bài")]),
+          row([P("")], [P("")], [P("")]),
+          row(
+            [P("1. Câu hỏi một\n"), P("→ She lost the phone\n")],
+            [P("")],
+            fb1.length ? fb1.map((t) => P(t, 50)) : [P("\n", 50)],
+          ),
+          row(
+            [P("2. Câu hỏi hai\n"), P("→ I can show the way\n")],
+            [P("")],
+            fb2.length ? fb2.map((t) => P(t, 80)) : [P("\n", 80)],
+          ),
+        ],
+        [row([P(`Nhận xét chung của Giáo viên:${overall}\n`, 300)])],
+      ]),
+    );
+
+  const written = {
+    // "**" became styling; the reason is its own paragraph.
+    fb1: ["She has lost the phone.\n", "(Sai thì.)\n"],
+    fb2: [`${IS_CORRECT_ANSWER}\n`],
+    overall: OVERALL,
+  };
+
+  it("recognises the doc once this run's feedback is in it", () => {
+    expect(matchesOwnFeedback(results, docWith(written))).toBe(true);
+  });
+
+  it("does not claim a doc before anything was written", () => {
+    expect(matchesOwnFeedback(results, docWith())).toBe(false);
+  });
+
+  it("refuses feedback somebody else typed into one of the cells", () => {
+    const doc = docWith({ ...written, fb1: ["Em xem lại thì nhé.\n"] });
+    expect(matchesOwnFeedback(results, doc)).toBe(false);
+  });
+
+  it("refuses a doc whose cells match but whose overall comment is missing", () => {
+    const doc = docWith({ ...written, overall: "" });
+    expect(matchesOwnFeedback(results, doc)).toBe(false);
+  });
+
+  it("agrees with buildFeedbackRequests on what goes where", () => {
+    // Before the write, the requests carry exactly the strings checked above.
+    const inserts = buildFeedbackRequests(results, docWith(), "t.x")
+      .filter((r) => r.insertText)
+      .map((r) => r.insertText.text);
+    expect(inserts).toContain(IS_CORRECT_ANSWER);
+    expect(inserts).toContain("has lost");
+    expect(inserts).toContain(OVERALL);
+  });
+
+  it("never matches when nothing would be written", () => {
+    expect(matchesOwnFeedback([], docWith(written))).toBe(false);
   });
 });

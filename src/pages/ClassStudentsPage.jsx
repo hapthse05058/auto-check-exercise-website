@@ -5,9 +5,9 @@ import {
   bulkDeleteStudents,
   deleteStudent,
   fetchAllClasses,
+  fetchClassLessons,
   fetchClasses,
   fetchCurrentLesson,
-  fetchLessons,
   fetchStudents,
   fetchTeachersManage,
 } from "../api/backend.js";
@@ -137,10 +137,9 @@ export default function ClassStudentsPage() {
     setSearched(false);
     if (!classId) return;
 
-    const cls = classes.find((c) => c.id === classId);
     setLessonsLoading(true);
     try {
-      const lessonList = await fetchLessons(cls?.classType);
+      const lessonList = await fetchClassLessons(classId);
       setLessons(lessonList);
       // Pre-select the class's current lesson when available (drives the tab to
       // open on the doc links).

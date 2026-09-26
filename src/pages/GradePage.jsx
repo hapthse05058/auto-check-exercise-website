@@ -1,17 +1,21 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 import {
   fetchAllClasses,
+  fetchClassLessons,
   fetchClasses,
   fetchCurrentLesson,
-  fetchLessons,
+  fetchGradingJob,
+  fetchGradingSchedule,
+  fetchLatestGradingJob,
   fetchMyPoint,
   fetchPayerPoint,
   recordFeedbackClearSummary,
   updateCurrentLessonForClass,
 } from "../api/backend.js";
 import { useAuth } from "../auth/AuthContext.jsx";
+import AutoGradeScheduleModal from "../components/AutoGradeScheduleModal.jsx";
 import SearchableSelect from "../components/SearchableSelect.jsx";
 import { isAdminEmail } from "../config.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
@@ -19,15 +23,26 @@ import {
   executeFeedbackClear,
   planFeedbackClear,
 } from "../lib/feedbackClear.js";
-import { processDocs } from "../lib/grading.js";
+import { describeJob, isJobFinished, startGradingJob } from "../lib/grading.js";
+import { announcePoints } from "../lib/pointEvents.js";
+import { formatVn } from "../lib/scheduleTime.js";
 import { playSuccessSound } from "../lib/sound.js";
+
+/** How often an open grading screen asks the backend for job progress. */
+const JOB_POLL_MS = 4000;
 
 export default function GradePage() {
   const { loadTeacherInfo } = useAuth();
   const { t } = useLanguage();
   const navigate = useNavigate();
+  // A notification links here as /grade?classId=…&lessonId=… — open that class.
+  const [searchParams] = useSearchParams();
+  const linkedRef = useRef(false);
 
   const [classes, setClasses] = useState([]);
+  // The selected class's weekly auto-grading schedule (null = none / not loaded).
+  const [schedule, setSchedule] = useState(null);
+  const [scheduleOpen, setScheduleOpen] = useState(false);
   const [lessons, setLessons] = useState([]);
   const [selectedClassId, setSelectedClassId] = useState("");
   const [selectedLessonId, setSelectedLessonId] = useState("");
@@ -41,11 +56,15 @@ export default function GradePage() {
     text: "",
     warnings: [],
   });
-  const [processing, setProcessing] = useState(false);
+  // The start request is in flight (a few hundred ms).
+  const [starting, setStarting] = useState(false);
+  // The grading job shown on screen: `live` when it was started from this
+  // screen (so its end is celebrated), false when merely looked up.
+  const [followed, setFollowed] = useState(null); // { id, live } | null
+  const [jobRunning, setJobRunning] = useState(false);
   const [clearing, setClearing] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [saveCache, setSaveCache] = useState(true);
-  const [point, setPoint] = useState(null);
   // Who actually pays for the selected class. An admin grading someone else's
   // class spends THAT teacher's points, so the badge must show their balance.
   const [payer, setPayer] = useState(null);
@@ -53,7 +72,8 @@ export default function GradePage() {
 
   const refreshPoint = async () => {
     try {
-      setPoint(await fetchMyPoint());
+      // The header badge shows it (lib/pointEvents.js).
+      announcePoints(await fetchMyPoint());
     } catch (error) {
       if (error.message !== "RE-AUTH_NEEDED")
         console.error("Point fetch failed:", error);
@@ -117,28 +137,42 @@ export default function GradePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- run once on mount; `t` is only used for status/error messages, adding it would re-fetch on language change
   }, [loadTeacherInfo, navigate]);
 
-  const handleClassChange = async (classId) => {
+  const refreshSchedule = async (classId) => {
+    setSchedule(null);
+    if (!classId) return;
+    try {
+      setSchedule(await fetchGradingSchedule(classId));
+    } catch (error) {
+      if (error.message !== "RE-AUTH_NEEDED")
+        console.error("Grading schedule fetch failed:", error);
+    }
+  };
+
+  /**
+   * `preferredLessonId` (from a notification link) is shown instead of the
+   * class's current lesson — auto-grading may already have moved the class on
+   * to the next one. It is only displayed, not saved as the current lesson.
+   */
+  const handleClassChange = async (classId, preferredLessonId = null) => {
     setSelectedClassId(classId);
     setSelectedLessonId("");
     setLessons([]);
     currentLessonRef.current = null;
     refreshPayer(classId);
+    refreshSchedule(classId);
     if (!classId) return;
 
-    const cls = classes.find((c) => c.id === classId);
     setLessonsLoading(true);
     try {
-      const lessonList = await fetchLessons(cls?.classType);
+      const lessonList = await fetchClassLessons(classId);
       setLessons(lessonList);
 
       const currentLesson = await fetchCurrentLesson(classId);
       currentLessonRef.current = currentLesson;
-      if (
-        currentLesson &&
-        lessonList.some((lesson) => lesson.id === currentLesson)
-      ) {
-        setSelectedLessonId(currentLesson);
-      }
+      const shown = [preferredLessonId, currentLesson].find(
+        (id) => id && lessonList.some((lesson) => lesson.id === id),
+      );
+      if (shown) setSelectedLessonId(shown);
     } catch (error) {
       if (error.message === "RE-AUTH_NEEDED") return;
       console.error("Error fetching lessons:", error);
@@ -147,6 +181,18 @@ export default function GradePage() {
       setLessonsLoading(false);
     }
   };
+
+  // Once the class list is in, follow a notification link (once per visit).
+  useEffect(() => {
+    if (linkedRef.current || !classes.length) return;
+    const linkedClass = searchParams.get("classId");
+    if (!linkedClass) return;
+    linkedRef.current = true;
+    if (classes.some((c) => c.id === linkedClass)) {
+      handleClassChange(linkedClass, searchParams.get("lessonId"));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- runs when the class list arrives
+  }, [classes, searchParams]);
 
   const handleLessonChange = async (event) => {
     const lessonId = event.target.value;
@@ -169,55 +215,103 @@ export default function GradePage() {
     }
   };
 
+  // Show the last grading run of the selected class + lesson — still running
+  // if the teacher closed the tab mid-run and came back.
+  useEffect(() => {
+    setFollowed(null);
+    setJobRunning(false);
+    if (!selectedClassId || !selectedLessonId) return undefined;
+    let cancelled = false;
+    fetchLatestGradingJob(selectedClassId, selectedLessonId)
+      .then((job) => {
+        if (!cancelled && job) setFollowed({ id: job.id, live: false });
+      })
+      .catch((error) => {
+        if (error.message !== "RE-AUTH_NEEDED")
+          console.error("Latest grading job fetch failed:", error);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedClassId, selectedLessonId]);
+
+  // Follow the job on screen until it ends. Closing the tab only stops this
+  // polling — the backend carries on and notifies the teacher at the end.
+  useEffect(() => {
+    if (!followed) return undefined;
+    let cancelled = false;
+    let timer = null;
+    let sawRunning = false;
+    const classId = selectedClassId;
+
+    const poll = async () => {
+      try {
+        const job = await fetchGradingJob(followed.id);
+        if (cancelled) return;
+        const view = describeJob(job, t);
+        const finished = isJobFinished(job);
+        const looked = !followed.live && !sawRunning;
+        setStatus(
+          looked && finished
+            ? { ...view, text: `${t("grading.lastRun")} ${view.text}` }
+            : view,
+        );
+        setJobRunning(!finished);
+        if (!finished) {
+          sawRunning = true;
+          timer = setTimeout(poll, JOB_POLL_MS);
+          return;
+        }
+        if (!looked) {
+          if (job.status === "done" && job.written > 0) playSuccessSound();
+          // Balances changed if any docs were graded.
+          refreshPoint();
+          refreshPayer(classId);
+        }
+      } catch (error) {
+        if (cancelled || error.message === "RE-AUTH_NEEDED") return;
+        console.error("Grading job poll failed:", error);
+        timer = setTimeout(poll, JOB_POLL_MS);
+      }
+    };
+    poll();
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- re-run per followed job only; `t` and the refreshers are stable enough for a status line
+  }, [followed]);
+
   const handleProcessAllDocs = async () => {
-    if (processing || clearing) return;
-    const lessonName = lessons.find(
-      (item) => item.id === selectedLessonId,
-    )?.name;
-    setProcessing(true);
+    if (starting || jobRunning || clearing) return;
+    setStarting(true);
     setStatus({
       phase: "running",
-      text: t("grading.gradingAnswers"),
+      text: t("grading.jobStarting"),
       warnings: [],
     });
     try {
-      const { graded, warnings, error, notice } = await processDocs({
+      const { jobId } = await startGradingJob({
         docLinksText,
         classId: selectedClassId,
-        classType: selectedClass?.classType,
-        lessonName,
         lessonId: selectedLessonId,
         // Non-admins always use the cache; admins control it via the toggle.
         useCache: isAdmin ? saveCache : true,
-        t,
       });
-      if (error) {
-        setStatus({ phase: "error", text: error, warnings });
-      } else if (graded > 0) {
-        setStatus({
-          phase: "done",
-          text: t("grading.doneCount", { n: graded }),
-          warnings,
-        });
-        playSuccessSound();
-      } else {
-        // Nothing was written — say why rather than claiming "0 students".
-        setStatus({ phase: "done", text: notice ?? "", warnings });
-      }
+      setJobRunning(true);
+      setFollowed({ id: jobId, live: true });
     } catch (error) {
-      if (error.message !== "RE-AUTH_NEEDED") {
-        console.error("Processing error:", error);
-        setStatus({
-          phase: "error",
-          text: t("grade.processFailed", { msg: error.message }),
-          warnings: [],
-        });
-      }
+      if (error.message === "RE-AUTH_NEEDED") return;
+      console.error("Processing error:", error);
+      const text =
+        error.message === "GOOGLE_REAUTH_REQUIRED"
+          ? t("grading.reauthToStart")
+          : error.message === "no_docs"
+            ? t("grading.noDocs")
+            : t("grade.processFailed", { msg: error.message });
+      setStatus({ phase: "error", text, warnings: [] });
     } finally {
-      setProcessing(false);
-      // Balances changed if any docs were graded.
-      refreshPoint();
-      refreshPayer(selectedClassId);
+      setStarting(false);
     }
   };
 
@@ -227,7 +321,7 @@ export default function GradePage() {
    * numbers before anything irreversible happens.
    */
   const handleClearFeedback = async () => {
-    if (processing || clearing) return;
+    if (starting || jobRunning || clearing) return;
     const lessonName = lessons.find(
       (item) => item.id === selectedLessonId,
     )?.name;
@@ -316,38 +410,37 @@ export default function GradePage() {
   };
 
   const canProcess =
-    selectedClassId && selectedLessonId && !processing && !clearing;
+    selectedClassId &&
+    selectedLessonId &&
+    !starting &&
+    !jobRunning &&
+    !clearing;
 
   return (
     <div className="page-wide">
       <h2 className="page-title">
         {t("grade.title")}{" "}
-        {/* Once a class is picked, show the balance of whoever pays for it —
-            for an admin that is the class's teacher, not the admin. */}
-        {payer ? (
-          <span className="count-badge">
-            {t("grade.payerPoint", {
-              teacher: payer.teacherName,
-              point: payer.point,
-            })}
-          </span>
-        ) : (
-          point !== null &&
-          (isAdmin ? (
-            <span className="count-badge">{t("grade.adminUnlimited")}</span>
-          ) : (
+        {/* A teacher's own balance is in the header. An admin grades on
+            behalf of the class's teacher, whose balance the header does not
+            show — so that one stays here. */}
+        {isAdmin &&
+          (payer ? (
             <span className="count-badge">
-              {t("grade.pointLeft", { point })}
+              {t("grade.payerPoint", {
+                teacher: payer.teacherName,
+                point: payer.point,
+              })}
             </span>
-          ))
-        )}
+          ) : (
+            <span className="count-badge">{t("grade.adminUnlimited")}</span>
+          ))}
       </h2>
       <SearchableSelect
         className="mb-1"
         value={selectedClassId}
         onChange={handleClassChange}
         options={classes}
-        disabled={processing || clearing}
+        disabled={starting || clearing}
         placeholder={t("grade.selectClass")}
         searchPlaceholder={t("common.searchClassPlaceholder")}
         noResultsText={t("common.noClassesFound")}
@@ -357,7 +450,7 @@ export default function GradePage() {
         value={selectedLessonId}
         onChange={handleLessonChange}
         disabled={
-          lessonsLoading || lessons.length === 0 || processing || clearing
+          lessonsLoading || lessons.length === 0 || starting || clearing
         }
       >
         <option value="">
@@ -375,7 +468,7 @@ export default function GradePage() {
         rows={10}
         value={docLinksText}
         onChange={(e) => setDocLinksText(e.target.value)}
-        disabled={processing || clearing}
+        disabled={starting || clearing}
       />
       {isAdmin && (
         <label className="cache-toggle mb-1" title={t("grade.saveCacheTitle")}>
@@ -383,7 +476,7 @@ export default function GradePage() {
             type="checkbox"
             checked={saveCache}
             onChange={(e) => setSaveCache(e.target.checked)}
-            disabled={processing || clearing}
+            disabled={starting || clearing}
           />
           <span>
             {saveCache ? t("grade.saveCacheOn") : t("grade.saveCacheOff")}
@@ -396,7 +489,15 @@ export default function GradePage() {
           onClick={handleProcessAllDocs}
           disabled={!canProcess}
         >
-          {processing ? t("grade.processing") : t("grade.process")}
+          {starting || jobRunning ? t("grade.processing") : t("grade.process")}
+        </button>
+        <button
+          className="secondary-btn"
+          onClick={() => setScheduleOpen(true)}
+          disabled={!selectedClassId || starting || clearing}
+        >
+          <i className="ti ti-clock" aria-hidden="true" />
+          {t("autoGrade.button")}
         </button>
         {isAdmin && (
           <button
@@ -408,6 +509,20 @@ export default function GradePage() {
           </button>
         )}
       </div>
+      {selectedClassId && (
+        <p className="auto-grade-summary">
+          {schedule?.enabled && schedule.next
+            ? t("autoGrade.summaryOn", { runAt: formatVn(schedule.next.runAt) })
+            : t("autoGrade.summaryOff")}
+        </p>
+      )}
+      {scheduleOpen && selectedClass && (
+        <AutoGradeScheduleModal
+          cls={selectedClass}
+          onClose={() => setScheduleOpen(false)}
+          onSaved={() => refreshSchedule(selectedClassId)}
+        />
+      )}
       <div className="status-output">
         {status.phase === "running" ? (
           <span className="status-loading">

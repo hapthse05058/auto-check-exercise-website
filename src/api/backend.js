@@ -176,27 +176,65 @@ export async function checkClassNameExists(name) {
   return data.exists === true;
 }
 
-export async function fetchClassTypes() {
-  const response = await authFetch("/class-types");
+// ---------------------------------------------------------------------------
+// Courses & lessons (backend lib/courses.js)
+// ---------------------------------------------------------------------------
+
+/** Throws Error(<backend error code>) with `.params` on a failed response. */
+async function courseResult(response, key) {
+  const data = await response.json().catch(() => null);
   if (!response.ok) {
-    throw new Error("Failed to fetch class types");
+    const error = new Error(data?.error || "course_failed");
+    error.params = data || {};
+    throw error;
   }
-  const responseBody = await response.json();
-  const data = Array.isArray(responseBody)
-    ? responseBody
-    : responseBody.classTypes || responseBody.data || responseBody.items || [];
-  if (!Array.isArray(data) || data.length === 0) {
-    throw new Error("Invalid class type payload");
-  }
-  return data;
+  return key ? data?.[key] : data;
 }
 
-export async function fetchLessons(classType) {
-  const response = await authFetch(
-    `/lessons?classType=${encodeURIComponent(classType)}`,
+/** The courses; hidden ones only when asked. */
+export async function fetchCourses({ includeInactive } = {}) {
+  return courseResult(
+    await authFetch(`/courses${includeInactive ? "?includeInactive=1" : ""}`),
+    "courses",
   );
+}
+
+export async function createCourse(body) {
+  return courseResult(
+    await authFetch("/courses", { method: "POST", body }),
+    "course",
+  );
+}
+
+export async function updateCourse(courseId, body) {
+  return courseResult(
+    await authFetch(`/courses/${encodeURIComponent(courseId)}`, {
+      method: "PATCH",
+      body,
+    }),
+    "course",
+  );
+}
+
+async function fetchLessonList(query) {
+  const response = await authFetch(`/lessons${query}`);
   if (!response.ok) throw new Error("Failed to fetch lessons");
   return response.json();
+}
+
+/** The lessons of a class, in course order. */
+export function fetchClassLessons(classId) {
+  return fetchLessonList(`?classId=${encodeURIComponent(classId)}`);
+}
+
+/** The lessons of one course (the new-class form). */
+export function fetchCourseLessons(courseId) {
+  return fetchLessonList(`?courseId=${encodeURIComponent(courseId)}`);
+}
+
+/** Every lesson — the admin's picker when editing a course. */
+export function fetchAllLessons() {
+  return fetchLessonList("");
 }
 
 export async function fetchCurrentLesson(classId) {
@@ -231,12 +269,13 @@ export async function updateCurrentLessonForClass(classId, lessonId) {
 export async function createClass({
   name,
   classType,
+  courseId,
   currentLesson,
   teacherId,
 }) {
   return authFetch("/classes", {
     method: "POST",
-    body: { name, classType, currentLesson, teacherId },
+    body: { name, classType, courseId, currentLesson, teacherId },
   });
 }
 
@@ -306,28 +345,132 @@ export async function fetchStudents(classId) {
   return response.json();
 }
 
+// ---------------------------------------------------------------------------
+// Background grading jobs — the backend reads, grades and writes the docs, so
+// the tab may be closed once a job has started.
+// ---------------------------------------------------------------------------
+
 /**
- * Sends a DEDUPED array of unique {question, answer} pairs (for the whole
- * class) to the cached grader and returns `[{question, answer, feedback}]`.
- * The backend reuses gradingCache feedback and only sends genuine misses to
- * the AI. `feedback` can be null when the AI returned nothing for a pair.
+ * Starts grading a lesson. When a job is already running for this class and
+ * lesson, returns THAT job (`joined: true`) instead of failing, so a second
+ * click simply shows the progress of the first.
+ *
+ * @returns {Promise<{jobId: string, joined: boolean}>}
+ * @throws {Error} "GOOGLE_REAUTH_REQUIRED" when a Google-login teacher must
+ *   sign in again; otherwise the backend's error code as the message.
  */
-export async function gradeAnswers(
-  items,
-  { useCache = true, classId, lessonId, pendingCount } = {},
-) {
-  const response = await authFetch("/grade-cached", {
+export async function createGradingJob({
+  classId,
+  lessonId,
+  docIds,
+  useCache,
+}) {
+  const response = await authFetch("/grading-jobs", {
     method: "POST",
-    // classId/lessonId/pendingCount are not used for grading — they let the
-    // backend write a readable audit detail instead of dumping the answers.
-    body: { items, useCache, classId, lessonId, pendingCount },
+    body: { classId, lessonId, docIds, useCache },
   });
-  if (!response.ok) {
-    const data = await response.json().catch(() => null);
-    throw new Error(data?.error || "Grading failed");
+  const data = await response.json().catch(() => null);
+  if (response.status === 202) return { jobId: data.jobId, joined: false };
+  if (data?.error === "job_in_progress") {
+    return { jobId: data.jobId, joined: true };
   }
-  const data = await response.json();
-  return Array.isArray(data.results) ? data.results : [];
+  if (data?.error === "google_reauth_required") {
+    throw new Error("GOOGLE_REAUTH_REQUIRED");
+  }
+  throw new Error(data?.error || "grading_job_failed");
+}
+
+/** Progress and outcome of one job (see describeJob in lib/grading.js). */
+export async function fetchGradingJob(jobId) {
+  const response = await authFetch(
+    `/grading-jobs/${encodeURIComponent(jobId)}`,
+  );
+  if (!response.ok) throw new Error("Failed to fetch grading job");
+  return (await response.json()).job;
+}
+
+/** The last job started for this class + lesson, or null. */
+export async function fetchLatestGradingJob(classId, lessonId) {
+  const response = await authFetch(
+    `/grading-jobs/latest?classId=${encodeURIComponent(classId)}` +
+      `&lessonId=${encodeURIComponent(lessonId)}`,
+  );
+  if (!response.ok) throw new Error("Failed to fetch latest grading job");
+  return (await response.json()).job;
+}
+
+// ---------------------------------------------------------------------------
+// Scheduled grading (backend/lib/gradingSchedules.js)
+// ---------------------------------------------------------------------------
+
+/** Throws an Error whose message is the backend's error code, params attached. */
+async function scheduleResult(response, key) {
+  const data = await response.json().catch(() => null);
+  if (!response.ok) {
+    const error = new Error(data?.error || "grading_schedule_failed");
+    error.params = data || {};
+    throw error;
+  }
+  return key ? data?.[key] : data;
+}
+
+/** One class's schedule (with how its last week went), or null. */
+export async function fetchGradingSchedule(classId) {
+  const response = await authFetch(
+    `/grading-schedules?classId=${encodeURIComponent(classId)}`,
+  );
+  return scheduleResult(response, "schedule");
+}
+
+/** Schedules of every class the caller can see. */
+export async function fetchGradingSchedules() {
+  return scheduleResult(await authFetch("/grading-schedules"), "schedules");
+}
+
+/**
+ * What saving these weekly slots ({slots: [{studentDeadlineAt,
+ * graderDeadlineAt}]}, first occurrences in epoch ms) would schedule. Free of
+ * side effects on the backend, so it can be called on every edit.
+ */
+export async function previewGradingSchedule(classId, { slots }) {
+  const query = new URLSearchParams({
+    classId,
+    slots: slots
+      .map((slot) => `${slot.studentDeadlineAt}-${slot.graderDeadlineAt}`)
+      .join(","),
+  });
+  const response = await authFetch(`/grading-schedules/preview?${query}`);
+  return scheduleResult(response, "preview");
+}
+
+export async function saveGradingSchedule(classId, { slots }) {
+  const response = await authFetch(
+    `/grading-schedules/${encodeURIComponent(classId)}`,
+    { method: "PUT", body: { slots } },
+  );
+  return scheduleResult(response, "schedule");
+}
+
+export async function deleteGradingSchedule(classId) {
+  const response = await authFetch(
+    `/grading-schedules/${encodeURIComponent(classId)}`,
+    { method: "DELETE" },
+  );
+  return scheduleResult(response);
+}
+
+/**
+ * The most the payer's scheduled classes can cost next time, against the
+ * balance: `{point, needMax, classes, teacherName}`. With a classId, the payer
+ * is that class's (for an admin: its teacher).
+ */
+export async function fetchScheduleEstimate(classId) {
+  const response = await authFetch(
+    `/grading-schedules/estimate${
+      classId ? `?classId=${encodeURIComponent(classId)}` : ""
+    }`,
+  );
+  return scheduleResult(response);
 }
 
 // ---------------------------------------------------------------------------
@@ -403,21 +546,6 @@ export async function fetchMyPoint() {
 }
 
 /**
- * Spends 1 point per student doc just written. Send the docs, not an amount —
- * the backend prices them and its ledger makes a repeat call a no-op.
- * Throws INSUFFICIENT_POINTS on 402 so the caller can stop the run.
- */
-export async function consumeDocPoints({ classId, docIds, lessonId }) {
-  const response = await authFetch("/teacher-points/consume", {
-    method: "POST",
-    body: { classId, docIds, lessonId },
-  });
-  if (response.status === 402) throw new Error("INSUFFICIENT_POINTS");
-  if (!response.ok) throw new Error("Failed to consume points");
-  return response.json(); // { point, charged, payerTeacherId, payerName }
-}
-
-/**
  * Balance of whoever pays for this class — the class's teacher when an admin is
  * grading, the caller otherwise. Resolved server-side from the class record.
  */
@@ -435,24 +563,9 @@ export async function fetchPayerPoint(classId) {
 }
 
 /**
- * One audit line closing out a grading run. Never throws: the points are
- * already settled in the ledger, and losing a log line must not fail the run.
- */
-export async function recordGradingSummary({ classId, lessonId, totalPoints }) {
-  try {
-    await authFetch("/grading-summary", {
-      method: "POST",
-      body: { classId, lessonId, totalPoints },
-    });
-  } catch {
-    // Offline, expired token, backend down — losing one log line is acceptable.
-  }
-}
-
-/**
  * One audit line closing out a "clear feedback" run. The docs are edited
- * browser-side, so nothing else would record it. Never throws, for the same
- * reason as above: the deletion already happened.
+ * browser-side, so nothing else would record it. Never throws: the deletion
+ * already happened, and losing a log line must not turn it into an error.
  */
 export async function recordFeedbackClearSummary({
   classId,

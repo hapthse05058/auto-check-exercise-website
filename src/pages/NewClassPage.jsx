@@ -6,12 +6,21 @@ import {
   createClass,
   fetchAllClasses,
   fetchClasses,
-  fetchClassTypes,
-  fetchLessons,
+  fetchCourseLessons,
+  fetchCourses,
+  saveGradingSchedule,
 } from "../api/backend.js";
 import { useAuth } from "../auth/AuthContext.jsx";
+import AutoGradeScheduleFields from "../components/AutoGradeScheduleFields.jsx";
 import { isAdminEmail } from "../config.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
+import {
+  emptySlot,
+  scheduleErrorText,
+  slotErrorText,
+  slotsToBody,
+  validateSlots,
+} from "../lib/autoGrade.js";
 
 export default function NewClassPage() {
   const { loadTeacherInfo } = useAuth();
@@ -20,14 +29,18 @@ export default function NewClassPage() {
 
   const [name, setName] = useState("");
   const [nameError, setNameError] = useState("");
-  const [classTypes, setClassTypes] = useState([]);
-  const [classType, setClassType] = useState("");
+  const [courses, setCourses] = useState([]);
+  const [coursesLoading, setCoursesLoading] = useState(true);
+  const [courseId, setCourseId] = useState("");
   const [lessons, setLessons] = useState([]);
   const [lessonsLoading, setLessonsLoading] = useState(false);
   const [lesson, setLesson] = useState("");
   const [existingClasses, setExistingClasses] = useState([]);
   const [status, setStatus] = useState(t("newClass.intro"));
   const [saving, setSaving] = useState(false);
+  // Optional weekly auto-grading, saved right after the class is created.
+  const [autoGrade, setAutoGrade] = useState(false);
+  const [slots, setSlots] = useState(() => [emptySlot()]);
 
   useEffect(() => {
     let cancelled = false;
@@ -41,8 +54,11 @@ export default function NewClassPage() {
           navigate("/missing-teacher", { replace: true });
           return;
         }
-        const types = await fetchClassTypes();
-        if (!cancelled) setClassTypes(types);
+        const courseList = await fetchCourses();
+        if (cancelled) return;
+        setCourses(Array.isArray(courseList) ? courseList : []);
+        // A single course: nothing to choose.
+        if (courseList?.length === 1) setCourseId(courseList[0].id);
         // Admin's duplicate-name check spans all classes, not just their own.
         const classList = isAdminEmail(teacherInfo.gmail)
           ? await fetchAllClasses()
@@ -51,6 +67,8 @@ export default function NewClassPage() {
       } catch (error) {
         if (cancelled || error.message === "RE-AUTH_NEEDED") return;
         console.error("Error loading new-class data:", error);
+      } finally {
+        if (!cancelled) setCoursesLoading(false);
       }
     })();
     return () => {
@@ -58,22 +76,28 @@ export default function NewClassPage() {
     };
   }, [loadTeacherInfo, navigate]);
 
-  const handleTypeChange = async (event) => {
-    const type = event.target.value;
-    setClassType(type);
+  // The lessons of the chosen course.
+  useEffect(() => {
+    let cancelled = false;
     setLesson("");
     setLessons([]);
-    if (!type) return;
+    if (!courseId) return undefined;
     setLessonsLoading(true);
-    try {
-      const lessonOptions = await fetchLessons(type);
-      setLessons(Array.isArray(lessonOptions) ? lessonOptions : []);
-    } catch (error) {
-      console.error("Error loading lessons for new class:", error);
-    } finally {
-      setLessonsLoading(false);
-    }
-  };
+    fetchCourseLessons(courseId)
+      .then((list) => {
+        if (!cancelled) setLessons(Array.isArray(list) ? list : []);
+      })
+      .catch((error) => {
+        if (error.message !== "RE-AUTH_NEEDED")
+          console.error("Error loading lessons for new class:", error);
+      })
+      .finally(() => {
+        if (!cancelled) setLessonsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [courseId]);
 
   /** Local + backend duplicate check; returns true when the name is usable. */
   const verifyClassName = async () => {
@@ -118,6 +142,11 @@ export default function NewClassPage() {
       setStatus(t("newClass.fixName"));
       return;
     }
+    const slotError = autoGrade ? validateSlots(slots) : null;
+    if (slotError) {
+      setStatus(slotErrorText(slotError, t));
+      return;
+    }
 
     setStatus(t("newClass.saving"));
     setSaving(true);
@@ -125,7 +154,7 @@ export default function NewClassPage() {
       const teacherInfo = await loadTeacherInfo();
       const response = await createClass({
         name: trimmed,
-        classType,
+        courseId,
         currentLesson: lesson.trim(),
         teacherId: teacherInfo?.id,
       });
@@ -136,8 +165,28 @@ export default function NewClassPage() {
         return;
       }
 
+      const created = await response.json().catch(() => null);
+      if (autoGrade && created?.id) {
+        try {
+          await saveGradingSchedule(created.id, slotsToBody(slots));
+        } catch (error) {
+          // The class exists; say what is missing and stay, so the teacher
+          // can set the schedule later from the grading screen.
+          setStatus(
+            t("autoGrade.saveAfterCreateFailed", {
+              msg: scheduleErrorText(error, t),
+            }),
+          );
+          return;
+        }
+      }
+
       setStatus(t("newClass.created"));
-      navigate("/grade");
+      navigate(
+        created?.id
+          ? `/grade?classId=${encodeURIComponent(created.id)}`
+          : "/grade",
+      );
     } catch (error) {
       console.error("Error creating class:", error);
       setStatus(t("newClass.createError"));
@@ -146,7 +195,7 @@ export default function NewClassPage() {
     }
   };
 
-  const canSave = !!(name.trim() && classType && lesson) && !saving;
+  const canSave = !!(name.trim() && courseId && lesson) && !saving;
 
   return (
     <div className="page-narrow">
@@ -172,16 +221,23 @@ export default function NewClassPage() {
           )}
         </div>
         <div className="form-field">
-          <label htmlFor="newClassType">{t("newClass.type")}</label>
+          <label htmlFor="newClassCourse">{t("newClass.course")}</label>
           <select
-            id="newClassType"
-            value={classType}
-            onChange={handleTypeChange}
+            id="newClassCourse"
+            value={courseId}
+            onChange={(e) => setCourseId(e.target.value)}
+            disabled={coursesLoading}
           >
-            <option value="">{t("newClass.selectType")}</option>
-            {classTypes.map((type) => (
-              <option key={type.code} value={type.code}>
-                {type.name || type.code || type.id}
+            <option value="">
+              {coursesLoading
+                ? t("newClass.loadingCourses")
+                : courses.length === 0
+                  ? t("newClass.noCourses")
+                  : t("newClass.selectCourse")}
+            </option>
+            {courses.map((course) => (
+              <option key={course.id} value={course.id}>
+                {course.name}
               </option>
             ))}
           </select>
@@ -197,7 +253,7 @@ export default function NewClassPage() {
             <option value="">
               {lessonsLoading
                 ? t("newClass.loadingLessons")
-                : lessons.length === 0 && classType
+                : lessons.length === 0 && courseId
                   ? t("newClass.noLessons")
                   : t("newClass.selectLesson")}
             </option>
@@ -208,6 +264,28 @@ export default function NewClassPage() {
             ))}
           </select>
         </div>
+        <div className="form-field">
+          <label className="cache-toggle">
+            <input
+              type="checkbox"
+              checked={autoGrade}
+              onChange={(e) => setAutoGrade(e.target.checked)}
+            />
+            <span>{t("autoGrade.newClassToggle")}</span>
+          </label>
+        </div>
+        {autoGrade && (
+          <div className="form-field">
+            <p className="field-note auto-grade-intro">
+              {t("autoGrade.intro")}
+            </p>
+            <AutoGradeScheduleFields
+              value={slots}
+              onChange={setSlots}
+              disabled={saving}
+            />
+          </div>
+        )}
         <div className="action-row">
           <button className="logout-btn" onClick={() => navigate("/grade")}>
             {t("common.backHome")}

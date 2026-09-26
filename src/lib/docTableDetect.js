@@ -12,6 +12,10 @@
  * — dòng header, dòng ví dụ, dòng công thức "B1:/B2:" mà học viên tự điền —
  * không bao giờ sinh cặp Q/A và không bao giờ bị ghi đè, bất kể chúng nằm
  * trong bảng riêng hay ngay trong bảng câu hỏi.
+ *
+ * Pure. The backend copies this file verbatim into
+ * auto-check-exercise-be/backend/lib/doc/ to run grading jobs — see the header
+ * of docWriter.js.
  */
 import {
   OVERALL_FEEDBACK_LABEL,

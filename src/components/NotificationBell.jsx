@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import {
   fetchNotifications,
@@ -7,6 +8,12 @@ import {
 import { usePushNotifications } from "../hooks/usePushNotifications.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
 import { PUSH_EVENT } from "../lib/push.js";
+import {
+  notificationSoundEnabled,
+  playNotificationSound,
+  setNotificationSoundEnabled,
+  unlockAudioOnFirstGesture,
+} from "../lib/sound.js";
 
 /** Poll cadence, matched to AuthContext's proactiveTokenRefresh interval. */
 const POLL_MS = 60_000;
@@ -83,13 +90,44 @@ export default function NotificationBell() {
   // Ids that were unread when the dropdown was opened — kept highlighted until
   // it closes, even though they are already marked read on the server.
   const justReadRef = useRef(new Set());
+  // Ids already known to be unread; null until the first load, which only
+  // takes note — the chime is for notifications arriving while the page is open.
+  const seenUnreadRef = useRef(null);
+  const [soundOn, setSoundOn] = useState(notificationSoundEnabled);
   const { t } = useLanguage();
   const push = usePushNotifications();
+  const navigate = useNavigate();
+
+  /** Only in-app paths are followed ("/grade?classId=…"), never a full URL. */
+  const pathOf = (item) => {
+    const path = item.data?.path;
+    return typeof path === "string" &&
+      path.startsWith("/") &&
+      !path.startsWith("//")
+      ? path
+      : null;
+  };
+  const openItem = (item) => {
+    const path = pathOf(item);
+    if (!path) return;
+    setOpen(false);
+    justReadRef.current = new Set();
+    navigate(path);
+  };
 
   const load = useCallback(async () => {
     try {
       const data = await fetchNotifications({ limit: 30 });
-      setItems(data.results || []);
+      const results = data.results || [];
+      const unreadIds = results.filter((n) => !n.read).map((n) => n.id);
+      if (seenUnreadRef.current === null) {
+        seenUnreadRef.current = new Set(unreadIds);
+      } else {
+        const fresh = unreadIds.filter((id) => !seenUnreadRef.current.has(id));
+        fresh.forEach((id) => seenUnreadRef.current.add(id));
+        if (fresh.length > 0) playNotificationSound();
+      }
+      setItems(results);
       setUnread(data.unreadCount || 0);
       setFailed(false);
     } catch {
@@ -119,6 +157,22 @@ export default function NotificationBell() {
       document.removeEventListener("visibilitychange", onVisibility);
     };
   }, [load]);
+
+  useEffect(() => {
+    const unlock = unlockAudioOnFirstGesture();
+    return () => {
+      window.removeEventListener("pointerdown", unlock);
+      window.removeEventListener("keydown", unlock);
+    };
+  }, []);
+
+  const toggleSound = (event) => {
+    event.stopPropagation();
+    const next = !soundOn;
+    setNotificationSoundEnabled(next);
+    setSoundOn(next);
+    if (next) playNotificationSound();
+  };
 
   // A push delivered while this tab is focused is handed to the page, not shown
   // by the service worker — refresh immediately instead of waiting for the poll.
@@ -192,6 +246,19 @@ export default function NotificationBell() {
                 {t("notif.unread", { n: unread })}
               </span>
             )}
+            <button
+              type="button"
+              className="notif-sound-toggle"
+              onClick={toggleSound}
+              title={soundOn ? t("notif.soundOff") : t("notif.soundOn")}
+              aria-label={soundOn ? t("notif.soundOff") : t("notif.soundOn")}
+              aria-pressed={soundOn}
+            >
+              <i
+                className={`ti ${soundOn ? "ti-volume" : "ti-volume-off"}`}
+                aria-hidden="true"
+              />
+            </button>
           </div>
 
           {push.canEnable && (
@@ -213,10 +280,21 @@ export default function NotificationBell() {
           {items.map((item) => {
             const { title, body } = renderNotification(item, t);
             const isNew = !item.read || justReadRef.current.has(item.id);
+            const linked = Boolean(pathOf(item));
             return (
               <div
                 key={item.id}
-                className={`notif-item ${isNew ? "unread" : ""} sev-${item.severity}`}
+                className={`notif-item ${isNew ? "unread" : ""} sev-${item.severity}${linked ? " clickable" : ""}`}
+                role={linked ? "link" : undefined}
+                tabIndex={linked ? 0 : undefined}
+                onClick={linked ? () => openItem(item) : undefined}
+                onKeyDown={
+                  linked
+                    ? (event) => {
+                        if (event.key === "Enter") openItem(item);
+                      }
+                    : undefined
+                }
               >
                 <span className="notif-item-title">{title}</span>
                 <span className="notif-item-body">{body}</span>
