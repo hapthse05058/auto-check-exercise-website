@@ -8,6 +8,10 @@
  * highlighted text splitting a line into several runs. Everything here is
  * built to still read the pair out of such a cell — and, when it genuinely
  * cannot, to say so (see `getUnreadableQuestions`) rather than guess.
+ *
+ * Pure. The backend copies this file verbatim into
+ * auto-check-exercise-be/backend/lib/doc/ to run grading jobs — see the header
+ * of docWriter.js.
  */
 
 export const IS_CORRECT_ANSWER = "✅ Đúng";

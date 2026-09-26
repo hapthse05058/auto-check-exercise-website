@@ -1,6 +1,12 @@
 /**
  * Builds Google Docs batchUpdate requests that write AI feedback into the
  * "Chữa bài" column. Direct port of the extension logic (extension/popup.js).
+ *
+ * Pure — no network, no DOM. The backend runs this very file to write feedback
+ * from its grading jobs: it is copied verbatim, together with docParser.js,
+ * docTableDetect.js and docTables.js, into
+ * auto-check-exercise-be/backend/lib/doc/ (`npm run sync:doc-lib` there).
+ * Keep all four free of imports outside this set.
  */
 import {
   IS_CORRECT_ANSWER,
@@ -8,8 +14,8 @@ import {
   containsCorrectMark,
   extractQuestionIndex,
   getCellText,
+  normalizeText,
 } from "./docParser.js";
-import { batchUpdateDoc } from "../api/googleDocs.js";
 
 /** Parses the AI's markdown table response into {questionIndex, aiFeedback}. */
 export function parseAiResponse(agentResponse) {
@@ -258,6 +264,43 @@ function feedbackTextOf(item) {
  * `questionIndex` vẫn được giữ làm đường lùi cho các lời gọi chưa có `rowKey`.
  */
 export function buildFeedbackRequests(gradingResults, rows, tabId) {
+  const { cells, overall } = planFeedbackWrites(gradingResults, rows);
+
+  const groupedRequests = cells.map(({ startIndex, text }) => ({
+    startIndex,
+    // Newlines are kept on purpose: formatFeedbackForDoc puts the reason on its
+    // own line, and the Docs API counts "\n" as a single index unit.
+    subRequests: createStyledTextRequests(text, startIndex, tabId),
+  }));
+  if (overall) {
+    groupedRequests.push({
+      startIndex: overall.startIndex,
+      subRequests: setStyleForTeacherFeedBack(
+        overall.startIndex,
+        overall.text,
+        tabId,
+      ),
+    });
+  }
+
+  // Apply groups bottom-up so earlier inserts don't shift later indexes.
+  groupedRequests.sort((a, b) => b.startIndex - a.startIndex);
+
+  return groupedRequests.flatMap((group) => group.subRequests);
+}
+
+/**
+ * Where each piece of feedback goes and what it says, before any request is
+ * built. Shared by `buildFeedbackRequests` (to write) and `matchesOwnFeedback`
+ * (to recognise that write afterwards), so the two can never disagree about
+ * which cell gets which text.
+ *
+ * @returns {{
+ *   cells: Array<{entry: object, startIndex: number, text: string}>,
+ *   overall: {entry: object, startIndex: number, text: string}|null,
+ * }}
+ */
+function planFeedbackWrites(gradingResults, rows) {
   const entries = rows || [];
   const questionRows = entries.filter((entry) => !entry.isOverall);
   const byRowKey = new Map(
@@ -297,74 +340,80 @@ export function buildFeedbackRequests(gradingResults, rows, tabId) {
     textsByEntry.get(entry).push(feedbackTextOf(item));
   }
 
-  const groupedRequests = [];
+  const cells = [];
   for (const [entry, texts] of textsByEntry) {
     // Ô giữ chỗ của một ô bị gộp có thể không có `content`. Bỏ qua dòng đó chứ
     // đừng ném — một ô dị dạng không được phép làm hỏng cả tài liệu.
-    const targetStartIndex = entry.fbCell?.content?.[0]?.startIndex;
-    if (targetStartIndex === undefined) continue;
-    // Newlines are kept on purpose: formatFeedbackForDoc puts the reason on its
-    // own line, and the Docs API counts "\n" as a single index unit.
-    groupedRequests.push({
-      startIndex: targetStartIndex,
-      subRequests: createStyledTextRequests(
-        texts.join("\n"),
-        targetStartIndex,
-        tabId,
-      ),
-    });
+    const startIndex = entry.fbCell?.content?.[0]?.startIndex;
+    if (startIndex === undefined) continue;
+    cells.push({ entry, startIndex, text: texts.join("\n") });
   }
 
+  let overallWrite = null;
   const overall = entries.find((entry) => entry.isOverall);
   const overallStart = overall?.overallCell?.content?.[0]?.startIndex;
   if (overall && overallStart !== undefined && gradingResults.length) {
     const labelText = getCellText(overall.overallCell).trim();
     if (labelText.includes(OVERALL_FEEDBACK_LABEL)) {
-      const targetStartIndex = overallStart + labelText.length;
-      groupedRequests.push({
-        startIndex: targetStartIndex,
-        subRequests: setStyleForTeacherFeedBack(
-          targetStartIndex,
-          generateOverallFeedback(gradingResults),
-          tabId,
-        ),
-      });
+      overallWrite = {
+        entry: overall,
+        startIndex: overallStart + labelText.length,
+        text: generateOverallFeedback(gradingResults),
+      };
     }
   }
 
-  // Apply groups bottom-up so earlier inserts don't shift later indexes.
-  groupedRequests.sort((a, b) => b.startIndex - a.startIndex);
-
-  return groupedRequests.flatMap((group) => group.subRequests);
+  return { cells, overall: overallWrite };
 }
 
 /**
- * Writes pre-computed grading results into the student's Google Doc.
- * `gradingResults` is `[{questionIndex, aiFeedback}]` in doc (question) order;
- * each row is targeted by its questionIndex, which is unique within the doc.
- * `student` carries {docId, tabId, exercise}; `tableIndex` locates the
- * exercise tables for the lesson/class type.
+ * The characters `createStyledTextRequests` actually inserts for `text`: the
+ * "**" markers become styling, not text. Derived from the requests themselves
+ * rather than re-implemented, so it cannot drift from what is written.
  */
-export async function writeGradingResultsToDoc(
-  gradingResults,
-  student,
-  accessToken,
-) {
-  if (!gradingResults || gradingResults.length === 0) return;
-  try {
-    const finalRequests = buildFeedbackRequests(
-      gradingResults,
-      student.rows,
-      student.tabId,
-    );
+function insertedTextOf(text) {
+  return createStyledTextRequests(text, 0, "")
+    .filter((request) => request.insertText)
+    .map((request) => request.insertText.text)
+    .join("");
+}
 
-    if (finalRequests.length > 0) {
-      await batchUpdateDoc(student.docId, finalRequests, accessToken);
-    }
-  } catch (error) {
-    console.error(error);
-    throw error;
-  }
+/** A string reduced the way `getCellText` reduces a cell, so both compare. */
+function asCellText(text) {
+  return String(text ?? "")
+    .split(/\r?\n|\v/)
+    .map((line) => line.trimEnd())
+    .filter((line) => line.trim() !== "")
+    .join("\n");
+}
+
+/**
+ * True when the doc already holds EXACTLY the feedback `gradingResults` would
+ * write — i.e. the write went through, even if its response was lost.
+ *
+ * `describeGradedState(rows).reviewed` only says a feedback cell has text, not
+ * whose text it is. Before a background job charges for a doc it found already
+ * filled in, it must prove the text is its own; a teacher's hand-typed notes,
+ * or a different run's feedback, must not be billed as this run's work.
+ *
+ * Every targeted cell must match exactly, and the overall comment must follow
+ * the label. `rows` is the doc read AFTER the write; row identities
+ * (tableIdx:rowIdx) do not move when text is inserted into a cell.
+ */
+export function matchesOwnFeedback(gradingResults, rows) {
+  const { cells, overall } = planFeedbackWrites(gradingResults || [], rows);
+  if (!cells.length) return false;
+
+  const cellsMatch = cells.every(
+    ({ entry, text }) =>
+      getCellText(entry.fbCell) === asCellText(insertedTextOf(text)),
+  );
+  if (!cellsMatch) return false;
+
+  if (!overall || !overall.text.trim()) return true;
+  return normalizeText(getCellText(overall.entry.overallCell)).includes(
+    normalizeText(overall.text),
+  );
 }
 
 // ---------------------------------------------------------------------------

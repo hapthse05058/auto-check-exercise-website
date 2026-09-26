@@ -306,28 +306,58 @@ export async function fetchStudents(classId) {
   return response.json();
 }
 
+// ---------------------------------------------------------------------------
+// Background grading jobs — the backend reads, grades and writes the docs, so
+// the tab may be closed once a job has started.
+// ---------------------------------------------------------------------------
+
 /**
- * Sends a DEDUPED array of unique {question, answer} pairs (for the whole
- * class) to the cached grader and returns `[{question, answer, feedback}]`.
- * The backend reuses gradingCache feedback and only sends genuine misses to
- * the AI. `feedback` can be null when the AI returned nothing for a pair.
+ * Starts grading a lesson. When a job is already running for this class and
+ * lesson, returns THAT job (`joined: true`) instead of failing, so a second
+ * click simply shows the progress of the first.
+ *
+ * @returns {Promise<{jobId: string, joined: boolean}>}
+ * @throws {Error} "GOOGLE_REAUTH_REQUIRED" when a Google-login teacher must
+ *   sign in again; otherwise the backend's error code as the message.
  */
-export async function gradeAnswers(
-  items,
-  { useCache = true, classId, lessonId, pendingCount } = {},
-) {
-  const response = await authFetch("/grade-cached", {
+export async function createGradingJob({
+  classId,
+  lessonId,
+  docIds,
+  useCache,
+}) {
+  const response = await authFetch("/grading-jobs", {
     method: "POST",
-    // classId/lessonId/pendingCount are not used for grading — they let the
-    // backend write a readable audit detail instead of dumping the answers.
-    body: { items, useCache, classId, lessonId, pendingCount },
+    body: { classId, lessonId, docIds, useCache },
   });
-  if (!response.ok) {
-    const data = await response.json().catch(() => null);
-    throw new Error(data?.error || "Grading failed");
+  const data = await response.json().catch(() => null);
+  if (response.status === 202) return { jobId: data.jobId, joined: false };
+  if (data?.error === "job_in_progress") {
+    return { jobId: data.jobId, joined: true };
   }
-  const data = await response.json();
-  return Array.isArray(data.results) ? data.results : [];
+  if (data?.error === "google_reauth_required") {
+    throw new Error("GOOGLE_REAUTH_REQUIRED");
+  }
+  throw new Error(data?.error || "grading_job_failed");
+}
+
+/** Progress and outcome of one job (see describeJob in lib/grading.js). */
+export async function fetchGradingJob(jobId) {
+  const response = await authFetch(
+    `/grading-jobs/${encodeURIComponent(jobId)}`,
+  );
+  if (!response.ok) throw new Error("Failed to fetch grading job");
+  return (await response.json()).job;
+}
+
+/** The last job started for this class + lesson, or null. */
+export async function fetchLatestGradingJob(classId, lessonId) {
+  const response = await authFetch(
+    `/grading-jobs/latest?classId=${encodeURIComponent(classId)}` +
+      `&lessonId=${encodeURIComponent(lessonId)}`,
+  );
+  if (!response.ok) throw new Error("Failed to fetch latest grading job");
+  return (await response.json()).job;
 }
 
 // ---------------------------------------------------------------------------
@@ -403,21 +433,6 @@ export async function fetchMyPoint() {
 }
 
 /**
- * Spends 1 point per student doc just written. Send the docs, not an amount —
- * the backend prices them and its ledger makes a repeat call a no-op.
- * Throws INSUFFICIENT_POINTS on 402 so the caller can stop the run.
- */
-export async function consumeDocPoints({ classId, docIds, lessonId }) {
-  const response = await authFetch("/teacher-points/consume", {
-    method: "POST",
-    body: { classId, docIds, lessonId },
-  });
-  if (response.status === 402) throw new Error("INSUFFICIENT_POINTS");
-  if (!response.ok) throw new Error("Failed to consume points");
-  return response.json(); // { point, charged, payerTeacherId, payerName }
-}
-
-/**
  * Balance of whoever pays for this class — the class's teacher when an admin is
  * grading, the caller otherwise. Resolved server-side from the class record.
  */
@@ -435,24 +450,9 @@ export async function fetchPayerPoint(classId) {
 }
 
 /**
- * One audit line closing out a grading run. Never throws: the points are
- * already settled in the ledger, and losing a log line must not fail the run.
- */
-export async function recordGradingSummary({ classId, lessonId, totalPoints }) {
-  try {
-    await authFetch("/grading-summary", {
-      method: "POST",
-      body: { classId, lessonId, totalPoints },
-    });
-  } catch {
-    // Offline, expired token, backend down — losing one log line is acceptable.
-  }
-}
-
-/**
  * One audit line closing out a "clear feedback" run. The docs are edited
- * browser-side, so nothing else would record it. Never throws, for the same
- * reason as above: the deletion already happened.
+ * browser-side, so nothing else would record it. Never throws: the deletion
+ * already happened, and losing a log line must not turn it into an error.
  */
 export async function recordFeedbackClearSummary({
   classId,

@@ -53,6 +53,14 @@ export const translations = {
       hoursAgo: "{n} h ago",
       daysAgo: "{n} d ago",
       type: {
+        gradingJobDone: "Grading finished",
+        gradingJobDoneBody:
+          "Class {className} · Lesson {lessonName}: {written}/{total} document(s) written.",
+        gradingJobNeedsReauth: "Sign in with Google again to finish grading",
+        gradingJobNeedsReauthBody:
+          "Class {className} · Lesson {lessonName}: {written}/{total} document(s) written. Sign in again, then grade again.",
+        gradingJobFailed: "Grading could not finish",
+        gradingJobFailedBody: "Class {className} · Lesson {lessonName}.",
         deepseekLowBalance: "DeepSeek balance is low",
         deepseekLowBalanceBody:
           "{balance} {currency} left (threshold {threshold} {currency}). Top up the DeepSeek account.",
@@ -588,8 +596,24 @@ export const translations = {
         'Note: re-grading reuses the cached feedback. To make the AI grade from scratch, turn off "Save to grading cache" first.',
     },
     grading: {
+      jobStarting: "Starting grading...",
+      jobPreparing:
+        "Reading and grading the documents on the server... You can close this tab — you will get a notification when it is done.",
+      jobProgress:
+        "Writing feedback: {done}/{total} document(s) processed. You can close this tab — you will get a notification when it is done.",
+      lastRun: "Last run:",
+      reauthRequired:
+        "Your Google sign-in has expired: {written}/{total} document(s) were written. Sign in with Google again, then grade again — documents already done are skipped.",
+      reauthToStart:
+        "Please sign out and sign in with Google again so grading can keep running after you close the tab.",
+      jobAbandoned:
+        "This run stopped responding and was replaced by a newer one.",
+      jobFailed: "Grading could not finish ({code}). Please try again.",
+      ownershipUnclear:
+        "{docId}: someone else's feedback appeared in this document while it was being graded — left as is, no point charged.",
+      gradedMeanwhile:
+        "{docId}: feedback was added to this document while grading was running — left as is, no point charged.",
       noDocs: "No student documents found for this class.",
-      gradingAnswers: "Grading answers...",
       doneCount:
         "Finished grading for {n} student(s)!\nGrading student's exercises completed! You can review the result!!",
       allChecked: "All docs were already checked. Nothing to grade.",
@@ -603,7 +627,6 @@ export const translations = {
       tableQuestionRef: "table {table} question {question}",
       noAnswers: "No answered questions found to grade.",
       noneGraded: "No exercise was graded. See the warnings below.",
-      pointCheckFailed: "Could not check the point balance. Please try again.",
       notEnough:
         "Not enough points: {need} exercise(s) to grade, {teacher} has {have}. Please contact admin to top up.",
       gradingFailed: "Grading failed: {msg}",
@@ -674,6 +697,14 @@ export const translations = {
       hoursAgo: "{n} giờ trước",
       daysAgo: "{n} ngày trước",
       type: {
+        gradingJobDone: "Đã chấm xong",
+        gradingJobDoneBody:
+          "Lớp {className} · Buổi {lessonName}: đã ghi {written}/{total} tài liệu.",
+        gradingJobNeedsReauth: "Cần đăng nhập lại Google để chấm tiếp",
+        gradingJobNeedsReauthBody:
+          "Lớp {className} · Buổi {lessonName}: đã ghi {written}/{total} tài liệu. Đăng nhập lại rồi bấm chấm lại.",
+        gradingJobFailed: "Chấm bài không hoàn tất",
+        gradingJobFailedBody: "Lớp {className} · Buổi {lessonName}.",
         deepseekLowBalance: "Số dư DeepSeek sắp hết",
         deepseekLowBalanceBody:
           "Còn {balance} {currency} (ngưỡng {threshold} {currency}). Vui lòng nạp thêm tài khoản DeepSeek.",
@@ -1207,8 +1238,24 @@ export const translations = {
         'Lưu ý: chấm lại sẽ dùng feedback cũ trong cache. Nếu muốn AI chấm lại từ đầu, hãy tắt "Lưu vào cache chấm bài" trước khi chấm.',
     },
     grading: {
+      jobStarting: "Đang bắt đầu chấm...",
+      jobPreparing:
+        "Máy chủ đang đọc và chấm bài... Bạn có thể đóng tab — sẽ có thông báo khi chấm xong.",
+      jobProgress:
+        "Đang ghi feedback: đã xử lý {done}/{total} tài liệu. Bạn có thể đóng tab — sẽ có thông báo khi chấm xong.",
+      lastRun: "Lần chấm gần nhất:",
+      reauthRequired:
+        "Phiên đăng nhập Google đã hết hạn: đã ghi {written}/{total} tài liệu. Vui lòng đăng nhập lại bằng Google rồi bấm chấm lại — các tài liệu đã chấm sẽ được bỏ qua.",
+      reauthToStart:
+        "Vui lòng đăng xuất và đăng nhập lại bằng Google để việc chấm bài vẫn tiếp tục sau khi bạn đóng tab.",
+      jobAbandoned:
+        "Lần chấm này không còn phản hồi và đã được thay bằng lần chấm mới hơn.",
+      jobFailed: "Chấm bài không hoàn tất ({code}). Vui lòng thử lại.",
+      ownershipUnclear:
+        "{docId}: tài liệu xuất hiện feedback của người khác trong lúc đang chấm — giữ nguyên, không trừ point.",
+      gradedMeanwhile:
+        "{docId}: tài liệu được thêm feedback trong lúc đang chấm — giữ nguyên, không trừ point.",
       noDocs: "Không tìm thấy tài liệu học sinh nào cho lớp này.",
-      gradingAnswers: "Đang chấm bài...",
       doneCount:
         "Hoàn tất chấm bài cho {n} học sinh!\nĐã chấm xong bài của học sinh! Bạn có thể xem lại kết quả!!",
       allChecked: "Tất cả tài liệu đã được chấm. Không có gì để chấm.",
@@ -1222,7 +1269,6 @@ export const translations = {
       tableQuestionRef: "bảng {table} câu {question}",
       noAnswers: "Không tìm thấy câu trả lời nào để chấm.",
       noneGraded: "Không có bài nào được chấm. Xem cảnh báo bên dưới.",
-      pointCheckFailed: "Không kiểm tra được số point. Vui lòng thử lại.",
       notEnough:
         "Không đủ point: cần chấm {need} bài, {teacher} còn {have} point. Vui lòng liên hệ admin để nạp thêm point.",
       gradingFailed: "Chấm bài thất bại: {msg}",

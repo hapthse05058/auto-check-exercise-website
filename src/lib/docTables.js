@@ -4,6 +4,10 @@
  * Each Google Doc tab ("BUỔI XX") contains several tables; `tableIndex` lists
  * the indexes of the tables holding the part-IV exercises. The last index is
  * the table that contains the teacher's overall feedback.
+ *
+ * Pure. The backend copies this file verbatim into
+ * auto-check-exercise-be/backend/lib/doc/ to run grading jobs — see the header
+ * of docWriter.js.
  */
 /**
  * Cần gạt thoát hiểm cho `docTableDetect`: ép cứng chỉ số bảng cho một tab cụ
