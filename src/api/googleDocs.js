@@ -1,5 +1,3 @@
-import { isServiceAccountGoogleToken } from "../auth/tokens.js";
-import { PROJECT_NUMBER } from "../config.js";
 import { findTabByTitle } from "../lib/docParser.js";
 
 /**
@@ -39,8 +37,8 @@ export async function getTabContent(docId, accessToken, tabTitle) {
 /**
  * Returns a Google Doc's title (the file name shown in Drive), or "" when the
  * document has none. `?fields=title` keeps the response tiny — unlike
- * getTabContent, none of the body is needed. No `x-goog-user-project` header:
- * reads work for both login modes without it (see batchUpdateDoc below).
+ * getTabContent, none of the body is needed. No `x-goog-user-project`
+ * header (see batchUpdateDoc below).
  * Throws on a failed request so the caller can decide how to recover.
  */
 export async function getDocTitle(docId, accessToken) {
@@ -62,18 +60,18 @@ export async function getDocTitle(docId, accessToken) {
 }
 
 /**
- * Sends a batchUpdate to a Google Doc. Only end-user (Gmail) tokens need a
- * quota project header; the service-account token (username/password login)
- * 403s with it, so it is omitted in that case.
+ * Sends a batchUpdate to a Google Doc. No `x-goog-user-project` header: a
+ * teacher token comes from the app's own OAuth client, so Google already bills
+ * it to that project, and naming the project only adds a check that the
+ * teacher holds roles/serviceusage.serviceUsageConsumer on it. The
+ * service-account token 403s with the header outright. Keep in sync with the
+ * backend's lib/googleDocsApi.js.
  */
 export async function batchUpdateDoc(docId, requests, accessToken) {
   const updateHeaders = {
     Authorization: `Bearer ${accessToken}`,
     "Content-Type": "application/json",
   };
-  if (!isServiceAccountGoogleToken()) {
-    updateHeaders["x-goog-user-project"] = PROJECT_NUMBER;
-  }
 
   const updateResponse = await fetch(
     `https://docs.googleapis.com/v1/documents/${docId}:batchUpdate`,
