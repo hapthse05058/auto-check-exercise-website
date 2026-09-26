@@ -88,6 +88,26 @@ body {
   gap: 1rem;
 }
 
+/* The teacher's point balance, always visible in the header. */
+.point-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  color: var(--color-primary-dark);
+  background: #e3f4ef;
+  border: 1px solid #b9e2d6;
+}
+.point-badge.empty {
+  color: #b3261e;
+  background: #fdecea;
+  border-color: #f5c2bd;
+}
+
 .app-main {
   flex: 1;
   width: 100%;
@@ -629,6 +649,26 @@ textarea {
 .auto-grade-intro {
   margin: -0.5rem 0 1rem;
   line-height: 1.5;
+}
+.auto-grade-alert {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 10px 12px;
+  margin-bottom: 0.75rem;
+  border-radius: var(--border-radius-md, 8px);
+  background: #fdecea;
+  border: 1px solid #f5c2bd;
+  color: #8c1d18;
+  font-size: 13px;
+  line-height: 1.45;
+}
+.auto-grade-alert i {
+  font-size: 18px;
+  margin-top: 1px;
+}
+.auto-grade-alert p {
+  margin: 2px 0 0;
 }
 .auto-grade-notes {
   display: flex;

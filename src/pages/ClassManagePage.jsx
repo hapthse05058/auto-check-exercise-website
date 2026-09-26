@@ -3,9 +3,11 @@ import { useNavigate } from "react-router-dom";
 
 import {
   fetchAllClasses,
+  fetchClassLessons,
   fetchClasses,
+  fetchCourseLessons,
+  fetchCourses,
   fetchGradingSchedules,
-  fetchLessons,
   updateClass,
   updateCurrentLessonForClass,
 } from "../api/backend.js";
@@ -41,11 +43,19 @@ export default function ClassManagePage() {
   // Edit modal state.
   const [active, setActive] = useState(null); // the class being edited
   const [editOpen, setEditOpen] = useState(false);
-  const [form, setForm] = useState({ name: "", lessonId: "" });
+  const [form, setForm] = useState({ name: "", lessonId: "", courseId: "" });
   const [lessons, setLessons] = useState([]);
   const [lessonsLoading, setLessonsLoading] = useState(false);
   const [formError, setFormError] = useState("");
   const [saving, setSaving] = useState(false);
+
+  // Every course, hidden ones included: classes on a hidden course still
+  // show its name.
+  const [courses, setCourses] = useState([]);
+  const courseById = useMemo(
+    () => new Map(courses.map((course) => [course.id, course])),
+    [courses],
+  );
 
   // Auto-grading schedules by classId, and the class whose modal is open.
   const [schedules, setSchedules] = useState({});
@@ -99,6 +109,12 @@ export default function ClassManagePage() {
       setClasses(normalized);
       setStatus(t("classManage.countClasses", { n: normalized.length }));
       reloadSchedules();
+      fetchCourses({ includeInactive: true })
+        .then((list) => setCourses(Array.isArray(list) ? list : []))
+        .catch((error) => {
+          if (error.message !== "RE-AUTH_NEEDED")
+            console.error("Courses fetch failed:", error);
+        });
     } catch (error) {
       if (error.message === "RE-AUTH_NEEDED") return;
       console.error("Reload error:", error);
@@ -127,13 +143,17 @@ export default function ClassManagePage() {
 
   const openEdit = async (cls) => {
     setActive(cls);
-    setForm({ name: cls.name || "", lessonId: cls.currentLesson || "" });
+    setForm({
+      name: cls.name || "",
+      lessonId: cls.currentLesson || "",
+      courseId: cls.courseId || "",
+    });
     setFormError("");
     setLessons([]);
     setEditOpen(true);
     setLessonsLoading(true);
     try {
-      const lessonList = await fetchLessons(cls.classType);
+      const lessonList = await fetchClassLessons(cls.id);
       setLessons(lessonList);
     } catch (error) {
       if (error.message !== "RE-AUTH_NEEDED") {
@@ -144,10 +164,38 @@ export default function ClassManagePage() {
     }
   };
 
+  /** Another course: its lessons, keeping the current one when it is there. */
+  const changeCourse = async (courseId) => {
+    setForm((prev) => ({ ...prev, courseId }));
+    setLessons([]);
+    if (!courseId) return;
+    setLessonsLoading(true);
+    try {
+      const lessonList = await fetchCourseLessons(courseId);
+      setLessons(lessonList);
+      setForm((prev) => ({
+        ...prev,
+        lessonId: lessonList.some((l) => l.id === prev.lessonId)
+          ? prev.lessonId
+          : "",
+      }));
+    } catch (error) {
+      if (error.message !== "RE-AUTH_NEEDED")
+        console.error("Error fetching lessons:", error);
+    } finally {
+      setLessonsLoading(false);
+    }
+  };
+
+  // The courses a class may move to: the visible ones, plus its own.
+  const courseOptions = courses.filter(
+    (course) => course.isActive || course.id === active?.courseId,
+  );
+
   const closeEdit = () => {
     setEditOpen(false);
     setActive(null);
-    setForm({ name: "", lessonId: "" });
+    setForm({ name: "", lessonId: "", courseId: "" });
     setLessons([]);
     setFormError("");
   };
@@ -161,22 +209,35 @@ export default function ClassManagePage() {
     setSaving(true);
     try {
       const nameChanged = newName !== (active.name || "");
+      const courseChanged =
+        form.courseId && form.courseId !== (active.courseId || "");
       const lessonChanged =
         form.lessonId && form.lessonId !== (active.currentLesson || "");
+      if (courseChanged && !form.lessonId) {
+        setFormError(t("classManage.lessonRequired"));
+        return;
+      }
 
-      if (nameChanged) {
-        const res = await updateClass(active.id, { name: newName });
+      if (nameChanged || courseChanged) {
+        const res = await updateClass(active.id, {
+          ...(nameChanged ? { name: newName } : {}),
+          // A new course carries its lesson in the same request: the class
+          // is never on a course that lacks its current lesson.
+          ...(courseChanged
+            ? { courseId: form.courseId, currentLesson: form.lessonId }
+            : {}),
+        });
         if (!res.ok) {
           const d = await res.json().catch(() => null);
           setFormError(
             res.status === 409
               ? t("classManage.nameDuplicate")
-              : d?.error || t("classManage.saveFailed"),
+              : courseErrorFor(d?.error),
           );
           return;
         }
       }
-      if (lessonChanged) {
+      if (lessonChanged && !courseChanged) {
         const ok = await updateCurrentLessonForClass(active.id, form.lessonId);
         if (!ok) {
           setFormError(t("classManage.saveFailed"));
@@ -194,6 +255,14 @@ export default function ClassManagePage() {
       setSaving(false);
     }
   };
+
+  const courseErrorFor = (code) => {
+    const key = `courses.error.${code}`;
+    const text = code ? t(key, { classes: "", lessons: "" }) : key;
+    return text === key ? t("classManage.saveFailed") : text;
+  };
+
+  const courseLabel = (cls) => courseById.get(cls.courseId)?.name || "—";
 
   const handleDeactivate = async (cls) => {
     if (!window.confirm(t("classManage.deactivateConfirm"))) return;
@@ -259,6 +328,7 @@ export default function ClassManagePage() {
                 <tr>
                   <th>{t("classManage.colName")}</th>
                   <th>{t("classManage.colCode")}</th>
+                  <th>{t("classManage.colCourse")}</th>
                   {isAdmin && <th>{t("classManage.colTeacher")}</th>}
                   <th>{t("classManage.colCurrentLesson")}</th>
                   <th>{t("autoGrade.colHeader")}</th>
@@ -271,6 +341,7 @@ export default function ClassManagePage() {
                   <tr key={c.id}>
                     <td>{c.name}</td>
                     <td className="cell-date">{c.id}</td>
+                    <td>{courseLabel(c)}</td>
                     {isAdmin && (
                       <td>
                         {Array.isArray(c.teacherNames)
@@ -361,6 +432,24 @@ export default function ClassManagePage() {
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   autoFocus
                 />
+              </div>
+              <div className="field-group">
+                <label>{t("classManage.courseLabel")}</label>
+                <select
+                  value={form.courseId}
+                  onChange={(e) => changeCourse(e.target.value)}
+                  disabled={saving}
+                >
+                  {!active.courseId && (
+                    <option value="">{t("classManage.noCourse")}</option>
+                  )}
+                  {courseOptions.map((course) => (
+                    <option key={course.id} value={course.id}>
+                      {course.name}
+                      {course.isActive ? "" : ` (${t("courses.hidden")})`}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div className="field-group">
                 <label>{t("classManage.currentLessonLabel")}</label>

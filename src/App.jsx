@@ -3,6 +3,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import Layout from "./components/Layout.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import AddStudentsPage from "./pages/AddStudentsPage.jsx";
+import AdminCoursesPage from "./pages/AdminCoursesPage.jsx";
 import AdminTeacherPointsPage from "./pages/AdminTeacherPointsPage.jsx";
 import AdminTeachersPage from "./pages/AdminTeachersPage.jsx";
 import AuditLogPage from "./pages/AuditLogPage.jsx";
@@ -45,6 +46,7 @@ export default function App() {
             element={<AdminTeacherPointsPage />}
           />
           <Route path="/admin/teachers" element={<AdminTeachersPage />} />
+          <Route path="/admin/courses" element={<AdminCoursesPage />} />
           <Route path="/admin/audit-logs" element={<AuditLogPage />} />
           <Route path="/speaking" element={<SpeakingPage />} />
           <Route path="/missing-teacher" element={<MissingTeacherPage />} />

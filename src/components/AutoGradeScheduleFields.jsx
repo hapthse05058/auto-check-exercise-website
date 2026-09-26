@@ -4,6 +4,8 @@ import {
   fetchScheduleEstimate,
   previewGradingSchedule,
 } from "../api/backend.js";
+import { useAuth } from "../auth/AuthContext.jsx";
+import { isAdminEmail } from "../config.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
 import { scheduleErrorText, validateDeadlines } from "../lib/autoGrade.js";
 import {
@@ -29,6 +31,7 @@ export default function AutoGradeScheduleFields({
   disabled = false,
 }) {
   const { t } = useLanguage();
+  const { teacherInfo } = useAuth();
   const [preview, setPreview] = useState(null);
   const [previewError, setPreviewError] = useState("");
   const [estimate, setEstimate] = useState(null);
@@ -71,6 +74,16 @@ export default function AutoGradeScheduleFields({
     };
   }, [classId]);
 
+  // Short: the balance cannot cover every scheduled class at full
+  // attendance — or there is nothing at all, which cancels even the first week.
+  const short =
+    estimate && (estimate.point <= 0 || estimate.point < estimate.needMax);
+  // An admin sets schedules for other teachers: name whose balance it is.
+  const payerName =
+    isAdminEmail(teacherInfo?.gmail) && estimate?.teacherName
+      ? estimate.teacherName
+      : null;
+
   const set = (field) => (event) =>
     onChange({ ...value, [field]: event.target.value });
 
@@ -102,6 +115,29 @@ export default function AutoGradeScheduleFields({
           disabled={disabled}
         />
       </div>
+
+      {short && (
+        <div className="auto-grade-alert" role="alert">
+          <i className="ti ti-alert-triangle" aria-hidden="true" />
+          <div>
+            <strong>{t("autoGrade.pointsShortTitle")}</strong>
+            <p>
+              {t(
+                estimate.needMax > 0
+                  ? "autoGrade.pointsShortBody"
+                  : "autoGrade.pointsEmptyBody",
+                {
+                  need: estimate.needMax,
+                  point: estimate.point,
+                  missing: Math.max(0, estimate.needMax - estimate.point),
+                  classes: estimate.classes?.length ?? 0,
+                  who: payerName || t("autoGrade.pointsYou"),
+                },
+              )}
+            </p>
+          </div>
+        </div>
+      )}
 
       <div className="auto-grade-notes">
         {invalidKey ? (
@@ -137,22 +173,13 @@ export default function AutoGradeScheduleFields({
         {previewError && (
           <p className="field-note error-text">{previewError}</p>
         )}
-        {estimate && (
-          <p
-            className={`field-note ${
-              estimate.point < estimate.needMax ? "error-text" : ""
-            }`}
-          >
-            {t(
-              estimate.point < estimate.needMax
-                ? "autoGrade.estimateShort"
-                : "autoGrade.estimate",
-              {
-                need: estimate.needMax,
-                point: estimate.point,
-                classes: estimate.classes?.length ?? 0,
-              },
-            )}
+        {estimate && !short && (
+          <p className="field-note">
+            {t("autoGrade.estimate", {
+              need: estimate.needMax,
+              point: estimate.point,
+              classes: estimate.classes?.length ?? 0,
+            })}
           </p>
         )}
       </div>

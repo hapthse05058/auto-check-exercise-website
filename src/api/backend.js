@@ -176,27 +176,65 @@ export async function checkClassNameExists(name) {
   return data.exists === true;
 }
 
-export async function fetchClassTypes() {
-  const response = await authFetch("/class-types");
+// ---------------------------------------------------------------------------
+// Courses & lessons (backend lib/courses.js)
+// ---------------------------------------------------------------------------
+
+/** Throws Error(<backend error code>) with `.params` on a failed response. */
+async function courseResult(response, key) {
+  const data = await response.json().catch(() => null);
   if (!response.ok) {
-    throw new Error("Failed to fetch class types");
+    const error = new Error(data?.error || "course_failed");
+    error.params = data || {};
+    throw error;
   }
-  const responseBody = await response.json();
-  const data = Array.isArray(responseBody)
-    ? responseBody
-    : responseBody.classTypes || responseBody.data || responseBody.items || [];
-  if (!Array.isArray(data) || data.length === 0) {
-    throw new Error("Invalid class type payload");
-  }
-  return data;
+  return key ? data?.[key] : data;
 }
 
-export async function fetchLessons(classType) {
-  const response = await authFetch(
-    `/lessons?classType=${encodeURIComponent(classType)}`,
+/** The courses; hidden ones only when asked. */
+export async function fetchCourses({ includeInactive } = {}) {
+  return courseResult(
+    await authFetch(`/courses${includeInactive ? "?includeInactive=1" : ""}`),
+    "courses",
   );
+}
+
+export async function createCourse(body) {
+  return courseResult(
+    await authFetch("/courses", { method: "POST", body }),
+    "course",
+  );
+}
+
+export async function updateCourse(courseId, body) {
+  return courseResult(
+    await authFetch(`/courses/${encodeURIComponent(courseId)}`, {
+      method: "PATCH",
+      body,
+    }),
+    "course",
+  );
+}
+
+async function fetchLessonList(query) {
+  const response = await authFetch(`/lessons${query}`);
   if (!response.ok) throw new Error("Failed to fetch lessons");
   return response.json();
+}
+
+/** The lessons of a class, in course order. */
+export function fetchClassLessons(classId) {
+  return fetchLessonList(`?classId=${encodeURIComponent(classId)}`);
+}
+
+/** The lessons of one course (the new-class form). */
+export function fetchCourseLessons(courseId) {
+  return fetchLessonList(`?courseId=${encodeURIComponent(courseId)}`);
+}
+
+/** Every lesson — the admin's picker when editing a course. */
+export function fetchAllLessons() {
+  return fetchLessonList("");
 }
 
 export async function fetchCurrentLesson(classId) {
@@ -231,12 +269,13 @@ export async function updateCurrentLessonForClass(classId, lessonId) {
 export async function createClass({
   name,
   classType,
+  courseId,
   currentLesson,
   teacherId,
 }) {
   return authFetch("/classes", {
     method: "POST",
-    body: { name, classType, currentLesson, teacherId },
+    body: { name, classType, courseId, currentLesson, teacherId },
   });
 }
 

@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from "react";
-import { Link, Outlet, useNavigate } from "react-router-dom";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 
+import { fetchMyPoint } from "../api/backend.js";
 import { useAuth } from "../auth/AuthContext.jsx";
 import { SUPPORT_EMAIL, isAdminEmail } from "../config.js";
 import NotificationBell from "./NotificationBell.jsx";
 import { usePushNotifications } from "../hooks/usePushNotifications.js";
 import { usePwaInstall } from "../hooks/usePwaInstall.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
+import { POINTS_CHANGED } from "../lib/pointEvents.js";
 import { refreshPushToken, startForegroundPushListener } from "../lib/push.js";
 
 function initials(name) {
@@ -34,6 +36,53 @@ function LanguageSwitcher() {
         {t("lang.en")}
       </button>
     </div>
+  );
+}
+
+const POINT_REFRESH_MS = 60 * 1000;
+
+/**
+ * The signed-in teacher's point balance, always in the header. Re-read on
+ * every page change, when the tab regains focus and once a minute (scheduled
+ * grading spends points in the background); screens that read a fresh
+ * balance themselves announce it (lib/pointEvents.js).
+ */
+function PointBadge() {
+  const { t } = useLanguage();
+  const location = useLocation();
+  const [point, setPoint] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    const load = () =>
+      fetchMyPoint()
+        .then((value) => !cancelled && setPoint(value))
+        .catch(() => {});
+    load();
+    const timer = setInterval(load, POINT_REFRESH_MS);
+    const onFocus = () => load();
+    const onAnnounce = (event) => {
+      if (Number.isFinite(event.detail?.point)) setPoint(event.detail.point);
+    };
+    window.addEventListener("focus", onFocus);
+    window.addEventListener(POINTS_CHANGED, onAnnounce);
+    return () => {
+      cancelled = true;
+      clearInterval(timer);
+      window.removeEventListener("focus", onFocus);
+      window.removeEventListener(POINTS_CHANGED, onAnnounce);
+    };
+  }, [location.pathname]);
+
+  if (point === null) return null;
+  return (
+    <span
+      className={`point-badge ${point <= 0 ? "empty" : ""}`}
+      title={t("nav.pointsTitle")}
+    >
+      <i className="ti ti-coins" aria-hidden="true" />
+      {t("nav.points", { n: point.toLocaleString("vi-VN") })}
+    </span>
   );
 }
 
@@ -113,6 +162,14 @@ function NavMenu() {
               onClick={() => go("/admin/teachers")}
             >
               {t("nav.manageTeachers")}
+            </button>
+          )}
+          {isAdmin && (
+            <button
+              className="menu-option"
+              onClick={() => go("/admin/courses")}
+            >
+              {t("nav.manageCourses")}
             </button>
           )}
           {isAdmin && (
@@ -290,6 +347,7 @@ export default function Layout() {
         </Link>
         <div className="header-right">
           <LanguageSwitcher />
+          {isAuthenticated && teacherInfo && <PointBadge />}
           {isAuthenticated && <NavMenu />}
           {isAuthenticated && <NotificationBell />}
           {isAuthenticated && <ProfileMenu teacherInfo={teacherInfo} />}

@@ -3,12 +3,12 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 
 import {
   fetchAllClasses,
+  fetchClassLessons,
   fetchClasses,
   fetchCurrentLesson,
   fetchGradingJob,
   fetchGradingSchedule,
   fetchLatestGradingJob,
-  fetchLessons,
   fetchMyPoint,
   fetchPayerPoint,
   recordFeedbackClearSummary,
@@ -24,6 +24,7 @@ import {
   planFeedbackClear,
 } from "../lib/feedbackClear.js";
 import { describeJob, isJobFinished, startGradingJob } from "../lib/grading.js";
+import { announcePoints } from "../lib/pointEvents.js";
 import { formatVn } from "../lib/scheduleTime.js";
 import { playSuccessSound } from "../lib/sound.js";
 
@@ -64,7 +65,6 @@ export default function GradePage() {
   const [clearing, setClearing] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const [saveCache, setSaveCache] = useState(true);
-  const [point, setPoint] = useState(null);
   // Who actually pays for the selected class. An admin grading someone else's
   // class spends THAT teacher's points, so the badge must show their balance.
   const [payer, setPayer] = useState(null);
@@ -72,7 +72,8 @@ export default function GradePage() {
 
   const refreshPoint = async () => {
     try {
-      setPoint(await fetchMyPoint());
+      // The header badge shows it (lib/pointEvents.js).
+      announcePoints(await fetchMyPoint());
     } catch (error) {
       if (error.message !== "RE-AUTH_NEEDED")
         console.error("Point fetch failed:", error);
@@ -161,10 +162,9 @@ export default function GradePage() {
     refreshSchedule(classId);
     if (!classId) return;
 
-    const cls = classes.find((c) => c.id === classId);
     setLessonsLoading(true);
     try {
-      const lessonList = await fetchLessons(cls?.classType);
+      const lessonList = await fetchClassLessons(classId);
       setLessons(lessonList);
 
       const currentLesson = await fetchCurrentLesson(classId);
@@ -420,25 +420,20 @@ export default function GradePage() {
     <div className="page-wide">
       <h2 className="page-title">
         {t("grade.title")}{" "}
-        {/* Once a class is picked, show the balance of whoever pays for it —
-            for an admin that is the class's teacher, not the admin. */}
-        {payer ? (
-          <span className="count-badge">
-            {t("grade.payerPoint", {
-              teacher: payer.teacherName,
-              point: payer.point,
-            })}
-          </span>
-        ) : (
-          point !== null &&
-          (isAdmin ? (
-            <span className="count-badge">{t("grade.adminUnlimited")}</span>
-          ) : (
+        {/* A teacher's own balance is in the header. An admin grades on
+            behalf of the class's teacher, whose balance the header does not
+            show — so that one stays here. */}
+        {isAdmin &&
+          (payer ? (
             <span className="count-badge">
-              {t("grade.pointLeft", { point })}
+              {t("grade.payerPoint", {
+                teacher: payer.teacherName,
+                point: payer.point,
+              })}
             </span>
-          ))
-        )}
+          ) : (
+            <span className="count-badge">{t("grade.adminUnlimited")}</span>
+          ))}
       </h2>
       <SearchableSelect
         className="mb-1"
