@@ -7,7 +7,14 @@ import {
 import { useAuth } from "../auth/AuthContext.jsx";
 import { isAdminEmail } from "../config.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
-import { scheduleErrorText, validateDeadlines } from "../lib/autoGrade.js";
+import {
+  MAX_SLOTS,
+  nextSlotAfter,
+  scheduleErrorText,
+  slotsToBody,
+  validateDeadlines,
+  validateSlots,
+} from "../lib/autoGrade.js";
 import {
   formatVn,
   fromVnInput,
@@ -18,11 +25,13 @@ import {
 const PREVIEW_DEBOUNCE_MS = 400;
 
 /**
- * The two deadline pickers of a weekly grading schedule, with what they mean:
- * the weekly repeat, when the first grading would run (asked from the backend
- * when the class already exists) and whether the points look sufficient.
+ * The weekly slots of a grading schedule — one per lesson the class has in a
+ * week, each with the students' deadline and the grading deadline — with
+ * what they mean: each slot's weekly repeat, when the first grading would run
+ * (asked from the backend when the class already exists) and whether the
+ * points look sufficient.
  *
- * `value` is {student, grader} as datetime-local strings in Vietnam time.
+ * `value` is [{student, grader}] as datetime-local strings in Vietnam time.
  */
 export default function AutoGradeScheduleFields({
   classId = null,
@@ -36,21 +45,22 @@ export default function AutoGradeScheduleFields({
   const [previewError, setPreviewError] = useState("");
   const [estimate, setEstimate] = useState(null);
 
-  const invalidKey = validateDeadlines(value);
-  const s = fromVnInput(value.student);
-  const g = fromVnInput(value.grader);
+  const invalid = validateSlots(value);
+  // Stable dependency for the preview: the slots as epoch ms.
+  const slotsKey = invalid
+    ? ""
+    : value
+        .map((s) => `${fromVnInput(s.student)}-${fromVnInput(s.grader)}`)
+        .join(",");
 
-  // Ask the backend what these deadlines would schedule (side-effect free).
+  // Ask the backend what these slots would schedule (side-effect free).
   useEffect(() => {
     setPreview(null);
     setPreviewError("");
-    if (!classId || invalidKey) return undefined;
+    if (!classId || !slotsKey) return undefined;
     let cancelled = false;
     const timer = setTimeout(() => {
-      previewGradingSchedule(classId, {
-        studentDeadlineAt: s,
-        graderDeadlineAt: g,
-      })
+      previewGradingSchedule(classId, slotsToBody(value))
         .then((result) => !cancelled && setPreview(result))
         .catch((error) => {
           if (cancelled || error.message === "RE-AUTH_NEEDED") return;
@@ -61,8 +71,8 @@ export default function AutoGradeScheduleFields({
       cancelled = true;
       clearTimeout(timer);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- `t` only renders the error text
-  }, [classId, s, g, invalidKey]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `slotsKey` stands for `value`; `t` only renders the error text
+  }, [classId, slotsKey]);
 
   useEffect(() => {
     let cancelled = false;
@@ -75,7 +85,7 @@ export default function AutoGradeScheduleFields({
   }, [classId]);
 
   // Short: the balance cannot cover every scheduled class at full
-  // attendance — or there is nothing at all, which cancels even the first week.
+  // attendance — or there is nothing at all, which cancels even the first run.
   const short =
     estimate && (estimate.point <= 0 || estimate.point < estimate.needMax);
   // An admin sets schedules for other teachers: name whose balance it is.
@@ -84,38 +94,21 @@ export default function AutoGradeScheduleFields({
       ? estimate.teacherName
       : null;
 
-  const set = (field) => (event) =>
-    onChange({ ...value, [field]: event.target.value });
+  const setField = (index, field) => (event) =>
+    onChange(
+      value.map((slot, i) =>
+        i === index ? { ...slot, [field]: event.target.value } : slot,
+      ),
+    );
+  const addSlot = () => onChange([...value, nextSlotAfter(value.at(-1))]);
+  const removeSlot = (index) => onChange(value.filter((_, i) => i !== index));
+
+  // Only show "fill in both" once the teacher has started typing.
+  const touched = value.some((slot) => slot.student || slot.grader);
+  const overlap = invalid?.key === "autoGrade.error.slots_overlap";
 
   return (
     <>
-      <div className="field-group">
-        <label htmlFor="autoGradeStudent">
-          {t("autoGrade.studentDeadline")}
-          <span className="required-mark">*</span>
-        </label>
-        <input
-          id="autoGradeStudent"
-          type="datetime-local"
-          value={value.student}
-          onChange={set("student")}
-          disabled={disabled}
-        />
-      </div>
-      <div className="field-group">
-        <label htmlFor="autoGradeGrader">
-          {t("autoGrade.graderDeadline")}
-          <span className="required-mark">*</span>
-        </label>
-        <input
-          id="autoGradeGrader"
-          type="datetime-local"
-          value={value.grader}
-          onChange={set("grader")}
-          disabled={disabled}
-        />
-      </div>
-
       {short && (
         <div className="auto-grade-alert" role="alert">
           <i className="ti ti-alert-triangle" aria-hidden="true" />
@@ -139,36 +132,102 @@ export default function AutoGradeScheduleFields({
         </div>
       )}
 
+      {value.map((slot, index) => {
+        const slotError = validateDeadlines(slot);
+        const s = fromVnInput(slot.student);
+        const g = fromVnInput(slot.grader);
+        return (
+          <fieldset className="auto-grade-slot" key={slot.id}>
+            <legend className="auto-grade-slot-head">
+              <span>
+                {value.length > 1
+                  ? t("autoGrade.slotTitle", { n: index + 1 })
+                  : t("autoGrade.slotSingle")}
+              </span>
+              {value.length > 1 && (
+                <button
+                  type="button"
+                  className="btn-icon"
+                  title={t("autoGrade.removeSlot")}
+                  aria-label={t("autoGrade.removeSlot")}
+                  onClick={() => removeSlot(index)}
+                  disabled={disabled}
+                >
+                  <i className="ti ti-trash" aria-hidden="true" />
+                </button>
+              )}
+            </legend>
+            <div className="auto-grade-slot-fields">
+              <div className="field-group">
+                <label htmlFor={`autoGradeStudent-${index}`}>
+                  {t("autoGrade.studentDeadline")}
+                  <span className="required-mark">*</span>
+                </label>
+                <input
+                  id={`autoGradeStudent-${index}`}
+                  type="datetime-local"
+                  value={slot.student}
+                  onChange={setField(index, "student")}
+                  disabled={disabled}
+                />
+              </div>
+              <div className="field-group">
+                <label htmlFor={`autoGradeGrader-${index}`}>
+                  {t("autoGrade.graderDeadline")}
+                  <span className="required-mark">*</span>
+                </label>
+                <input
+                  id={`autoGradeGrader-${index}`}
+                  type="datetime-local"
+                  value={slot.grader}
+                  onChange={setField(index, "grader")}
+                  disabled={disabled}
+                />
+              </div>
+            </div>
+            {slotError ? (
+              (slot.student || slot.grader) && (
+                <p className="field-note error-text">
+                  {t(slotError, { minHours: 2 })}
+                </p>
+              )
+            ) : (
+              <p className="field-note">
+                {t("autoGrade.repeats", {
+                  student: weekdayTime(vnWeekTime(s), t),
+                  grader: weekdayTime(vnWeekTime(g), t),
+                })}
+              </p>
+            )}
+          </fieldset>
+        );
+      })}
+
+      <button
+        type="button"
+        className="secondary-btn auto-grade-add"
+        onClick={addSlot}
+        disabled={disabled || value.length >= MAX_SLOTS}
+      >
+        <i className="ti ti-plus" aria-hidden="true" /> {t("autoGrade.addSlot")}
+      </button>
+
       <div className="auto-grade-notes">
-        {invalidKey ? (
-          (value.student || value.grader) && (
-            <p className="field-note error-text">
-              {t(invalidKey, { minHours: 2 })}
-            </p>
-          )
-        ) : (
+        {overlap && touched && (
+          <p className="field-note error-text">
+            {t(invalid.key, invalid.params)}
+          </p>
+        )}
+        {!invalid && preview?.next && (
           <p className="field-note">
-            {t("autoGrade.repeats", {
-              student: weekdayTime(vnWeekTime(s), t),
-              grader: weekdayTime(vnWeekTime(g), t),
+            {t("autoGrade.firstRun", {
+              runAt: formatVn(preview.next.runAt),
+              remindAt: formatVn(preview.next.remindAt),
             })}
           </p>
         )}
-        {preview?.next && (
-          <p className="field-note">
-            {t(
-              preview.next.offPeak
-                ? "autoGrade.firstRunOffPeak"
-                : "autoGrade.firstRunPeak",
-              {
-                runAt: formatVn(preview.next.runAt),
-                remindAt: formatVn(preview.next.remindAt),
-              },
-            )}
-          </p>
-        )}
-        {!invalidKey && !classId && (
-          <p className="field-note">{t("autoGrade.offPeakNote")}</p>
+        {!invalid && !classId && (
+          <p className="field-note">{t("autoGrade.afterDeadlineNote")}</p>
         )}
         {previewError && (
           <p className="field-note error-text">{previewError}</p>

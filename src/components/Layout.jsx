@@ -347,13 +347,23 @@ export default function Layout() {
         </Link>
         <div className="header-right">
           <LanguageSwitcher />
-          {isAuthenticated && teacherInfo && <PointBadge />}
+          {/* Admins grade on the class teacher's points (the grading screen
+              shows that balance), so their own would only mislead. */}
+          {isAuthenticated &&
+            teacherInfo &&
+            !isAdminEmail(teacherInfo.gmail) && <PointBadge />}
           {isAuthenticated && <NavMenu />}
           {isAuthenticated && <NotificationBell />}
           {isAuthenticated && <ProfileMenu teacherInfo={teacherInfo} />}
           {isAuthenticated && (
-            <button className="logout-btn" onClick={handleLogout}>
-              {t("nav.logout")}
+            <button
+              className="logout-btn header-logout"
+              onClick={handleLogout}
+              title={t("nav.logout")}
+              aria-label={t("nav.logout")}
+            >
+              <i className="ti ti-logout" aria-hidden="true" />
+              <span className="header-logout-label">{t("nav.logout")}</span>
             </button>
           )}
         </div>

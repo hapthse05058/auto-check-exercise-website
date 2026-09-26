@@ -443,6 +443,14 @@
 .cache-search input {
   flex: 1 1 220px;
 }
+/* A checkbox toggle in the search row keeps its own size. */
+.cache-search .cache-toggle {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+.cache-search .cache-toggle input {
+  flex: none;
+}
 .cache-table-wrap {
   overflow-x: auto;
   border: 1px solid var(--color-border-tertiary, #dfe7e4);

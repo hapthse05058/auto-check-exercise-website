@@ -43,6 +43,8 @@ export const translations = {
       empty: "No notifications",
       loadFailed: "Could not load notifications",
       unread: "{n} unread",
+      soundOn: "Turn on the notification sound",
+      soundOff: "Turn off the notification sound",
       enablePush: "Enable push notifications",
       disablePush: "Turn off push notifications",
       pushEnabled: "Push notifications enabled",
@@ -153,18 +155,19 @@ export const translations = {
       button: "Auto-grade",
       modalTitle: "Auto-grading · {class}",
       intro:
-        "Every week the system grades the class's current lesson between the two deadlines, preferably at DeepSeek's off-peak hours (23:30–07:30). You are notified 30 minutes before and again when it is done. Make-up lessons: grade them by hand.",
+        "For each lesson of the week, the system grades the class's current lesson between that lesson's two deadlines, then moves the class on to the next lesson. You are notified 30 minutes before and again when it is done. If no student has done the homework yet, nothing is graded and no points are spent — no need to worry. Make-up lessons: grade them by hand.",
       loading: "Loading schedule…",
-      studentDeadline: "Students' deadline (repeats weekly)",
-      graderDeadline: "Grading deadline (repeats weekly)",
+      studentDeadline: "Students' deadline",
+      graderDeadline: "Grading deadline",
+      slotTitle: "Lesson {n} of the week",
+      slotSingle: "Repeats every week",
+      addSlot: "Add a lesson in the week",
+      removeSlot: "Remove this lesson",
       repeats:
         "Every week: students hand in by {student}, results ready by {grader}.",
-      firstRunOffPeak:
-        "First run: {runAt} (DeepSeek off-peak). Notification at {remindAt}.",
-      firstRunPeak:
-        "First run: {runAt} — this window has no off-peak hours. Notification at {remindAt}.",
-      offPeakNote:
-        "Grading runs 40+ minutes after the students' deadline, preferably between 23:30 and 07:30.",
+      firstRun: "First run: {runAt}. Notification at {remindAt}.",
+      afterDeadlineNote:
+        "Grading runs at least 40 minutes after the students' deadline.",
       estimate:
         "Next time, {classes} scheduled class(es) can cost up to {need} points; {point} left.",
       estimateShort:
@@ -177,7 +180,7 @@ export const translations = {
         "{who} have 0 points, so every scheduled week will be cancelled. Top up before the first grading.",
       pointsYou: "you",
       nextRun: "Next run: {runAt} (notification at {remindAt}).",
-      lastRun: "Last week:",
+      lastRun: "Last run:",
       enable: "Turn on",
       update: "Save schedule",
       disable: "Turn off",
@@ -201,6 +204,10 @@ export const translations = {
         deadline_gap_too_long:
           "The grading deadline must be within 7 days of the students' deadline.",
         invalid_deadlines: "Invalid dates.",
+        slots_overlap:
+          "Lessons {slot} and {other} overlap: a lesson's grading deadline must come before the next lesson's students' deadline.",
+        too_many_slots: "At most {max} lessons a week.",
+        slots_required: "Add at least one lesson.",
         google_reauth_required:
           "Sign in with Google again so the system can grade on your behalf.",
         no_current_lesson:
@@ -604,7 +611,8 @@ export const translations = {
     },
     classManage: {
       title: "Manage classes",
-      subtitle: "Search, rename, change current lesson, or deactivate classes.",
+      subtitle:
+        "Search, rename, change the course or current lesson, or close classes.",
       searchPlaceholder: "Search by class name or class code…",
       statusActive: "Active",
       statusInactive: "Closed",
@@ -837,6 +845,8 @@ export const translations = {
       empty: "Chưa có thông báo nào",
       loadFailed: "Không tải được thông báo",
       unread: "{n} chưa đọc",
+      soundOn: "Bật tiếng thông báo",
+      soundOff: "Tắt tiếng thông báo",
       enablePush: "Bật thông báo đẩy",
       disablePush: "Tắt thông báo đẩy",
       pushEnabled: "Đã bật thông báo đẩy",
@@ -946,18 +956,19 @@ export const translations = {
       button: "Chấm bài tự động",
       modalTitle: "Chấm bài tự động · {class}",
       intro:
-        "Mỗi tuần hệ thống sẽ chấm buổi hiện tại của lớp trong khoảng giữa hai hạn, ưu tiên giờ thấp điểm của DeepSeek (23:30–07:30). Bạn được báo trước 30 phút và báo lại khi chấm xong. Buổi học bù thì hãy chấm tay.",
+        "Với mỗi buổi học trong tuần, hệ thống chấm buổi hiện tại của lớp trong khoảng giữa hai hạn của buổi đó, rồi tự chuyển lớp sang buổi kế tiếp. Bạn được báo trước 30 phút và báo lại khi chấm xong. Nếu chưa có học sinh nào làm bài thì hệ thống sẽ không chấm và không trừ point, bạn không cần lo. Buổi học bù thì hãy chấm tay.",
       loading: "Đang tải lịch…",
-      studentDeadline: "Hạn nộp của học sinh (lặp lại hằng tuần)",
-      graderDeadline: "Hạn chấm của giáo viên (lặp lại hằng tuần)",
+      studentDeadline: "Hạn nộp của học sinh",
+      graderDeadline: "Hạn chấm của giáo viên",
+      slotTitle: "Buổi {n} trong tuần",
+      slotSingle: "Lặp lại hằng tuần",
+      addSlot: "Thêm buổi học trong tuần",
+      removeSlot: "Bỏ buổi này",
       repeats:
         "Hằng tuần: học sinh nộp trước {student}, có kết quả trước {grader}.",
-      firstRunOffPeak:
-        "Lần chấm đầu: {runAt} (giờ thấp điểm DeepSeek). Báo trước lúc {remindAt}.",
-      firstRunPeak:
-        "Lần chấm đầu: {runAt} — khoảng này không có giờ thấp điểm. Báo trước lúc {remindAt}.",
-      offPeakNote:
-        "Hệ thống chấm sau hạn nộp ít nhất 40 phút, ưu tiên khoảng 23:30–07:30.",
+      firstRun: "Lần chấm đầu: {runAt}. Báo trước lúc {remindAt}.",
+      afterDeadlineNote:
+        "Hệ thống chấm sau hạn nộp của học sinh ít nhất 40 phút.",
       estimate:
         "Lần chấm tới, {classes} lớp đã hẹn giờ cần tối đa {need} point; còn {point} point.",
       estimateShort:
@@ -970,7 +981,7 @@ export const translations = {
         "{who} đang có 0 point nên mọi lượt chấm tự động sẽ bị huỷ. Hãy nạp point trước lần chấm đầu tiên.",
       pointsYou: "bạn",
       nextRun: "Lần chấm tới: {runAt} (báo trước lúc {remindAt}).",
-      lastRun: "Tuần gần nhất:",
+      lastRun: "Lần chấm gần nhất:",
       enable: "Bật chấm tự động",
       update: "Lưu lịch",
       disable: "Tắt chấm tự động",
@@ -993,6 +1004,10 @@ export const translations = {
           "Hạn chấm phải sau hạn nộp ít nhất {minHours} giờ.",
         deadline_gap_too_long: "Hạn chấm phải trong vòng 7 ngày sau hạn nộp.",
         invalid_deadlines: "Ngày giờ không hợp lệ.",
+        slots_overlap:
+          "Buổi {slot} và buổi {other} bị chồng nhau: hạn chấm của một buổi phải trước hạn nộp của buổi kế tiếp.",
+        too_many_slots: "Tối đa {max} buổi mỗi tuần.",
+        slots_required: "Hãy thêm ít nhất một buổi.",
         google_reauth_required:
           "Cần đăng nhập lại bằng Google để hệ thống chấm thay bạn.",
         no_current_lesson:
@@ -1394,7 +1409,7 @@ export const translations = {
     classManage: {
       title: "Quản lý lớp học",
       subtitle:
-        "Tìm kiếm, đổi tên, đổi current lesson, hoặc deactivate lớp học.",
+        "Tìm kiếm, đổi tên, đổi khóa hoặc buổi hiện tại, hoặc đóng lớp học.",
       searchPlaceholder: "Tìm theo tên lớp hoặc mã lớp…",
       statusActive: "Đang active",
       statusInactive: "Đã đóng",
@@ -1403,7 +1418,7 @@ export const translations = {
       colCode: "Mã lớp",
       colCourse: "Khóa",
       colTeacher: "Giáo viên",
-      colCurrentLesson: "Current lesson",
+      colCurrentLesson: "Buổi hiện tại",
       colStatus: "Trạng thái",
       colAction: "Hành động",
       deactivate: "Đóng lớp",
@@ -1415,7 +1430,7 @@ export const translations = {
       courseLabel: "Khóa",
       noCourse: "— chưa có khóa (mẫu cũ) —",
       lessonRequired: "Hãy chọn buổi hiện tại trong khóa mới.",
-      currentLessonLabel: "Current lesson",
+      currentLessonLabel: "Buổi hiện tại",
       selectLesson: "Chọn buổi học",
       noLesson: "— chưa có —",
       nameRequired: "Tên lớp không được để trống.",

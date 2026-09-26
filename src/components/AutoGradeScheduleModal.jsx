@@ -8,12 +8,15 @@ import {
 } from "../api/backend.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
 import {
+  emptySlot,
   lastRunText,
   scheduleErrorText,
   scheduleToValue,
-  validateDeadlines,
+  slotErrorText,
+  slotsToBody,
+  validateSlots,
 } from "../lib/autoGrade.js";
-import { formatVn, fromVnInput } from "../lib/scheduleTime.js";
+import { formatVn } from "../lib/scheduleTime.js";
 
 /**
  * Set up, change or switch off a class's weekly auto-grading.
@@ -22,7 +25,7 @@ import { formatVn, fromVnInput } from "../lib/scheduleTime.js";
 export default function AutoGradeScheduleModal({ cls, onClose, onSaved }) {
   const { t } = useLanguage();
   const [schedule, setSchedule] = useState(null);
-  const [value, setValue] = useState({ student: "", grader: "" });
+  const [value, setValue] = useState(() => [emptySlot()]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -49,18 +52,15 @@ export default function AutoGradeScheduleModal({ cls, onClose, onSaved }) {
   }, [cls.id]);
 
   const handleSave = async () => {
-    const invalid = validateDeadlines(value);
+    const invalid = validateSlots(value);
     if (invalid) {
-      setError(t(invalid, { minHours: 2 }));
+      setError(slotErrorText(invalid, t));
       return;
     }
     setBusy(true);
     setError("");
     try {
-      const saved = await saveGradingSchedule(cls.id, {
-        studentDeadlineAt: fromVnInput(value.student),
-        graderDeadlineAt: fromVnInput(value.grader),
-      });
+      const saved = await saveGradingSchedule(cls.id, slotsToBody(value));
       onSaved?.(saved);
       onClose();
     } catch (err) {

@@ -14,8 +14,13 @@ import { useAuth } from "../auth/AuthContext.jsx";
 import AutoGradeScheduleFields from "../components/AutoGradeScheduleFields.jsx";
 import { isAdminEmail } from "../config.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
-import { scheduleErrorText, validateDeadlines } from "../lib/autoGrade.js";
-import { fromVnInput } from "../lib/scheduleTime.js";
+import {
+  emptySlot,
+  scheduleErrorText,
+  slotErrorText,
+  slotsToBody,
+  validateSlots,
+} from "../lib/autoGrade.js";
 
 export default function NewClassPage() {
   const { loadTeacherInfo } = useAuth();
@@ -35,7 +40,7 @@ export default function NewClassPage() {
   const [saving, setSaving] = useState(false);
   // Optional weekly auto-grading, saved right after the class is created.
   const [autoGrade, setAutoGrade] = useState(false);
-  const [deadlines, setDeadlines] = useState({ student: "", grader: "" });
+  const [slots, setSlots] = useState(() => [emptySlot()]);
 
   useEffect(() => {
     let cancelled = false;
@@ -137,9 +142,9 @@ export default function NewClassPage() {
       setStatus(t("newClass.fixName"));
       return;
     }
-    const deadlineError = autoGrade ? validateDeadlines(deadlines) : null;
-    if (deadlineError) {
-      setStatus(t(deadlineError, { minHours: 2 }));
+    const slotError = autoGrade ? validateSlots(slots) : null;
+    if (slotError) {
+      setStatus(slotErrorText(slotError, t));
       return;
     }
 
@@ -163,10 +168,7 @@ export default function NewClassPage() {
       const created = await response.json().catch(() => null);
       if (autoGrade && created?.id) {
         try {
-          await saveGradingSchedule(created.id, {
-            studentDeadlineAt: fromVnInput(deadlines.student),
-            graderDeadlineAt: fromVnInput(deadlines.grader),
-          });
+          await saveGradingSchedule(created.id, slotsToBody(slots));
         } catch (error) {
           // The class exists; say what is missing and stay, so the teacher
           // can set the schedule later from the grading screen.
@@ -278,8 +280,8 @@ export default function NewClassPage() {
               {t("autoGrade.intro")}
             </p>
             <AutoGradeScheduleFields
-              value={deadlines}
-              onChange={setDeadlines}
+              value={slots}
+              onChange={setSlots}
               disabled={saving}
             />
           </div>

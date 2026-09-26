@@ -15,7 +15,8 @@ import { useAuth } from "../auth/AuthContext.jsx";
 import AutoGradeScheduleModal from "../components/AutoGradeScheduleModal.jsx";
 import { isAdminEmail } from "../config.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
-import { formatVn, weekdayTime } from "../lib/scheduleTime.js";
+import { scheduleSummary } from "../lib/autoGrade.js";
+import { formatVn } from "../lib/scheduleTime.js";
 import { LESSON_OPTIONS } from "../shared/constant.js";
 
 /** "lesson05" -> "BUỔI 05" (falls back to the raw value / a dash). */
@@ -353,7 +354,7 @@ export default function ClassManagePage() {
                     <td className="auto-grade-cell">
                       {schedules[c.id]?.enabled && schedules[c.id].next ? (
                         <>
-                          {weekdayTime(schedules[c.id].studentDeadline, t)}
+                          {scheduleSummary(schedules[c.id], t)}
                           <br />
                           {t("autoGrade.summaryOn", {
                             runAt: formatVn(schedules[c.id].next.runAt),

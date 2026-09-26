@@ -428,29 +428,25 @@ export async function fetchGradingSchedules() {
 }
 
 /**
- * What saving these first-week deadlines (epoch ms) would schedule. Free of
+ * What saving these weekly slots ({slots: [{studentDeadlineAt,
+ * graderDeadlineAt}]}, first occurrences in epoch ms) would schedule. Free of
  * side effects on the backend, so it can be called on every edit.
  */
-export async function previewGradingSchedule(
-  classId,
-  { studentDeadlineAt, graderDeadlineAt },
-) {
+export async function previewGradingSchedule(classId, { slots }) {
   const query = new URLSearchParams({
     classId,
-    studentDeadlineAt: String(studentDeadlineAt),
-    graderDeadlineAt: String(graderDeadlineAt),
+    slots: slots
+      .map((slot) => `${slot.studentDeadlineAt}-${slot.graderDeadlineAt}`)
+      .join(","),
   });
   const response = await authFetch(`/grading-schedules/preview?${query}`);
   return scheduleResult(response, "preview");
 }
 
-export async function saveGradingSchedule(
-  classId,
-  { studentDeadlineAt, graderDeadlineAt },
-) {
+export async function saveGradingSchedule(classId, { slots }) {
   const response = await authFetch(
     `/grading-schedules/${encodeURIComponent(classId)}`,
-    { method: "PUT", body: { studentDeadlineAt, graderDeadlineAt } },
+    { method: "PUT", body: { slots } },
   );
   return scheduleResult(response, "schedule");
 }

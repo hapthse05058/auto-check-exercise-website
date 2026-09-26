@@ -88,6 +88,31 @@ body {
   gap: 1rem;
 }
 
+/* Phones: the title gives way so the controls fit without side-scrolling. */
+@media (max-width: 640px) {
+  .app-header {
+    padding: 0.6rem 0.75rem;
+    gap: 0.5rem;
+  }
+  .brand h3 {
+    display: none;
+  }
+  .header-right {
+    gap: 0.4rem;
+  }
+  /* Log out becomes an icon: the one control whose label can go. */
+  .header-right .header-logout {
+    padding: 6px 9px;
+  }
+  .header-logout-label {
+    display: none;
+  }
+  .point-badge {
+    padding: 3px 8px;
+    font-size: 12px;
+  }
+}
+
 /* The teacher's point balance, always visible in the header. */
 .point-badge {
   display: inline-flex;
@@ -181,6 +206,12 @@ button {
   cursor: pointer;
   border-radius: var(--border-radius-md);
   font-weight: 500;
+}
+.header-logout {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
 }
 .logout-btn:hover {
   background-color: #c93a2f;
@@ -282,6 +313,19 @@ a.login-link {
 }
 .notif-count {
   font-size: 12px;
+  color: var(--color-primary);
+}
+.notif-sound-toggle {
+  margin-left: auto;
+  background: none;
+  border: none;
+  padding: 2px 4px;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+}
+.notif-sound-toggle:hover {
   color: var(--color-primary);
 }
 .notif-empty {
@@ -669,6 +713,39 @@ textarea {
 }
 .auto-grade-alert p {
   margin: 2px 0 0;
+}
+.auto-grade-slot {
+  border: 1px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-md, 8px);
+  padding: 0.5rem 0.75rem 0.6rem;
+  margin: 0 0 0.75rem;
+  min-width: 0;
+}
+.auto-grade-slot-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+.auto-grade-slot-head .btn-icon {
+  padding: 2px 4px;
+}
+.auto-grade-slot-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0 0.75rem;
+}
+.auto-grade-slot-fields .field-group {
+  margin-bottom: 0.4rem;
+}
+.auto-grade-slot .field-note {
+  margin: 0;
+}
+.auto-grade-add {
+  margin: 0 0 0.75rem;
 }
 .auto-grade-notes {
   display: flex;
