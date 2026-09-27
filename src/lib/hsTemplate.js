@@ -75,18 +75,8 @@ export const HS_LESSONS = [
             n: 1,
             prompt: "Tôi là học sinh.",
             hint: "student /ˈstjuːdənt/: học sinh.",
-            parts: [
-              {
-                t: 0,
-                r: 1,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 1,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 1, c: 2 }],
+            fb: { t: 0, r: 1, c: 4 },
             kind: "vi_en",
           },
           {
@@ -94,18 +84,8 @@ export const HS_LESSONS = [
             n: 2,
             prompt: "Chúng tôi học tiếng Anh.",
             hint: "English /ˈɪŋɡlɪʃ/: tiếng Anh.",
-            parts: [
-              {
-                t: 0,
-                r: 2,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 2,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 2, c: 2 }],
+            fb: { t: 0, r: 2, c: 4 },
             kind: "vi_en",
           },
           {
@@ -113,18 +93,8 @@ export const HS_LESSONS = [
             n: 3,
             prompt: "Cô ấy thích môn lịch sử.",
             hint: "history /ˈhɪstri/: môn lịch sử .",
-            parts: [
-              {
-                t: 0,
-                r: 3,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 3,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 3, c: 2 }],
+            fb: { t: 0, r: 3, c: 4 },
             kind: "vi_en",
           },
           {
@@ -132,18 +102,8 @@ export const HS_LESSONS = [
             n: 4,
             prompt: "Họ đến trường mỗi ngày.",
             hint: "school /skuːl/: trường học.",
-            parts: [
-              {
-                t: 0,
-                r: 4,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 4,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 4, c: 2 }],
+            fb: { t: 0, r: 4, c: 4 },
             kind: "vi_en",
           },
           {
@@ -151,18 +111,8 @@ export const HS_LESSONS = [
             n: 5,
             prompt: "Tôi cần 1 chiếc máy tính cầm tay",
             hint: "calculator /ˈkælkjuleɪtər/: máy tính cầm tay.",
-            parts: [
-              {
-                t: 0,
-                r: 5,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 5,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 5, c: 2 }],
+            fb: { t: 0, r: 5, c: 4 },
             kind: "vi_en",
           },
         ],
@@ -336,28 +286,12 @@ export const HS_LESSONS = [
             prompt: "Tom plays football.",
             hint: "Tom chơi bóng đá.",
             parts: [
-              {
-                t: 0,
-                r: 1,
-                c: 3,
-              },
-              {
-                t: 0,
-                r: 1,
-                c: 4,
-              },
-              {
-                t: 0,
-                r: 1,
-                c: 5,
-              },
+              { t: 0, r: 1, c: 3 },
+              { t: 0, r: 1, c: 4 },
+              { t: 0, r: 1, c: 5 },
             ],
             labels: ["S", "V", "O"],
-            fb: {
-              t: 0,
-              r: 1,
-              c: 6,
-            },
+            fb: { t: 0, r: 1, c: 6 },
             kind: "svo",
           },
           {
@@ -366,28 +300,12 @@ export const HS_LESSONS = [
             prompt: "She reads books.",
             hint: "Cô ấy đọc sách.",
             parts: [
-              {
-                t: 0,
-                r: 2,
-                c: 3,
-              },
-              {
-                t: 0,
-                r: 2,
-                c: 4,
-              },
-              {
-                t: 0,
-                r: 2,
-                c: 5,
-              },
+              { t: 0, r: 2, c: 3 },
+              { t: 0, r: 2, c: 4 },
+              { t: 0, r: 2, c: 5 },
             ],
             labels: ["S", "V", "O"],
-            fb: {
-              t: 0,
-              r: 2,
-              c: 6,
-            },
+            fb: { t: 0, r: 2, c: 6 },
             kind: "svo",
           },
           {
@@ -396,28 +314,12 @@ export const HS_LESSONS = [
             prompt: "We eat rice.",
             hint: "Chúng tôi ăn cơm.",
             parts: [
-              {
-                t: 0,
-                r: 3,
-                c: 3,
-              },
-              {
-                t: 0,
-                r: 3,
-                c: 4,
-              },
-              {
-                t: 0,
-                r: 3,
-                c: 5,
-              },
+              { t: 0, r: 3, c: 3 },
+              { t: 0, r: 3, c: 4 },
+              { t: 0, r: 3, c: 5 },
             ],
             labels: ["S", "V", "O"],
-            fb: {
-              t: 0,
-              r: 3,
-              c: 6,
-            },
+            fb: { t: 0, r: 3, c: 6 },
             kind: "svo",
           },
           {
@@ -426,28 +328,12 @@ export const HS_LESSONS = [
             prompt: "He kicks a ball.",
             hint: "Anh ấy đá một quả bóng.",
             parts: [
-              {
-                t: 0,
-                r: 4,
-                c: 3,
-              },
-              {
-                t: 0,
-                r: 4,
-                c: 4,
-              },
-              {
-                t: 0,
-                r: 4,
-                c: 5,
-              },
+              { t: 0, r: 4, c: 3 },
+              { t: 0, r: 4, c: 4 },
+              { t: 0, r: 4, c: 5 },
             ],
             labels: ["S", "V", "O"],
-            fb: {
-              t: 0,
-              r: 4,
-              c: 6,
-            },
+            fb: { t: 0, r: 4, c: 6 },
             kind: "svo",
           },
           {
@@ -456,28 +342,12 @@ export const HS_LESSONS = [
             prompt: "They watch TV.",
             hint: "Họ xem TV.",
             parts: [
-              {
-                t: 0,
-                r: 5,
-                c: 3,
-              },
-              {
-                t: 0,
-                r: 5,
-                c: 4,
-              },
-              {
-                t: 0,
-                r: 5,
-                c: 5,
-              },
+              { t: 0, r: 5, c: 3 },
+              { t: 0, r: 5, c: 4 },
+              { t: 0, r: 5, c: 5 },
             ],
             labels: ["S", "V", "O"],
-            fb: {
-              t: 0,
-              r: 5,
-              c: 6,
-            },
+            fb: { t: 0, r: 5, c: 6 },
             kind: "svo",
           },
           {
@@ -486,28 +356,12 @@ export const HS_LESSONS = [
             prompt: "I drink milk.",
             hint: "Tôi uống sữa.",
             parts: [
-              {
-                t: 0,
-                r: 6,
-                c: 3,
-              },
-              {
-                t: 0,
-                r: 6,
-                c: 4,
-              },
-              {
-                t: 0,
-                r: 6,
-                c: 5,
-              },
+              { t: 0, r: 6, c: 3 },
+              { t: 0, r: 6, c: 4 },
+              { t: 0, r: 6, c: 5 },
             ],
             labels: ["S", "V", "O"],
-            fb: {
-              t: 0,
-              r: 6,
-              c: 6,
-            },
+            fb: { t: 0, r: 6, c: 6 },
             kind: "svo",
           },
           {
@@ -516,28 +370,12 @@ export const HS_LESSONS = [
             prompt: "Mary likes cats.",
             hint: "Mary thích mèo.",
             parts: [
-              {
-                t: 0,
-                r: 7,
-                c: 3,
-              },
-              {
-                t: 0,
-                r: 7,
-                c: 4,
-              },
-              {
-                t: 0,
-                r: 7,
-                c: 5,
-              },
+              { t: 0, r: 7, c: 3 },
+              { t: 0, r: 7, c: 4 },
+              { t: 0, r: 7, c: 5 },
             ],
             labels: ["S", "V", "O"],
-            fb: {
-              t: 0,
-              r: 7,
-              c: 6,
-            },
+            fb: { t: 0, r: 7, c: 6 },
             kind: "svo",
           },
           {
@@ -546,28 +384,12 @@ export const HS_LESSONS = [
             prompt: "Birds sing songs.",
             hint: "Chim hót những bài hát.",
             parts: [
-              {
-                t: 0,
-                r: 8,
-                c: 3,
-              },
-              {
-                t: 0,
-                r: 8,
-                c: 4,
-              },
-              {
-                t: 0,
-                r: 8,
-                c: 5,
-              },
+              { t: 0, r: 8, c: 3 },
+              { t: 0, r: 8, c: 4 },
+              { t: 0, r: 8, c: 5 },
             ],
             labels: ["S", "V", "O"],
-            fb: {
-              t: 0,
-              r: 8,
-              c: 6,
-            },
+            fb: { t: 0, r: 8, c: 6 },
             kind: "svo",
           },
           {
@@ -576,28 +398,12 @@ export const HS_LESSONS = [
             prompt: "We clean rooms.",
             hint: "Chúng tôi dọn phòng.",
             parts: [
-              {
-                t: 0,
-                r: 9,
-                c: 3,
-              },
-              {
-                t: 0,
-                r: 9,
-                c: 4,
-              },
-              {
-                t: 0,
-                r: 9,
-                c: 5,
-              },
+              { t: 0, r: 9, c: 3 },
+              { t: 0, r: 9, c: 4 },
+              { t: 0, r: 9, c: 5 },
             ],
             labels: ["S", "V", "O"],
-            fb: {
-              t: 0,
-              r: 9,
-              c: 6,
-            },
+            fb: { t: 0, r: 9, c: 6 },
             kind: "svo",
           },
           {
@@ -606,28 +412,12 @@ export const HS_LESSONS = [
             prompt: "Dogs chase cats.",
             hint: "Chó đuổi mèo.",
             parts: [
-              {
-                t: 0,
-                r: 10,
-                c: 3,
-              },
-              {
-                t: 0,
-                r: 10,
-                c: 4,
-              },
-              {
-                t: 0,
-                r: 10,
-                c: 5,
-              },
+              { t: 0, r: 10, c: 3 },
+              { t: 0, r: 10, c: 4 },
+              { t: 0, r: 10, c: 5 },
             ],
             labels: ["S", "V", "O"],
-            fb: {
-              t: 0,
-              r: 10,
-              c: 6,
-            },
+            fb: { t: 0, r: 10, c: 6 },
             kind: "svo",
           },
           {
@@ -636,28 +426,12 @@ export const HS_LESSONS = [
             prompt: "My friends visit the museum.",
             hint: "Bạn tôi thăm viện bảo tàng.",
             parts: [
-              {
-                t: 0,
-                r: 11,
-                c: 3,
-              },
-              {
-                t: 0,
-                r: 11,
-                c: 4,
-              },
-              {
-                t: 0,
-                r: 11,
-                c: 5,
-              },
+              { t: 0, r: 11, c: 3 },
+              { t: 0, r: 11, c: 4 },
+              { t: 0, r: 11, c: 5 },
             ],
             labels: ["S", "V", "O"],
-            fb: {
-              t: 0,
-              r: 11,
-              c: 6,
-            },
+            fb: { t: 0, r: 11, c: 6 },
             kind: "svo",
           },
           {
@@ -666,28 +440,12 @@ export const HS_LESSONS = [
             prompt: "The baby is eating a banana.",
             hint: "Em bé đang ăn một quả chuối.",
             parts: [
-              {
-                t: 0,
-                r: 12,
-                c: 3,
-              },
-              {
-                t: 0,
-                r: 12,
-                c: 4,
-              },
-              {
-                t: 0,
-                r: 12,
-                c: 5,
-              },
+              { t: 0, r: 12, c: 3 },
+              { t: 0, r: 12, c: 4 },
+              { t: 0, r: 12, c: 5 },
             ],
             labels: ["S", "V", "O"],
-            fb: {
-              t: 0,
-              r: 12,
-              c: 6,
-            },
+            fb: { t: 0, r: 12, c: 6 },
             kind: "svo",
           },
           {
@@ -696,28 +454,12 @@ export const HS_LESSONS = [
             prompt: "We will watch a new movie.",
             hint: "Chúng tôi sẽ xem một bộ phim mới.",
             parts: [
-              {
-                t: 0,
-                r: 13,
-                c: 3,
-              },
-              {
-                t: 0,
-                r: 13,
-                c: 4,
-              },
-              {
-                t: 0,
-                r: 13,
-                c: 5,
-              },
+              { t: 0, r: 13, c: 3 },
+              { t: 0, r: 13, c: 4 },
+              { t: 0, r: 13, c: 5 },
             ],
             labels: ["S", "V", "O"],
-            fb: {
-              t: 0,
-              r: 13,
-              c: 6,
-            },
+            fb: { t: 0, r: 13, c: 6 },
             kind: "svo",
           },
           {
@@ -726,28 +468,12 @@ export const HS_LESSONS = [
             prompt: "She writes letters every Sunday.",
             hint: "Cô ấy viết thư vào mỗi Chủ nhật.",
             parts: [
-              {
-                t: 0,
-                r: 14,
-                c: 3,
-              },
-              {
-                t: 0,
-                r: 14,
-                c: 4,
-              },
-              {
-                t: 0,
-                r: 14,
-                c: 5,
-              },
+              { t: 0, r: 14, c: 3 },
+              { t: 0, r: 14, c: 4 },
+              { t: 0, r: 14, c: 5 },
             ],
             labels: ["S", "V", "O"],
-            fb: {
-              t: 0,
-              r: 14,
-              c: 6,
-            },
+            fb: { t: 0, r: 14, c: 6 },
             kind: "svo",
           },
           {
@@ -756,28 +482,12 @@ export const HS_LESSONS = [
             prompt: "Our dog is chasing a ball.",
             hint: "Con chó của chúng tôi đang đuổi một quả bóng.",
             parts: [
-              {
-                t: 0,
-                r: 15,
-                c: 3,
-              },
-              {
-                t: 0,
-                r: 15,
-                c: 4,
-              },
-              {
-                t: 0,
-                r: 15,
-                c: 5,
-              },
+              { t: 0, r: 15, c: 3 },
+              { t: 0, r: 15, c: 4 },
+              { t: 0, r: 15, c: 5 },
             ],
             labels: ["S", "V", "O"],
-            fb: {
-              t: 0,
-              r: 15,
-              c: 6,
-            },
+            fb: { t: 0, r: 15, c: 6 },
             kind: "svo",
           },
         ],
@@ -860,18 +570,8 @@ export const HS_LESSONS = [
             n: 1,
             prompt: "Cô ấy đang nghe nhạc.",
             hint: "listen to sth /ˈlɪsn tuː/: nghe music /ˈmjuːzɪk/: âm nhạc",
-            parts: [
-              {
-                t: 0,
-                r: 1,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 1,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 1, c: 2 }],
+            fb: { t: 0, r: 1, c: 4 },
             kind: "vi_en",
           },
           {
@@ -879,18 +579,8 @@ export const HS_LESSONS = [
             n: 2,
             prompt: "Họ sẽ đi du lịch vào tuần sau.",
             hint: "travel /ˈtrævl/: du lịch; next week /nekst wiːk/: tuần sau",
-            parts: [
-              {
-                t: 0,
-                r: 2,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 2,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 2, c: 2 }],
+            fb: { t: 0, r: 2, c: 4 },
             kind: "vi_en",
           },
           {
@@ -898,18 +588,8 @@ export const HS_LESSONS = [
             n: 3,
             prompt: "Tôi đã làm bài tập tối qua.",
             hint: "homework /ˈhəʊmwɜːk/: bài tập về nhà; last night /lɑːst naɪt/: tối qua",
-            parts: [
-              {
-                t: 0,
-                r: 3,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 3,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 3, c: 2 }],
+            fb: { t: 0, r: 3, c: 4 },
             kind: "vi_en",
           },
           {
@@ -917,18 +597,8 @@ export const HS_LESSONS = [
             n: 4,
             prompt: "Chúng tôi đang nấu bữa trưa.",
             hint: "lunch /lʌntʃ/: bữa trưa",
-            parts: [
-              {
-                t: 0,
-                r: 4,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 4,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 4, c: 2 }],
+            fb: { t: 0, r: 4, c: 4 },
             kind: "vi_en",
           },
           {
@@ -936,18 +606,8 @@ export const HS_LESSONS = [
             n: 5,
             prompt: "Anh ấy thường dậy sớm.",
             hint: "early /ˈɜːli/: sớm; usually /ˈjuːʒuəli/: thường",
-            parts: [
-              {
-                t: 0,
-                r: 5,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 5,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 5, c: 2 }],
+            fb: { t: 0, r: 5, c: 4 },
             kind: "vi_en",
           },
         ],
@@ -984,13 +644,7 @@ export const HS_LESSONS = [
             key: "hsLesson02|ex2|hiện tại – ht đơn",
             n: 1,
             prompt: "Hiện tại – HT Đơn",
-            parts: [
-              {
-                t: 0,
-                r: 1,
-                c: 0,
-              },
-            ],
+            parts: [{ t: 0, r: 1, c: 0 }],
             formText: "HT Đơn",
             kind: "grid",
           },
@@ -998,13 +652,7 @@ export const HS_LESSONS = [
             key: "hsLesson02|ex2|quá khứ – qk đơn",
             n: 2,
             prompt: "Quá khứ – QK Đơn",
-            parts: [
-              {
-                t: 0,
-                r: 1,
-                c: 1,
-              },
-            ],
+            parts: [{ t: 0, r: 1, c: 1 }],
             formText: "QK Đơn",
             kind: "grid",
           },
@@ -1012,13 +660,7 @@ export const HS_LESSONS = [
             key: "hsLesson02|ex2|tương lai – tl đơn",
             n: 3,
             prompt: "Tương lai – TL Đơn",
-            parts: [
-              {
-                t: 0,
-                r: 1,
-                c: 2,
-              },
-            ],
+            parts: [{ t: 0, r: 1, c: 2 }],
             formText: "TL Đơn",
             kind: "grid",
           },
@@ -1026,13 +668,7 @@ export const HS_LESSONS = [
             key: "hsLesson02|ex2|hiện tại – ht tiếp diễn",
             n: 4,
             prompt: "Hiện tại – HT Tiếp diễn",
-            parts: [
-              {
-                t: 0,
-                r: 2,
-                c: 0,
-              },
-            ],
+            parts: [{ t: 0, r: 2, c: 0 }],
             formText: "HT Tiếp diễn",
             kind: "grid",
           },
@@ -1040,13 +676,7 @@ export const HS_LESSONS = [
             key: "hsLesson02|ex2|quá khứ – qk tiếp diễn",
             n: 5,
             prompt: "Quá khứ – QK Tiếp diễn",
-            parts: [
-              {
-                t: 0,
-                r: 2,
-                c: 1,
-              },
-            ],
+            parts: [{ t: 0, r: 2, c: 1 }],
             formText: "QK Tiếp diễn",
             kind: "grid",
           },
@@ -1054,13 +684,7 @@ export const HS_LESSONS = [
             key: "hsLesson02|ex2|tương lai – tl tiếp diễn",
             n: 6,
             prompt: "Tương lai – TL Tiếp diễn",
-            parts: [
-              {
-                t: 0,
-                r: 2,
-                c: 2,
-              },
-            ],
+            parts: [{ t: 0, r: 2, c: 2 }],
             formText: "TL Tiếp diễn",
             kind: "grid",
           },
@@ -1068,13 +692,7 @@ export const HS_LESSONS = [
             key: "hsLesson02|ex2|hiện tại – ht hoàn thành",
             n: 7,
             prompt: "Hiện tại – HT hoàn thành",
-            parts: [
-              {
-                t: 0,
-                r: 3,
-                c: 0,
-              },
-            ],
+            parts: [{ t: 0, r: 3, c: 0 }],
             formText: "HT hoàn thành",
             kind: "grid",
           },
@@ -1082,13 +700,7 @@ export const HS_LESSONS = [
             key: "hsLesson02|ex2|quá khứ – qk hoàn thành",
             n: 8,
             prompt: "Quá khứ – QK hoàn thành",
-            parts: [
-              {
-                t: 0,
-                r: 3,
-                c: 1,
-              },
-            ],
+            parts: [{ t: 0, r: 3, c: 1 }],
             formText: "QK hoàn thành",
             kind: "grid",
           },
@@ -1096,13 +708,7 @@ export const HS_LESSONS = [
             key: "hsLesson02|ex2|tương lai – tl hoàn thành",
             n: 9,
             prompt: "Tương lai – TL hoàn thành",
-            parts: [
-              {
-                t: 0,
-                r: 3,
-                c: 2,
-              },
-            ],
+            parts: [{ t: 0, r: 3, c: 2 }],
             formText: "TL hoàn thành",
             kind: "grid",
           },
@@ -1110,13 +716,7 @@ export const HS_LESSONS = [
             key: "hsLesson02|ex2|hiện tại – ht hoàn thành tiếp diễn",
             n: 10,
             prompt: "Hiện tại – HT hoàn thành tiếp diễn",
-            parts: [
-              {
-                t: 0,
-                r: 4,
-                c: 0,
-              },
-            ],
+            parts: [{ t: 0, r: 4, c: 0 }],
             formText: "HT hoàn thành tiếp diễn",
             kind: "grid",
           },
@@ -1124,13 +724,7 @@ export const HS_LESSONS = [
             key: "hsLesson02|ex2|quá khứ – qk hoàn thành tiếp diễn",
             n: 11,
             prompt: "Quá khứ – QK hoàn thành tiếp diễn",
-            parts: [
-              {
-                t: 0,
-                r: 4,
-                c: 1,
-              },
-            ],
+            parts: [{ t: 0, r: 4, c: 1 }],
             formText: "QK hoàn thành tiếp diễn",
             kind: "grid",
           },
@@ -1138,13 +732,7 @@ export const HS_LESSONS = [
             key: "hsLesson02|ex2|tương lai – tl hoàn thành tiếp diễn",
             n: 12,
             prompt: "Tương lai – TL hoàn thành tiếp diễn",
-            parts: [
-              {
-                t: 0,
-                r: 4,
-                c: 2,
-              },
-            ],
+            parts: [{ t: 0, r: 4, c: 2 }],
             formText: "TL hoàn thành tiếp diễn",
             kind: "grid",
           },
@@ -1226,18 +814,8 @@ export const HS_LESSONS = [
             n: 1,
             prompt: "Tôi học ở trường nội trú",
             hint: "boarding school /ˈbɔːrdɪŋ skuːl/:trường nội trú",
-            parts: [
-              {
-                t: 0,
-                r: 1,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 1,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 1, c: 2 }],
+            fb: { t: 0, r: 1, c: 4 },
             kind: "vi_en",
           },
           {
@@ -1245,18 +823,8 @@ export const HS_LESSONS = [
             n: 2,
             prompt: "Giờ giải lao là lúc 10 giờ",
             hint: "break time /breɪk taɪm/: giờ giải lao",
-            parts: [
-              {
-                t: 0,
-                r: 2,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 2,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 2, c: 2 }],
+            fb: { t: 0, r: 2, c: 4 },
             kind: "vi_en",
           },
           {
@@ -1264,18 +832,8 @@ export const HS_LESSONS = [
             n: 3,
             prompt: "Tôi viết trên bảng đen",
             hint: "chalkboard /ˈtʃɔːkbɔːrd/: bảng đen",
-            parts: [
-              {
-                t: 0,
-                r: 3,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 3,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 3, c: 2 }],
+            fb: { t: 0, r: 3, c: 4 },
             kind: "vi_en",
           },
           {
@@ -1283,18 +841,8 @@ export const HS_LESSONS = [
             n: 4,
             prompt: "Môn học yêu thích của tôi là lịch sử",
             hint: "favourite /ˈfeɪvərɪt/: yêu thích history /ˈhɪstri/: lịch sử",
-            parts: [
-              {
-                t: 0,
-                r: 4,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 4,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 4, c: 2 }],
+            fb: { t: 0, r: 4, c: 4 },
             kind: "vi_en",
           },
           {
@@ -1302,18 +850,8 @@ export const HS_LESSONS = [
             n: 5,
             prompt: "Trường của tôi là trường quốc tế",
             hint: "international /ˌɪntərˈnæʃənl/: quốc tế",
-            parts: [
-              {
-                t: 0,
-                r: 5,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 5,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 5, c: 2 }],
+            fb: { t: 0, r: 5, c: 4 },
             kind: "vi_en",
           },
         ],
@@ -1328,39 +866,25 @@ export const HS_LESSONS = [
         instruction:
           "Exercise 2: Listen and fill in the blanks/ Nghe và điền vào chỗ trống ￼ Emma: Is there a desk? Emma: That sounds perfect! What else is in the room? Ben: Well, there is a big wardrobe for my clothes, and there is a shelf with some books. Emma: Oh, I love having books in my room. Do you read a lot? Emma: Wow, that's great! Is there a TV? Ben: No, there isn't a TV. I don't watch much television. Emma: That's not too bad. Do you have a view from your window? Emma: That sounds so nice! Your room sounds cosy. Ben: Yes, it's small, but it's comfortable. I like it.",
         paras: [
-          {
-            text: "Emma: What is your ______like, Ben?",
-          },
+          { text: "Emma: What is your ______like, Ben?" },
           {
             text: "Ben: It's _______, but it's nice. There is a bed in the corner, and next to it, there is a small ____with a light .",
           },
-          {
-            text: "Emma: Is there a desk?",
-          },
+          { text: "Emma: Is there a desk?" },
           {
             text: "Ben: Yes, there is. It's by the _________. I like to study there because the _______is good.",
           },
-          {
-            text: "Emma: That sounds perfect! What else is in the room?",
-          },
+          { text: "Emma: That sounds perfect! What else is in the room?" },
           {
             text: "Ben: Well, there is a big wardrobe for my clothes, and there is a shelf with some books.",
           },
           {
             text: "Emma: Oh, I love having books in my room. Do you read a lot?",
           },
-          {
-            text: "Ben: Yes, I do. There are about 20 ________on the shelf.",
-          },
-          {
-            text: "Emma: Wow, that's great! Is there a TV?",
-          },
-          {
-            text: "Ben: No, there isn't a TV. I don't watch much television.",
-          },
-          {
-            text: "Emma: I see. Is there a ______in your room?",
-          },
+          { text: "Ben: Yes, I do. There are about 20 ________on the shelf." },
+          { text: "Emma: Wow, that's great! Is there a TV?" },
+          { text: "Ben: No, there isn't a TV. I don't watch much television." },
+          { text: "Emma: I see. Is there a ______in your room?" },
           {
             text: "Ben: No, there isn't. The bathroom is down the __________. There is only one bathroom for the whole floor.",
           },
@@ -1370,12 +894,8 @@ export const HS_LESSONS = [
           {
             text: "Ben: Yes! There are some trees outside, and I can see the _________.",
           },
-          {
-            text: "Emma: That sounds so nice! Your room sounds cosy.",
-          },
-          {
-            text: "Ben: Yes, it's small, but it's comfortable. I like it.",
-          },
+          { text: "Emma: That sounds so nice! Your room sounds cosy." },
+          { text: "Ben: Yes, it's small, but it's comfortable. I like it." },
         ],
         tables: [],
         items: [
@@ -1383,11 +903,7 @@ export const HS_LESSONS = [
             key: "hsLesson03|ex2|emma: what is your like, ben?|0",
             n: 1,
             prompt: "Emma: What is your like, Ben?",
-            parts: [
-              {
-                p: 0,
-              },
-            ],
+            parts: [{ p: 0 }],
             slot: 0,
             formText: "Emma: What is your ______like, Ben?",
             kind: "listening",
@@ -1397,11 +913,7 @@ export const HS_LESSONS = [
             n: 2,
             prompt:
               "Ben: It's , but it's nice. There is a bed in the corner, and next to it, there is a small with a light .",
-            parts: [
-              {
-                p: 1,
-              },
-            ],
+            parts: [{ p: 1 }],
             slot: 0,
             formText:
               "Ben: It's _______, but it's nice. There is a bed in the corner, and next to it, there is a small ____with a light .",
@@ -1412,11 +924,7 @@ export const HS_LESSONS = [
             n: 3,
             prompt:
               "Ben: It's , but it's nice. There is a bed in the corner, and next to it, there is a small with a light .",
-            parts: [
-              {
-                p: 1,
-              },
-            ],
+            parts: [{ p: 1 }],
             slot: 1,
             formText:
               "Ben: It's _______, but it's nice. There is a bed in the corner, and next to it, there is a small ____with a light .",
@@ -1427,11 +935,7 @@ export const HS_LESSONS = [
             n: 4,
             prompt:
               "Ben: Yes, there is. It's by the . I like to study there because the is good.",
-            parts: [
-              {
-                p: 3,
-              },
-            ],
+            parts: [{ p: 3 }],
             slot: 0,
             formText:
               "Ben: Yes, there is. It's by the _________. I like to study there because the _______is good.",
@@ -1442,11 +946,7 @@ export const HS_LESSONS = [
             n: 5,
             prompt:
               "Ben: Yes, there is. It's by the . I like to study there because the is good.",
-            parts: [
-              {
-                p: 3,
-              },
-            ],
+            parts: [{ p: 3 }],
             slot: 1,
             formText:
               "Ben: Yes, there is. It's by the _________. I like to study there because the _______is good.",
@@ -1456,11 +956,7 @@ export const HS_LESSONS = [
             key: "hsLesson03|ex2|ben: yes, i do. there are about 20 on the shelf.|0",
             n: 6,
             prompt: "Ben: Yes, I do. There are about 20 on the shelf.",
-            parts: [
-              {
-                p: 7,
-              },
-            ],
+            parts: [{ p: 7 }],
             slot: 0,
             formText:
               "Ben: Yes, I do. There are about 20 ________on the shelf.",
@@ -1470,11 +966,7 @@ export const HS_LESSONS = [
             key: "hsLesson03|ex2|emma: i see. is there a in your room?|0",
             n: 7,
             prompt: "Emma: I see. Is there a in your room?",
-            parts: [
-              {
-                p: 10,
-              },
-            ],
+            parts: [{ p: 10 }],
             slot: 0,
             formText: "Emma: I see. Is there a ______in your room?",
             kind: "listening",
@@ -1484,11 +976,7 @@ export const HS_LESSONS = [
             n: 8,
             prompt:
               "Ben: No, there isn't. The bathroom is down the . There is only one bathroom for the whole floor.",
-            parts: [
-              {
-                p: 11,
-              },
-            ],
+            parts: [{ p: 11 }],
             slot: 0,
             formText:
               "Ben: No, there isn't. The bathroom is down the __________. There is only one bathroom for the whole floor.",
@@ -1499,11 +987,7 @@ export const HS_LESSONS = [
             n: 9,
             prompt:
               "Ben: Yes! There are some trees outside, and I can see the .",
-            parts: [
-              {
-                p: 13,
-              },
-            ],
+            parts: [{ p: 13 }],
             slot: 0,
             formText:
               "Ben: Yes! There are some trees outside, and I can see the _________.",
@@ -1591,18 +1075,8 @@ export const HS_LESSONS = [
             n: 1,
             prompt: "Anh ấy là bạn cùng lớp của tôi",
             hint: "classmate /ˈklæsˌmeɪt/: bạn cùng lớp",
-            parts: [
-              {
-                t: 0,
-                r: 1,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 1,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 1, c: 2 }],
+            fb: { t: 0, r: 1, c: 4 },
             kind: "vi_en",
           },
           {
@@ -1610,18 +1084,8 @@ export const HS_LESSONS = [
             n: 2,
             prompt: "Tôi có một cái gọt bút chì mới",
             hint: "pencil sharpener /ˈpensl ˌʃɑːrpənər/: cái gọt bút chì",
-            parts: [
-              {
-                t: 0,
-                r: 2,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 2,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 2, c: 2 }],
+            fb: { t: 0, r: 2, c: 4 },
             kind: "vi_en",
           },
           {
@@ -1629,18 +1093,8 @@ export const HS_LESSONS = [
             n: 3,
             prompt: "Tôi mang tẩy và vở của mình",
             hint: "bring /brɪŋ/: mang; rubber /ˈrʌbər/: cục tẩy; notebook /ˈnoʊtbʊk/: vở",
-            parts: [
-              {
-                t: 0,
-                r: 3,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 3,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 3, c: 2 }],
+            fb: { t: 0, r: 3, c: 4 },
             kind: "vi_en",
           },
           {
@@ -1648,18 +1102,8 @@ export const HS_LESSONS = [
             n: 4,
             prompt: "Gia sư riêng của tôi giúp tôi",
             hint: "private tutor /ˈpraɪvət ˈtuːtər/: gia sư riêng; helps /helps/: giúp",
-            parts: [
-              {
-                t: 0,
-                r: 4,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 4,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 4, c: 2 }],
+            fb: { t: 0, r: 4, c: 4 },
             kind: "vi_en",
           },
           {
@@ -1667,18 +1111,8 @@ export const HS_LESSONS = [
             n: 5,
             prompt: "Chúng tôi bơi ở bể bơi",
             hint: "swim /swɪm/: bơi; swimming pool /ˈswɪmɪŋ puːl/: bể bơi",
-            parts: [
-              {
-                t: 0,
-                r: 5,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 5,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 5, c: 2 }],
+            fb: { t: 0, r: 5, c: 4 },
             kind: "vi_en",
           },
         ],
@@ -1801,16 +1235,8 @@ export const HS_LESSONS = [
             n: 1,
             prompt: "Tôi học Tiếng anh mỗi ngày",
             parts: [
-              {
-                t: 0,
-                r: 1,
-                c: 1,
-              },
-              {
-                t: 0,
-                r: 1,
-                c: 2,
-              },
+              { t: 0, r: 1, c: 1 },
+              { t: 0, r: 1, c: 2 },
             ],
             labels: ["QK đơn", "HT đơn"],
             group: "Đơn = đơn giản",
@@ -1821,16 +1247,8 @@ export const HS_LESSONS = [
             n: 2,
             prompt: "Tôi đã học Tiếng anh hôm qua",
             parts: [
-              {
-                t: 0,
-                r: 2,
-                c: 1,
-              },
-              {
-                t: 0,
-                r: 2,
-                c: 2,
-              },
+              { t: 0, r: 2, c: 1 },
+              { t: 0, r: 2, c: 2 },
             ],
             labels: ["QK đơn", "HT đơn"],
             group: "Đơn = đơn giản",
@@ -1841,16 +1259,8 @@ export const HS_LESSONS = [
             n: 3,
             prompt: "Hôm qua, tôi đã đi học.",
             parts: [
-              {
-                t: 0,
-                r: 3,
-                c: 1,
-              },
-              {
-                t: 0,
-                r: 3,
-                c: 2,
-              },
+              { t: 0, r: 3, c: 1 },
+              { t: 0, r: 3, c: 2 },
             ],
             labels: ["QK đơn", "HT đơn"],
             group: "Đơn = đơn giản",
@@ -1861,16 +1271,8 @@ export const HS_LESSONS = [
             n: 4,
             prompt: "Tôi đi học mỗi ngày",
             parts: [
-              {
-                t: 0,
-                r: 4,
-                c: 1,
-              },
-              {
-                t: 0,
-                r: 4,
-                c: 2,
-              },
+              { t: 0, r: 4, c: 1 },
+              { t: 0, r: 4, c: 2 },
             ],
             labels: ["QK đơn", "HT đơn"],
             group: "Đơn = đơn giản",
@@ -1881,16 +1283,8 @@ export const HS_LESSONS = [
             n: 5,
             prompt: "Tôi thường xem phim hoạt hình",
             parts: [
-              {
-                t: 0,
-                r: 5,
-                c: 1,
-              },
-              {
-                t: 0,
-                r: 5,
-                c: 2,
-              },
+              { t: 0, r: 5, c: 1 },
+              { t: 0, r: 5, c: 2 },
             ],
             labels: ["QK đơn", "HT đơn"],
             group: "Đơn = đơn giản",
@@ -1901,16 +1295,8 @@ export const HS_LESSONS = [
             n: 6,
             prompt: "Tối qua, tôi đã xem phim hoạt hình",
             parts: [
-              {
-                t: 0,
-                r: 6,
-                c: 1,
-              },
-              {
-                t: 0,
-                r: 6,
-                c: 2,
-              },
+              { t: 0, r: 6, c: 1 },
+              { t: 0, r: 6, c: 2 },
             ],
             labels: ["QK đơn", "HT đơn"],
             group: "Đơn = đơn giản",
@@ -1921,16 +1307,8 @@ export const HS_LESSONS = [
             n: 7,
             prompt: "Hôm qua, tôi đã chơi điện tử",
             parts: [
-              {
-                t: 0,
-                r: 7,
-                c: 1,
-              },
-              {
-                t: 0,
-                r: 7,
-                c: 2,
-              },
+              { t: 0, r: 7, c: 1 },
+              { t: 0, r: 7, c: 2 },
             ],
             labels: ["QK đơn", "HT đơn"],
             group: "Đơn = đơn giản",
@@ -1941,16 +1319,8 @@ export const HS_LESSONS = [
             n: 8,
             prompt: "Tôi thỉnh thoảng chơi điện tử",
             parts: [
-              {
-                t: 0,
-                r: 8,
-                c: 1,
-              },
-              {
-                t: 0,
-                r: 8,
-                c: 2,
-              },
+              { t: 0, r: 8, c: 1 },
+              { t: 0, r: 8, c: 2 },
             ],
             labels: ["QK đơn", "HT đơn"],
             group: "Đơn = đơn giản",
@@ -1961,16 +1331,8 @@ export const HS_LESSONS = [
             n: 9,
             prompt: "Tôi đánh răng mỗi ngày",
             parts: [
-              {
-                t: 0,
-                r: 9,
-                c: 1,
-              },
-              {
-                t: 0,
-                r: 9,
-                c: 2,
-              },
+              { t: 0, r: 9, c: 1 },
+              { t: 0, r: 9, c: 2 },
             ],
             labels: ["QK đơn", "HT đơn"],
             group: "Đơn = đơn giản",
@@ -1981,16 +1343,8 @@ export const HS_LESSONS = [
             n: 10,
             prompt: "Tôi đã đánh răng hôm qua",
             parts: [
-              {
-                t: 0,
-                r: 10,
-                c: 1,
-              },
-              {
-                t: 0,
-                r: 10,
-                c: 2,
-              },
+              { t: 0, r: 10, c: 1 },
+              { t: 0, r: 10, c: 2 },
             ],
             labels: ["QK đơn", "HT đơn"],
             group: "Đơn = đơn giản",
@@ -2001,16 +1355,8 @@ export const HS_LESSONS = [
             n: 11,
             prompt: "Bây giờ, tôi đang học tiếng Anh.",
             parts: [
-              {
-                t: 1,
-                r: 1,
-                c: 1,
-              },
-              {
-                t: 1,
-                r: 1,
-                c: 2,
-              },
+              { t: 1, r: 1, c: 1 },
+              { t: 1, r: 1, c: 2 },
             ],
             labels: ["QK tiếp diễn", "HT tiếp diễn"],
             group: "Tiếp diễn = đang",
@@ -2021,16 +1367,8 @@ export const HS_LESSONS = [
             n: 12,
             prompt: "Vào lúc 8 giờ tối qua, tôi đã đang học tiếng Anh.",
             parts: [
-              {
-                t: 1,
-                r: 2,
-                c: 1,
-              },
-              {
-                t: 1,
-                r: 2,
-                c: 2,
-              },
+              { t: 1, r: 2, c: 1 },
+              { t: 1, r: 2, c: 2 },
             ],
             labels: ["QK tiếp diễn", "HT tiếp diễn"],
             group: "Tiếp diễn = đang",
@@ -2041,16 +1379,8 @@ export const HS_LESSONS = [
             n: 13,
             prompt: "Lúc 7 giờ sáng hôm qua, tôi đã đang đi học.",
             parts: [
-              {
-                t: 1,
-                r: 3,
-                c: 1,
-              },
-              {
-                t: 1,
-                r: 3,
-                c: 2,
-              },
+              { t: 1, r: 3, c: 1 },
+              { t: 1, r: 3, c: 2 },
             ],
             labels: ["QK tiếp diễn", "HT tiếp diễn"],
             group: "Tiếp diễn = đang",
@@ -2061,16 +1391,8 @@ export const HS_LESSONS = [
             n: 14,
             prompt: "Bây giờ, tôi đang đi học.",
             parts: [
-              {
-                t: 1,
-                r: 4,
-                c: 1,
-              },
-              {
-                t: 1,
-                r: 4,
-                c: 2,
-              },
+              { t: 1, r: 4, c: 1 },
+              { t: 1, r: 4, c: 2 },
             ],
             labels: ["QK tiếp diễn", "HT tiếp diễn"],
             group: "Tiếp diễn = đang",
@@ -2081,16 +1403,8 @@ export const HS_LESSONS = [
             n: 15,
             prompt: "Hiện tại, tôi đang xem phim hoạt hình.",
             parts: [
-              {
-                t: 1,
-                r: 5,
-                c: 1,
-              },
-              {
-                t: 1,
-                r: 5,
-                c: 2,
-              },
+              { t: 1, r: 5, c: 1 },
+              { t: 1, r: 5, c: 2 },
             ],
             labels: ["QK tiếp diễn", "HT tiếp diễn"],
             group: "Tiếp diễn = đang",
@@ -2101,16 +1415,8 @@ export const HS_LESSONS = [
             n: 16,
             prompt: "Vào lúc 9 giờ tối qua, tôi đã đang xem phim hoạt hình.",
             parts: [
-              {
-                t: 1,
-                r: 6,
-                c: 1,
-              },
-              {
-                t: 1,
-                r: 6,
-                c: 2,
-              },
+              { t: 1, r: 6, c: 1 },
+              { t: 1, r: 6, c: 2 },
             ],
             labels: ["QK tiếp diễn", "HT tiếp diễn"],
             group: "Tiếp diễn = đang",
@@ -2121,16 +1427,8 @@ export const HS_LESSONS = [
             n: 17,
             prompt: "Lúc này, tôi đang chơi điện tử.",
             parts: [
-              {
-                t: 1,
-                r: 7,
-                c: 1,
-              },
-              {
-                t: 1,
-                r: 7,
-                c: 2,
-              },
+              { t: 1, r: 7, c: 1 },
+              { t: 1, r: 7, c: 2 },
             ],
             labels: ["QK tiếp diễn", "HT tiếp diễn"],
             group: "Tiếp diễn = đang",
@@ -2141,16 +1439,8 @@ export const HS_LESSONS = [
             n: 18,
             prompt: "Vào lúc 5 giờ chiều hôm qua, tôi đã đang chơi điện tử.",
             parts: [
-              {
-                t: 1,
-                r: 8,
-                c: 1,
-              },
-              {
-                t: 1,
-                r: 8,
-                c: 2,
-              },
+              { t: 1, r: 8, c: 1 },
+              { t: 1, r: 8, c: 2 },
             ],
             labels: ["QK tiếp diễn", "HT tiếp diễn"],
             group: "Tiếp diễn = đang",
@@ -2161,16 +1451,8 @@ export const HS_LESSONS = [
             n: 19,
             prompt: "Hiện tại, tôi đang đánh răng.",
             parts: [
-              {
-                t: 1,
-                r: 9,
-                c: 1,
-              },
-              {
-                t: 1,
-                r: 9,
-                c: 2,
-              },
+              { t: 1, r: 9, c: 1 },
+              { t: 1, r: 9, c: 2 },
             ],
             labels: ["QK tiếp diễn", "HT tiếp diễn"],
             group: "Tiếp diễn = đang",
@@ -2181,16 +1463,8 @@ export const HS_LESSONS = [
             n: 20,
             prompt: "Vào lúc 9 giờ tối qua, tôi đã đang đánh răng.",
             parts: [
-              {
-                t: 1,
-                r: 10,
-                c: 1,
-              },
-              {
-                t: 1,
-                r: 10,
-                c: 2,
-              },
+              { t: 1, r: 10, c: 1 },
+              { t: 1, r: 10, c: 2 },
             ],
             labels: ["QK tiếp diễn", "HT tiếp diễn"],
             group: "Tiếp diễn = đang",
@@ -2201,26 +1475,10 @@ export const HS_LESSONS = [
             n: 21,
             prompt: "Tôi đã học tiếng Anh được 3 năm rồi. (không liên tục)",
             parts: [
-              {
-                t: 2,
-                r: 1,
-                c: 1,
-              },
-              {
-                t: 2,
-                r: 1,
-                c: 2,
-              },
-              {
-                t: 2,
-                r: 1,
-                c: 3,
-              },
-              {
-                t: 2,
-                r: 1,
-                c: 4,
-              },
+              { t: 2, r: 1, c: 1 },
+              { t: 2, r: 1, c: 2 },
+              { t: 2, r: 1, c: 3 },
+              { t: 2, r: 1, c: 4 },
             ],
             labels: ["QKHT", "QKHTTD", "HTHT", "HTHTTD"],
             group: "Hoàn thành/hoàn thành tiếp diễn",
@@ -2232,26 +1490,10 @@ export const HS_LESSONS = [
             prompt:
               "Tính đến 2023, tôi đã học tiếng anh được 1 năm rồi (liên tục)",
             parts: [
-              {
-                t: 2,
-                r: 2,
-                c: 1,
-              },
-              {
-                t: 2,
-                r: 2,
-                c: 2,
-              },
-              {
-                t: 2,
-                r: 2,
-                c: 3,
-              },
-              {
-                t: 2,
-                r: 2,
-                c: 4,
-              },
+              { t: 2, r: 2, c: 1 },
+              { t: 2, r: 2, c: 2 },
+              { t: 2, r: 2, c: 3 },
+              { t: 2, r: 2, c: 4 },
             ],
             labels: ["QKHT", "QKHTTD", "HTHT", "HTHTTD"],
             group: "Hoàn thành/hoàn thành tiếp diễn",
@@ -2263,26 +1505,10 @@ export const HS_LESSONS = [
             prompt:
               "Hôm qua, sau khi tôi đã đánh răng, tôi mới đi ngủ.\n(Xác định thì động từ ở phần in đậm)",
             parts: [
-              {
-                t: 2,
-                r: 3,
-                c: 1,
-              },
-              {
-                t: 2,
-                r: 3,
-                c: 2,
-              },
-              {
-                t: 2,
-                r: 3,
-                c: 3,
-              },
-              {
-                t: 2,
-                r: 3,
-                c: 4,
-              },
+              { t: 2, r: 3, c: 1 },
+              { t: 2, r: 3, c: 2 },
+              { t: 2, r: 3, c: 3 },
+              { t: 2, r: 3, c: 4 },
             ],
             labels: ["QKHT", "QKHTTD", "HTHT", "HTHTTD"],
             group: "Hoàn thành/hoàn thành tiếp diễn",
@@ -2293,26 +1519,10 @@ export const HS_LESSONS = [
             n: 24,
             prompt: "Tôi đã sống ở Hà Nội được 2 năm rồi (liên tục)",
             parts: [
-              {
-                t: 2,
-                r: 4,
-                c: 1,
-              },
-              {
-                t: 2,
-                r: 4,
-                c: 2,
-              },
-              {
-                t: 2,
-                r: 4,
-                c: 3,
-              },
-              {
-                t: 2,
-                r: 4,
-                c: 4,
-              },
+              { t: 2, r: 4, c: 1 },
+              { t: 2, r: 4, c: 2 },
+              { t: 2, r: 4, c: 3 },
+              { t: 2, r: 4, c: 4 },
             ],
             labels: ["QKHT", "QKHTTD", "HTHT", "HTHTTD"],
             group: "Hoàn thành/hoàn thành tiếp diễn",
@@ -2409,18 +1619,8 @@ export const HS_LESSONS = [
             n: 1,
             prompt: "Ngày mai tôi sẽ gọi cho bạn.",
             hint: "call /kɔːl/: gọi Gợi ý thì: Đơn giản trong tương lai",
-            parts: [
-              {
-                t: 0,
-                r: 1,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 1,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 1, c: 2 }],
+            fb: { t: 0, r: 1, c: 4 },
             kind: "vi_en",
           },
           {
@@ -2428,18 +1628,8 @@ export const HS_LESSONS = [
             n: 2,
             prompt: "Tôi chuẩn bị đi ngủ đây.",
             hint: "go to bed /ɡəʊ tuː bed/: đi ngủ Gợi ý thì: Tương lai rất gần",
-            parts: [
-              {
-                t: 0,
-                r: 2,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 2,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 2, c: 2 }],
+            fb: { t: 0, r: 2, c: 4 },
             kind: "vi_en",
           },
           {
@@ -2447,18 +1637,8 @@ export const HS_LESSONS = [
             n: 3,
             prompt: "Tôi sẽ đi xem phim vào cuối tuần này. (đã có kế hoạch)",
             hint: "see a movie /siː ə ˈmuːvi/: xem phim Gợi ý thì: Tương lai gần",
-            parts: [
-              {
-                t: 0,
-                r: 3,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 3,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 3, c: 2 }],
+            fb: { t: 0, r: 3, c: 4 },
             kind: "vi_en",
           },
           {
@@ -2466,18 +1646,8 @@ export const HS_LESSONS = [
             n: 4,
             prompt: "Rạp chiếu phim gần nhà tôi là hiện đại nhất ở Hà Nội",
             hint: "cinema /ˈsɪnəmə/: rạp chiếu phim; near /nɪə(r)/: gần; modern /ˈmɒdn/: hiện đại",
-            parts: [
-              {
-                t: 0,
-                r: 4,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 4,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 4, c: 2 }],
+            fb: { t: 0, r: 4, c: 4 },
             kind: "vi_en",
           },
           {
@@ -2485,18 +1655,8 @@ export const HS_LESSONS = [
             n: 5,
             prompt: "Phương bận rộn hơn Mai",
             hint: "busy /ˈbɪzi/: bận",
-            parts: [
-              {
-                t: 0,
-                r: 5,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 5,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 5, c: 2 }],
+            fb: { t: 0, r: 5, c: 4 },
             kind: "vi_en",
           },
         ],
@@ -2563,130 +1723,70 @@ export const HS_LESSONS = [
             key: "hsLesson05|ex2|is / a car. / my bicycle / than / faster.",
             n: 1,
             prompt: "is / a car. / My bicycle / than / faster.",
-            parts: [
-              {
-                t: 0,
-                r: 1,
-                c: 2,
-              },
-            ],
+            parts: [{ t: 0, r: 1, c: 2 }],
             kind: "line",
           },
           {
             key: "hsLesson05|ex2|than / my schoolbag / heavier / is / yours.",
             n: 2,
             prompt: "than / My schoolbag / heavier / is / yours.",
-            parts: [
-              {
-                t: 0,
-                r: 2,
-                c: 2,
-              },
-            ],
+            parts: [{ t: 0, r: 2, c: 2 }],
             kind: "line",
           },
           {
             key: "hsLesson05|ex2|is / than / a dog. / a cat / smaller.",
             n: 3,
             prompt: "is / than / a dog. / A cat / smaller.",
-            parts: [
-              {
-                t: 0,
-                r: 3,
-                c: 2,
-              },
-            ],
+            parts: [{ t: 0, r: 3, c: 2 }],
             kind: "line",
           },
           {
             key: "hsLesson05|ex2|than / my friend / speaks english / better / i.",
             n: 4,
             prompt: "than / My friend / speaks English / better / I.",
-            parts: [
-              {
-                t: 0,
-                r: 4,
-                c: 2,
-              },
-            ],
+            parts: [{ t: 0, r: 4, c: 2 }],
             kind: "line",
           },
           {
             key: "hsLesson05|ex2|more carefully / than / my dad / drives / my mom.",
             n: 5,
             prompt: "more carefully / than / My dad / drives / my mom.",
-            parts: [
-              {
-                t: 0,
-                r: 5,
-                c: 2,
-              },
-            ],
+            parts: [{ t: 0, r: 5, c: 2 }],
             kind: "line",
           },
           {
             key: "hsLesson05|ex2|than / a car. / this bicycle / is / more expensive.",
             n: 6,
             prompt: "than / a car. / This bicycle / is / more expensive.",
-            parts: [
-              {
-                t: 0,
-                r: 6,
-                c: 2,
-              },
-            ],
+            parts: [{ t: 0, r: 6, c: 2 }],
             kind: "line",
           },
           {
             key: "hsLesson05|ex2|is / than / this book / more interesting / that one.",
             n: 7,
             prompt: "is / than / This book / more interesting / that one.",
-            parts: [
-              {
-                t: 0,
-                r: 7,
-                c: 2,
-              },
-            ],
+            parts: [{ t: 0, r: 7, c: 2 }],
             kind: "line",
           },
           {
             key: "hsLesson05|ex2|is / my brother's room / my room. / cleaner / than.",
             n: 8,
             prompt: "is / My brother's room / my room. / cleaner / than.",
-            parts: [
-              {
-                t: 0,
-                r: 8,
-                c: 2,
-              },
-            ],
+            parts: [{ t: 0, r: 8, c: 2 }],
             kind: "line",
           },
           {
             key: "hsLesson05|ex2|today / is / than / hotter / yesterday. / the weather.",
             n: 9,
             prompt: "today / is / than / hotter / yesterday. / The weather.",
-            parts: [
-              {
-                t: 0,
-                r: 9,
-                c: 2,
-              },
-            ],
+            parts: [{ t: 0, r: 9, c: 2 }],
             kind: "line",
           },
           {
             key: "hsLesson05|ex2|more beautifully / my sister / than / sings / my brother.",
             n: 10,
             prompt: "more beautifully / My sister / than / sings / my brother.",
-            parts: [
-              {
-                t: 0,
-                r: 10,
-                c: 2,
-              },
-            ],
+            parts: [{ t: 0, r: 10, c: 2 }],
             kind: "line",
           },
         ],
@@ -2704,12 +1804,8 @@ export const HS_LESSONS = [
           {
             text: "VD: He is faster than her.\u000b->   She is not as fast as him.",
           },
-          {
-            text: "1. This exercise is easier than that one.",
-          },
-          {
-            text: " -> That ________ ",
-          },
+          { text: "1. This exercise is easier than that one." },
+          { text: " -> That ________ " },
           {
             text: "2. This book is more interesting than that one.\u000b -> That ________ ",
           },
@@ -2719,9 +1815,7 @@ export const HS_LESSONS = [
           {
             text: "4. My house is bigger than your house.\u000b -> Your  ________ ",
           },
-          {
-            text: "5. Tom is taller than Peter.\u000b -> Peter  ________ ",
-          },
+          { text: "5. Tom is taller than Peter.\u000b -> Peter  ________ " },
         ],
         tables: [],
         items: [
@@ -2729,14 +1823,7 @@ export const HS_LESSONS = [
             key: "hsLesson05|ex3|1. this exercise is easier than that one. -> that",
             n: 1,
             prompt: "1. This exercise is easier than that one. -> That",
-            parts: [
-              {
-                p: 1,
-              },
-              {
-                p: 2,
-              },
-            ],
+            parts: [{ p: 1 }, { p: 2 }],
             formText:
               "1. This exercise is easier than that one.\n -> That ________ ",
             kind: "line",
@@ -2745,11 +1832,7 @@ export const HS_LESSONS = [
             key: "hsLesson05|ex3|2. this book is more interesting than that one. -> that",
             n: 2,
             prompt: "2. This book is more interesting than that one. -> That",
-            parts: [
-              {
-                p: 3,
-              },
-            ],
+            parts: [{ p: 3 }],
             formText:
               "2. This book is more interesting than that one.\u000b -> That ________ ",
             kind: "line",
@@ -2758,11 +1841,7 @@ export const HS_LESSONS = [
             key: "hsLesson05|ex3|3. today is colder than yesterday. -> yesterday",
             n: 3,
             prompt: "3. Today is colder than yesterday. -> Yesterday",
-            parts: [
-              {
-                p: 4,
-              },
-            ],
+            parts: [{ p: 4 }],
             formText:
               "3. Today is colder than yesterday.\u000b ->  Yesterday ________ ",
             kind: "line",
@@ -2771,11 +1850,7 @@ export const HS_LESSONS = [
             key: "hsLesson05|ex3|4. my house is bigger than your house. -> your",
             n: 4,
             prompt: "4. My house is bigger than your house. -> Your",
-            parts: [
-              {
-                p: 5,
-              },
-            ],
+            parts: [{ p: 5 }],
             formText:
               "4. My house is bigger than your house.\u000b -> Your  ________ ",
             kind: "line",
@@ -2784,11 +1859,7 @@ export const HS_LESSONS = [
             key: "hsLesson05|ex3|5. tom is taller than peter. -> peter",
             n: 5,
             prompt: "5. Tom is taller than Peter. -> Peter",
-            parts: [
-              {
-                p: 6,
-              },
-            ],
+            parts: [{ p: 6 }],
             formText: "5. Tom is taller than Peter.\u000b -> Peter  ________ ",
             kind: "line",
           },
@@ -2839,13 +1910,7 @@ export const HS_LESSONS = [
             key: "hsLesson05|tc|bằng: beautiful",
             n: 1,
             prompt: "Bằng: beautiful",
-            parts: [
-              {
-                t: 0,
-                r: 2,
-                c: 1,
-              },
-            ],
+            parts: [{ t: 0, r: 2, c: 1 }],
             formText: "as beautiful as",
             kind: "grid",
           },
@@ -2853,13 +1918,7 @@ export const HS_LESSONS = [
             key: "hsLesson05|tc|bằng: intelligent",
             n: 2,
             prompt: "Bằng: intelligent",
-            parts: [
-              {
-                t: 0,
-                r: 2,
-                c: 2,
-              },
-            ],
+            parts: [{ t: 0, r: 2, c: 2 }],
             formText: "",
             kind: "grid",
           },
@@ -2867,13 +1926,7 @@ export const HS_LESSONS = [
             key: "hsLesson05|tc|bằng: tall",
             n: 3,
             prompt: "Bằng: tall",
-            parts: [
-              {
-                t: 0,
-                r: 2,
-                c: 3,
-              },
-            ],
+            parts: [{ t: 0, r: 2, c: 3 }],
             formText: "",
             kind: "grid",
           },
@@ -2881,13 +1934,7 @@ export const HS_LESSONS = [
             key: "hsLesson05|tc|bằng: busy",
             n: 4,
             prompt: "Bằng: busy",
-            parts: [
-              {
-                t: 0,
-                r: 2,
-                c: 4,
-              },
-            ],
+            parts: [{ t: 0, r: 2, c: 4 }],
             formText: "",
             kind: "grid",
           },
@@ -2895,13 +1942,7 @@ export const HS_LESSONS = [
             key: "hsLesson05|tc|bằng: good",
             n: 5,
             prompt: "Bằng: good",
-            parts: [
-              {
-                t: 0,
-                r: 2,
-                c: 5,
-              },
-            ],
+            parts: [{ t: 0, r: 2, c: 5 }],
             formText: "",
             kind: "grid",
           },
@@ -2909,13 +1950,7 @@ export const HS_LESSONS = [
             key: "hsLesson05|tc|bằng: much",
             n: 6,
             prompt: "Bằng: much",
-            parts: [
-              {
-                t: 0,
-                r: 2,
-                c: 6,
-              },
-            ],
+            parts: [{ t: 0, r: 2, c: 6 }],
             formText: "",
             kind: "grid",
           },
@@ -2923,13 +1958,7 @@ export const HS_LESSONS = [
             key: "hsLesson05|tc|hơn: beautiful",
             n: 7,
             prompt: "Hơn: beautiful",
-            parts: [
-              {
-                t: 0,
-                r: 3,
-                c: 1,
-              },
-            ],
+            parts: [{ t: 0, r: 3, c: 1 }],
             formText: "more beautiful than",
             kind: "grid",
           },
@@ -2937,13 +1966,7 @@ export const HS_LESSONS = [
             key: "hsLesson05|tc|hơn: intelligent",
             n: 8,
             prompt: "Hơn: intelligent",
-            parts: [
-              {
-                t: 0,
-                r: 3,
-                c: 2,
-              },
-            ],
+            parts: [{ t: 0, r: 3, c: 2 }],
             formText: "",
             kind: "grid",
           },
@@ -2951,13 +1974,7 @@ export const HS_LESSONS = [
             key: "hsLesson05|tc|hơn: tall",
             n: 9,
             prompt: "Hơn: tall",
-            parts: [
-              {
-                t: 0,
-                r: 3,
-                c: 3,
-              },
-            ],
+            parts: [{ t: 0, r: 3, c: 3 }],
             formText: "",
             kind: "grid",
           },
@@ -2965,13 +1982,7 @@ export const HS_LESSONS = [
             key: "hsLesson05|tc|hơn: busy",
             n: 10,
             prompt: "Hơn: busy",
-            parts: [
-              {
-                t: 0,
-                r: 3,
-                c: 4,
-              },
-            ],
+            parts: [{ t: 0, r: 3, c: 4 }],
             formText: "",
             kind: "grid",
           },
@@ -2979,13 +1990,7 @@ export const HS_LESSONS = [
             key: "hsLesson05|tc|hơn: good",
             n: 11,
             prompt: "Hơn: good",
-            parts: [
-              {
-                t: 0,
-                r: 3,
-                c: 5,
-              },
-            ],
+            parts: [{ t: 0, r: 3, c: 5 }],
             formText: "",
             kind: "grid",
           },
@@ -2993,13 +1998,7 @@ export const HS_LESSONS = [
             key: "hsLesson05|tc|hơn: much",
             n: 12,
             prompt: "Hơn: much",
-            parts: [
-              {
-                t: 0,
-                r: 3,
-                c: 6,
-              },
-            ],
+            parts: [{ t: 0, r: 3, c: 6 }],
             formText: "",
             kind: "grid",
           },
@@ -3007,13 +2006,7 @@ export const HS_LESSONS = [
             key: "hsLesson05|tc|kém: beautiful",
             n: 13,
             prompt: "Kém: beautiful",
-            parts: [
-              {
-                t: 0,
-                r: 4,
-                c: 1,
-              },
-            ],
+            parts: [{ t: 0, r: 4, c: 1 }],
             formText: "less beautiful than",
             kind: "grid",
           },
@@ -3021,13 +2014,7 @@ export const HS_LESSONS = [
             key: "hsLesson05|tc|kém: intelligent",
             n: 14,
             prompt: "Kém: intelligent",
-            parts: [
-              {
-                t: 0,
-                r: 4,
-                c: 2,
-              },
-            ],
+            parts: [{ t: 0, r: 4, c: 2 }],
             formText: "",
             kind: "grid",
           },
@@ -3035,13 +2022,7 @@ export const HS_LESSONS = [
             key: "hsLesson05|tc|kém: tall",
             n: 15,
             prompt: "Kém: tall",
-            parts: [
-              {
-                t: 0,
-                r: 4,
-                c: 3,
-              },
-            ],
+            parts: [{ t: 0, r: 4, c: 3 }],
             formText: "",
             kind: "grid",
           },
@@ -3049,13 +2030,7 @@ export const HS_LESSONS = [
             key: "hsLesson05|tc|kém: busy",
             n: 16,
             prompt: "Kém: busy",
-            parts: [
-              {
-                t: 0,
-                r: 4,
-                c: 4,
-              },
-            ],
+            parts: [{ t: 0, r: 4, c: 4 }],
             formText: "",
             kind: "grid",
           },
@@ -3063,13 +2038,7 @@ export const HS_LESSONS = [
             key: "hsLesson05|tc|kém: good",
             n: 17,
             prompt: "Kém: good",
-            parts: [
-              {
-                t: 0,
-                r: 4,
-                c: 5,
-              },
-            ],
+            parts: [{ t: 0, r: 4, c: 5 }],
             formText: "",
             kind: "grid",
           },
@@ -3077,13 +2046,7 @@ export const HS_LESSONS = [
             key: "hsLesson05|tc|kém: much",
             n: 18,
             prompt: "Kém: much",
-            parts: [
-              {
-                t: 0,
-                r: 4,
-                c: 6,
-              },
-            ],
+            parts: [{ t: 0, r: 4, c: 6 }],
             formText: "",
             kind: "grid",
           },
@@ -3091,13 +2054,7 @@ export const HS_LESSONS = [
             key: "hsLesson05|tc|nhất: beautiful",
             n: 19,
             prompt: "Nhất: beautiful",
-            parts: [
-              {
-                t: 0,
-                r: 5,
-                c: 1,
-              },
-            ],
+            parts: [{ t: 0, r: 5, c: 1 }],
             formText: "the most beautiful",
             kind: "grid",
           },
@@ -3105,13 +2062,7 @@ export const HS_LESSONS = [
             key: "hsLesson05|tc|nhất: intelligent",
             n: 20,
             prompt: "Nhất: intelligent",
-            parts: [
-              {
-                t: 0,
-                r: 5,
-                c: 2,
-              },
-            ],
+            parts: [{ t: 0, r: 5, c: 2 }],
             formText: "",
             kind: "grid",
           },
@@ -3119,13 +2070,7 @@ export const HS_LESSONS = [
             key: "hsLesson05|tc|nhất: tall",
             n: 21,
             prompt: "Nhất: tall",
-            parts: [
-              {
-                t: 0,
-                r: 5,
-                c: 3,
-              },
-            ],
+            parts: [{ t: 0, r: 5, c: 3 }],
             formText: "",
             kind: "grid",
           },
@@ -3133,13 +2078,7 @@ export const HS_LESSONS = [
             key: "hsLesson05|tc|nhất: busy",
             n: 22,
             prompt: "Nhất: busy",
-            parts: [
-              {
-                t: 0,
-                r: 5,
-                c: 4,
-              },
-            ],
+            parts: [{ t: 0, r: 5, c: 4 }],
             formText: "",
             kind: "grid",
           },
@@ -3147,13 +2086,7 @@ export const HS_LESSONS = [
             key: "hsLesson05|tc|nhất: good",
             n: 23,
             prompt: "Nhất: good",
-            parts: [
-              {
-                t: 0,
-                r: 5,
-                c: 5,
-              },
-            ],
+            parts: [{ t: 0, r: 5, c: 5 }],
             formText: "",
             kind: "grid",
           },
@@ -3161,13 +2094,7 @@ export const HS_LESSONS = [
             key: "hsLesson05|tc|nhất: much",
             n: 24,
             prompt: "Nhất: much",
-            parts: [
-              {
-                t: 0,
-                r: 5,
-                c: 6,
-              },
-            ],
+            parts: [{ t: 0, r: 5, c: 6 }],
             formText: "",
             kind: "grid",
           },
@@ -3260,18 +2187,8 @@ export const HS_LESSONS = [
             n: 1,
             prompt: "Tôi có một quyển vở mới.",
             hint: "have /hæv/: có, sở hữu; notebook /ˈnəʊtbʊk/: quyển vở; new /njuː/: mới",
-            parts: [
-              {
-                t: 0,
-                r: 1,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 1,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 1, c: 2 }],
+            fb: { t: 0, r: 1, c: 4 },
             kind: "vi_en",
           },
           {
@@ -3279,18 +2196,8 @@ export const HS_LESSONS = [
             n: 2,
             prompt: "Những cây bút trên bàn rất sắc.",
             hint: "pen /pen/: cây bút; sharp /ʃɑːp/: sắc, nhọn",
-            parts: [
-              {
-                t: 0,
-                r: 2,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 2,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 2, c: 2 }],
+            fb: { t: 0, r: 2, c: 4 },
             kind: "vi_en",
           },
           {
@@ -3298,18 +2205,8 @@ export const HS_LESSONS = [
             n: 3,
             prompt: "Bạn tôi có cái kéo.",
             hint: "friend /frend/: bạn; have /hæv/: có; scissors /ˈsɪzəz/: cái kéo",
-            parts: [
-              {
-                t: 0,
-                r: 3,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 3,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 3, c: 2 }],
+            fb: { t: 0, r: 3, c: 4 },
             kind: "vi_en",
           },
           {
@@ -3318,18 +2215,8 @@ export const HS_LESSONS = [
             prompt:
               "Những quyển sách giáo khoa nhẹ.\n(Những quyển sách đã xác định vì cả người nói và người nghe đều biết)",
             hint: "textbook /ˈtekstbʊk/: sách giáo khoa; light /laɪt/: nhẹ",
-            parts: [
-              {
-                t: 0,
-                r: 4,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 4,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 4, c: 2 }],
+            fb: { t: 0, r: 4, c: 4 },
             kind: "vi_en",
           },
           {
@@ -3337,18 +2224,8 @@ export const HS_LESSONS = [
             n: 5,
             prompt: "Bạn cùng lớp mang một cái thước kẻ dài",
             hint: "classmate /ˈklɑːsmeɪt/: bạn cùng lớp; bring /brɪŋ/: mang; ruler /ˈruːlə(r)/: thước kẻ; long /lɒŋ/: dài",
-            parts: [
-              {
-                t: 0,
-                r: 5,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 5,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 5, c: 2 }],
+            fb: { t: 0, r: 5, c: 4 },
             kind: "vi_en",
           },
         ],
@@ -3363,12 +2240,8 @@ export const HS_LESSONS = [
         instruction:
           "Exercise 2: Rearrange the words to make correct sentences. Sắp xếp lại các từ để tạo thành câu đúng.",
         paras: [
-          {
-            text: "are / schoolbags / There / five /table / on /the.",
-          },
-          {
-            text: " → ___________________________________\u000b",
-          },
+          { text: "are / schoolbags / There / five /table / on /the." },
+          { text: " → ___________________________________\u000b" },
           {
             text: "my / a / new / student. / is / friend / from / America.\u000b → __________________________________\u000b",
           },
@@ -3382,14 +2255,7 @@ export const HS_LESSONS = [
             key: "hsLesson06|ex2|are / schoolbags / there / five /table / on /the. →",
             n: 1,
             prompt: "are / schoolbags / There / five /table / on /the. →",
-            parts: [
-              {
-                p: 0,
-              },
-              {
-                p: 1,
-              },
-            ],
+            parts: [{ p: 0 }, { p: 1 }],
             formText:
               "are / schoolbags / There / five /table / on /the.\n → ___________________________________\u000b",
             kind: "line",
@@ -3398,11 +2264,7 @@ export const HS_LESSONS = [
             key: "hsLesson06|ex2|my / a / new / student. / is / friend / from / america. →",
             n: 2,
             prompt: "my / a / new / student. / is / friend / from / America. →",
-            parts: [
-              {
-                p: 2,
-              },
-            ],
+            parts: [{ p: 2 }],
             formText:
               "my / a / new / student. / is / friend / from / America.\u000b → __________________________________\u000b",
             kind: "line",
@@ -3412,11 +2274,7 @@ export const HS_LESSONS = [
             n: 3,
             prompt:
               "a / classroom / a / big / is / There / teacher's / desk. / in. →",
-            parts: [
-              {
-                p: 3,
-              },
-            ],
+            parts: [{ p: 3 }],
             formText:
               "a / classroom / a / big / is / There / teacher's / desk. / in.\u000b → _______________________________________",
             kind: "line",
@@ -3449,13 +2307,7 @@ export const HS_LESSONS = [
             key: "hsLesson06|ex3|đếm được – số ít (singular)",
             n: 1,
             prompt: "Đếm được – Số ít (Singular)",
-            parts: [
-              {
-                t: 0,
-                r: 2,
-                c: 0,
-              },
-            ],
+            parts: [{ t: 0, r: 2, c: 0 }],
             formText: "",
             kind: "grid",
           },
@@ -3463,13 +2315,7 @@ export const HS_LESSONS = [
             key: "hsLesson06|ex3|số nhiều (plural)",
             n: 2,
             prompt: "Số nhiều (Plural)",
-            parts: [
-              {
-                t: 0,
-                r: 2,
-                c: 1,
-              },
-            ],
+            parts: [{ t: 0, r: 2, c: 1 }],
             formText: "",
             kind: "grid",
           },
@@ -3477,13 +2323,7 @@ export const HS_LESSONS = [
             key: "hsLesson06|ex3|không đếm được",
             n: 3,
             prompt: "Không đếm được",
-            parts: [
-              {
-                t: 0,
-                r: 2,
-                c: 2,
-              },
-            ],
+            parts: [{ t: 0, r: 2, c: 2 }],
             formText: "",
             kind: "grid",
           },
@@ -3516,14 +2356,7 @@ export const HS_LESSONS = [
             key: "hsLesson06|ex4|photo →",
             n: 1,
             prompt: "photo →",
-            parts: [
-              {
-                t: 0,
-                r: 0,
-                c: 0,
-                p: 0,
-              },
-            ],
+            parts: [{ t: 0, r: 0, c: 0, p: 0 }],
             formText: "photo → ",
             kind: "blank",
           },
@@ -3531,14 +2364,7 @@ export const HS_LESSONS = [
             key: "hsLesson06|ex4|chair →",
             n: 2,
             prompt: "chair →",
-            parts: [
-              {
-                t: 0,
-                r: 0,
-                c: 0,
-                p: 1,
-              },
-            ],
+            parts: [{ t: 0, r: 0, c: 0, p: 1 }],
             formText: "chair → ",
             kind: "blank",
           },
@@ -3546,14 +2372,7 @@ export const HS_LESSONS = [
             key: "hsLesson06|ex4|pen →",
             n: 3,
             prompt: "pen →",
-            parts: [
-              {
-                t: 0,
-                r: 0,
-                c: 0,
-                p: 2,
-              },
-            ],
+            parts: [{ t: 0, r: 0, c: 0, p: 2 }],
             formText: "pen → ",
             kind: "blank",
           },
@@ -3561,14 +2380,7 @@ export const HS_LESSONS = [
             key: "hsLesson06|ex4|laptop →",
             n: 4,
             prompt: "laptop →",
-            parts: [
-              {
-                t: 0,
-                r: 0,
-                c: 0,
-                p: 3,
-              },
-            ],
+            parts: [{ t: 0, r: 0, c: 0, p: 3 }],
             formText: "laptop → ",
             kind: "blank",
           },
@@ -3576,14 +2388,7 @@ export const HS_LESSONS = [
             key: "hsLesson06|ex4|car →",
             n: 5,
             prompt: "car →",
-            parts: [
-              {
-                t: 0,
-                r: 0,
-                c: 0,
-                p: 4,
-              },
-            ],
+            parts: [{ t: 0, r: 0, c: 0, p: 4 }],
             formText: "car → ",
             kind: "blank",
           },
@@ -3591,14 +2396,7 @@ export const HS_LESSONS = [
             key: "hsLesson06|ex4|bus →",
             n: 6,
             prompt: "bus →",
-            parts: [
-              {
-                t: 0,
-                r: 0,
-                c: 1,
-                p: 0,
-              },
-            ],
+            parts: [{ t: 0, r: 0, c: 1, p: 0 }],
             formText: "bus → ",
             kind: "blank",
           },
@@ -3606,14 +2404,7 @@ export const HS_LESSONS = [
             key: "hsLesson06|ex4|box →",
             n: 7,
             prompt: "box →",
-            parts: [
-              {
-                t: 0,
-                r: 0,
-                c: 1,
-                p: 1,
-              },
-            ],
+            parts: [{ t: 0, r: 0, c: 1, p: 1 }],
             formText: "box → ",
             kind: "blank",
           },
@@ -3621,14 +2412,7 @@ export const HS_LESSONS = [
             key: "hsLesson06|ex4|tomato →",
             n: 8,
             prompt: "tomato →",
-            parts: [
-              {
-                t: 0,
-                r: 0,
-                c: 1,
-                p: 2,
-              },
-            ],
+            parts: [{ t: 0, r: 0, c: 1, p: 2 }],
             formText: "tomato → ",
             kind: "blank",
           },
@@ -3636,14 +2420,7 @@ export const HS_LESSONS = [
             key: "hsLesson06|ex4|child →",
             n: 9,
             prompt: "child →",
-            parts: [
-              {
-                t: 0,
-                r: 0,
-                c: 1,
-                p: 3,
-              },
-            ],
+            parts: [{ t: 0, r: 0, c: 1, p: 3 }],
             formText: "child → ",
             kind: "blank",
           },
@@ -3651,14 +2428,7 @@ export const HS_LESSONS = [
             key: "hsLesson06|ex4|tooth →",
             n: 10,
             prompt: "tooth →",
-            parts: [
-              {
-                t: 0,
-                r: 0,
-                c: 1,
-                p: 4,
-              },
-            ],
+            parts: [{ t: 0, r: 0, c: 1, p: 4 }],
             formText: "tooth → ",
             kind: "blank",
           },
@@ -3740,18 +2510,8 @@ export const HS_LESSONS = [
             n: 1,
             prompt: "Tôi sống trong một căn hộ nhỏ.",
             hint: "flat /ˈflæt/: căn hộ",
-            parts: [
-              {
-                t: 0,
-                r: 1,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 1,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 1, c: 2 }],
+            fb: { t: 0, r: 1, c: 4 },
             kind: "vi_en",
           },
           {
@@ -3759,18 +2519,8 @@ export const HS_LESSONS = [
             n: 2,
             prompt: "Bố tôi làm việc ở một cửa hàng bách hóa.",
             hint: "department store /dɪˈpɑːtmənt stɔː(r)/: cửa hàng bách hóa",
-            parts: [
-              {
-                t: 0,
-                r: 2,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 2,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 2, c: 2 }],
+            fb: { t: 0, r: 2, c: 4 },
             kind: "vi_en",
           },
           {
@@ -3778,18 +2528,8 @@ export const HS_LESSONS = [
             n: 3,
             prompt: "Cô ấy là giáo viên ở một trường tiểu học.",
             hint: "primary school /ˈpraɪməri skuːl/: trường tiểu học",
-            parts: [
-              {
-                t: 0,
-                r: 3,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 3,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 3, c: 2 }],
+            fb: { t: 0, r: 3, c: 4 },
             kind: "vi_en",
           },
           {
@@ -3797,18 +2537,8 @@ export const HS_LESSONS = [
             n: 4,
             prompt: "Cô ấy sống trong một căn hộ lớn ở trung tâm thành phố.",
             hint: "flat /ˈflæt/: căn hộ; city center /ˈsɪti ˈsentə(r)/: trung tâm thành phố",
-            parts: [
-              {
-                t: 0,
-                r: 4,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 4,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 4, c: 2 }],
+            fb: { t: 0, r: 4, c: 4 },
             kind: "vi_en",
           },
           {
@@ -3816,18 +2546,8 @@ export const HS_LESSONS = [
             n: 5,
             prompt: "Anh trai tôi làm việc trong một cửa hàng bách hóa lớn.",
             hint: "department store /dɪˈpɑːtmənt stɔː(r)/: cửa hàng bách hóa",
-            parts: [
-              {
-                t: 0,
-                r: 5,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 5,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 5, c: 2 }],
+            fb: { t: 0, r: 5, c: 4 },
             kind: "vi_en",
           },
         ],
@@ -3842,36 +2562,22 @@ export const HS_LESSONS = [
         instruction:
           "Exercise 2: Write the correct form of the verb. Chia động từ trong ngoặc ở thì hiện tại đơn.",
         paras: [
-          {
-            text: "My friend often _____________(study) in the library.",
-          },
+          { text: "My friend often _____________(study) in the library." },
           {
             text: "The teacher _____________ (not/have) a new spiral notebook.",
           },
-          {
-            text: "We always _____________ (share) our school supplies.",
-          },
-          {
-            text: "My brother _____________(play) judo on Saturdays.",
-          },
+          { text: "We always _____________ (share) our school supplies." },
+          { text: "My brother _____________(play) judo on Saturdays." },
           {
             text: "I _____________(remember) to bring my folder and backpack every day.",
           },
-          {
-            text: "My father_____________(teach) Science at my school.",
-          },
-          {
-            text: "We _____________ (not/watch) TV in the school dormitory.",
-          },
+          { text: "My father_____________(teach) Science at my school." },
+          { text: "We _____________ (not/watch) TV in the school dormitory." },
           {
             text: "The pupils _____________ (be) very excited about the new school year.",
           },
-          {
-            text: "He ________________ (not/have) a pencil sharpener.",
-          },
-          {
-            text: "The school _____________(be) in a quiet neighbourhood.",
-          },
+          { text: "He ________________ (not/have) a pencil sharpener." },
+          { text: "The school _____________(be) in a quiet neighbourhood." },
         ],
         tables: [],
         items: [
@@ -3879,11 +2585,7 @@ export const HS_LESSONS = [
             key: "hsLesson07|ex2|my friend often (study) in the library.",
             n: 1,
             prompt: "My friend often (study) in the library.",
-            parts: [
-              {
-                p: 0,
-              },
-            ],
+            parts: [{ p: 0 }],
             formText: "My friend often _____________(study) in the library.",
             kind: "blank",
           },
@@ -3891,11 +2593,7 @@ export const HS_LESSONS = [
             key: "hsLesson07|ex2|the teacher (not/have) a new spiral notebook.",
             n: 2,
             prompt: "The teacher (not/have) a new spiral notebook.",
-            parts: [
-              {
-                p: 1,
-              },
-            ],
+            parts: [{ p: 1 }],
             formText:
               "The teacher _____________ (not/have) a new spiral notebook.",
             kind: "blank",
@@ -3904,11 +2602,7 @@ export const HS_LESSONS = [
             key: "hsLesson07|ex2|we always (share) our school supplies.",
             n: 3,
             prompt: "We always (share) our school supplies.",
-            parts: [
-              {
-                p: 2,
-              },
-            ],
+            parts: [{ p: 2 }],
             formText: "We always _____________ (share) our school supplies.",
             kind: "blank",
           },
@@ -3916,11 +2610,7 @@ export const HS_LESSONS = [
             key: "hsLesson07|ex2|my brother (play) judo on saturdays.",
             n: 4,
             prompt: "My brother (play) judo on Saturdays.",
-            parts: [
-              {
-                p: 3,
-              },
-            ],
+            parts: [{ p: 3 }],
             formText: "My brother _____________(play) judo on Saturdays.",
             kind: "blank",
           },
@@ -3928,11 +2618,7 @@ export const HS_LESSONS = [
             key: "hsLesson07|ex2|i (remember) to bring my folder and backpack every day.",
             n: 5,
             prompt: "I (remember) to bring my folder and backpack every day.",
-            parts: [
-              {
-                p: 4,
-              },
-            ],
+            parts: [{ p: 4 }],
             formText:
               "I _____________(remember) to bring my folder and backpack every day.",
             kind: "blank",
@@ -3941,11 +2627,7 @@ export const HS_LESSONS = [
             key: "hsLesson07|ex2|my father (teach) science at my school.",
             n: 6,
             prompt: "My father (teach) Science at my school.",
-            parts: [
-              {
-                p: 5,
-              },
-            ],
+            parts: [{ p: 5 }],
             formText: "My father_____________(teach) Science at my school.",
             kind: "blank",
           },
@@ -3953,11 +2635,7 @@ export const HS_LESSONS = [
             key: "hsLesson07|ex2|we (not/watch) tv in the school dormitory.",
             n: 7,
             prompt: "We (not/watch) TV in the school dormitory.",
-            parts: [
-              {
-                p: 6,
-              },
-            ],
+            parts: [{ p: 6 }],
             formText:
               "We _____________ (not/watch) TV in the school dormitory.",
             kind: "blank",
@@ -3966,11 +2644,7 @@ export const HS_LESSONS = [
             key: "hsLesson07|ex2|the pupils (be) very excited about the new school year.",
             n: 8,
             prompt: "The pupils (be) very excited about the new school year.",
-            parts: [
-              {
-                p: 7,
-              },
-            ],
+            parts: [{ p: 7 }],
             formText:
               "The pupils _____________ (be) very excited about the new school year.",
             kind: "blank",
@@ -3979,11 +2653,7 @@ export const HS_LESSONS = [
             key: "hsLesson07|ex2|he (not/have) a pencil sharpener.",
             n: 9,
             prompt: "He (not/have) a pencil sharpener.",
-            parts: [
-              {
-                p: 8,
-              },
-            ],
+            parts: [{ p: 8 }],
             formText: "He ________________ (not/have) a pencil sharpener.",
             kind: "blank",
           },
@@ -3991,11 +2661,7 @@ export const HS_LESSONS = [
             key: "hsLesson07|ex2|the school (be) in a quiet neighbourhood.",
             n: 10,
             prompt: "The school (be) in a quiet neighbourhood.",
-            parts: [
-              {
-                p: 9,
-              },
-            ],
+            parts: [{ p: 9 }],
             formText: "The school _____________(be) in a quiet neighbourhood.",
             kind: "blank",
           },
@@ -4027,11 +2693,7 @@ export const HS_LESSONS = [
             key: "hsLesson07|ex3|our / she / new / likes / uniform / school's. →",
             n: 1,
             prompt: "our / She / new / likes / uniform / school's. →",
-            parts: [
-              {
-                p: 0,
-              },
-            ],
+            parts: [{ p: 0 }],
             formText:
               "our / She / new / likes / uniform / school's. → _________________",
             kind: "line",
@@ -4041,11 +2703,7 @@ export const HS_LESSONS = [
             n: 2,
             prompt:
               "my / usually / I / with / do / my / homework / classmates. →",
-            parts: [
-              {
-                p: 1,
-              },
-            ],
+            parts: [{ p: 1 }],
             formText:
               "my / usually / I / with / do / my / homework / classmates. → _____________",
             kind: "line",
@@ -4054,11 +2712,7 @@ export const HS_LESSONS = [
             key: "hsLesson07|ex3|is / a / he / student / private / school. / in / a. →",
             n: 3,
             prompt: "is / a / He / student / private / school. / in / a. →",
-            parts: [
-              {
-                p: 2,
-              },
-            ],
+            parts: [{ p: 2 }],
             formText:
               "is / a / He / student / private / school. / in / a. → _____________",
             kind: "line",
@@ -4138,18 +2792,8 @@ export const HS_LESSONS = [
             n: 1,
             prompt: "Cô ấy đang rửa tay trong bồn rửa.",
             hint: "sink /sɪŋk/: bồn rửa",
-            parts: [
-              {
-                t: 0,
-                r: 1,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 1,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 1, c: 2 }],
+            fb: { t: 0, r: 1, c: 4 },
             kind: "vi_en",
           },
           {
@@ -4157,18 +2801,8 @@ export const HS_LESSONS = [
             n: 2,
             prompt: "Tôi đang chuyển bàn ra ga-ra",
             hint: "garage /ˈɡærɑːʒ/: ga-ra; move /muːv/: chuyển",
-            parts: [
-              {
-                t: 0,
-                r: 2,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 2,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 2, c: 2 }],
+            fb: { t: 0, r: 2, c: 4 },
             kind: "vi_en",
           },
           {
@@ -4176,18 +2810,8 @@ export const HS_LESSONS = [
             n: 3,
             prompt: "Anh ấy lau chùi tủ bát mỗi tuần.",
             hint: "cupboard /ˈkʌbəd/: tủ",
-            parts: [
-              {
-                t: 0,
-                r: 3,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 3,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 3, c: 2 }],
+            fb: { t: 0, r: 3, c: 4 },
             kind: "vi_en",
           },
           {
@@ -4195,18 +2819,8 @@ export const HS_LESSONS = [
             n: 4,
             prompt: "Mẹ tôi đang đặt đĩa vào trong máy rửa chén.",
             hint: "dishwasher /ˈdɪʃwɒʃə(r)/: máy rửa chén",
-            parts: [
-              {
-                t: 0,
-                r: 4,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 4,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 4, c: 2 }],
+            fb: { t: 0, r: 4, c: 4 },
             kind: "vi_en",
           },
           {
@@ -4214,18 +2828,8 @@ export const HS_LESSONS = [
             n: 5,
             prompt: "Anh ấy thường kiểm tra tủ lạnh vào buổi sáng.",
             hint: "fridge /frɪdʒ/: tủ lạnh",
-            parts: [
-              {
-                t: 0,
-                r: 5,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 5,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 5, c: 2 }],
+            fb: { t: 0, r: 5, c: 4 },
             kind: "vi_en",
           },
         ],
@@ -4240,36 +2844,22 @@ export const HS_LESSONS = [
         instruction:
           'Exercise 2: Write the correct form of the verb and explain the reason. Chia động từ trong ngoặc ở thì hiện tại đơn hoặc hiện tại tiếp diễn + GIẢI THÍCH LÝ DO VD: She usually (go) to school by bike. => She usually goes to school by bike. Giải thích: Có từ "usually" = thường xuyên → diễn tả thói quen → dùng Hiện tại đơn.',
         paras: [
-          {
-            text: "What ____you____ (you/do) at present?",
-          },
+          { text: "What ____you____ (you/do) at present?" },
           {
             text: "My sister usually ________ (move) the furniture in her bedroom.",
           },
-          {
-            text: "They _____ (not/watch) TV every night.",
-          },
-          {
-            text: "The children ________ (play) in the garage now.",
-          },
-          {
-            text: "My house ________ (have) a big garden.",
-          },
-          {
-            text: "She _________ (not/clean) the kitchen at the moment.",
-          },
+          { text: "They _____ (not/watch) TV every night." },
+          { text: "The children ________ (play) in the garage now." },
+          { text: "My house ________ (have) a big garden." },
+          { text: "She _________ (not/clean) the kitchen at the moment." },
           {
             text: "I always _________ (put) my kitchen tools in the cupboard.",
           },
           {
             text: "Where ________ (be) the blanket? It _______ (be) on the sofa.",
           },
-          {
-            text: "We _________ (live) in a beautiful country house.",
-          },
-          {
-            text: "The alarm clock _______ (ring) at 6 a.m every morning.",
-          },
+          { text: "We _________ (live) in a beautiful country house." },
+          { text: "The alarm clock _______ (ring) at 6 a.m every morning." },
         ],
         tables: [],
         items: [
@@ -4277,11 +2867,7 @@ export const HS_LESSONS = [
             key: "hsLesson08|ex2|what you (you/do) at present?",
             n: 1,
             prompt: "What you (you/do) at present?",
-            parts: [
-              {
-                p: 0,
-              },
-            ],
+            parts: [{ p: 0 }],
             formText: "What ____you____ (you/do) at present?",
             kind: "blank_reason",
           },
@@ -4289,11 +2875,7 @@ export const HS_LESSONS = [
             key: "hsLesson08|ex2|my sister usually (move) the furniture in her bedroom.",
             n: 2,
             prompt: "My sister usually (move) the furniture in her bedroom.",
-            parts: [
-              {
-                p: 1,
-              },
-            ],
+            parts: [{ p: 1 }],
             formText:
               "My sister usually ________ (move) the furniture in her bedroom.",
             kind: "blank_reason",
@@ -4302,11 +2884,7 @@ export const HS_LESSONS = [
             key: "hsLesson08|ex2|they (not/watch) tv every night.",
             n: 3,
             prompt: "They (not/watch) TV every night.",
-            parts: [
-              {
-                p: 2,
-              },
-            ],
+            parts: [{ p: 2 }],
             formText: "They _____ (not/watch) TV every night.",
             kind: "blank_reason",
           },
@@ -4314,11 +2892,7 @@ export const HS_LESSONS = [
             key: "hsLesson08|ex2|the children (play) in the garage now.",
             n: 4,
             prompt: "The children (play) in the garage now.",
-            parts: [
-              {
-                p: 3,
-              },
-            ],
+            parts: [{ p: 3 }],
             formText: "The children ________ (play) in the garage now.",
             kind: "blank_reason",
           },
@@ -4326,11 +2900,7 @@ export const HS_LESSONS = [
             key: "hsLesson08|ex2|my house (have) a big garden.",
             n: 5,
             prompt: "My house (have) a big garden.",
-            parts: [
-              {
-                p: 4,
-              },
-            ],
+            parts: [{ p: 4 }],
             formText: "My house ________ (have) a big garden.",
             kind: "blank_reason",
           },
@@ -4338,11 +2908,7 @@ export const HS_LESSONS = [
             key: "hsLesson08|ex2|she (not/clean) the kitchen at the moment.",
             n: 6,
             prompt: "She (not/clean) the kitchen at the moment.",
-            parts: [
-              {
-                p: 5,
-              },
-            ],
+            parts: [{ p: 5 }],
             formText: "She _________ (not/clean) the kitchen at the moment.",
             kind: "blank_reason",
           },
@@ -4350,11 +2916,7 @@ export const HS_LESSONS = [
             key: "hsLesson08|ex2|i always (put) my kitchen tools in the cupboard.",
             n: 7,
             prompt: "I always (put) my kitchen tools in the cupboard.",
-            parts: [
-              {
-                p: 6,
-              },
-            ],
+            parts: [{ p: 6 }],
             formText:
               "I always _________ (put) my kitchen tools in the cupboard.",
             kind: "blank_reason",
@@ -4363,11 +2925,7 @@ export const HS_LESSONS = [
             key: "hsLesson08|ex2|where (be) the blanket? it (be) on the sofa.",
             n: 8,
             prompt: "Where (be) the blanket? It (be) on the sofa.",
-            parts: [
-              {
-                p: 7,
-              },
-            ],
+            parts: [{ p: 7 }],
             formText:
               "Where ________ (be) the blanket? It _______ (be) on the sofa.",
             kind: "blank_reason",
@@ -4376,11 +2934,7 @@ export const HS_LESSONS = [
             key: "hsLesson08|ex2|we (live) in a beautiful country house.",
             n: 9,
             prompt: "We (live) in a beautiful country house.",
-            parts: [
-              {
-                p: 8,
-              },
-            ],
+            parts: [{ p: 8 }],
             formText: "We _________ (live) in a beautiful country house.",
             kind: "blank_reason",
           },
@@ -4388,11 +2942,7 @@ export const HS_LESSONS = [
             key: "hsLesson08|ex2|the alarm clock (ring) at 6 a.m every morning.",
             n: 10,
             prompt: "The alarm clock (ring) at 6 a.m every morning.",
-            parts: [
-              {
-                p: 9,
-              },
-            ],
+            parts: [{ p: 9 }],
             formText: "The alarm clock _______ (ring) at 6 a.m every morning.",
             kind: "blank_reason",
           },
@@ -4431,11 +2981,7 @@ export const HS_LESSONS = [
             n: 1,
             prompt:
               "is / the / bathroom. / the / My / at / mom / cleaning / moment. →",
-            parts: [
-              {
-                p: 0,
-              },
-            ],
+            parts: [{ p: 0 }],
             formText:
               "is / the / bathroom. / the / My / at / mom / cleaning / moment. → _________________",
             kind: "line",
@@ -4444,11 +2990,7 @@ export const HS_LESSONS = [
             key: "hsLesson08|ex3|every / i / morning. / use /alarm clock / an. →",
             n: 2,
             prompt: "every / I / morning. / use /alarm clock / an. →",
-            parts: [
-              {
-                p: 1,
-              },
-            ],
+            parts: [{ p: 1 }],
             formText:
               "every / I / morning. / use /alarm clock / an. →_________________",
             kind: "line",
@@ -4458,11 +3000,7 @@ export const HS_LESSONS = [
             n: 3,
             prompt:
               "dining room / a / big / Our / and / has / table / chairs. →",
-            parts: [
-              {
-                p: 2,
-              },
-            ],
+            parts: [{ p: 2 }],
             formText:
               "dining room / a  / big / Our / and / has / table / chairs. → _________________",
             kind: "line",
@@ -4471,11 +3009,7 @@ export const HS_LESSONS = [
             key: "hsLesson08|ex3|front / of / is / garage. / in / the / car / my. →",
             n: 4,
             prompt: "front / of / is / garage. / in / The / car / my. →",
-            parts: [
-              {
-                p: 3,
-              },
-            ],
+            parts: [{ p: 3 }],
             formText:
               "front / of / is / garage. / in / The / car / my. → _________________",
             kind: "line",
@@ -4485,11 +3019,7 @@ export const HS_LESSONS = [
             n: 5,
             prompt:
               "is / the/ the / between / and / The / chest of drawers. / bed / wardrobe. →.",
-            parts: [
-              {
-                p: 4,
-              },
-            ],
+            parts: [{ p: 4 }],
             formText:
               "is / the/ the  / between / and / The / chest of drawers. / bed / wardrobe. →. _________________",
             kind: "line",
@@ -4569,18 +3099,8 @@ export const HS_LESSONS = [
             n: 1,
             prompt: "Căn hộ của tôi nhỏ hơn căn nhà của bạn.",
             hint: "flat /ˈflæt/: căn hộ; small /ˈsmɔːl/: nhỏ",
-            parts: [
-              {
-                t: 0,
-                r: 1,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 1,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 1, c: 2 }],
+            fb: { t: 0, r: 1, c: 4 },
             kind: "vi_en",
           },
           {
@@ -4588,18 +3108,8 @@ export const HS_LESSONS = [
             n: 2,
             prompt: "Chiếc bàn này dài hơn chiếc bàn kia.",
             hint: "table /ˈteɪbl/: bàn; long /ˈlɒŋ/: dài",
-            parts: [
-              {
-                t: 0,
-                r: 2,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 2,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 2, c: 2 }],
+            fb: { t: 0, r: 2, c: 4 },
             kind: "vi_en",
           },
           {
@@ -4607,18 +3117,8 @@ export const HS_LESSONS = [
             n: 3,
             prompt: "Chiếc ghế của tôi nhẹ hơn chiếc ghế của anh ấy.",
             hint: "chair /tʃeə(r)/: ghế; light /ˈlaɪt/: nhẹ",
-            parts: [
-              {
-                t: 0,
-                r: 3,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 3,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 3, c: 2 }],
+            fb: { t: 0, r: 3, c: 4 },
             kind: "vi_en",
           },
           {
@@ -4626,18 +3126,8 @@ export const HS_LESSONS = [
             n: 4,
             prompt: "Căn phòng này sáng hơn căn phòng kia.",
             hint: "room /ruːm/: phòng; bright /ˈbraɪt/: sáng",
-            parts: [
-              {
-                t: 0,
-                r: 4,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 4,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 4, c: 2 }],
+            fb: { t: 0, r: 4, c: 4 },
             kind: "vi_en",
           },
           {
@@ -4645,18 +3135,8 @@ export const HS_LESSONS = [
             n: 5,
             prompt: "Cái tủ lạnh này đắt hơn cái tủ bếp.",
             hint: "fridge /frɪdʒ/: tủ lạnh; cupboard /ˈkʌbəd/: tủ bếp",
-            parts: [
-              {
-                t: 0,
-                r: 5,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 5,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 5, c: 2 }],
+            fb: { t: 0, r: 5, c: 4 },
             kind: "vi_en",
           },
         ],
@@ -4700,208 +3180,112 @@ export const HS_LESSONS = [
             key: "hsLesson09|ex2|a laptop",
             n: 1,
             prompt: "a laptop",
-            parts: [
-              {
-                t: 0,
-                r: 1,
-                c: 2,
-              },
-            ],
+            parts: [{ t: 0, r: 1, c: 2 }],
             kind: "blank",
           },
           {
             key: "hsLesson09|ex2|a hero",
             n: 2,
             prompt: "a hero",
-            parts: [
-              {
-                t: 0,
-                r: 1,
-                c: 5,
-              },
-            ],
+            parts: [{ t: 0, r: 1, c: 5 }],
             kind: "blank",
           },
           {
             key: "hsLesson09|ex2|a box",
             n: 3,
             prompt: "a box",
-            parts: [
-              {
-                t: 0,
-                r: 2,
-                c: 2,
-              },
-            ],
+            parts: [{ t: 0, r: 2, c: 2 }],
             kind: "blank",
           },
           {
             key: "hsLesson09|ex2|a photo",
             n: 4,
             prompt: "a photo",
-            parts: [
-              {
-                t: 0,
-                r: 2,
-                c: 5,
-              },
-            ],
+            parts: [{ t: 0, r: 2, c: 5 }],
             kind: "blank",
           },
           {
             key: "hsLesson09|ex2|a watch",
             n: 5,
             prompt: "a watch",
-            parts: [
-              {
-                t: 0,
-                r: 3,
-                c: 2,
-              },
-            ],
+            parts: [{ t: 0, r: 3, c: 2 }],
             kind: "blank",
           },
           {
             key: "hsLesson09|ex2|a phone",
             n: 6,
             prompt: "a phone",
-            parts: [
-              {
-                t: 0,
-                r: 3,
-                c: 5,
-              },
-            ],
+            parts: [{ t: 0, r: 3, c: 5 }],
             kind: "blank",
           },
           {
             key: "hsLesson09|ex2|a brush",
             n: 7,
             prompt: "a brush",
-            parts: [
-              {
-                t: 0,
-                r: 4,
-                c: 2,
-              },
-            ],
+            parts: [{ t: 0, r: 4, c: 2 }],
             kind: "blank",
           },
           {
             key: "hsLesson09|ex2|a house",
             n: 8,
             prompt: "a house",
-            parts: [
-              {
-                t: 0,
-                r: 4,
-                c: 5,
-              },
-            ],
+            parts: [{ t: 0, r: 4, c: 5 }],
             kind: "blank",
           },
           {
             key: "hsLesson09|ex2|a quiz",
             n: 9,
             prompt: "a quiz",
-            parts: [
-              {
-                t: 0,
-                r: 5,
-                c: 2,
-              },
-            ],
+            parts: [{ t: 0, r: 5, c: 2 }],
             kind: "blank",
           },
           {
             key: "hsLesson09|ex2|a car",
             n: 10,
             prompt: "a car",
-            parts: [
-              {
-                t: 0,
-                r: 5,
-                c: 5,
-              },
-            ],
+            parts: [{ t: 0, r: 5, c: 5 }],
             kind: "blank",
           },
           {
             key: "hsLesson09|ex2|a class",
             n: 11,
             prompt: "a class",
-            parts: [
-              {
-                t: 0,
-                r: 6,
-                c: 2,
-              },
-            ],
+            parts: [{ t: 0, r: 6, c: 2 }],
             kind: "blank",
           },
           {
             key: "hsLesson09|ex2|a dog",
             n: 12,
             prompt: "a dog",
-            parts: [
-              {
-                t: 0,
-                r: 6,
-                c: 5,
-              },
-            ],
+            parts: [{ t: 0, r: 6, c: 5 }],
             kind: "blank",
           },
           {
             key: "hsLesson09|ex2|a tomato",
             n: 13,
             prompt: "a tomato",
-            parts: [
-              {
-                t: 0,
-                r: 7,
-                c: 2,
-              },
-            ],
+            parts: [{ t: 0, r: 7, c: 2 }],
             kind: "blank",
           },
           {
             key: "hsLesson09|ex2|a potato",
             n: 14,
             prompt: "a potato",
-            parts: [
-              {
-                t: 0,
-                r: 7,
-                c: 5,
-              },
-            ],
+            parts: [{ t: 0, r: 7, c: 5 }],
             kind: "blank",
           },
           {
             key: "hsLesson09|ex2|a church",
             n: 15,
             prompt: "a church",
-            parts: [
-              {
-                t: 0,
-                r: 8,
-                c: 2,
-              },
-            ],
+            parts: [{ t: 0, r: 8, c: 2 }],
             kind: "blank",
           },
           {
             key: "hsLesson09|ex2|a bus",
             n: 16,
             prompt: "a bus",
-            parts: [
-              {
-                t: 0,
-                r: 8,
-                c: 5,
-              },
-            ],
+            parts: [{ t: 0, r: 8, c: 5 }],
             kind: "blank",
           },
         ],
@@ -4944,11 +3328,7 @@ export const HS_LESSONS = [
             key: "hsLesson09|ex3|the students with new backpacks (is/am/are) beautiful",
             n: 1,
             prompt: "The students with new backpacks (is/am/are) beautiful",
-            parts: [
-              {
-                p: 0,
-              },
-            ],
+            parts: [{ p: 0 }],
             options: ["is", "am", "are"],
             group: "(is/am/are)",
             formText: "The students with new backpacks (is/am/are) beautiful",
@@ -4959,11 +3339,7 @@ export const HS_LESSONS = [
             n: 2,
             prompt:
               "The teachers at the international school (teach/teaches) well",
-            parts: [
-              {
-                p: 1,
-              },
-            ],
+            parts: [{ p: 1 }],
             options: ["teach", "teaches"],
             group: "(teach/teaches)",
             formText:
@@ -4974,11 +3350,7 @@ export const HS_LESSONS = [
             key: "hsLesson09|ex3|the books on the shelf (is/am/are) new",
             n: 3,
             prompt: "The books on the shelf (is/am/are) new",
-            parts: [
-              {
-                p: 2,
-              },
-            ],
+            parts: [{ p: 2 }],
             options: ["is", "am", "are"],
             group: "(is/am/are)",
             formText: "The books on the shelf (is/am/are) new",
@@ -4988,11 +3360,7 @@ export const HS_LESSONS = [
             key: "hsLesson09|ex3|the old building in the neighborhood (was/were) damaged",
             n: 4,
             prompt: "The old building in the neighborhood (was/were) damaged",
-            parts: [
-              {
-                p: 3,
-              },
-            ],
+            parts: [{ p: 3 }],
             options: ["was", "were"],
             group: "(was/were)",
             formText:
@@ -5003,11 +3371,7 @@ export const HS_LESSONS = [
             key: "hsLesson09|ex3|the boy in the classrooms often (play/plays) games",
             n: 5,
             prompt: "The boy in the classrooms often (play/plays) games",
-            parts: [
-              {
-                p: 4,
-              },
-            ],
+            parts: [{ p: 4 }],
             options: ["play", "plays"],
             group: "(play/plays)",
             formText: "The boy in the classrooms often (play/plays) games",
@@ -5030,10 +3394,7 @@ export const HS_LESSONS = [
             flags:
               ",,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,",
           },
-          {
-            text: "Dịch: ",
-            flags: ",,,,,",
-          },
+          { text: "Dịch: ", flags: ",,,,," },
           {
             text: "___________________________________________________________________________________________",
             flags:
@@ -5057,23 +3418,7 @@ export const HS_LESSONS = [
             n: 1,
             prompt:
               "My classmates from the international boarding school always help me. The backpack with colorful art designs contains a calculator, and the photos on the chalkboard inspire every student.",
-            parts: [
-              {
-                p: 0,
-              },
-              {
-                p: 1,
-              },
-              {
-                p: 2,
-              },
-              {
-                p: 3,
-              },
-              {
-                p: 4,
-              },
-            ],
+            parts: [{ p: 0 }, { p: 1 }, { p: 2 }, { p: 3 }, { p: 4 }],
             formText:
               "My classmates from the international boarding school always help me. The backpack with colorful art designs contains a calculator, and the photos on the chalkboard inspire every student.\nDịch: \n___________________________________________________________________________________________\n___________________________________________________________________________________________\n___________________________________________________________________________________________",
             kind: "underline_translate",
@@ -5155,18 +3500,8 @@ export const HS_LESSONS = [
             n: 1,
             prompt: "Tôi có một cái cốc trong bếp.",
             hint: "cup /kʌp/: cái cốc",
-            parts: [
-              {
-                t: 0,
-                r: 2,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 2,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 2, c: 2 }],
+            fb: { t: 0, r: 2, c: 4 },
             kind: "vi_en",
           },
           {
@@ -5174,18 +3509,8 @@ export const HS_LESSONS = [
             n: 2,
             prompt: "Con mèo đang ở dưới bàn.",
             hint: "under /ˈʌndə(r)/: dưới; table /ˈteɪbl/: bàn",
-            parts: [
-              {
-                t: 0,
-                r: 3,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 3,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 3, c: 2 }],
+            fb: { t: 0, r: 3, c: 4 },
             kind: "vi_en",
           },
           {
@@ -5193,18 +3518,8 @@ export const HS_LESSONS = [
             n: 3,
             prompt: "Chúng tôi ăn trưa với bạn bè.",
             hint: "lunch /lʌntʃ/: bữa trưa",
-            parts: [
-              {
-                t: 0,
-                r: 4,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 4,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 4, c: 2 }],
+            fb: { t: 0, r: 4, c: 4 },
             kind: "vi_en",
           },
           {
@@ -5212,18 +3527,8 @@ export const HS_LESSONS = [
             n: 4,
             prompt: "Cha tôi đỗ xe trong nhà để xe.",
             hint: "garage /ˈɡærɑːʒ/: nhà để xe; car /kɑː(r)/: xe hơi",
-            parts: [
-              {
-                t: 0,
-                r: 6,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 6,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 6, c: 2 }],
+            fb: { t: 0, r: 6, c: 4 },
             kind: "vi_en",
           },
           {
@@ -5231,18 +3536,8 @@ export const HS_LESSONS = [
             n: 5,
             prompt: "Căn phòng này rất rộng và tối.",
             hint: "large /lɑːdʒ/: rộng; dark /dɑːk/: tối",
-            parts: [
-              {
-                t: 0,
-                r: 7,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 7,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 7, c: 2 }],
+            fb: { t: 0, r: 7, c: 4 },
             kind: "vi_en",
           },
         ],
@@ -5321,18 +3616,8 @@ export const HS_LESSONS = [
             n: 1,
             prompt: "Cô ấy xem phim vào cuối tuần.",
             hint: "movie /ˈmuːvi/: phim; weekend /ˈwiːkend/: cuối tuần",
-            parts: [
-              {
-                t: 0,
-                r: 2,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 2,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 2, c: 2 }],
+            fb: { t: 0, r: 2, c: 4 },
             kind: "vi_en",
           },
           {
@@ -5340,18 +3625,8 @@ export const HS_LESSONS = [
             n: 2,
             prompt: "Cô ấy có ba chiếc máy tính mới.",
             hint: "",
-            parts: [
-              {
-                t: 0,
-                r: 3,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 3,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 3, c: 2 }],
+            fb: { t: 0, r: 3, c: 4 },
             kind: "vi_en",
           },
           {
@@ -5359,18 +3634,8 @@ export const HS_LESSONS = [
             n: 3,
             prompt: "Cô ấy giặt quần áo bẩn của cô ấy vào buổi tối.",
             hint: "dirty /ˈdɜːrti/: bẩn; clothes /kləʊðz/: quần áo",
-            parts: [
-              {
-                t: 0,
-                r: 5,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 5,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 5, c: 2 }],
+            fb: { t: 0, r: 5, c: 4 },
             kind: "vi_en",
           },
           {
@@ -5378,18 +3643,8 @@ export const HS_LESSONS = [
             n: 4,
             prompt: "Cô ấy cất những cuốn sách của cô ấy vào ba tủ khoá.",
             hint: "put /pʊt/: cất; locker /ˈlɒkə(r)/: tủ khoá",
-            parts: [
-              {
-                t: 0,
-                r: 7,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 7,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 7, c: 2 }],
+            fb: { t: 0, r: 7, c: 4 },
             kind: "vi_en",
           },
           {
@@ -5397,18 +3652,8 @@ export const HS_LESSONS = [
             n: 5,
             prompt: "Cô ấy không bao giờ mượn những chiếc kẹp giấy của tôi.",
             hint: "never /ˈnevə(r)/: không bao giờ; borrow /ˈbɒrəʊ/: mượn; paper clip /ˈpeɪpə klɪp/: kẹp giấy",
-            parts: [
-              {
-                t: 0,
-                r: 8,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 8,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 8, c: 2 }],
+            fb: { t: 0, r: 8, c: 4 },
             kind: "vi_en",
           },
         ],
@@ -5434,11 +3679,7 @@ export const HS_LESSONS = [
             n: 1,
             prompt:
               "My (1) have many hobbies. Tom (2) to collect old (3) and (4) . He also (5) many documentaries about (6) Our teacher, Mrs. Wilson, (7) he is one of the (8) students. He (9) his homework quickly and (10) us with our difficult exercises.",
-            parts: [
-              {
-                p: 0,
-              },
-            ],
+            parts: [{ p: 0 }],
             slot: 0,
             formText:
               "My (1) _________ have many hobbies. Tom (2) ______________  to collect old (3) __________ and (4) _________. He also (5) _________________ many documentaries about (6) __________  Our teacher, Mrs. Wilson, (7) ___________  he is one of the (8) ___________  students. He (9) ____________ his homework quickly and (10) ___________ us with our difficult exercises.",
@@ -5449,11 +3690,7 @@ export const HS_LESSONS = [
             n: 2,
             prompt:
               "My (1) have many hobbies. Tom (2) to collect old (3) and (4) . He also (5) many documentaries about (6) Our teacher, Mrs. Wilson, (7) he is one of the (8) students. He (9) his homework quickly and (10) us with our difficult exercises.",
-            parts: [
-              {
-                p: 0,
-              },
-            ],
+            parts: [{ p: 0 }],
             slot: 1,
             formText:
               "My (1) _________ have many hobbies. Tom (2) ______________  to collect old (3) __________ and (4) _________. He also (5) _________________ many documentaries about (6) __________  Our teacher, Mrs. Wilson, (7) ___________  he is one of the (8) ___________  students. He (9) ____________ his homework quickly and (10) ___________ us with our difficult exercises.",
@@ -5464,11 +3701,7 @@ export const HS_LESSONS = [
             n: 3,
             prompt:
               "My (1) have many hobbies. Tom (2) to collect old (3) and (4) . He also (5) many documentaries about (6) Our teacher, Mrs. Wilson, (7) he is one of the (8) students. He (9) his homework quickly and (10) us with our difficult exercises.",
-            parts: [
-              {
-                p: 0,
-              },
-            ],
+            parts: [{ p: 0 }],
             slot: 2,
             formText:
               "My (1) _________ have many hobbies. Tom (2) ______________  to collect old (3) __________ and (4) _________. He also (5) _________________ many documentaries about (6) __________  Our teacher, Mrs. Wilson, (7) ___________  he is one of the (8) ___________  students. He (9) ____________ his homework quickly and (10) ___________ us with our difficult exercises.",
@@ -5479,11 +3712,7 @@ export const HS_LESSONS = [
             n: 4,
             prompt:
               "My (1) have many hobbies. Tom (2) to collect old (3) and (4) . He also (5) many documentaries about (6) Our teacher, Mrs. Wilson, (7) he is one of the (8) students. He (9) his homework quickly and (10) us with our difficult exercises.",
-            parts: [
-              {
-                p: 0,
-              },
-            ],
+            parts: [{ p: 0 }],
             slot: 3,
             formText:
               "My (1) _________ have many hobbies. Tom (2) ______________  to collect old (3) __________ and (4) _________. He also (5) _________________ many documentaries about (6) __________  Our teacher, Mrs. Wilson, (7) ___________  he is one of the (8) ___________  students. He (9) ____________ his homework quickly and (10) ___________ us with our difficult exercises.",
@@ -5494,11 +3723,7 @@ export const HS_LESSONS = [
             n: 5,
             prompt:
               "My (1) have many hobbies. Tom (2) to collect old (3) and (4) . He also (5) many documentaries about (6) Our teacher, Mrs. Wilson, (7) he is one of the (8) students. He (9) his homework quickly and (10) us with our difficult exercises.",
-            parts: [
-              {
-                p: 0,
-              },
-            ],
+            parts: [{ p: 0 }],
             slot: 4,
             formText:
               "My (1) _________ have many hobbies. Tom (2) ______________  to collect old (3) __________ and (4) _________. He also (5) _________________ many documentaries about (6) __________  Our teacher, Mrs. Wilson, (7) ___________  he is one of the (8) ___________  students. He (9) ____________ his homework quickly and (10) ___________ us with our difficult exercises.",
@@ -5509,11 +3734,7 @@ export const HS_LESSONS = [
             n: 6,
             prompt:
               "My (1) have many hobbies. Tom (2) to collect old (3) and (4) . He also (5) many documentaries about (6) Our teacher, Mrs. Wilson, (7) he is one of the (8) students. He (9) his homework quickly and (10) us with our difficult exercises.",
-            parts: [
-              {
-                p: 0,
-              },
-            ],
+            parts: [{ p: 0 }],
             slot: 5,
             formText:
               "My (1) _________ have many hobbies. Tom (2) ______________  to collect old (3) __________ and (4) _________. He also (5) _________________ many documentaries about (6) __________  Our teacher, Mrs. Wilson, (7) ___________  he is one of the (8) ___________  students. He (9) ____________ his homework quickly and (10) ___________ us with our difficult exercises.",
@@ -5524,11 +3745,7 @@ export const HS_LESSONS = [
             n: 7,
             prompt:
               "My (1) have many hobbies. Tom (2) to collect old (3) and (4) . He also (5) many documentaries about (6) Our teacher, Mrs. Wilson, (7) he is one of the (8) students. He (9) his homework quickly and (10) us with our difficult exercises.",
-            parts: [
-              {
-                p: 0,
-              },
-            ],
+            parts: [{ p: 0 }],
             slot: 6,
             formText:
               "My (1) _________ have many hobbies. Tom (2) ______________  to collect old (3) __________ and (4) _________. He also (5) _________________ many documentaries about (6) __________  Our teacher, Mrs. Wilson, (7) ___________  he is one of the (8) ___________  students. He (9) ____________ his homework quickly and (10) ___________ us with our difficult exercises.",
@@ -5539,11 +3756,7 @@ export const HS_LESSONS = [
             n: 8,
             prompt:
               "My (1) have many hobbies. Tom (2) to collect old (3) and (4) . He also (5) many documentaries about (6) Our teacher, Mrs. Wilson, (7) he is one of the (8) students. He (9) his homework quickly and (10) us with our difficult exercises.",
-            parts: [
-              {
-                p: 0,
-              },
-            ],
+            parts: [{ p: 0 }],
             slot: 7,
             formText:
               "My (1) _________ have many hobbies. Tom (2) ______________  to collect old (3) __________ and (4) _________. He also (5) _________________ many documentaries about (6) __________  Our teacher, Mrs. Wilson, (7) ___________  he is one of the (8) ___________  students. He (9) ____________ his homework quickly and (10) ___________ us with our difficult exercises.",
@@ -5554,11 +3767,7 @@ export const HS_LESSONS = [
             n: 9,
             prompt:
               "My (1) have many hobbies. Tom (2) to collect old (3) and (4) . He also (5) many documentaries about (6) Our teacher, Mrs. Wilson, (7) he is one of the (8) students. He (9) his homework quickly and (10) us with our difficult exercises.",
-            parts: [
-              {
-                p: 0,
-              },
-            ],
+            parts: [{ p: 0 }],
             slot: 8,
             formText:
               "My (1) _________ have many hobbies. Tom (2) ______________  to collect old (3) __________ and (4) _________. He also (5) _________________ many documentaries about (6) __________  Our teacher, Mrs. Wilson, (7) ___________  he is one of the (8) ___________  students. He (9) ____________ his homework quickly and (10) ___________ us with our difficult exercises.",
@@ -5569,11 +3778,7 @@ export const HS_LESSONS = [
             n: 10,
             prompt:
               "My (1) have many hobbies. Tom (2) to collect old (3) and (4) . He also (5) many documentaries about (6) Our teacher, Mrs. Wilson, (7) he is one of the (8) students. He (9) his homework quickly and (10) us with our difficult exercises.",
-            parts: [
-              {
-                p: 0,
-              },
-            ],
+            parts: [{ p: 0 }],
             slot: 9,
             formText:
               "My (1) _________ have many hobbies. Tom (2) ______________  to collect old (3) __________ and (4) _________. He also (5) _________________ many documentaries about (6) __________  Our teacher, Mrs. Wilson, (7) ___________  he is one of the (8) ___________  students. He (9) ____________ his homework quickly and (10) ___________ us with our difficult exercises.",
@@ -5657,18 +3862,8 @@ export const HS_LESSONS = [
             n: 1,
             prompt: "Tôi thích chiếc mũi nhỏ của mình.",
             hint: "nose /nəʊz/: mũi",
-            parts: [
-              {
-                t: 0,
-                r: 1,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 1,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 1, c: 2 }],
+            fb: { t: 0, r: 1, c: 4 },
             kind: "vi_en",
           },
           {
@@ -5676,18 +3871,8 @@ export const HS_LESSONS = [
             n: 2,
             prompt: "Anh ấy thích nhất vẻ ngoài của anh ấy.",
             hint: "tall /tɔːl/: cao ráo; appearance /əˈpɪərəns/: vẻ ngoài",
-            parts: [
-              {
-                t: 0,
-                r: 2,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 2,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 2, c: 2 }],
+            fb: { t: 0, r: 2, c: 4 },
             kind: "vi_en",
           },
           {
@@ -5695,18 +3880,8 @@ export const HS_LESSONS = [
             n: 3,
             prompt: "Cô ấy yêu những ngón tay mũm mĩm của cô ấy",
             hint: "chubby /ˈtʃʌbi/: mũm mĩm; finger /ˈfɪŋɡə(r)/: ngón tay",
-            parts: [
-              {
-                t: 0,
-                r: 3,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 3,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 3, c: 2 }],
+            fb: { t: 0, r: 3, c: 4 },
             kind: "vi_en",
           },
           {
@@ -5714,18 +3889,8 @@ export const HS_LESSONS = [
             n: 4,
             prompt: "Họ đang nói về những người bạn năng động của họ.",
             hint: "active /ˈæktɪv/: năng động",
-            parts: [
-              {
-                t: 0,
-                r: 4,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 4,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 4, c: 2 }],
+            fb: { t: 0, r: 4, c: 4 },
             kind: "vi_en",
           },
           {
@@ -5733,18 +3898,8 @@ export const HS_LESSONS = [
             n: 5,
             prompt: "Tính cách của cô ấy rất hào phóng.",
             hint: "personality /ˌpɜːsəˈnæləti/: tính cách; generous /ˈdʒenərəs/: hào phóng",
-            parts: [
-              {
-                t: 0,
-                r: 5,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 5,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 5, c: 2 }],
+            fb: { t: 0, r: 5, c: 4 },
             kind: "vi_en",
           },
         ],
@@ -5759,30 +3914,14 @@ export const HS_LESSONS = [
         instruction:
           "Exercise 2: Fill in the blank with the suitable personal pronoun or possessive adjective. (Điền đại từ nhân xưng hoặc tính từ sở hữu thích hợp vào chỗ trống)",
         paras: [
-          {
-            text: "This is my sister. ______ is a nurse.",
-          },
-          {
-            text: "I love this pen. It’s ______ pen.",
-          },
-          {
-            text: "Do you know that boy? I don’t know ______ .",
-          },
-          {
-            text: "Tom is my classmate. ______ often helps me with homework.",
-          },
-          {
-            text: "We are students. These are ______ books.",
-          },
-          {
-            text: "Mary has a cat. ______ name is Kitty.",
-          },
-          {
-            text: "This house belongs to my parents. It’s ______ house.",
-          },
-          {
-            text: "These are my friends. Do you know ______ ?",
-          },
+          { text: "This is my sister. ______ is a nurse." },
+          { text: "I love this pen. It’s ______ pen." },
+          { text: "Do you know that boy? I don’t know ______ ." },
+          { text: "Tom is my classmate. ______ often helps me with homework." },
+          { text: "We are students. These are ______ books." },
+          { text: "Mary has a cat. ______ name is Kitty." },
+          { text: "This house belongs to my parents. It’s ______ house." },
+          { text: "These are my friends. Do you know ______ ?" },
         ],
         tables: [],
         items: [
@@ -5790,11 +3929,7 @@ export const HS_LESSONS = [
             key: "hsLesson12|ex2|this is my sister. is a nurse.",
             n: 1,
             prompt: "This is my sister. is a nurse.",
-            parts: [
-              {
-                p: 0,
-              },
-            ],
+            parts: [{ p: 0 }],
             formText: "This is my sister. ______ is a nurse.",
             kind: "blank",
           },
@@ -5802,11 +3937,7 @@ export const HS_LESSONS = [
             key: "hsLesson12|ex2|i love this pen. it's pen.",
             n: 2,
             prompt: "I love this pen. It's pen.",
-            parts: [
-              {
-                p: 1,
-              },
-            ],
+            parts: [{ p: 1 }],
             formText: "I love this pen. It’s ______ pen.",
             kind: "blank",
           },
@@ -5814,11 +3945,7 @@ export const HS_LESSONS = [
             key: "hsLesson12|ex2|do you know that boy? i don't know .",
             n: 3,
             prompt: "Do you know that boy? I don't know .",
-            parts: [
-              {
-                p: 2,
-              },
-            ],
+            parts: [{ p: 2 }],
             formText: "Do you know that boy? I don’t know ______ .",
             kind: "blank",
           },
@@ -5826,11 +3953,7 @@ export const HS_LESSONS = [
             key: "hsLesson12|ex2|tom is my classmate. often helps me with homework.",
             n: 4,
             prompt: "Tom is my classmate. often helps me with homework.",
-            parts: [
-              {
-                p: 3,
-              },
-            ],
+            parts: [{ p: 3 }],
             formText:
               "Tom is my classmate. ______ often helps me with homework.",
             kind: "blank",
@@ -5839,11 +3962,7 @@ export const HS_LESSONS = [
             key: "hsLesson12|ex2|we are students. these are books.",
             n: 5,
             prompt: "We are students. These are books.",
-            parts: [
-              {
-                p: 4,
-              },
-            ],
+            parts: [{ p: 4 }],
             formText: "We are students. These are ______ books.",
             kind: "blank",
           },
@@ -5851,11 +3970,7 @@ export const HS_LESSONS = [
             key: "hsLesson12|ex2|mary has a cat. name is kitty.",
             n: 6,
             prompt: "Mary has a cat. name is Kitty.",
-            parts: [
-              {
-                p: 5,
-              },
-            ],
+            parts: [{ p: 5 }],
             formText: "Mary has a cat. ______ name is Kitty.",
             kind: "blank",
           },
@@ -5863,11 +3978,7 @@ export const HS_LESSONS = [
             key: "hsLesson12|ex2|this house belongs to my parents. it's house.",
             n: 7,
             prompt: "This house belongs to my parents. It's house.",
-            parts: [
-              {
-                p: 6,
-              },
-            ],
+            parts: [{ p: 6 }],
             formText: "This house belongs to my parents. It’s ______ house.",
             kind: "blank",
           },
@@ -5875,11 +3986,7 @@ export const HS_LESSONS = [
             key: "hsLesson12|ex2|these are my friends. do you know ?",
             n: 8,
             prompt: "These are my friends. Do you know ?",
-            parts: [
-              {
-                p: 7,
-              },
-            ],
+            parts: [{ p: 7 }],
             formText: "These are my friends. Do you know ______ ?",
             kind: "blank",
           },
@@ -5895,30 +4002,14 @@ export const HS_LESSONS = [
         instruction:
           "Exercise 3: Practice pronouncing /b/ and /p/ sounds. Read the following sentences aloud, paying attention to correctly pronouncing the bold words. / Bài tập luyện phát âm âm /b/ và /p/. Đọc to các câu sau đây, chú ý phát âm chính xác các từ in đậm. Nộp bài đọc trên Zalo My brother often borrows my pencil. We play with a big ball in the park. The boy has a painting of a beautiful butterfly. I put my book in my backpack. My pupil got a present from his parents. He has a pocket full of buttons. The private tutor painted a big bird on a tree. My friends often participate in a basketball match.",
         paras: [
-          {
-            text: "My brother often borrows my pencil.",
-          },
-          {
-            text: "We play with a big ball in the park.",
-          },
-          {
-            text: "The boy has a painting of a beautiful butterfly.",
-          },
-          {
-            text: "I put my book in my backpack.",
-          },
-          {
-            text: "My pupil got a present from his parents.",
-          },
-          {
-            text: "He has a pocket full of buttons.",
-          },
-          {
-            text: "The private tutor painted a big bird on a tree.",
-          },
-          {
-            text: "My friends often participate in a basketball match.",
-          },
+          { text: "My brother often borrows my pencil." },
+          { text: "We play with a big ball in the park." },
+          { text: "The boy has a painting of a beautiful butterfly." },
+          { text: "I put my book in my backpack." },
+          { text: "My pupil got a present from his parents." },
+          { text: "He has a pocket full of buttons." },
+          { text: "The private tutor painted a big bird on a tree." },
+          { text: "My friends often participate in a basketball match." },
         ],
         tables: [],
         items: [],
@@ -5972,11 +4063,7 @@ export const HS_LESSONS = [
             n: 1,
             prompt:
               "My friends and I go to the park. (We/Us) play soccer together.",
-            parts: [
-              {
-                p: 0,
-              },
-            ],
+            parts: [{ p: 0 }],
             options: ["We", "Us"],
             group: "(We/Us)",
             formText:
@@ -5987,11 +4074,7 @@ export const HS_LESSONS = [
             key: "hsLesson12|tc|i see your teacher. can you talk to (she/her)?",
             n: 2,
             prompt: "I see your teacher. Can you talk to (she/her)?",
-            parts: [
-              {
-                p: 1,
-              },
-            ],
+            parts: [{ p: 1 }],
             options: ["she", "her"],
             group: "(she/her)",
             formText: "I see your teacher. Can you talk to (she/her)?",
@@ -6002,11 +4085,7 @@ export const HS_LESSONS = [
             n: 3,
             prompt:
               "My brother is at the playground. I am going to meet (he/him).",
-            parts: [
-              {
-                p: 2,
-              },
-            ],
+            parts: [{ p: 2 }],
             options: ["he", "him"],
             group: "(he/him)",
             formText:
@@ -6017,11 +4096,7 @@ export const HS_LESSONS = [
             key: "hsLesson12|tc|the classroom is big, but (it/its) is not messy.",
             n: 4,
             prompt: "The classroom is big, but (it/its) is not messy.",
-            parts: [
-              {
-                p: 3,
-              },
-            ],
+            parts: [{ p: 3 }],
             options: ["it", "its"],
             group: "(it/its)",
             formText: "The classroom is big, but (it/its) is not messy.",
@@ -6032,11 +4107,7 @@ export const HS_LESSONS = [
             n: 5,
             prompt:
               "My parents bought a new car. (They/Them) are very excited.",
-            parts: [
-              {
-                p: 4,
-              },
-            ],
+            parts: [{ p: 4 }],
             options: ["They", "Them"],
             group: "(They/Them)",
             formText:
@@ -6047,11 +4118,7 @@ export const HS_LESSONS = [
             key: "hsLesson12|tc|this is a good book. i like to read (it/its).",
             n: 6,
             prompt: "This is a good book. I like to read (it/its).",
-            parts: [
-              {
-                p: 5,
-              },
-            ],
+            parts: [{ p: 5 }],
             options: ["it", "its"],
             group: "(it/its)",
             formText: "This is a good book. I like to read (it/its).",
@@ -6061,11 +4128,7 @@ export const HS_LESSONS = [
             key: "hsLesson12|tc|do (you/your) want to come to my house?",
             n: 7,
             prompt: "Do (you/your) want to come to my house?",
-            parts: [
-              {
-                p: 6,
-              },
-            ],
+            parts: [{ p: 6 }],
             options: ["you", "your"],
             group: "(you/your)",
             formText: "Do (you/your) want to come to my house?",
@@ -6146,18 +4209,8 @@ export const HS_LESSONS = [
             n: 1,
             prompt: "Khuôn mặt của Anna rất thông minh.",
             hint: "face /feɪs/: gương mặt; clever /ˈklevə(r)/: thông minh",
-            parts: [
-              {
-                t: 0,
-                r: 1,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 1,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 1, c: 2 }],
+            fb: { t: 0, r: 1, c: 4 },
             kind: "vi_en",
           },
           {
@@ -6165,18 +4218,8 @@ export const HS_LESSONS = [
             n: 2,
             prompt: "Mái tóc xoăn của cô ấy đẹp hơn của tôi",
             hint: "curly /ˈkɜːli/: xoăn; beautiful /ˈbjuːtɪfl/: đẹp",
-            parts: [
-              {
-                t: 0,
-                r: 2,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 2,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 2, c: 2 }],
+            fb: { t: 0, r: 2, c: 4 },
             kind: "vi_en",
           },
           {
@@ -6184,18 +4227,8 @@ export const HS_LESSONS = [
             n: 3,
             prompt: "Lông mày của cô ấy dày hơn của bạn.",
             hint: "eyebrows /ˈaɪbraʊz/: lông mày; thick /θɪk/: dày",
-            parts: [
-              {
-                t: 0,
-                r: 3,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 3,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 3, c: 2 }],
+            fb: { t: 0, r: 3, c: 4 },
             kind: "vi_en",
           },
           {
@@ -6203,18 +4236,8 @@ export const HS_LESSONS = [
             n: 4,
             prompt: "Râu của bố cô ấy rất dài và đen.",
             hint: "beard /bɪəd/: râu; dark /dɑːk/: tối, đen",
-            parts: [
-              {
-                t: 0,
-                r: 4,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 4,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 4, c: 2 }],
+            fb: { t: 0, r: 4, c: 4 },
             kind: "vi_en",
           },
           {
@@ -6222,18 +4245,8 @@ export const HS_LESSONS = [
             n: 5,
             prompt: "Má của chị gái cô ấy rất mũm mĩm.",
             hint: "cheeks /tʃiːks/: má; chubby /ˈtʃʌbi/: mũm mĩm",
-            parts: [
-              {
-                t: 0,
-                r: 5,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 5,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 5, c: 2 }],
+            fb: { t: 0, r: 5, c: 4 },
             kind: "vi_en",
           },
         ],
@@ -6248,27 +4261,13 @@ export const HS_LESSONS = [
         instruction:
           "Exercise 2: Complete the sentence with a Personal Pronoun, Possessive Adjective or Possessive Pronoun. / Hoàn thành câu với Đại từ nhân xưng, Tính từ sở hữu hoặc Đại từ sở hữu",
         paras: [
-          {
-            text: "Is this pencil ______ ? No, that is not my pencil.",
-          },
-          {
-            text: "My parents gave this computer to me. Now it is _________.",
-          },
-          {
-            text: "They like to play with ______ friends at the school.",
-          },
-          {
-            text: "Her mother is very happy because ______ got a good grade.",
-          },
-          {
-            text: "Look at my brother. I'm playing with ______ .",
-          },
-          {
-            text: "We have a house, and this is ______ .",
-          },
-          {
-            text: "I don't have a pen. Could you lend ______ yours?",
-          },
+          { text: "Is this pencil ______ ? No, that is not my pencil." },
+          { text: "My parents gave this computer to me. Now it is _________." },
+          { text: "They like to play with ______ friends at the school." },
+          { text: "Her mother is very happy because ______ got a good grade." },
+          { text: "Look at my brother. I'm playing with ______ ." },
+          { text: "We have a house, and this is ______ ." },
+          { text: "I don't have a pen. Could you lend ______ yours?" },
         ],
         tables: [],
         items: [
@@ -6276,11 +4275,7 @@ export const HS_LESSONS = [
             key: "hsLesson13|ex2|is this pencil ? no, that is not my pencil.",
             n: 1,
             prompt: "Is this pencil ? No, that is not my pencil.",
-            parts: [
-              {
-                p: 0,
-              },
-            ],
+            parts: [{ p: 0 }],
             formText: "Is this pencil ______ ? No, that is not my pencil.",
             kind: "blank",
           },
@@ -6288,11 +4283,7 @@ export const HS_LESSONS = [
             key: "hsLesson13|ex2|my parents gave this computer to me. now it is .",
             n: 2,
             prompt: "My parents gave this computer to me. Now it is .",
-            parts: [
-              {
-                p: 1,
-              },
-            ],
+            parts: [{ p: 1 }],
             formText:
               "My parents gave this computer to me. Now it is _________.",
             kind: "blank",
@@ -6301,11 +4292,7 @@ export const HS_LESSONS = [
             key: "hsLesson13|ex2|they like to play with friends at the school.",
             n: 3,
             prompt: "They like to play with friends at the school.",
-            parts: [
-              {
-                p: 2,
-              },
-            ],
+            parts: [{ p: 2 }],
             formText: "They like to play with ______ friends at the school.",
             kind: "blank",
           },
@@ -6313,11 +4300,7 @@ export const HS_LESSONS = [
             key: "hsLesson13|ex2|her mother is very happy because got a good grade.",
             n: 4,
             prompt: "Her mother is very happy because got a good grade.",
-            parts: [
-              {
-                p: 3,
-              },
-            ],
+            parts: [{ p: 3 }],
             formText:
               "Her mother is very happy because ______ got a good grade.",
             kind: "blank",
@@ -6326,11 +4309,7 @@ export const HS_LESSONS = [
             key: "hsLesson13|ex2|look at my brother. i'm playing with .",
             n: 5,
             prompt: "Look at my brother. I'm playing with .",
-            parts: [
-              {
-                p: 4,
-              },
-            ],
+            parts: [{ p: 4 }],
             formText: "Look at my brother. I'm playing with ______ .",
             kind: "blank",
           },
@@ -6338,11 +4317,7 @@ export const HS_LESSONS = [
             key: "hsLesson13|ex2|we have a house, and this is .",
             n: 6,
             prompt: "We have a house, and this is .",
-            parts: [
-              {
-                p: 5,
-              },
-            ],
+            parts: [{ p: 5 }],
             formText: "We have a house, and this is ______ .",
             kind: "blank",
           },
@@ -6350,11 +4325,7 @@ export const HS_LESSONS = [
             key: "hsLesson13|ex2|i don't have a pen. could you lend yours?",
             n: 7,
             prompt: "I don't have a pen. Could you lend yours?",
-            parts: [
-              {
-                p: 6,
-              },
-            ],
+            parts: [{ p: 6 }],
             formText: "I don't have a pen. Could you lend ______ yours?",
             kind: "blank",
           },
@@ -6370,21 +4341,13 @@ export const HS_LESSONS = [
         instruction:
           "Exercise 3: Rewrite the sentences, using the correct possessive pronoun. / Viết lại câu sau, sử dụng đại từ sở hữu phù hợp",
         paras: [
-          {
-            text: "This is her book. → The book is ______ .",
-          },
-          {
-            text: "That is their house. → The house is ______ .",
-          },
-          {
-            text: "This is your bike. → The bike is ______ .",
-          },
+          { text: "This is her book. → The book is ______ ." },
+          { text: "That is their house. → The house is ______ ." },
+          { text: "This is your bike. → The bike is ______ ." },
           {
             text: "These are my school supplies. → These school supplies are ______ .",
           },
-          {
-            text: "Is this our ball? → Is this ball ______ ?",
-          },
+          { text: "Is this our ball? → Is this ball ______ ?" },
         ],
         tables: [],
         items: [
@@ -6392,11 +4355,7 @@ export const HS_LESSONS = [
             key: "hsLesson13|ex3|this is her book. → the book is .",
             n: 1,
             prompt: "This is her book. → The book is .",
-            parts: [
-              {
-                p: 0,
-              },
-            ],
+            parts: [{ p: 0 }],
             formText: "This is her book. → The book is ______ .",
             kind: "blank",
           },
@@ -6404,11 +4363,7 @@ export const HS_LESSONS = [
             key: "hsLesson13|ex3|that is their house. → the house is .",
             n: 2,
             prompt: "That is their house. → The house is .",
-            parts: [
-              {
-                p: 1,
-              },
-            ],
+            parts: [{ p: 1 }],
             formText: "That is their house. → The house is ______ .",
             kind: "blank",
           },
@@ -6416,11 +4371,7 @@ export const HS_LESSONS = [
             key: "hsLesson13|ex3|this is your bike. → the bike is .",
             n: 3,
             prompt: "This is your bike. → The bike is .",
-            parts: [
-              {
-                p: 2,
-              },
-            ],
+            parts: [{ p: 2 }],
             formText: "This is your bike. → The bike is ______ .",
             kind: "blank",
           },
@@ -6429,11 +4380,7 @@ export const HS_LESSONS = [
             n: 4,
             prompt:
               "These are my school supplies. → These school supplies are .",
-            parts: [
-              {
-                p: 3,
-              },
-            ],
+            parts: [{ p: 3 }],
             formText:
               "These are my school supplies. → These school supplies are ______ .",
             kind: "blank",
@@ -6442,11 +4389,7 @@ export const HS_LESSONS = [
             key: "hsLesson13|ex3|is this our ball? → is this ball ?",
             n: 5,
             prompt: "Is this our ball? → Is this ball ?",
-            parts: [
-              {
-                p: 4,
-              },
-            ],
+            parts: [{ p: 4 }],
             formText: "Is this our ball? → Is this ball ______ ?",
             kind: "blank",
           },
@@ -6476,11 +4419,7 @@ export const HS_LESSONS = [
             n: 1,
             prompt:
               "My family lives in a (1) house with a lovely garden. I have a (2) named Ben. He is a good (3) at a (4) school. (5) favorite subjects are (6) and art. My parents are very proud of (7) . They bought him a new (8) on his birthday. My old phone is a bit too small, so I want a new one. I hope my parents will buy one for (9) soon!",
-            parts: [
-              {
-                p: 1,
-              },
-            ],
+            parts: [{ p: 1 }],
             slot: 0,
             formText:
               "My family lives in a (1) ______ house with a lovely garden. I have a (2) ______ named Ben. He is a good (3) ______ at a (4) ______ school. (5) ______ favorite subjects are (6) ______ _______ and art. My parents are very proud of (7) ______ . They bought him a new (8) ______ on his birthday. My old phone is a bit too small, so I want a new one. I hope my parents will buy one for (9) ______ soon!",
@@ -6491,11 +4430,7 @@ export const HS_LESSONS = [
             n: 2,
             prompt:
               "My family lives in a (1) house with a lovely garden. I have a (2) named Ben. He is a good (3) at a (4) school. (5) favorite subjects are (6) and art. My parents are very proud of (7) . They bought him a new (8) on his birthday. My old phone is a bit too small, so I want a new one. I hope my parents will buy one for (9) soon!",
-            parts: [
-              {
-                p: 1,
-              },
-            ],
+            parts: [{ p: 1 }],
             slot: 1,
             formText:
               "My family lives in a (1) ______ house with a lovely garden. I have a (2) ______ named Ben. He is a good (3) ______ at a (4) ______ school. (5) ______ favorite subjects are (6) ______ _______ and art. My parents are very proud of (7) ______ . They bought him a new (8) ______ on his birthday. My old phone is a bit too small, so I want a new one. I hope my parents will buy one for (9) ______ soon!",
@@ -6506,11 +4441,7 @@ export const HS_LESSONS = [
             n: 3,
             prompt:
               "My family lives in a (1) house with a lovely garden. I have a (2) named Ben. He is a good (3) at a (4) school. (5) favorite subjects are (6) and art. My parents are very proud of (7) . They bought him a new (8) on his birthday. My old phone is a bit too small, so I want a new one. I hope my parents will buy one for (9) soon!",
-            parts: [
-              {
-                p: 1,
-              },
-            ],
+            parts: [{ p: 1 }],
             slot: 2,
             formText:
               "My family lives in a (1) ______ house with a lovely garden. I have a (2) ______ named Ben. He is a good (3) ______ at a (4) ______ school. (5) ______ favorite subjects are (6) ______ _______ and art. My parents are very proud of (7) ______ . They bought him a new (8) ______ on his birthday. My old phone is a bit too small, so I want a new one. I hope my parents will buy one for (9) ______ soon!",
@@ -6521,11 +4452,7 @@ export const HS_LESSONS = [
             n: 4,
             prompt:
               "My family lives in a (1) house with a lovely garden. I have a (2) named Ben. He is a good (3) at a (4) school. (5) favorite subjects are (6) and art. My parents are very proud of (7) . They bought him a new (8) on his birthday. My old phone is a bit too small, so I want a new one. I hope my parents will buy one for (9) soon!",
-            parts: [
-              {
-                p: 1,
-              },
-            ],
+            parts: [{ p: 1 }],
             slot: 3,
             formText:
               "My family lives in a (1) ______ house with a lovely garden. I have a (2) ______ named Ben. He is a good (3) ______ at a (4) ______ school. (5) ______ favorite subjects are (6) ______ _______ and art. My parents are very proud of (7) ______ . They bought him a new (8) ______ on his birthday. My old phone is a bit too small, so I want a new one. I hope my parents will buy one for (9) ______ soon!",
@@ -6536,11 +4463,7 @@ export const HS_LESSONS = [
             n: 5,
             prompt:
               "My family lives in a (1) house with a lovely garden. I have a (2) named Ben. He is a good (3) at a (4) school. (5) favorite subjects are (6) and art. My parents are very proud of (7) . They bought him a new (8) on his birthday. My old phone is a bit too small, so I want a new one. I hope my parents will buy one for (9) soon!",
-            parts: [
-              {
-                p: 1,
-              },
-            ],
+            parts: [{ p: 1 }],
             slot: 4,
             formText:
               "My family lives in a (1) ______ house with a lovely garden. I have a (2) ______ named Ben. He is a good (3) ______ at a (4) ______ school. (5) ______ favorite subjects are (6) ______ _______ and art. My parents are very proud of (7) ______ . They bought him a new (8) ______ on his birthday. My old phone is a bit too small, so I want a new one. I hope my parents will buy one for (9) ______ soon!",
@@ -6551,11 +4474,7 @@ export const HS_LESSONS = [
             n: 6,
             prompt:
               "My family lives in a (1) house with a lovely garden. I have a (2) named Ben. He is a good (3) at a (4) school. (5) favorite subjects are (6) and art. My parents are very proud of (7) . They bought him a new (8) on his birthday. My old phone is a bit too small, so I want a new one. I hope my parents will buy one for (9) soon!",
-            parts: [
-              {
-                p: 1,
-              },
-            ],
+            parts: [{ p: 1 }],
             slot: 5,
             formText:
               "My family lives in a (1) ______ house with a lovely garden. I have a (2) ______ named Ben. He is a good (3) ______ at a (4) ______ school. (5) ______ favorite subjects are (6) ______ _______ and art. My parents are very proud of (7) ______ . They bought him a new (8) ______ on his birthday. My old phone is a bit too small, so I want a new one. I hope my parents will buy one for (9) ______ soon!",
@@ -6566,11 +4485,7 @@ export const HS_LESSONS = [
             n: 7,
             prompt:
               "My family lives in a (1) house with a lovely garden. I have a (2) named Ben. He is a good (3) at a (4) school. (5) favorite subjects are (6) and art. My parents are very proud of (7) . They bought him a new (8) on his birthday. My old phone is a bit too small, so I want a new one. I hope my parents will buy one for (9) soon!",
-            parts: [
-              {
-                p: 1,
-              },
-            ],
+            parts: [{ p: 1 }],
             slot: 6,
             formText:
               "My family lives in a (1) ______ house with a lovely garden. I have a (2) ______ named Ben. He is a good (3) ______ at a (4) ______ school. (5) ______ favorite subjects are (6) ______ _______ and art. My parents are very proud of (7) ______ . They bought him a new (8) ______ on his birthday. My old phone is a bit too small, so I want a new one. I hope my parents will buy one for (9) ______ soon!",
@@ -6581,11 +4496,7 @@ export const HS_LESSONS = [
             n: 8,
             prompt:
               "My family lives in a (1) house with a lovely garden. I have a (2) named Ben. He is a good (3) at a (4) school. (5) favorite subjects are (6) and art. My parents are very proud of (7) . They bought him a new (8) on his birthday. My old phone is a bit too small, so I want a new one. I hope my parents will buy one for (9) soon!",
-            parts: [
-              {
-                p: 1,
-              },
-            ],
+            parts: [{ p: 1 }],
             slot: 7,
             formText:
               "My family lives in a (1) ______ house with a lovely garden. I have a (2) ______ named Ben. He is a good (3) ______ at a (4) ______ school. (5) ______ favorite subjects are (6) ______ _______ and art. My parents are very proud of (7) ______ . They bought him a new (8) ______ on his birthday. My old phone is a bit too small, so I want a new one. I hope my parents will buy one for (9) ______ soon!",
@@ -6596,11 +4507,7 @@ export const HS_LESSONS = [
             n: 9,
             prompt:
               "My family lives in a (1) house with a lovely garden. I have a (2) named Ben. He is a good (3) at a (4) school. (5) favorite subjects are (6) and art. My parents are very proud of (7) . They bought him a new (8) on his birthday. My old phone is a bit too small, so I want a new one. I hope my parents will buy one for (9) soon!",
-            parts: [
-              {
-                p: 1,
-              },
-            ],
+            parts: [{ p: 1 }],
             slot: 8,
             formText:
               "My family lives in a (1) ______ house with a lovely garden. I have a (2) ______ named Ben. He is a good (3) ______ at a (4) ______ school. (5) ______ favorite subjects are (6) ______ _______ and art. My parents are very proud of (7) ______ . They bought him a new (8) ______ on his birthday. My old phone is a bit too small, so I want a new one. I hope my parents will buy one for (9) ______ soon!",
@@ -6684,18 +4591,8 @@ export const HS_LESSONS = [
             n: 1,
             prompt: "Tôi có một người bạn tốt.",
             hint: "kind /kaɪnd/: tốt",
-            parts: [
-              {
-                t: 0,
-                r: 1,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 1,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 1, c: 2 }],
+            fb: { t: 0, r: 1, c: 4 },
             kind: "vi_en",
           },
           {
@@ -6703,18 +4600,8 @@ export const HS_LESSONS = [
             n: 2,
             prompt: "Cậu ấy có một mái tóc kì lạ.",
             hint: "strange /streɪndʒ/: kì lạ; hair /heə(r)/: tóc",
-            parts: [
-              {
-                t: 0,
-                r: 2,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 2,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 2, c: 2 }],
+            fb: { t: 0, r: 2, c: 4 },
             kind: "vi_en",
           },
           {
@@ -6723,18 +4610,8 @@ export const HS_LESSONS = [
             prompt:
               "Mái tóc thì sẫm màu và xoăn.\n(mái tóc được xác định vì cả người nói và người nghe đều biết)",
             hint: "dark /dɑːk/: sẫm; curly /ˈkɜːli/: xoăn",
-            parts: [
-              {
-                t: 0,
-                r: 3,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 3,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 3, c: 2 }],
+            fb: { t: 0, r: 3, c: 4 },
             kind: "vi_en",
           },
           {
@@ -6742,18 +4619,8 @@ export const HS_LESSONS = [
             n: 4,
             prompt: "Cậu ấy là một học sinh thông minh.",
             hint: "intelligent /ɪnˈtelɪdʒənt/: thông minh",
-            parts: [
-              {
-                t: 0,
-                r: 4,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 4,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 4, c: 2 }],
+            fb: { t: 0, r: 4, c: 4 },
             kind: "vi_en",
           },
           {
@@ -6761,18 +4628,8 @@ export const HS_LESSONS = [
             n: 5,
             prompt: "Cậu ấy cũng là một chàng trai chăm chỉ.",
             hint: "hard-working /ˌhɑːd ˈwɜːkɪŋ/: chăm chỉ",
-            parts: [
-              {
-                t: 0,
-                r: 5,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 5,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 5, c: 2 }],
+            fb: { t: 0, r: 5, c: 4 },
             kind: "vi_en",
           },
         ],
@@ -6787,36 +4644,18 @@ export const HS_LESSONS = [
         instruction:
           'Exercise 2: Fill in the blanks with "a", "an", "the" or leave blank (Ø). / Điền vào chỗ trống với "a", "an", "the" hoặc để trống (Ø)',
         paras: [
-          {
-            text: "My sister wants to be ______ artist.",
-          },
+          { text: "My sister wants to be ______ artist." },
           {
             text: "I saw a big dog and a small cat in the garden. ______ dog was chasing ______ cat.",
           },
-          {
-            text: "______ rich often help ______ poor in my country.",
-          },
-          {
-            text: "Can you pass me ______ salt, please?",
-          },
-          {
-            text: "London is ______ capital of England.",
-          },
-          {
-            text: "She has ______ small apartment in the city.",
-          },
-          {
-            text: "He's ______ student at ______ university in Hanoi.",
-          },
-          {
-            text: "I'm going to ______ cinema with my friends.",
-          },
-          {
-            text: "______ hour ago, I saw ______ beautiful butterfly.",
-          },
-          {
-            text: "My uncle is ______ honest person.",
-          },
+          { text: "______ rich often help ______ poor in my country." },
+          { text: "Can you pass me ______ salt, please?" },
+          { text: "London is ______ capital of England." },
+          { text: "She has ______ small apartment in the city." },
+          { text: "He's ______ student at ______ university in Hanoi." },
+          { text: "I'm going to ______ cinema with my friends." },
+          { text: "______ hour ago, I saw ______ beautiful butterfly." },
+          { text: "My uncle is ______ honest person." },
         ],
         tables: [],
         items: [
@@ -6824,11 +4663,7 @@ export const HS_LESSONS = [
             key: "hsLesson14|ex2|my sister wants to be artist.",
             n: 1,
             prompt: "My sister wants to be artist.",
-            parts: [
-              {
-                p: 0,
-              },
-            ],
+            parts: [{ p: 0 }],
             formText: "My sister wants to be ______ artist.",
             kind: "blank",
           },
@@ -6837,11 +4672,7 @@ export const HS_LESSONS = [
             n: 2,
             prompt:
               "I saw a big dog and a small cat in the garden. dog was chasing cat.",
-            parts: [
-              {
-                p: 1,
-              },
-            ],
+            parts: [{ p: 1 }],
             formText:
               "I saw a big dog and a small cat in the garden. ______ dog was chasing ______ cat.",
             kind: "blank",
@@ -6850,11 +4681,7 @@ export const HS_LESSONS = [
             key: "hsLesson14|ex2|rich often help poor in my country.",
             n: 3,
             prompt: "rich often help poor in my country.",
-            parts: [
-              {
-                p: 2,
-              },
-            ],
+            parts: [{ p: 2 }],
             formText: "______ rich often help ______ poor in my country.",
             kind: "blank",
           },
@@ -6862,11 +4689,7 @@ export const HS_LESSONS = [
             key: "hsLesson14|ex2|can you pass me salt, please?",
             n: 4,
             prompt: "Can you pass me salt, please?",
-            parts: [
-              {
-                p: 3,
-              },
-            ],
+            parts: [{ p: 3 }],
             formText: "Can you pass me ______ salt, please?",
             kind: "blank",
           },
@@ -6874,11 +4697,7 @@ export const HS_LESSONS = [
             key: "hsLesson14|ex2|london is capital of england.",
             n: 5,
             prompt: "London is capital of England.",
-            parts: [
-              {
-                p: 4,
-              },
-            ],
+            parts: [{ p: 4 }],
             formText: "London is ______ capital of England.",
             kind: "blank",
           },
@@ -6886,11 +4705,7 @@ export const HS_LESSONS = [
             key: "hsLesson14|ex2|she has small apartment in the city.",
             n: 6,
             prompt: "She has small apartment in the city.",
-            parts: [
-              {
-                p: 5,
-              },
-            ],
+            parts: [{ p: 5 }],
             formText: "She has ______ small apartment in the city.",
             kind: "blank",
           },
@@ -6898,11 +4713,7 @@ export const HS_LESSONS = [
             key: "hsLesson14|ex2|he's student at university in hanoi.",
             n: 7,
             prompt: "He's student at university in Hanoi.",
-            parts: [
-              {
-                p: 6,
-              },
-            ],
+            parts: [{ p: 6 }],
             formText: "He's ______ student at ______ university in Hanoi.",
             kind: "blank",
           },
@@ -6910,11 +4721,7 @@ export const HS_LESSONS = [
             key: "hsLesson14|ex2|i'm going to cinema with my friends.",
             n: 8,
             prompt: "I'm going to cinema with my friends.",
-            parts: [
-              {
-                p: 7,
-              },
-            ],
+            parts: [{ p: 7 }],
             formText: "I'm going to ______ cinema with my friends.",
             kind: "blank",
           },
@@ -6922,11 +4729,7 @@ export const HS_LESSONS = [
             key: "hsLesson14|ex2|hour ago, i saw beautiful butterfly.",
             n: 9,
             prompt: "hour ago, I saw beautiful butterfly.",
-            parts: [
-              {
-                p: 8,
-              },
-            ],
+            parts: [{ p: 8 }],
             formText: "______ hour ago, I saw ______ beautiful butterfly.",
             kind: "blank",
           },
@@ -6934,11 +4737,7 @@ export const HS_LESSONS = [
             key: "hsLesson14|ex2|my uncle is honest person.",
             n: 10,
             prompt: "My uncle is honest person.",
-            parts: [
-              {
-                p: 9,
-              },
-            ],
+            parts: [{ p: 9 }],
             formText: "My uncle is ______ honest person.",
             kind: "blank",
           },
@@ -7019,18 +4818,8 @@ export const HS_LESSONS = [
             n: 1,
             prompt: "Tôi có một vài người bạn cùng lớp thân thiện.",
             hint: "friendly /ˈfrendli/: thân thiện; classmate /ˈklæsmeɪt/: bạn cùng lớp",
-            parts: [
-              {
-                t: 0,
-                r: 1,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 1,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 1, c: 2 }],
+            fb: { t: 0, r: 1, c: 4 },
             kind: "vi_en",
           },
           {
@@ -7038,18 +4827,8 @@ export const HS_LESSONS = [
             n: 2,
             prompt: "Họ không có con thú cưng nào.",
             hint: "pet /pet/: thú cưng",
-            parts: [
-              {
-                t: 0,
-                r: 2,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 2,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 2, c: 2 }],
+            fb: { t: 0, r: 2, c: 4 },
             kind: "vi_en",
           },
           {
@@ -7057,18 +4836,8 @@ export const HS_LESSONS = [
             n: 3,
             prompt: "Một vài bạn gái thì gầy.",
             hint: "thin /θɪn/: gầy",
-            parts: [
-              {
-                t: 0,
-                r: 3,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 3,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 3, c: 2 }],
+            fb: { t: 0, r: 3, c: 4 },
             kind: "vi_en",
           },
           {
@@ -7076,18 +4845,8 @@ export const HS_LESSONS = [
             n: 4,
             prompt: "Một vài bạn nam thì nói nhiều.",
             hint: "talkative /ˈtɔːkətɪv/: nói nhiều",
-            parts: [
-              {
-                t: 0,
-                r: 4,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 4,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 4, c: 2 }],
+            fb: { t: 0, r: 4, c: 4 },
             kind: "vi_en",
           },
           {
@@ -7095,18 +4854,8 @@ export const HS_LESSONS = [
             n: 5,
             prompt: "Một vài giáo viên có tóc lượn sóng.",
             hint: "wavy /ˈweɪvi/: lượn sóng",
-            parts: [
-              {
-                t: 0,
-                r: 5,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 5,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 5, c: 2 }],
+            fb: { t: 0, r: 5, c: 4 },
             kind: "vi_en",
           },
         ],
@@ -7121,33 +4870,21 @@ export const HS_LESSONS = [
         instruction:
           "Exercise 2: There is a mistake in each sentence, find and correct it. / Trong mỗi câu có một lỗi sai, hãy tìm và sửa",
         paras: [
-          {
-            text: "There aren’t some books on the desk.  → _________________",
-          },
-          {
-            text: "She has any interesting ideas.  → _________________",
-          },
-          {
-            text: "Would you like any water?  → _________________",
-          },
-          {
-            text: "I don’t need some help.  → _________________",
-          },
+          { text: "There aren’t some books on the desk.  → _________________" },
+          { text: "She has any interesting ideas.  → _________________" },
+          { text: "Would you like any water?  → _________________" },
+          { text: "I don’t need some help.  → _________________" },
           {
             text: "There are any students in the classroom.  → _________________",
           },
-          {
-            text: "He didn’t buy some bread yesterday.  → _________________",
-          },
+          { text: "He didn’t buy some bread yesterday.  → _________________" },
           {
             text: "I need any money to pay for the tickets.  → _________________",
           },
           {
             text: "We don’t have some chairs in the living room.  → _________________",
           },
-          {
-            text: "Can I have any biscuits, please?  → _________________",
-          },
+          { text: "Can I have any biscuits, please?  → _________________" },
         ],
         tables: [],
         items: [
@@ -7155,11 +4892,7 @@ export const HS_LESSONS = [
             key: "hsLesson15|ex2|there aren't some books on the desk. →",
             n: 1,
             prompt: "There aren't some books on the desk. →",
-            parts: [
-              {
-                p: 0,
-              },
-            ],
+            parts: [{ p: 0 }],
             formText:
               "There aren’t some books on the desk.  → _________________",
             kind: "line",
@@ -7168,11 +4901,7 @@ export const HS_LESSONS = [
             key: "hsLesson15|ex2|she has any interesting ideas. →",
             n: 2,
             prompt: "She has any interesting ideas. →",
-            parts: [
-              {
-                p: 1,
-              },
-            ],
+            parts: [{ p: 1 }],
             formText: "She has any interesting ideas.  → _________________",
             kind: "line",
           },
@@ -7180,11 +4909,7 @@ export const HS_LESSONS = [
             key: "hsLesson15|ex2|would you like any water? →",
             n: 3,
             prompt: "Would you like any water? →",
-            parts: [
-              {
-                p: 2,
-              },
-            ],
+            parts: [{ p: 2 }],
             formText: "Would you like any water?  → _________________",
             kind: "line",
           },
@@ -7192,11 +4917,7 @@ export const HS_LESSONS = [
             key: "hsLesson15|ex2|i don't need some help. →",
             n: 4,
             prompt: "I don't need some help. →",
-            parts: [
-              {
-                p: 3,
-              },
-            ],
+            parts: [{ p: 3 }],
             formText: "I don’t need some help.  → _________________",
             kind: "line",
           },
@@ -7204,11 +4925,7 @@ export const HS_LESSONS = [
             key: "hsLesson15|ex2|there are any students in the classroom. →",
             n: 5,
             prompt: "There are any students in the classroom. →",
-            parts: [
-              {
-                p: 4,
-              },
-            ],
+            parts: [{ p: 4 }],
             formText:
               "There are any students in the classroom.  → _________________",
             kind: "line",
@@ -7217,11 +4934,7 @@ export const HS_LESSONS = [
             key: "hsLesson15|ex2|he didn't buy some bread yesterday. →",
             n: 6,
             prompt: "He didn't buy some bread yesterday. →",
-            parts: [
-              {
-                p: 5,
-              },
-            ],
+            parts: [{ p: 5 }],
             formText:
               "He didn’t buy some bread yesterday.  → _________________",
             kind: "line",
@@ -7230,11 +4943,7 @@ export const HS_LESSONS = [
             key: "hsLesson15|ex2|i need any money to pay for the tickets. →",
             n: 7,
             prompt: "I need any money to pay for the tickets. →",
-            parts: [
-              {
-                p: 6,
-              },
-            ],
+            parts: [{ p: 6 }],
             formText:
               "I need any money to pay for the tickets.  → _________________",
             kind: "line",
@@ -7243,11 +4952,7 @@ export const HS_LESSONS = [
             key: "hsLesson15|ex2|we don't have some chairs in the living room. →",
             n: 8,
             prompt: "We don't have some chairs in the living room. →",
-            parts: [
-              {
-                p: 7,
-              },
-            ],
+            parts: [{ p: 7 }],
             formText:
               "We don’t have some chairs in the living room.  → _________________",
             kind: "line",
@@ -7256,11 +4961,7 @@ export const HS_LESSONS = [
             key: "hsLesson15|ex2|can i have any biscuits, please? →",
             n: 9,
             prompt: "Can I have any biscuits, please? →",
-            parts: [
-              {
-                p: 8,
-              },
-            ],
+            parts: [{ p: 8 }],
             formText: "Can I have any biscuits, please?  → _________________",
             kind: "line",
           },
@@ -7276,24 +4977,14 @@ export const HS_LESSONS = [
         instruction:
           "Exercise 3: Fill in the blank with much/many/few/a few/little/a little. / Điền từ much/many/few/a few/little/a little thích hợp vào chỗ trống",
         paras: [
-          {
-            text: "1. There are ______ games in the museum today.",
-          },
-          {
-            text: "2. He doesn’t have ______ energy after the race.",
-          },
-          {
-            text: "3. He has ______ friends because he is very shy.",
-          },
-          {
-            text: "4. She has _______ _ friends who are very caring.",
-          },
+          { text: "1. There are ______ games in the museum today." },
+          { text: "2. He doesn’t have ______ energy after the race." },
+          { text: "3. He has ______ friends because he is very shy." },
+          { text: "4. She has _______ _ friends who are very caring." },
           {
             text: "5. There is ______ water in the bottle, so we can’t play the game.",
           },
-          {
-            text: "6. She has ______ _ time before the museum closes.",
-          },
+          { text: "6. She has ______ _ time before the museum closes." },
         ],
         tables: [],
         items: [
@@ -7301,11 +4992,7 @@ export const HS_LESSONS = [
             key: "hsLesson15|ex3|1. there are games in the museum today.",
             n: 1,
             prompt: "1. There are games in the museum today.",
-            parts: [
-              {
-                p: 0,
-              },
-            ],
+            parts: [{ p: 0 }],
             formText: "1. There are ______ games in the museum today.",
             kind: "blank",
           },
@@ -7313,11 +5000,7 @@ export const HS_LESSONS = [
             key: "hsLesson15|ex3|2. he doesn't have energy after the race.",
             n: 2,
             prompt: "2. He doesn't have energy after the race.",
-            parts: [
-              {
-                p: 1,
-              },
-            ],
+            parts: [{ p: 1 }],
             formText: "2. He doesn’t have ______ energy after the race.",
             kind: "blank",
           },
@@ -7325,11 +5008,7 @@ export const HS_LESSONS = [
             key: "hsLesson15|ex3|3. he has friends because he is very shy.",
             n: 3,
             prompt: "3. He has friends because he is very shy.",
-            parts: [
-              {
-                p: 2,
-              },
-            ],
+            parts: [{ p: 2 }],
             formText: "3. He has ______ friends because he is very shy.",
             kind: "blank",
           },
@@ -7337,11 +5016,7 @@ export const HS_LESSONS = [
             key: "hsLesson15|ex3|4. she has friends who are very caring.",
             n: 4,
             prompt: "4. She has friends who are very caring.",
-            parts: [
-              {
-                p: 3,
-              },
-            ],
+            parts: [{ p: 3 }],
             formText: "4. She has _______ _ friends who are very caring.",
             kind: "blank",
           },
@@ -7350,11 +5025,7 @@ export const HS_LESSONS = [
             n: 5,
             prompt:
               "5. There is water in the bottle, so we can't play the game.",
-            parts: [
-              {
-                p: 4,
-              },
-            ],
+            parts: [{ p: 4 }],
             formText:
               "5. There is ______ water in the bottle, so we can’t play the game.",
             kind: "blank",
@@ -7363,11 +5034,7 @@ export const HS_LESSONS = [
             key: "hsLesson15|ex3|6. she has time before the museum closes.",
             n: 6,
             prompt: "6. She has time before the museum closes.",
-            parts: [
-              {
-                p: 5,
-              },
-            ],
+            parts: [{ p: 5 }],
             formText: "6. She has ______ _ time before the museum closes.",
             kind: "blank",
           },
@@ -7450,18 +5117,8 @@ export const HS_LESSONS = [
             n: 1,
             prompt: "Có một nhà thờ lớn ở bên trái.",
             hint: "cathedral /kəˈθiːdrəl/: nhà thờ; left /left/: bên trái",
-            parts: [
-              {
-                t: 0,
-                r: 1,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 1,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 1, c: 2 }],
+            fb: { t: 0, r: 1, c: 4 },
             kind: "vi_en",
           },
           {
@@ -7469,18 +5126,8 @@ export const HS_LESSONS = [
             n: 2,
             prompt: "Đường phố khá hẹp nhưng thẳng.",
             hint: "narrow /ˈnærəʊ/: hẹp; straight /streɪt/: thẳng",
-            parts: [
-              {
-                t: 0,
-                r: 2,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 2,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 2, c: 2 }],
+            fb: { t: 0, r: 2, c: 4 },
             kind: "vi_en",
           },
           {
@@ -7488,18 +5135,8 @@ export const HS_LESSONS = [
             n: 3,
             prompt: "Có một nhà ga xe lửa rất ồn ào ở đây.",
             hint: "noisy /ˈnɔɪzi/: ồn ào; railway station /ˈreɪlweɪ ˈsteɪʃn/: nhà ga",
-            parts: [
-              {
-                t: 0,
-                r: 3,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 3,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 3, c: 2 }],
+            fb: { t: 0, r: 3, c: 4 },
             kind: "vi_en",
           },
           {
@@ -7507,18 +5144,8 @@ export const HS_LESSONS = [
             n: 4,
             prompt: "Chúng tôi có một vài quảng trường yên tĩnh ở đây.",
             hint: "quiet /ˈkwaɪət/: yên tĩnh; square /skwer/: quảng trường",
-            parts: [
-              {
-                t: 0,
-                r: 4,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 4,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 4, c: 2 }],
+            fb: { t: 0, r: 4, c: 4 },
             kind: "vi_en",
           },
           {
@@ -7526,18 +5153,8 @@ export const HS_LESSONS = [
             n: 5,
             prompt: "Phòng trưng bày nghệ thuật nằm ở bên phải.",
             hint: "art gallery /ˈɑːrt ˌɡæləri/: phòng trưng bày nghệ thuật; right /raɪt/: bên phải",
-            parts: [
-              {
-                t: 0,
-                r: 5,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 5,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 5, c: 2 }],
+            fb: { t: 0, r: 5, c: 4 },
             kind: "vi_en",
           },
         ],
@@ -7574,11 +5191,7 @@ export const HS_LESSONS = [
             key: "hsLesson16|ex2|1. if you (study) hard, you (pass) the exam.",
             n: 1,
             prompt: "1. If you (study) hard, you (pass) the exam.",
-            parts: [
-              {
-                p: 0,
-              },
-            ],
+            parts: [{ p: 0 }],
             formText:
               "1. If you __________ (study) hard, you __________ (pass) the exam.",
             kind: "blank",
@@ -7587,11 +5200,7 @@ export const HS_LESSONS = [
             key: "hsLesson16|ex2|2. if she (not / hurry), she (miss) the bus.",
             n: 2,
             prompt: "2. If she (not / hurry), she (miss) the bus.",
-            parts: [
-              {
-                p: 1,
-              },
-            ],
+            parts: [{ p: 1 }],
             formText:
               "2. If she __________ (not / hurry), she __________ (miss) the bus.",
             kind: "blank",
@@ -7600,11 +5209,7 @@ export const HS_LESSONS = [
             key: "hsLesson16|ex2|3. if they (leave) now, they (arrive) on time.",
             n: 3,
             prompt: "3. If they (leave) now, they (arrive) on time.",
-            parts: [
-              {
-                p: 2,
-              },
-            ],
+            parts: [{ p: 2 }],
             formText:
               "3. If they __________ (leave) now, they __________ (arrive) on time.",
             kind: "blank",
@@ -7613,11 +5218,7 @@ export const HS_LESSONS = [
             key: "hsLesson16|ex2|4. if it (rain) tomorrow, we (stay) at home.",
             n: 4,
             prompt: "4. If it (rain) tomorrow, we (stay) at home.",
-            parts: [
-              {
-                p: 3,
-              },
-            ],
+            parts: [{ p: 3 }],
             formText:
               "4. If it __________ (rain) tomorrow, we __________ (stay) at home.",
             kind: "blank",
@@ -7626,11 +5227,7 @@ export const HS_LESSONS = [
             key: "hsLesson16|ex2|5. if he (eat) too much candy, he (have) a toothache.",
             n: 5,
             prompt: "5. If he (eat) too much candy, he (have) a toothache.",
-            parts: [
-              {
-                p: 4,
-              },
-            ],
+            parts: [{ p: 4 }],
             formText:
               "5. If he __________ (eat) too much candy, he __________ (have) a toothache.",
             kind: "blank",
@@ -7669,11 +5266,7 @@ export const HS_LESSONS = [
             key: "hsLesson16|ex3|1. (the /open / door) →",
             n: 1,
             prompt: "1. (the /open / door) →",
-            parts: [
-              {
-                p: 0,
-              },
-            ],
+            parts: [{ p: 0 }],
             formText:
               "1. (the /open / door)\u000b → ______________________________",
             kind: "line",
@@ -7682,11 +5275,7 @@ export const HS_LESSONS = [
             key: "hsLesson16|ex3|2. (class/not / the / talk / in) →",
             n: 2,
             prompt: "2. (class/not / the / talk / in) →",
-            parts: [
-              {
-                p: 1,
-              },
-            ],
+            parts: [{ p: 1 }],
             formText:
               "2. (class/not / the / talk / in)\u000b → ______________________________",
             kind: "line",
@@ -7695,11 +5284,7 @@ export const HS_LESSONS = [
             key: "hsLesson16|ex3|3. (please/quiet / be ) →",
             n: 3,
             prompt: "3. (please/quiet / be ) →",
-            parts: [
-              {
-                p: 2,
-              },
-            ],
+            parts: [{ p: 2 }],
             formText:
               "3. (please/quiet / be )\u000b → ______________________________",
             kind: "line",
@@ -7708,11 +5293,7 @@ export const HS_LESSONS = [
             key: "hsLesson16|ex3|4. (homework/help /with / me / with this) →",
             n: 4,
             prompt: "4. (homework/help /with / me / with this) →",
-            parts: [
-              {
-                p: 3,
-              },
-            ],
+            parts: [{ p: 3 }],
             formText:
               "4. (homework/help /with / me / with this)\u000b → ______________________________",
             kind: "line",
@@ -7721,11 +5302,7 @@ export const HS_LESSONS = [
             key: "hsLesson16|ex3|5. (let's /football/ play /) →",
             n: 5,
             prompt: "5. (let's /football/ play /) →",
-            parts: [
-              {
-                p: 4,
-              },
-            ],
+            parts: [{ p: 4 }],
             formText:
               "5. (let’s /football/ play /)\u000b → ______________________________",
             kind: "line",
@@ -7742,21 +5319,11 @@ export const HS_LESSONS = [
         instruction:
           'BÀI TẬP TỰ CHỌN: Complete the sentences with "is", "are", "some" or "any". / Hoàn thành câu với "is", "are", "some" hoặc "any".',
         paras: [
-          {
-            text: "There _________ not _________ magnets on the chalkboard.",
-          },
-          {
-            text: "My school _________ an international school.",
-          },
-          {
-            text: "There _________ a timetable in the classroom.",
-          },
-          {
-            text: "We have _________ new textbooks for this school year.",
-          },
-          {
-            text: "The students _________ playing in the swimming pool.",
-          },
+          { text: "There _________ not _________ magnets on the chalkboard." },
+          { text: "My school _________ an international school." },
+          { text: "There _________ a timetable in the classroom." },
+          { text: "We have _________ new textbooks for this school year." },
+          { text: "The students _________ playing in the swimming pool." },
         ],
         tables: [],
         items: [
@@ -7764,11 +5331,7 @@ export const HS_LESSONS = [
             key: "hsLesson16|tc|there not magnets on the chalkboard.",
             n: 1,
             prompt: "There not magnets on the chalkboard.",
-            parts: [
-              {
-                p: 0,
-              },
-            ],
+            parts: [{ p: 0 }],
             formText:
               "There _________ not _________ magnets on the chalkboard.",
             kind: "blank",
@@ -7777,11 +5340,7 @@ export const HS_LESSONS = [
             key: "hsLesson16|tc|my school an international school.",
             n: 2,
             prompt: "My school an international school.",
-            parts: [
-              {
-                p: 1,
-              },
-            ],
+            parts: [{ p: 1 }],
             formText: "My school _________ an international school.",
             kind: "blank",
           },
@@ -7789,11 +5348,7 @@ export const HS_LESSONS = [
             key: "hsLesson16|tc|there a timetable in the classroom.",
             n: 3,
             prompt: "There a timetable in the classroom.",
-            parts: [
-              {
-                p: 2,
-              },
-            ],
+            parts: [{ p: 2 }],
             formText: "There _________ a timetable in the classroom.",
             kind: "blank",
           },
@@ -7801,11 +5356,7 @@ export const HS_LESSONS = [
             key: "hsLesson16|tc|we have new textbooks for this school year.",
             n: 4,
             prompt: "We have new textbooks for this school year.",
-            parts: [
-              {
-                p: 3,
-              },
-            ],
+            parts: [{ p: 3 }],
             formText: "We have _________ new textbooks for this school year.",
             kind: "blank",
           },
@@ -7813,11 +5364,7 @@ export const HS_LESSONS = [
             key: "hsLesson16|tc|the students playing in the swimming pool.",
             n: 5,
             prompt: "The students playing in the swimming pool.",
-            parts: [
-              {
-                p: 4,
-              },
-            ],
+            parts: [{ p: 4 }],
             formText: "The students _________ playing in the swimming pool.",
             kind: "blank",
           },
@@ -7855,21 +5402,15 @@ export const HS_LESSONS = [
           {
             text: "Look! Those children (sail) _________ a boat. It (be) _________ too dangerous.",
           },
-          {
-            text: "(it/ rain) _________ heavily in summer in your country?",
-          },
-          {
-            text: "How often (Brian/ take) _________ the dog for a walk?",
-          },
+          { text: "(it/ rain) _________ heavily in summer in your country?" },
+          { text: "How often (Brian/ take) _________ the dog for a walk?" },
           {
             text: "It (get) _________ darker and darker. I (have) _________ to go home now.",
           },
           {
             text: "Where (your mother/ be) _________ ? – She (do) _________ the laundry.",
           },
-          {
-            text: "My best friend (love) _________ writing poems.",
-          },
+          { text: "My best friend (love) _________ writing poems." },
         ],
         tables: [],
         items: [
@@ -7878,11 +5419,7 @@ export const HS_LESSONS = [
             n: 1,
             prompt:
               "Ben (not talk) on the phone right now, he (clean) the floor.",
-            parts: [
-              {
-                p: 0,
-              },
-            ],
+            parts: [{ p: 0 }],
             formText:
               "Ben (not talk) _________ on the phone right now, he (clean) _________ the floor.",
             kind: "blank",
@@ -7891,11 +5428,7 @@ export const HS_LESSONS = [
             key: "hsLesson17|ex1|my grandpa (watch / usually) the news in the evening.",
             n: 2,
             prompt: "My grandpa (watch / usually) the news in the evening.",
-            parts: [
-              {
-                p: 1,
-              },
-            ],
+            parts: [{ p: 1 }],
             formText:
               "My grandpa (watch / usually) ________ the news in the evening.",
             kind: "blank",
@@ -7904,11 +5437,7 @@ export const HS_LESSONS = [
             key: "hsLesson17|ex1|my brother (play / always) drums in the afternoon.",
             n: 3,
             prompt: "My brother (play / always) drums in the afternoon.",
-            parts: [
-              {
-                p: 2,
-              },
-            ],
+            parts: [{ p: 2 }],
             formText:
               "My brother (play / always) _________ drums in the afternoon.",
             kind: "blank",
@@ -7918,11 +5447,7 @@ export const HS_LESSONS = [
             n: 4,
             prompt:
               "Jane's sister (be) very hard-working. She (have) a big flat now.",
-            parts: [
-              {
-                p: 3,
-              },
-            ],
+            parts: [{ p: 3 }],
             formText:
               "Jane’s sister (be) _________ very hard-working. She (have) _________ a big flat now.",
             kind: "blank",
@@ -7932,11 +5457,7 @@ export const HS_LESSONS = [
             n: 5,
             prompt:
               "Look! Those children (sail) a boat. It (be) too dangerous.",
-            parts: [
-              {
-                p: 4,
-              },
-            ],
+            parts: [{ p: 4 }],
             formText:
               "Look! Those children (sail) _________ a boat. It (be) _________ too dangerous.",
             kind: "blank",
@@ -7945,11 +5466,7 @@ export const HS_LESSONS = [
             key: "hsLesson17|ex1|(it/ rain) heavily in summer in your country?",
             n: 6,
             prompt: "(it/ rain) heavily in summer in your country?",
-            parts: [
-              {
-                p: 5,
-              },
-            ],
+            parts: [{ p: 5 }],
             formText: "(it/ rain) _________ heavily in summer in your country?",
             kind: "blank",
           },
@@ -7957,11 +5474,7 @@ export const HS_LESSONS = [
             key: "hsLesson17|ex1|how often (brian/ take) the dog for a walk?",
             n: 7,
             prompt: "How often (Brian/ take) the dog for a walk?",
-            parts: [
-              {
-                p: 6,
-              },
-            ],
+            parts: [{ p: 6 }],
             formText: "How often (Brian/ take) _________ the dog for a walk?",
             kind: "blank",
           },
@@ -7969,11 +5482,7 @@ export const HS_LESSONS = [
             key: "hsLesson17|ex1|it (get) darker and darker. i (have) to go home now.",
             n: 8,
             prompt: "It (get) darker and darker. I (have) to go home now.",
-            parts: [
-              {
-                p: 7,
-              },
-            ],
+            parts: [{ p: 7 }],
             formText:
               "It (get) _________ darker and darker. I (have) _________ to go home now.",
             kind: "blank",
@@ -7982,11 +5491,7 @@ export const HS_LESSONS = [
             key: "hsLesson17|ex1|where (your mother/ be) ? – she (do) the laundry.",
             n: 9,
             prompt: "Where (your mother/ be) ? – She (do) the laundry.",
-            parts: [
-              {
-                p: 8,
-              },
-            ],
+            parts: [{ p: 8 }],
             formText:
               "Where (your mother/ be) _________ ? – She (do) _________ the laundry.",
             kind: "blank",
@@ -7995,11 +5500,7 @@ export const HS_LESSONS = [
             key: "hsLesson17|ex1|my best friend (love) writing poems.",
             n: 10,
             prompt: "My best friend (love) writing poems.",
-            parts: [
-              {
-                p: 9,
-              },
-            ],
+            parts: [{ p: 9 }],
             formText: "My best friend (love) _________ writing poems.",
             kind: "blank",
           },
@@ -8030,12 +5531,8 @@ export const HS_LESSONS = [
           {
             text: "The villa is the most beautiful house in the street.\u000b → No other house ________________________",
           },
-          {
-            text: "Phong is Mrs. Hien’s son.",
-          },
-          {
-            text: "→ Mrs. Hien _________________________",
-          },
+          { text: "Phong is Mrs. Hien’s son." },
+          { text: "→ Mrs. Hien _________________________" },
         ],
         tables: [],
         items: [
@@ -8043,11 +5540,7 @@ export const HS_LESSONS = [
             key: "hsLesson17|ex2|my house is bigger than nam's house. → nam's house is not",
             n: 1,
             prompt: "My house is bigger than Nam's house. → Nam's house is not",
-            parts: [
-              {
-                p: 0,
-              },
-            ],
+            parts: [{ p: 0 }],
             formText:
               "My house is bigger than Nam’s house.\u000b → Nam’s house is not ________________________",
             kind: "line",
@@ -8056,11 +5549,7 @@ export const HS_LESSONS = [
             key: "hsLesson17|ex2|he has short and black hair. → his hair",
             n: 2,
             prompt: "He has short and black hair. → His hair",
-            parts: [
-              {
-                p: 1,
-              },
-            ],
+            parts: [{ p: 1 }],
             formText:
               "He has short and black hair. \u000b → His hair ________________________",
             kind: "line",
@@ -8069,11 +5558,7 @@ export const HS_LESSONS = [
             key: "hsLesson17|ex2|my bag is heavier than yours. → your bag is not",
             n: 3,
             prompt: "My bag is heavier than yours. → Your bag is not",
-            parts: [
-              {
-                p: 2,
-              },
-            ],
+            parts: [{ p: 2 }],
             formText:
               "My bag is heavier than yours.\u000b → Your bag is not ________________________",
             kind: "line",
@@ -8082,11 +5567,7 @@ export const HS_LESSONS = [
             key: "hsLesson17|ex2|she sings better than her sister. → her sister does not",
             n: 4,
             prompt: "She sings better than her sister. → Her sister does not",
-            parts: [
-              {
-                p: 3,
-              },
-            ],
+            parts: [{ p: 3 }],
             formText:
               "She sings better than her sister.\u000b → Her sister does not ________________________",
             kind: "line",
@@ -8096,11 +5577,7 @@ export const HS_LESSONS = [
             n: 5,
             prompt:
               "The villa is the most beautiful house in the street. → No other house",
-            parts: [
-              {
-                p: 4,
-              },
-            ],
+            parts: [{ p: 4 }],
             formText:
               "The villa is the most beautiful house in the street.\u000b → No other house ________________________",
             kind: "line",
@@ -8109,14 +5586,7 @@ export const HS_LESSONS = [
             key: "hsLesson17|ex2|phong is mrs. hien's son. → mrs. hien",
             n: 6,
             prompt: "Phong is Mrs. Hien's son. → Mrs. Hien",
-            parts: [
-              {
-                p: 5,
-              },
-              {
-                p: 6,
-              },
-            ],
+            parts: [{ p: 5 }, { p: 6 }],
             formText:
               "Phong is Mrs. Hien’s son.\n→ Mrs. Hien _________________________",
             kind: "line",
@@ -8133,60 +5603,24 @@ export const HS_LESSONS = [
         instruction:
           "Exercise 3: Arrange the following words into complete sentences. / Sắp xếp các từ dưới đây thành các câu hoàn chỉnh)",
         paras: [
-          {
-            text: "golf / plays / sometimes / Sundays / on / He",
-          },
-          {
-            text: "⇒ ________________________",
-          },
-          {
-            text: "bad / always / The / weather / November / is / in",
-          },
-          {
-            text: "⇒ ________________________",
-          },
-          {
-            text: "for / have / dinner / seldom / fish / We",
-          },
-          {
-            text: "⇒ ________________________",
-          },
-          {
-            text: "usually / Peter / doesn’t / seven / up / before / get",
-          },
-          {
-            text: "⇒ ________________________",
-          },
-          {
-            text: "never / the / They / watch / TV / afternoon / in",
-          },
-          {
-            text: "⇒ ________________________",
-          },
-          {
-            text: "pop / The / listens / often / girl / to / music",
-          },
-          {
-            text: "⇒ ________________________",
-          },
-          {
-            text: "winter / school / often / late / She / in / comes / to",
-          },
-          {
-            text: "⇒ ________________________",
-          },
-          {
-            text: "am / now / my / lunch / eating / right / I",
-          },
-          {
-            text: "⇒ ________________________",
-          },
-          {
-            text: "London / tomorrow / am / to / flying / I",
-          },
-          {
-            text: "⇒ ________________________",
-          },
+          { text: "golf / plays / sometimes / Sundays / on / He" },
+          { text: "⇒ ________________________" },
+          { text: "bad / always / The / weather / November / is / in" },
+          { text: "⇒ ________________________" },
+          { text: "for / have / dinner / seldom / fish / We" },
+          { text: "⇒ ________________________" },
+          { text: "usually / Peter / doesn’t / seven / up / before / get" },
+          { text: "⇒ ________________________" },
+          { text: "never / the / They / watch / TV / afternoon / in" },
+          { text: "⇒ ________________________" },
+          { text: "pop / The / listens / often / girl / to / music" },
+          { text: "⇒ ________________________" },
+          { text: "winter / school / often / late / She / in / comes / to" },
+          { text: "⇒ ________________________" },
+          { text: "am / now / my / lunch / eating / right / I" },
+          { text: "⇒ ________________________" },
+          { text: "London / tomorrow / am / to / flying / I" },
+          { text: "⇒ ________________________" },
         ],
         tables: [],
         items: [
@@ -8194,14 +5628,7 @@ export const HS_LESSONS = [
             key: "hsLesson17|ex3|golf / plays / sometimes / sundays / on / he ⇒",
             n: 1,
             prompt: "golf / plays / sometimes / Sundays / on / He ⇒",
-            parts: [
-              {
-                p: 0,
-              },
-              {
-                p: 1,
-              },
-            ],
+            parts: [{ p: 0 }, { p: 1 }],
             formText:
               "golf / plays / sometimes / Sundays / on / He\n⇒ ________________________",
             kind: "line",
@@ -8210,14 +5637,7 @@ export const HS_LESSONS = [
             key: "hsLesson17|ex3|bad / always / the / weather / november / is / in ⇒",
             n: 2,
             prompt: "bad / always / The / weather / November / is / in ⇒",
-            parts: [
-              {
-                p: 2,
-              },
-              {
-                p: 3,
-              },
-            ],
+            parts: [{ p: 2 }, { p: 3 }],
             formText:
               "bad / always / The / weather / November / is / in\n⇒ ________________________",
             kind: "line",
@@ -8226,14 +5646,7 @@ export const HS_LESSONS = [
             key: "hsLesson17|ex3|for / have / dinner / seldom / fish / we ⇒",
             n: 3,
             prompt: "for / have / dinner / seldom / fish / We ⇒",
-            parts: [
-              {
-                p: 4,
-              },
-              {
-                p: 5,
-              },
-            ],
+            parts: [{ p: 4 }, { p: 5 }],
             formText:
               "for / have / dinner / seldom / fish / We\n⇒ ________________________",
             kind: "line",
@@ -8242,14 +5655,7 @@ export const HS_LESSONS = [
             key: "hsLesson17|ex3|usually / peter / doesn't / seven / up / before / get ⇒",
             n: 4,
             prompt: "usually / Peter / doesn't / seven / up / before / get ⇒",
-            parts: [
-              {
-                p: 6,
-              },
-              {
-                p: 7,
-              },
-            ],
+            parts: [{ p: 6 }, { p: 7 }],
             formText:
               "usually / Peter / doesn’t / seven / up / before / get\n⇒ ________________________",
             kind: "line",
@@ -8258,14 +5664,7 @@ export const HS_LESSONS = [
             key: "hsLesson17|ex3|never / the / they / watch / tv / afternoon / in ⇒",
             n: 5,
             prompt: "never / the / They / watch / TV / afternoon / in ⇒",
-            parts: [
-              {
-                p: 8,
-              },
-              {
-                p: 9,
-              },
-            ],
+            parts: [{ p: 8 }, { p: 9 }],
             formText:
               "never / the / They / watch / TV / afternoon / in\n⇒ ________________________",
             kind: "line",
@@ -8274,14 +5673,7 @@ export const HS_LESSONS = [
             key: "hsLesson17|ex3|pop / the / listens / often / girl / to / music ⇒",
             n: 6,
             prompt: "pop / The / listens / often / girl / to / music ⇒",
-            parts: [
-              {
-                p: 10,
-              },
-              {
-                p: 11,
-              },
-            ],
+            parts: [{ p: 10 }, { p: 11 }],
             formText:
               "pop / The / listens / often / girl / to / music\n⇒ ________________________",
             kind: "line",
@@ -8290,14 +5682,7 @@ export const HS_LESSONS = [
             key: "hsLesson17|ex3|winter / school / often / late / she / in / comes / to ⇒",
             n: 7,
             prompt: "winter / school / often / late / She / in / comes / to ⇒",
-            parts: [
-              {
-                p: 12,
-              },
-              {
-                p: 13,
-              },
-            ],
+            parts: [{ p: 12 }, { p: 13 }],
             formText:
               "winter / school / often / late / She / in / comes / to\n⇒ ________________________",
             kind: "line",
@@ -8306,14 +5691,7 @@ export const HS_LESSONS = [
             key: "hsLesson17|ex3|am / now / my / lunch / eating / right / i ⇒",
             n: 8,
             prompt: "am / now / my / lunch / eating / right / I ⇒",
-            parts: [
-              {
-                p: 14,
-              },
-              {
-                p: 15,
-              },
-            ],
+            parts: [{ p: 14 }, { p: 15 }],
             formText:
               "am / now / my / lunch / eating / right / I\n⇒ ________________________",
             kind: "line",
@@ -8322,14 +5700,7 @@ export const HS_LESSONS = [
             key: "hsLesson17|ex3|london / tomorrow / am / to / flying / i ⇒",
             n: 9,
             prompt: "London / tomorrow / am / to / flying / I ⇒",
-            parts: [
-              {
-                p: 16,
-              },
-              {
-                p: 17,
-              },
-            ],
+            parts: [{ p: 16 }, { p: 17 }],
             formText:
               "London / tomorrow / am / to / flying / I\n⇒ ________________________",
             kind: "line",
@@ -8368,11 +5739,7 @@ export const HS_LESSONS = [
             key: "hsLesson17|ex4|(window / the / close) →",
             n: 1,
             prompt: "(window / the / close) →",
-            parts: [
-              {
-                p: 0,
-              },
-            ],
+            parts: [{ p: 0 }],
             formText:
               "(window / the / close) → ___________________________________",
             kind: "line",
@@ -8381,11 +5748,7 @@ export const HS_LESSONS = [
             key: "hsLesson17|ex4|(not / that / touch / do) →",
             n: 2,
             prompt: "(not / that / touch / do) →",
-            parts: [
-              {
-                p: 1,
-              },
-            ],
+            parts: [{ p: 1 }],
             formText:
               "(not / that / touch / do) → ___________________________________",
             kind: "line",
@@ -8394,11 +5757,7 @@ export const HS_LESSONS = [
             key: "hsLesson17|ex4|(down / please / sit) →",
             n: 3,
             prompt: "(down / please / sit) →",
-            parts: [
-              {
-                p: 2,
-              },
-            ],
+            parts: [{ p: 2 }],
             formText:
               "(down / please / sit) → ___________________________________",
             kind: "line",
@@ -8407,11 +5766,7 @@ export const HS_LESSONS = [
             key: "hsLesson17|ex4|(teacher / to / the / listen) →",
             n: 4,
             prompt: "(teacher / to / the / listen) →",
-            parts: [
-              {
-                p: 3,
-              },
-            ],
+            parts: [{ p: 3 }],
             formText:
               "(teacher / to / the / listen) → ___________________________________",
             kind: "line",
@@ -8420,11 +5775,7 @@ export const HS_LESSONS = [
             key: "hsLesson17|ex4|(the / to / zoo / let's / go) →",
             n: 5,
             prompt: "(the / to / zoo / let's / go) →",
-            parts: [
-              {
-                p: 4,
-              },
-            ],
+            parts: [{ p: 4 }],
             formText:
               "(the / to / zoo / let's / go) → ___________________________________",
             kind: "line",
@@ -8510,18 +5861,8 @@ export const HS_LESSONS = [
             n: 1,
             prompt: "Tôi thích đi đến một cửa hàng tạp hóa lớn.",
             hint: "grocery store /ˈɡrəʊsəri stɔː(r)/: cửa hàng rau củ quả",
-            parts: [
-              {
-                t: 0,
-                r: 1,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 1,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 1, c: 2 }],
+            fb: { t: 0, r: 1, c: 4 },
             kind: "vi_en",
           },
           {
@@ -8529,18 +5870,8 @@ export const HS_LESSONS = [
             n: 2,
             prompt: "Tôi muốn thấy một trung tâm y tế hiện đại.",
             hint: "modern /ˈmɒdn/: hiện đại; health center /helθ ˈsentə(r)/: trung tâm y tế",
-            parts: [
-              {
-                t: 0,
-                r: 2,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 2,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 2, c: 2 }],
+            fb: { t: 0, r: 2, c: 4 },
             kind: "vi_en",
           },
           {
@@ -8548,18 +5879,8 @@ export const HS_LESSONS = [
             n: 3,
             prompt: "Nhà thuốc mở cửa muộn vào buổi sáng.",
             hint: "pharmacy /ˈfɑːrməsi/: hiệu thuốc; late /leɪt/: muộn",
-            parts: [
-              {
-                t: 0,
-                r: 3,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 3,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 3, c: 2 }],
+            fb: { t: 0, r: 3, c: 4 },
             kind: "vi_en",
           },
           {
@@ -8567,18 +5888,8 @@ export const HS_LESSONS = [
             n: 4,
             prompt: "Tôi thích ghé thăm tiệm làm đẹp này.",
             hint: "visit /ˈvɪzɪt/: ghé thăm; beauty salon /ˈbjuːti səlɑːn/: tiệm làm đẹp",
-            parts: [
-              {
-                t: 0,
-                r: 4,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 4,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 4, c: 2 }],
+            fb: { t: 0, r: 4, c: 4 },
             kind: "vi_en",
           },
           {
@@ -8586,18 +5897,8 @@ export const HS_LESSONS = [
             n: 5,
             prompt: "Tôi không thích những cửa hàng quần áo đắt tiền ở đây.",
             hint: "expensive /ɪkˈspensɪv/: đắt tiền; dress shop /dres ʃɒp/: cửa hàng quần áo",
-            parts: [
-              {
-                t: 0,
-                r: 5,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 5,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 5, c: 2 }],
+            fb: { t: 0, r: 5, c: 4 },
             kind: "vi_en",
           },
         ],
@@ -8634,11 +5935,7 @@ export const HS_LESSONS = [
             n: 1,
             prompt:
               '"She is a very beautiful girl." Beautiful do từ nào sinh ra? →',
-            parts: [
-              {
-                p: 0,
-              },
-            ],
+            parts: [{ p: 0 }],
             formText:
               "“She is a very beautiful girl.”  Beautiful do từ nào sinh ra?  → _________",
             kind: "line",
@@ -8648,11 +5945,7 @@ export const HS_LESSONS = [
             n: 2,
             prompt:
               '"He answered all the questions correctly." Correctly do từ nào sinh ra? →',
-            parts: [
-              {
-                p: 1,
-              },
-            ],
+            parts: [{ p: 1 }],
             formText:
               "“He answered all the questions correctly.”  Correctly do từ nào sinh ra? → _________________",
             kind: "line",
@@ -8662,11 +5955,7 @@ export const HS_LESSONS = [
             n: 3,
             prompt:
               '"My brother is a very creative student." Creative do từ nào sinh ra? →',
-            parts: [
-              {
-                p: 2,
-              },
-            ],
+            parts: [{ p: 2 }],
             formText:
               "“My brother is a very creative student.”  Creative do từ nào sinh ra? → _________________",
             kind: "line",
@@ -8676,11 +5965,7 @@ export const HS_LESSONS = [
             n: 4,
             prompt:
               '"She drives carefully on the street." Carefully do từ nào sinh ra? →',
-            parts: [
-              {
-                p: 3,
-              },
-            ],
+            parts: [{ p: 3 }],
             formText:
               "“She drives carefully on the street.”  Carefully do từ nào sinh ra? → _________________",
             kind: "line",
@@ -8690,11 +5975,7 @@ export const HS_LESSONS = [
             n: 5,
             prompt:
               '"That was a dangerous game." Dangerous do từ nào sinh ra? →',
-            parts: [
-              {
-                p: 4,
-              },
-            ],
+            parts: [{ p: 4 }],
             formText:
               "“That was a dangerous game.”  Dangerous do từ nào sinh ra? → _________________",
             kind: "line",
@@ -8711,9 +5992,7 @@ export const HS_LESSONS = [
         instruction:
           "Exercise 3: Put the words in the correct order to make a complete sentence. /Sắp xếp các từ dưới đây để tạo thành câu hoàn chỉnh.",
         paras: [
-          {
-            text: "1. runs / quickly / He\u000b⇒ __________________________.",
-          },
+          { text: "1. runs / quickly / He\u000b⇒ __________________________." },
           {
             text: "2. reading / books / like / They / interesting\u000b⇒ __________________________.",
           },
@@ -8733,11 +6012,7 @@ export const HS_LESSONS = [
             key: "hsLesson18|ex3|1. runs / quickly / he ⇒ .",
             n: 1,
             prompt: "1. runs / quickly / He ⇒ .",
-            parts: [
-              {
-                p: 0,
-              },
-            ],
+            parts: [{ p: 0 }],
             formText:
               "1. runs / quickly / He\u000b⇒ __________________________.",
             kind: "line",
@@ -8746,11 +6021,7 @@ export const HS_LESSONS = [
             key: "hsLesson18|ex3|2. reading / books / like / they / interesting ⇒ .",
             n: 2,
             prompt: "2. reading / books / like / They / interesting ⇒ .",
-            parts: [
-              {
-                p: 1,
-              },
-            ],
+            parts: [{ p: 1 }],
             formText:
               "2. reading / books / like / They / interesting\u000b⇒ __________________________.",
             kind: "line",
@@ -8759,11 +6030,7 @@ export const HS_LESSONS = [
             key: "hsLesson18|ex3|3. to / go / wants / the / he / park / to ⇒ .",
             n: 3,
             prompt: "3. to / go / wants / the / He / park / to ⇒ .",
-            parts: [
-              {
-                p: 2,
-              },
-            ],
+            parts: [{ p: 2 }],
             formText:
               "3. to / go / wants / the / He / park / to\u000b⇒ __________________________.",
             kind: "line",
@@ -8772,11 +6039,7 @@ export const HS_LESSONS = [
             key: "hsLesson18|ex3|4. small / has / a / she / bag ⇒ .",
             n: 4,
             prompt: "4. small / has / a / She / bag ⇒ .",
-            parts: [
-              {
-                p: 3,
-              },
-            ],
+            parts: [{ p: 3 }],
             formText:
               "4. small / has / a / She / bag\u000b⇒ __________________________.",
             kind: "line",
@@ -8785,11 +6048,7 @@ export const HS_LESSONS = [
             key: "hsLesson18|ex3|5. buy / wants / to / she / a / notebook / beautiful ⇒ .",
             n: 5,
             prompt: "5. buy / wants / to / She / a / notebook / beautiful ⇒ .",
-            parts: [
-              {
-                p: 4,
-              },
-            ],
+            parts: [{ p: 4 }],
             formText:
               "5. buy / wants / to / She / a / notebook / beautiful\u000b⇒ __________________________.",
             kind: "line",
@@ -8878,18 +6137,8 @@ export const HS_LESSONS = [
             prompt:
               "Nhà hàng nằm ở giữa cửa hàng trái cây và cửa hàng quà lưu niệm.",
             hint: "restaurant /ˈrestərɑːnt/: nhà hàng; fruit shop /fruːt ʃɒp/: cửa hàng trái cây; gift shop /ɡɪft ʃɒp/: cửa hàng quà lưu niệm",
-            parts: [
-              {
-                t: 0,
-                r: 1,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 1,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 1, c: 2 }],
+            fb: { t: 0, r: 1, c: 4 },
             kind: "vi_en",
           },
           {
@@ -8897,18 +6146,8 @@ export const HS_LESSONS = [
             n: 2,
             prompt: "Chợ nằm trên con phố chính.",
             hint: "market /ˈmɑːrkɪt/: chợ; main street /meɪn striːt/: phố chính",
-            parts: [
-              {
-                t: 0,
-                r: 2,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 2,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 2, c: 2 }],
+            fb: { t: 0, r: 2, c: 4 },
             kind: "vi_en",
           },
           {
@@ -8916,18 +6155,8 @@ export const HS_LESSONS = [
             n: 3,
             prompt: "Có một công viên lớn gần khách sạn.",
             hint: "",
-            parts: [
-              {
-                t: 0,
-                r: 3,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 3,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 3, c: 2 }],
+            fb: { t: 0, r: 3, c: 4 },
             kind: "vi_en",
           },
           {
@@ -8935,18 +6164,8 @@ export const HS_LESSONS = [
             n: 4,
             prompt: "Cửa hàng giày nằm bên cạnh cửa hàng tiện lợi.",
             hint: "shoe shop /ʃuː ʃɒp/: cửa hàng giày; convenience store /kənˈviːniəns stɔː(r)/: cửa hàng tiện lợi",
-            parts: [
-              {
-                t: 0,
-                r: 4,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 4,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 4, c: 2 }],
+            fb: { t: 0, r: 4, c: 4 },
             kind: "vi_en",
           },
           {
@@ -8954,18 +6173,8 @@ export const HS_LESSONS = [
             n: 5,
             prompt: "Đồn cảnh sát nằm đối diện bệnh viện",
             hint: "police station /pəˈliːs steɪʃn/: đồn cảnh sát",
-            parts: [
-              {
-                t: 0,
-                r: 5,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 5,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 5, c: 2 }],
+            fb: { t: 0, r: 5, c: 4 },
             kind: "vi_en",
           },
         ],
@@ -8980,9 +6189,7 @@ export const HS_LESSONS = [
         instruction:
           "Exercise 2: There is a mistake in every sentence, find and correct it. / Có 1 lỗi sai trong mỗi câu dưới đây, tìm và sửa lại cho đúng",
         paras: [
-          {
-            text: "There is a lamp to the table. → _________________",
-          },
+          { text: "There is a lamp to the table. → _________________" },
           {
             text: "The children are playing on the garden.  → _________________",
           },
@@ -8995,21 +6202,11 @@ export const HS_LESSONS = [
           {
             text: "The café is in front between the cinema. → _________________",
           },
-          {
-            text: "The cat is sleeping of the bed.  → _________________",
-          },
-          {
-            text: "The picture is under the wall. → _________________",
-          },
-          {
-            text: "They live on a small village.  → _________________",
-          },
-          {
-            text: "She is sitting in the chair.  → _________________",
-          },
-          {
-            text: "My school is at Nguyen Trai Street.  → _________________",
-          },
+          { text: "The cat is sleeping of the bed.  → _________________" },
+          { text: "The picture is under the wall. → _________________" },
+          { text: "They live on a small village.  → _________________" },
+          { text: "She is sitting in the chair.  → _________________" },
+          { text: "My school is at Nguyen Trai Street.  → _________________" },
         ],
         tables: [],
         items: [
@@ -9017,11 +6214,7 @@ export const HS_LESSONS = [
             key: "hsLesson19|ex2|there is a lamp to the table. →",
             n: 1,
             prompt: "There is a lamp to the table. →",
-            parts: [
-              {
-                p: 0,
-              },
-            ],
+            parts: [{ p: 0 }],
             formText: "There is a lamp to the table. → _________________",
             kind: "line",
           },
@@ -9029,11 +6222,7 @@ export const HS_LESSONS = [
             key: "hsLesson19|ex2|the children are playing on the garden. →",
             n: 2,
             prompt: "The children are playing on the garden. →",
-            parts: [
-              {
-                p: 1,
-              },
-            ],
+            parts: [{ p: 1 }],
             formText:
               "The children are playing on the garden.  → _________________",
             kind: "line",
@@ -9042,11 +6231,7 @@ export const HS_LESSONS = [
             key: "hsLesson19|ex2|the bus stop is under the post office. →",
             n: 3,
             prompt: "The bus stop is under the post office. →",
-            parts: [
-              {
-                p: 2,
-              },
-            ],
+            parts: [{ p: 2 }],
             formText:
               "The bus stop is under the post office.  → _________________",
             kind: "line",
@@ -9055,11 +6240,7 @@ export const HS_LESSONS = [
             key: "hsLesson19|ex2|my house is on the library and the supermarket. →",
             n: 4,
             prompt: "My house is on the library and the supermarket. →",
-            parts: [
-              {
-                p: 3,
-              },
-            ],
+            parts: [{ p: 3 }],
             formText:
               "My house is on the library and the supermarket.  → _________________",
             kind: "line",
@@ -9068,11 +6249,7 @@ export const HS_LESSONS = [
             key: "hsLesson19|ex2|the café is in front between the cinema. →",
             n: 5,
             prompt: "The café is in front between the cinema. →",
-            parts: [
-              {
-                p: 4,
-              },
-            ],
+            parts: [{ p: 4 }],
             formText:
               "The café is in front between the cinema. → _________________",
             kind: "line",
@@ -9081,11 +6258,7 @@ export const HS_LESSONS = [
             key: "hsLesson19|ex2|the cat is sleeping of the bed. →",
             n: 6,
             prompt: "The cat is sleeping of the bed. →",
-            parts: [
-              {
-                p: 5,
-              },
-            ],
+            parts: [{ p: 5 }],
             formText: "The cat is sleeping of the bed.  → _________________",
             kind: "line",
           },
@@ -9093,11 +6266,7 @@ export const HS_LESSONS = [
             key: "hsLesson19|ex2|the picture is under the wall. →",
             n: 7,
             prompt: "The picture is under the wall. →",
-            parts: [
-              {
-                p: 6,
-              },
-            ],
+            parts: [{ p: 6 }],
             formText: "The picture is under the wall. → _________________",
             kind: "line",
           },
@@ -9105,11 +6274,7 @@ export const HS_LESSONS = [
             key: "hsLesson19|ex2|they live on a small village. →",
             n: 8,
             prompt: "They live on a small village. →",
-            parts: [
-              {
-                p: 7,
-              },
-            ],
+            parts: [{ p: 7 }],
             formText: "They live on a small village.  → _________________",
             kind: "line",
           },
@@ -9117,11 +6282,7 @@ export const HS_LESSONS = [
             key: "hsLesson19|ex2|she is sitting in the chair. →",
             n: 9,
             prompt: "She is sitting in the chair. →",
-            parts: [
-              {
-                p: 8,
-              },
-            ],
+            parts: [{ p: 8 }],
             formText: "She is sitting in the chair.  → _________________",
             kind: "line",
           },
@@ -9129,11 +6290,7 @@ export const HS_LESSONS = [
             key: "hsLesson19|ex2|my school is at nguyen trai street. →",
             n: 10,
             prompt: "My school is at Nguyen Trai Street. →",
-            parts: [
-              {
-                p: 9,
-              },
-            ],
+            parts: [{ p: 9 }],
             formText:
               "My school is at Nguyen Trai Street.  → _________________",
             kind: "line",
@@ -9221,18 +6378,8 @@ export const HS_LESSONS = [
             n: 1,
             prompt: "Tôi giỏi nướng bánh.",
             hint: "good at + N /ɡʊd æt/: giỏi về; bake /beɪk/: nướng bánh",
-            parts: [
-              {
-                t: 0,
-                r: 1,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 1,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 1, c: 2 }],
+            fb: { t: 0, r: 1, c: 4 },
             kind: "vi_en",
           },
           {
@@ -9240,18 +6387,8 @@ export const HS_LESSONS = [
             n: 2,
             prompt: "Tiệm bánh của tôi ở gần rạp chiếu phim.",
             hint: "bakery /ˈbeɪkəri/: tiệm bánh",
-            parts: [
-              {
-                t: 0,
-                r: 2,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 2,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 2, c: 2 }],
+            fb: { t: 0, r: 2, c: 4 },
             kind: "vi_en",
           },
           {
@@ -9259,18 +6396,8 @@ export const HS_LESSONS = [
             n: 3,
             prompt: "Chị gái tôi quan tâm đến cửa hàng đồ cổ ở đây",
             hint: "interested in + V-ing /ˈɪntrəstɪd ɪn/: quan tâm đến … antique shop /ænˈtiːk ʃɒp/: cửa hàng đồ cổ",
-            parts: [
-              {
-                t: 0,
-                r: 3,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 3,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 3, c: 2 }],
+            fb: { t: 0, r: 3, c: 4 },
             kind: "vi_en",
           },
           {
@@ -9278,18 +6405,8 @@ export const HS_LESSONS = [
             n: 4,
             prompt: "Cô ấy sợ băng qua đường.",
             hint: "afraid of + V-ing /əˈfreɪd əv/: sợ làm gì cross /krɒs/: vượt, băng qua",
-            parts: [
-              {
-                t: 0,
-                r: 4,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 4,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 4, c: 2 }],
+            fb: { t: 0, r: 4, c: 4 },
             kind: "vi_en",
           },
           {
@@ -9297,18 +6414,8 @@ export const HS_LESSONS = [
             n: 5,
             prompt: "Chúng tôi có các hoạt động ngoài trời trong công viên.",
             hint: "outdoor /ˈaʊtdɔː(r)/: ngoài trời; activity /ækˈtɪvəti/: hoạt động",
-            parts: [
-              {
-                t: 0,
-                r: 5,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 5,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 5, c: 2 }],
+            fb: { t: 0, r: 5, c: 4 },
             kind: "vi_en",
           },
         ],
@@ -9323,36 +6430,16 @@ export const HS_LESSONS = [
         instruction:
           "Exercise 2:Arrange the following words to make meaningful sentences, paying attention to the position of the prepositions. / Sắp xếp các từ sau để tạo thành câu có nghĩa, chú ý vị trí của giới từ.",
         paras: [
-          {
-            text: "is / the supermarket / my house / next to",
-          },
-          {
-            text: "⇒ ________________________________.",
-          },
-          {
-            text: "are / there / on / some books / the shelf",
-          },
-          {
-            text: "⇒ ________________________________.",
-          },
-          {
-            text: "living room / a sofa / there is / in / the",
-          },
-          {
-            text: "⇒ ________________________________.",
-          },
-          {
-            text: "the park / the bank / between / is / and/ the school",
-          },
-          {
-            text: "⇒ ________________________________.",
-          },
-          {
-            text: "on / the wall / a clock / is / there",
-          },
-          {
-            text: "⇒ ________________________________.",
-          },
+          { text: "is / the supermarket / my house / next to" },
+          { text: "⇒ ________________________________." },
+          { text: "are / there / on / some books / the shelf" },
+          { text: "⇒ ________________________________." },
+          { text: "living room / a sofa / there is / in / the" },
+          { text: "⇒ ________________________________." },
+          { text: "the park / the bank / between / is / and/ the school" },
+          { text: "⇒ ________________________________." },
+          { text: "on / the wall / a clock / is / there" },
+          { text: "⇒ ________________________________." },
         ],
         tables: [],
         items: [
@@ -9360,14 +6447,7 @@ export const HS_LESSONS = [
             key: "hsLesson20|ex2|is / the supermarket / my house / next to ⇒ .",
             n: 1,
             prompt: "is / the supermarket / my house / next to ⇒ .",
-            parts: [
-              {
-                p: 0,
-              },
-              {
-                p: 1,
-              },
-            ],
+            parts: [{ p: 0 }, { p: 1 }],
             formText:
               "is / the supermarket / my house / next to\n⇒ ________________________________.",
             kind: "line",
@@ -9376,14 +6456,7 @@ export const HS_LESSONS = [
             key: "hsLesson20|ex2|are / there / on / some books / the shelf ⇒ .",
             n: 2,
             prompt: "are / there / on / some books / the shelf ⇒ .",
-            parts: [
-              {
-                p: 2,
-              },
-              {
-                p: 3,
-              },
-            ],
+            parts: [{ p: 2 }, { p: 3 }],
             formText:
               "are / there / on / some books / the shelf\n⇒ ________________________________.",
             kind: "line",
@@ -9392,14 +6465,7 @@ export const HS_LESSONS = [
             key: "hsLesson20|ex2|living room / a sofa / there is / in / the ⇒ .",
             n: 3,
             prompt: "living room / a sofa / there is / in / the ⇒ .",
-            parts: [
-              {
-                p: 4,
-              },
-              {
-                p: 5,
-              },
-            ],
+            parts: [{ p: 4 }, { p: 5 }],
             formText:
               "living room / a sofa / there is / in / the\n⇒ ________________________________.",
             kind: "line",
@@ -9408,14 +6474,7 @@ export const HS_LESSONS = [
             key: "hsLesson20|ex2|the park / the bank / between / is / and/ the school ⇒ .",
             n: 4,
             prompt: "the park / the bank / between / is / and/ the school ⇒ .",
-            parts: [
-              {
-                p: 6,
-              },
-              {
-                p: 7,
-              },
-            ],
+            parts: [{ p: 6 }, { p: 7 }],
             formText:
               "the park / the bank / between / is / and/ the school\n⇒ ________________________________.",
             kind: "line",
@@ -9424,14 +6483,7 @@ export const HS_LESSONS = [
             key: "hsLesson20|ex2|on / the wall / a clock / is / there ⇒ .",
             n: 5,
             prompt: "on / the wall / a clock / is / there ⇒ .",
-            parts: [
-              {
-                p: 8,
-              },
-              {
-                p: 9,
-              },
-            ],
+            parts: [{ p: 8 }, { p: 9 }],
             formText:
               "on / the wall / a clock / is / there\n⇒ ________________________________.",
             kind: "line",
@@ -9448,21 +6500,15 @@ export const HS_LESSONS = [
         instruction:
           "Exercise 3: There is a mistake in every sentence, find and correct it. Có 1 lỗi sai trong mỗi câu dưới đây, tìm và sửa lại cho đúng",
         paras: [
-          {
-            text: "I live on a small village. → _________________",
-          },
-          {
-            text: "The bookshelf  next to the desk. → _________________",
-          },
+          { text: "I live on a small village. → _________________" },
+          { text: "The bookshelf  next to the desk. → _________________" },
           {
             text: "My school is next to the park and the museum. → _________________",
           },
           {
             text: "There are many books in the bookshelf. → _________________",
           },
-          {
-            text: "The picture is between the wall. → _________________",
-          },
+          { text: "The picture is between the wall. → _________________" },
         ],
         tables: [],
         items: [
@@ -9470,11 +6516,7 @@ export const HS_LESSONS = [
             key: "hsLesson20|ex3|i live on a small village. →",
             n: 1,
             prompt: "I live on a small village. →",
-            parts: [
-              {
-                p: 0,
-              },
-            ],
+            parts: [{ p: 0 }],
             formText: "I live on a small village. → _________________",
             kind: "line",
           },
@@ -9482,11 +6524,7 @@ export const HS_LESSONS = [
             key: "hsLesson20|ex3|the bookshelf next to the desk. →",
             n: 2,
             prompt: "The bookshelf next to the desk. →",
-            parts: [
-              {
-                p: 1,
-              },
-            ],
+            parts: [{ p: 1 }],
             formText: "The bookshelf  next to the desk. → _________________",
             kind: "line",
           },
@@ -9494,11 +6532,7 @@ export const HS_LESSONS = [
             key: "hsLesson20|ex3|my school is next to the park and the museum. →",
             n: 3,
             prompt: "My school is next to the park and the museum. →",
-            parts: [
-              {
-                p: 2,
-              },
-            ],
+            parts: [{ p: 2 }],
             formText:
               "My school is next to the park and the museum. → _________________",
             kind: "line",
@@ -9507,11 +6541,7 @@ export const HS_LESSONS = [
             key: "hsLesson20|ex3|there are many books in the bookshelf. →",
             n: 4,
             prompt: "There are many books in the bookshelf. →",
-            parts: [
-              {
-                p: 3,
-              },
-            ],
+            parts: [{ p: 3 }],
             formText:
               "There are many books in the bookshelf. → _________________",
             kind: "line",
@@ -9520,11 +6550,7 @@ export const HS_LESSONS = [
             key: "hsLesson20|ex3|the picture is between the wall. →",
             n: 5,
             prompt: "The picture is between the wall. →",
-            parts: [
-              {
-                p: 4,
-              },
-            ],
+            parts: [{ p: 4 }],
             formText: "The picture is between the wall. → _________________",
             kind: "line",
           },
@@ -9540,21 +6566,11 @@ export const HS_LESSONS = [
         instruction:
           "Exercise 4: Fill in the blanks with at / in / of / from. / Điền at / in / of / from vào chỗ trống",
         paras: [
-          {
-            text: "She is good ________  playing the piano.",
-          },
-          {
-            text: "My sister is interested ________ reading comic books.",
-          },
-          {
-            text: "I am afraid ________ dogs.",
-          },
-          {
-            text: "This shirt is different ________ that one.",
-          },
-          {
-            text: "He is bad ________ cooking meals",
-          },
+          { text: "She is good ________  playing the piano." },
+          { text: "My sister is interested ________ reading comic books." },
+          { text: "I am afraid ________ dogs." },
+          { text: "This shirt is different ________ that one." },
+          { text: "He is bad ________ cooking meals" },
         ],
         tables: [],
         items: [
@@ -9562,11 +6578,7 @@ export const HS_LESSONS = [
             key: "hsLesson20|ex4|she is good playing the piano.",
             n: 1,
             prompt: "She is good playing the piano.",
-            parts: [
-              {
-                p: 0,
-              },
-            ],
+            parts: [{ p: 0 }],
             formText: "She is good ________  playing the piano.",
             kind: "blank",
           },
@@ -9574,11 +6586,7 @@ export const HS_LESSONS = [
             key: "hsLesson20|ex4|my sister is interested reading comic books.",
             n: 2,
             prompt: "My sister is interested reading comic books.",
-            parts: [
-              {
-                p: 1,
-              },
-            ],
+            parts: [{ p: 1 }],
             formText: "My sister is interested ________ reading comic books.",
             kind: "blank",
           },
@@ -9586,11 +6594,7 @@ export const HS_LESSONS = [
             key: "hsLesson20|ex4|i am afraid dogs.",
             n: 3,
             prompt: "I am afraid dogs.",
-            parts: [
-              {
-                p: 2,
-              },
-            ],
+            parts: [{ p: 2 }],
             formText: "I am afraid ________ dogs.",
             kind: "blank",
           },
@@ -9598,11 +6602,7 @@ export const HS_LESSONS = [
             key: "hsLesson20|ex4|this shirt is different that one.",
             n: 4,
             prompt: "This shirt is different that one.",
-            parts: [
-              {
-                p: 3,
-              },
-            ],
+            parts: [{ p: 3 }],
             formText: "This shirt is different ________ that one.",
             kind: "blank",
           },
@@ -9610,11 +6610,7 @@ export const HS_LESSONS = [
             key: "hsLesson20|ex4|he is bad cooking meals",
             n: 5,
             prompt: "He is bad cooking meals",
-            parts: [
-              {
-                p: 4,
-              },
-            ],
+            parts: [{ p: 4 }],
             formText: "He is bad ________ cooking meals",
             kind: "blank",
           },
@@ -9693,18 +6689,8 @@ export const HS_LESSONS = [
             n: 1,
             prompt: "Chúng tôi phải mang ba lô ra bờ biển.",
             hint: "backpack /ˈbækpæk/: ba lô; beach /biːtʃ/: bãi biển",
-            parts: [
-              {
-                t: 0,
-                r: 1,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 1,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 1, c: 2 }],
+            fb: { t: 0, r: 1, c: 4 },
             kind: "vi_en",
           },
           {
@@ -9712,18 +6698,8 @@ export const HS_LESSONS = [
             n: 2,
             prompt: "Chúng ta không nên xả rác ở biển.",
             hint: "litter /ˈlɪtər/: vứt rác; beach /biːtʃ/: bãi biển",
-            parts: [
-              {
-                t: 0,
-                r: 2,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 2,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 2, c: 2 }],
+            fb: { t: 0, r: 2, c: 4 },
             kind: "vi_en",
           },
           {
@@ -9731,18 +6707,8 @@ export const HS_LESSONS = [
             n: 3,
             prompt: "Nhóm bạn phải bảo vệ phong cảnh biển.",
             hint: "landscape /ˈlændskeɪp/: phong cảnh",
-            parts: [
-              {
-                t: 0,
-                r: 3,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 3,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 3, c: 2 }],
+            fb: { t: 0, r: 3, c: 4 },
             kind: "vi_en",
           },
           {
@@ -9750,18 +6716,8 @@ export const HS_LESSONS = [
             n: 4,
             prompt: "Họ nên đội mũ che nắng",
             hint: "wear /weə(r)/: đội/mặc; sun hat /sʌn hæt/: mũ",
-            parts: [
-              {
-                t: 0,
-                r: 4,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 4,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 4, c: 2 }],
+            fb: { t: 0, r: 4, c: 4 },
             kind: "vi_en",
           },
           {
@@ -9769,18 +6725,8 @@ export const HS_LESSONS = [
             n: 5,
             prompt: "Bạn phải đi theo lối ra bãi biển.",
             hint: "follow /ˈfɒləʊ/: đi theo; path /pɑːθ/: lối đi",
-            parts: [
-              {
-                t: 0,
-                r: 5,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 5,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 5, c: 2 }],
+            fb: { t: 0, r: 5, c: 4 },
             kind: "vi_en",
           },
         ],
@@ -9795,21 +6741,11 @@ export const HS_LESSONS = [
         instruction:
           'Exercise 2: Điền "must" hoặc "mustn\'t". Điền "must" (phải) hoặc "mustn\'t" (không được) vào chỗ trống.',
         paras: [
-          {
-            text: "You ______be quiet in the hospital.",
-          },
-          {
-            text: "You _____play football in the living room.",
-          },
-          {
-            text: "We _____go to bed early to be healthy.",
-          },
-          {
-            text: "Students _____wear a uniform at school.",
-          },
-          {
-            text: "They _____be (playing) in the garden now.",
-          },
+          { text: "You ______be quiet in the hospital." },
+          { text: "You _____play football in the living room." },
+          { text: "We _____go to bed early to be healthy." },
+          { text: "Students _____wear a uniform at school." },
+          { text: "They _____be (playing) in the garden now." },
         ],
         tables: [],
         items: [
@@ -9817,11 +6753,7 @@ export const HS_LESSONS = [
             key: "hsLesson21|ex2|you be quiet in the hospital.",
             n: 1,
             prompt: "You be quiet in the hospital.",
-            parts: [
-              {
-                p: 0,
-              },
-            ],
+            parts: [{ p: 0 }],
             formText: "You ______be quiet in the hospital.",
             kind: "blank",
           },
@@ -9829,11 +6761,7 @@ export const HS_LESSONS = [
             key: "hsLesson21|ex2|you play football in the living room.",
             n: 2,
             prompt: "You play football in the living room.",
-            parts: [
-              {
-                p: 1,
-              },
-            ],
+            parts: [{ p: 1 }],
             formText: "You _____play football in the living room.",
             kind: "blank",
           },
@@ -9841,11 +6769,7 @@ export const HS_LESSONS = [
             key: "hsLesson21|ex2|we go to bed early to be healthy.",
             n: 3,
             prompt: "We go to bed early to be healthy.",
-            parts: [
-              {
-                p: 2,
-              },
-            ],
+            parts: [{ p: 2 }],
             formText: "We _____go to bed early to be healthy.",
             kind: "blank",
           },
@@ -9853,11 +6777,7 @@ export const HS_LESSONS = [
             key: "hsLesson21|ex2|students wear a uniform at school.",
             n: 4,
             prompt: "Students wear a uniform at school.",
-            parts: [
-              {
-                p: 3,
-              },
-            ],
+            parts: [{ p: 3 }],
             formText: "Students _____wear a uniform at school.",
             kind: "blank",
           },
@@ -9865,11 +6785,7 @@ export const HS_LESSONS = [
             key: "hsLesson21|ex2|they be (playing) in the garden now.",
             n: 5,
             prompt: "They be (playing) in the garden now.",
-            parts: [
-              {
-                p: 4,
-              },
-            ],
+            parts: [{ p: 4 }],
             formText: "They _____be (playing) in the garden now.",
             kind: "blank",
           },
@@ -9907,11 +6823,7 @@ export const HS_LESSONS = [
             key: "hsLesson21|ex3|it is a good idea to tidy your bedroom. →",
             n: 1,
             prompt: "It is a good idea to tidy your bedroom. →",
-            parts: [
-              {
-                p: 0,
-              },
-            ],
+            parts: [{ p: 0 }],
             formText:
               "It is a good idea to tidy your bedroom.  → _________________",
             kind: "line",
@@ -9920,11 +6832,7 @@ export const HS_LESSONS = [
             key: "hsLesson21|ex3|it is wrong to talk loudly in the cinema. →",
             n: 2,
             prompt: "It is wrong to talk loudly in the cinema. →",
-            parts: [
-              {
-                p: 1,
-              },
-            ],
+            parts: [{ p: 1 }],
             formText:
               "It is wrong to talk loudly in the cinema.  → _________________",
             kind: "line",
@@ -9933,11 +6841,7 @@ export const HS_LESSONS = [
             key: "hsLesson21|ex3|it is necessary for you to finish this task. →",
             n: 3,
             prompt: "It is necessary for you to finish this task. →",
-            parts: [
-              {
-                p: 2,
-              },
-            ],
+            parts: [{ p: 2 }],
             formText:
               "It is necessary for you to finish this task.  → _________________",
             kind: "line",
@@ -9946,11 +6850,7 @@ export const HS_LESSONS = [
             key: "hsLesson21|ex3|my doctor advises me to take some medicine. →",
             n: 4,
             prompt: "My doctor advises me to take some medicine. →",
-            parts: [
-              {
-                p: 3,
-              },
-            ],
+            parts: [{ p: 3 }],
             formText:
               "My doctor advises me to take some medicine.  → _________________",
             kind: "line",
@@ -9959,11 +6859,7 @@ export const HS_LESSONS = [
             key: "hsLesson21|ex3|it is prohibited to bring food into the museum. →",
             n: 5,
             prompt: "It is prohibited to bring food into the museum. →",
-            parts: [
-              {
-                p: 4,
-              },
-            ],
+            parts: [{ p: 4 }],
             formText:
               "It is prohibited to bring food into the museum.  → _________________",
             kind: "line",
@@ -9986,9 +6882,7 @@ export const HS_LESSONS = [
           {
             text: "There (be) ________ a TV in my future house because I can use my super smart computer to watch programmes.",
           },
-          {
-            text: "My future house (be) ____________ on the Moon.",
-          },
+          { text: "My future house (be) ____________ on the Moon." },
           {
             text: "Most families (have) ____________ robots in their houses in the future.",
           },
@@ -10002,11 +6896,7 @@ export const HS_LESSONS = [
             key: "hsLesson21|ex4|hi-tech robots (look after) children and old people.",
             n: 1,
             prompt: "Hi-tech robots (look after) children and old people.",
-            parts: [
-              {
-                p: 0,
-              },
-            ],
+            parts: [{ p: 0 }],
             formText:
               "Hi-tech robots (look after) ___________ children and old people.",
             kind: "blank",
@@ -10016,11 +6906,7 @@ export const HS_LESSONS = [
             n: 2,
             prompt:
               "There (be) a TV in my future house because I can use my super smart computer to watch programmes.",
-            parts: [
-              {
-                p: 1,
-              },
-            ],
+            parts: [{ p: 1 }],
             formText:
               "There (be) ________ a TV in my future house because I can use my super smart computer to watch programmes.",
             kind: "blank",
@@ -10029,11 +6915,7 @@ export const HS_LESSONS = [
             key: "hsLesson21|ex4|my future house (be) on the moon.",
             n: 3,
             prompt: "My future house (be) on the Moon.",
-            parts: [
-              {
-                p: 2,
-              },
-            ],
+            parts: [{ p: 2 }],
             formText: "My future house (be) ____________ on the Moon.",
             kind: "blank",
           },
@@ -10042,11 +6924,7 @@ export const HS_LESSONS = [
             n: 4,
             prompt:
               "Most families (have) robots in their houses in the future.",
-            parts: [
-              {
-                p: 3,
-              },
-            ],
+            parts: [{ p: 3 }],
             formText:
               "Most families (have) ____________ robots in their houses in the future.",
             kind: "blank",
@@ -10055,11 +6933,7 @@ export const HS_LESSONS = [
             key: "hsLesson21|ex4|people (build) hotels on the moon in the future.",
             n: 5,
             prompt: "People (build) hotels on the Moon in the future.",
-            parts: [
-              {
-                p: 4,
-              },
-            ],
+            parts: [{ p: 4 }],
             formText:
               "People (build) ____________ hotels on the Moon in the future.",
             kind: "blank",
@@ -10139,18 +7013,8 @@ export const HS_LESSONS = [
             n: 1,
             prompt: "Chúng ta không thấy thuyền trên hồ.",
             hint: "boat /bəʊt/: con thuyền; lake /leɪk/: hồ nước",
-            parts: [
-              {
-                t: 0,
-                r: 1,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 1,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 1, c: 2 }],
+            fb: { t: 0, r: 1, c: 4 },
             kind: "vi_en",
           },
           {
@@ -10158,18 +7022,8 @@ export const HS_LESSONS = [
             n: 2,
             prompt: "Bạn có la bàn không?",
             hint: "compass /ˈkʌmpəs/: la bàn",
-            parts: [
-              {
-                t: 0,
-                r: 2,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 2,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 2, c: 2 }],
+            fb: { t: 0, r: 2, c: 4 },
             kind: "vi_en",
           },
           {
@@ -10177,18 +7031,8 @@ export const HS_LESSONS = [
             n: 3,
             prompt: "Cô ấy không mang ủng đi bộ.",
             hint: "boot /buːt/: giày ủng",
-            parts: [
-              {
-                t: 0,
-                r: 3,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 3,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 3, c: 2 }],
+            fb: { t: 0, r: 3, c: 4 },
             kind: "vi_en",
           },
           {
@@ -10196,18 +7040,8 @@ export const HS_LESSONS = [
             n: 4,
             prompt: "Họ không đi bộ trong rừng.",
             hint: "forest /ˈfɔːrɪst/: rừng",
-            parts: [
-              {
-                t: 0,
-                r: 4,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 4,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 4, c: 2 }],
+            fb: { t: 0, r: 4, c: 4 },
             kind: "vi_en",
           },
           {
@@ -10215,18 +7049,8 @@ export const HS_LESSONS = [
             n: 5,
             prompt: "Tôi không có túi ngủ.",
             hint: "sleeping bag /ˈsliːpɪŋ bæɡ/: túi ngủ",
-            parts: [
-              {
-                t: 0,
-                r: 5,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 5,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 5, c: 2 }],
+            fb: { t: 0, r: 5, c: 4 },
             kind: "vi_en",
           },
         ],
@@ -10241,21 +7065,11 @@ export const HS_LESSONS = [
         instruction:
           "Exercise 2: Fill in the auxiliary verb (do/does)./ Điền trợ động từ (do/does)",
         paras: [
-          {
-            text: "______ you have a television in the living room?\u000b",
-          },
-          {
-            text: "______ she use a shower in the morning?\u000b",
-          },
-          {
-            text: "______ your parents like the new kitchen?\u000b",
-          },
-          {
-            text: "What time ______ the children go to bed?\u000b",
-          },
-          {
-            text: "______ he have a desk in his bedroom?\u000b",
-          },
+          { text: "______ you have a television in the living room?\u000b" },
+          { text: "______ she use a shower in the morning?\u000b" },
+          { text: "______ your parents like the new kitchen?\u000b" },
+          { text: "What time ______ the children go to bed?\u000b" },
+          { text: "______ he have a desk in his bedroom?\u000b" },
         ],
         tables: [],
         items: [
@@ -10263,11 +7077,7 @@ export const HS_LESSONS = [
             key: "hsLesson22|ex2|you have a television in the living room?",
             n: 1,
             prompt: "you have a television in the living room?",
-            parts: [
-              {
-                p: 0,
-              },
-            ],
+            parts: [{ p: 0 }],
             formText: "______ you have a television in the living room?\u000b",
             kind: "blank",
           },
@@ -10275,11 +7085,7 @@ export const HS_LESSONS = [
             key: "hsLesson22|ex2|she use a shower in the morning?",
             n: 2,
             prompt: "she use a shower in the morning?",
-            parts: [
-              {
-                p: 1,
-              },
-            ],
+            parts: [{ p: 1 }],
             formText: "______ she use a shower in the morning?\u000b",
             kind: "blank",
           },
@@ -10287,11 +7093,7 @@ export const HS_LESSONS = [
             key: "hsLesson22|ex2|your parents like the new kitchen?",
             n: 3,
             prompt: "your parents like the new kitchen?",
-            parts: [
-              {
-                p: 2,
-              },
-            ],
+            parts: [{ p: 2 }],
             formText: "______ your parents like the new kitchen?\u000b",
             kind: "blank",
           },
@@ -10299,11 +7101,7 @@ export const HS_LESSONS = [
             key: "hsLesson22|ex2|what time the children go to bed?",
             n: 4,
             prompt: "What time the children go to bed?",
-            parts: [
-              {
-                p: 3,
-              },
-            ],
+            parts: [{ p: 3 }],
             formText: "What time ______ the children go to bed?\u000b",
             kind: "blank",
           },
@@ -10311,11 +7109,7 @@ export const HS_LESSONS = [
             key: "hsLesson22|ex2|he have a desk in his bedroom?",
             n: 5,
             prompt: "he have a desk in his bedroom?",
-            parts: [
-              {
-                p: 4,
-              },
-            ],
+            parts: [{ p: 4 }],
             formText: "______ he have a desk in his bedroom?\u000b",
             kind: "blank",
           },
@@ -10337,18 +7131,12 @@ export const HS_LESSONS = [
           {
             text: "My father likes watching television on the sofa.\u000b → _________________",
           },
-          {
-            text: "They have a new kitchen.\u000b → _________________",
-          },
+          { text: "They have a new kitchen.\u000b → _________________" },
           {
             text: "She uses a computer for her homework.\u000b → _________________",
           },
-          {
-            text: "He played soccer with his friends last Sunday. ",
-          },
-          {
-            text: " → _________________",
-          },
+          { text: "He played soccer with his friends last Sunday. " },
+          { text: " → _________________" },
         ],
         tables: [],
         items: [
@@ -10356,11 +7144,7 @@ export const HS_LESSONS = [
             key: "hsLesson22|ex3|i have a big wardrobe in my bedroom. →",
             n: 1,
             prompt: "I have a big wardrobe in my bedroom. →",
-            parts: [
-              {
-                p: 0,
-              },
-            ],
+            parts: [{ p: 0 }],
             formText:
               "I have a big wardrobe in my bedroom.\u000b → _________________",
             kind: "line",
@@ -10369,11 +7153,7 @@ export const HS_LESSONS = [
             key: "hsLesson22|ex3|my father likes watching television on the sofa. →",
             n: 2,
             prompt: "My father likes watching television on the sofa. →",
-            parts: [
-              {
-                p: 1,
-              },
-            ],
+            parts: [{ p: 1 }],
             formText:
               "My father likes watching television on the sofa.\u000b → _________________",
             kind: "line",
@@ -10382,11 +7162,7 @@ export const HS_LESSONS = [
             key: "hsLesson22|ex3|they have a new kitchen. →",
             n: 3,
             prompt: "They have a new kitchen. →",
-            parts: [
-              {
-                p: 2,
-              },
-            ],
+            parts: [{ p: 2 }],
             formText: "They have a new kitchen.\u000b → _________________",
             kind: "line",
           },
@@ -10394,11 +7170,7 @@ export const HS_LESSONS = [
             key: "hsLesson22|ex3|she uses a computer for her homework. →",
             n: 4,
             prompt: "She uses a computer for her homework. →",
-            parts: [
-              {
-                p: 3,
-              },
-            ],
+            parts: [{ p: 3 }],
             formText:
               "She uses a computer for her homework.\u000b → _________________",
             kind: "line",
@@ -10407,14 +7179,7 @@ export const HS_LESSONS = [
             key: "hsLesson22|ex3|he played soccer with his friends last sunday. →",
             n: 5,
             prompt: "He played soccer with his friends last Sunday. →",
-            parts: [
-              {
-                p: 4,
-              },
-              {
-                p: 5,
-              },
-            ],
+            parts: [{ p: 4 }, { p: 5 }],
             formText:
               "He played soccer with his friends last Sunday. \n → _________________",
             kind: "line",
@@ -10431,36 +7196,16 @@ export const HS_LESSONS = [
         instruction:
           "Exercise 4: Make Wh-questions for the underlined parts./ Đặt câu hỏi Wh- cho phần được gạch chân",
         paras: [
-          {
-            text: "1. She goes to school at 7 o’clock.",
-          },
-          {
-            text: " → ______________________________________",
-          },
-          {
-            text: "2. My father works in a hospital.",
-          },
-          {
-            text: " → ______________________________________",
-          },
-          {
-            text: "3. They are waiting for their teacher.",
-          },
-          {
-            text: " → ______________________________________",
-          },
-          {
-            text: "4. We have English class three times a week.",
-          },
-          {
-            text: "→ ______________________________________",
-          },
-          {
-            text: "5. Tom likes Math because it is interesting.",
-          },
-          {
-            text: " → ______________________________________",
-          },
+          { text: "1. She goes to school at 7 o’clock." },
+          { text: " → ______________________________________" },
+          { text: "2. My father works in a hospital." },
+          { text: " → ______________________________________" },
+          { text: "3. They are waiting for their teacher." },
+          { text: " → ______________________________________" },
+          { text: "4. We have English class three times a week." },
+          { text: "→ ______________________________________" },
+          { text: "5. Tom likes Math because it is interesting." },
+          { text: " → ______________________________________" },
         ],
         tables: [],
         items: [
@@ -10468,14 +7213,7 @@ export const HS_LESSONS = [
             key: "hsLesson22|ex4|1. she goes to school at 7 o'clock. →",
             n: 1,
             prompt: "1. She goes to school at 7 o'clock. →",
-            parts: [
-              {
-                p: 0,
-              },
-              {
-                p: 1,
-              },
-            ],
+            parts: [{ p: 0 }, { p: 1 }],
             formText:
               "1. She goes to school at 7 o’clock.\n → ______________________________________",
             kind: "line",
@@ -10484,14 +7222,7 @@ export const HS_LESSONS = [
             key: "hsLesson22|ex4|2. my father works in a hospital. →",
             n: 2,
             prompt: "2. My father works in a hospital. →",
-            parts: [
-              {
-                p: 2,
-              },
-              {
-                p: 3,
-              },
-            ],
+            parts: [{ p: 2 }, { p: 3 }],
             formText:
               "2. My father works in a hospital.\n → ______________________________________",
             kind: "line",
@@ -10500,14 +7231,7 @@ export const HS_LESSONS = [
             key: "hsLesson22|ex4|3. they are waiting for their teacher. →",
             n: 3,
             prompt: "3. They are waiting for their teacher. →",
-            parts: [
-              {
-                p: 4,
-              },
-              {
-                p: 5,
-              },
-            ],
+            parts: [{ p: 4 }, { p: 5 }],
             formText:
               "3. They are waiting for their teacher.\n → ______________________________________",
             kind: "line",
@@ -10516,14 +7240,7 @@ export const HS_LESSONS = [
             key: "hsLesson22|ex4|4. we have english class three times a week. →",
             n: 4,
             prompt: "4. We have English class three times a week. →",
-            parts: [
-              {
-                p: 6,
-              },
-              {
-                p: 7,
-              },
-            ],
+            parts: [{ p: 6 }, { p: 7 }],
             formText:
               "4. We have English class three times a week.\n→ ______________________________________",
             kind: "line",
@@ -10532,14 +7249,7 @@ export const HS_LESSONS = [
             key: "hsLesson22|ex4|5. tom likes math because it is interesting. →",
             n: 5,
             prompt: "5. Tom likes Math because it is interesting. →",
-            parts: [
-              {
-                p: 8,
-              },
-              {
-                p: 9,
-              },
-            ],
+            parts: [{ p: 8 }, { p: 9 }],
             formText:
               "5. Tom likes Math because it is interesting.\n → ______________________________________",
             kind: "line",
@@ -10556,21 +7266,13 @@ export const HS_LESSONS = [
         instruction:
           "Exercise 1: Fill in the blanks with the negative form of the verbs in brackets./ Điền vào chỗ trống bằng dạng phủ định của động từ trong ngoặc.",
         paras: [
-          {
-            text: "My house is big, but we (not/have) __________ a garage.",
-          },
+          { text: "My house is big, but we (not/have) __________ a garage." },
           {
             text: "My parents (not/watch) __________ television in the morning.",
           },
-          {
-            text: "My brother (not/use) __________ the computer every day.",
-          },
-          {
-            text: "I (not/be) __________ in the kitchen now.",
-          },
-          {
-            text: "We (not/like) __________ the small bathroom.",
-          },
+          { text: "My brother (not/use) __________ the computer every day." },
+          { text: "I (not/be) __________ in the kitchen now." },
+          { text: "We (not/like) __________ the small bathroom." },
         ],
         tables: [],
         items: [
@@ -10578,11 +7280,7 @@ export const HS_LESSONS = [
             key: "hsLesson22|tc1|my house is big, but we (not/have) a garage.",
             n: 1,
             prompt: "My house is big, but we (not/have) a garage.",
-            parts: [
-              {
-                p: 0,
-              },
-            ],
+            parts: [{ p: 0 }],
             formText: "My house is big, but we (not/have) __________ a garage.",
             kind: "blank",
           },
@@ -10590,11 +7288,7 @@ export const HS_LESSONS = [
             key: "hsLesson22|tc1|my parents (not/watch) television in the morning.",
             n: 2,
             prompt: "My parents (not/watch) television in the morning.",
-            parts: [
-              {
-                p: 1,
-              },
-            ],
+            parts: [{ p: 1 }],
             formText:
               "My parents (not/watch) __________ television in the morning.",
             kind: "blank",
@@ -10603,11 +7297,7 @@ export const HS_LESSONS = [
             key: "hsLesson22|tc1|my brother (not/use) the computer every day.",
             n: 3,
             prompt: "My brother (not/use) the computer every day.",
-            parts: [
-              {
-                p: 2,
-              },
-            ],
+            parts: [{ p: 2 }],
             formText: "My brother (not/use) __________ the computer every day.",
             kind: "blank",
           },
@@ -10615,11 +7305,7 @@ export const HS_LESSONS = [
             key: "hsLesson22|tc1|i (not/be) in the kitchen now.",
             n: 4,
             prompt: "I (not/be) in the kitchen now.",
-            parts: [
-              {
-                p: 3,
-              },
-            ],
+            parts: [{ p: 3 }],
             formText: "I (not/be) __________ in the kitchen now.",
             kind: "blank",
           },
@@ -10627,11 +7313,7 @@ export const HS_LESSONS = [
             key: "hsLesson22|tc1|we (not/like) the small bathroom.",
             n: 5,
             prompt: "We (not/like) the small bathroom.",
-            parts: [
-              {
-                p: 4,
-              },
-            ],
+            parts: [{ p: 4 }],
             formText: "We (not/like) __________ the small bathroom.",
             kind: "blank",
           },
@@ -10669,11 +7351,7 @@ export const HS_LESSONS = [
             key: "hsLesson22|tc2|she don't have a sofa in her room. →",
             n: 1,
             prompt: "She don't have a sofa in her room. →",
-            parts: [
-              {
-                p: 0,
-              },
-            ],
+            parts: [{ p: 0 }],
             formText:
               "She don’t have a sofa in her room.\u000b → ______________________________________",
             kind: "line",
@@ -10682,11 +7360,7 @@ export const HS_LESSONS = [
             key: "hsLesson22|tc2|do he have a fridge in the kitchen? →",
             n: 2,
             prompt: "Do he have a fridge in the kitchen? →",
-            parts: [
-              {
-                p: 1,
-              },
-            ],
+            parts: [{ p: 1 }],
             formText:
               "Do he have a fridge in the kitchen?\u000b → ______________________________________",
             kind: "line",
@@ -10695,11 +7369,7 @@ export const HS_LESSONS = [
             key: "hsLesson22|tc2|i am not like the toilet. →",
             n: 3,
             prompt: "I am not like the toilet. →",
-            parts: [
-              {
-                p: 2,
-              },
-            ],
+            parts: [{ p: 2 }],
             formText:
               "I am not like the toilet.\u000b → ______________________________________",
             kind: "line",
@@ -10708,11 +7378,7 @@ export const HS_LESSONS = [
             key: "hsLesson22|tc2|they doesn't watch television in the bedroom. →",
             n: 4,
             prompt: "They doesn't watch television in the bedroom. →",
-            parts: [
-              {
-                p: 3,
-              },
-            ],
+            parts: [{ p: 3 }],
             formText:
               "They doesn’t watch television in the bedroom.\u000b → ______________________________________",
             kind: "line",
@@ -10721,11 +7387,7 @@ export const HS_LESSONS = [
             key: "hsLesson22|tc2|we goes to the living room every evening. →",
             n: 5,
             prompt: "We goes to the living room every evening. →",
-            parts: [
-              {
-                p: 4,
-              },
-            ],
+            parts: [{ p: 4 }],
             formText:
               "We goes to the living room every evening.\u000b → ______________________________________",
             kind: "line",
@@ -10805,18 +7467,8 @@ export const HS_LESSONS = [
             n: 1,
             prompt: "Bạn có thấy tảng đá lớn kia không?",
             hint: "rock /rɑːk/: tảng đá, phiến đá",
-            parts: [
-              {
-                t: 0,
-                r: 1,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 1,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 1, c: 2 }],
+            fb: { t: 0, r: 1, c: 4 },
             kind: "vi_en",
           },
           {
@@ -10824,18 +7476,8 @@ export const HS_LESSONS = [
             n: 2,
             prompt: "Họ có đang đi vào hang động không?",
             hint: "cave /keɪv/: hang động",
-            parts: [
-              {
-                t: 0,
-                r: 2,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 2,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 2, c: 2 }],
+            fb: { t: 0, r: 2, c: 4 },
             kind: "vi_en",
           },
           {
@@ -10843,18 +7485,8 @@ export const HS_LESSONS = [
             n: 3,
             prompt: "Bạn đã đi qua thung lũng chưa?",
             hint: "valley /ˈvæli/: thung lũng",
-            parts: [
-              {
-                t: 0,
-                r: 3,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 3,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 3, c: 2 }],
+            fb: { t: 0, r: 3, c: 4 },
             kind: "vi_en",
           },
           {
@@ -10862,18 +7494,8 @@ export const HS_LESSONS = [
             n: 4,
             prompt: "Đó có phải là rừng mưa nhiệt đới không?",
             hint: "rainforest /ˈreɪnfɔːrɪst/: rừng mưa nhiệt đới",
-            parts: [
-              {
-                t: 0,
-                r: 4,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 4,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 4, c: 2 }],
+            fb: { t: 0, r: 4, c: 4 },
             kind: "vi_en",
           },
           {
@@ -10881,18 +7503,8 @@ export const HS_LESSONS = [
             n: 5,
             prompt: "Bạn có thích kỳ quan này không?",
             hint: "wonder /ˈwʌndər/: kỳ quan",
-            parts: [
-              {
-                t: 0,
-                r: 5,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 5,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 5, c: 2 }],
+            fb: { t: 0, r: 5, c: 4 },
             kind: "vi_en",
           },
         ],
@@ -10929,11 +7541,7 @@ export const HS_LESSONS = [
             key: "hsLesson23|ex2|they / have / a lamp / on the desk",
             n: 1,
             prompt: "they / have / a lamp / on the desk",
-            parts: [
-              {
-                p: 0,
-              },
-            ],
+            parts: [{ p: 0 }],
             formText:
               "they / have / a lamp / on the desk\u000b____________________________",
             kind: "line",
@@ -10942,11 +7550,7 @@ export const HS_LESSONS = [
             key: "hsLesson23|ex2|she / like / the new house",
             n: 2,
             prompt: "she / like / the new house",
-            parts: [
-              {
-                p: 1,
-              },
-            ],
+            parts: [{ p: 1 }],
             formText:
               "she / like / the new house\u000b____________________________",
             kind: "line",
@@ -10955,11 +7559,7 @@ export const HS_LESSONS = [
             key: "hsLesson23|ex2|your brother / sleep / in the attic",
             n: 3,
             prompt: "your brother / sleep / in the attic",
-            parts: [
-              {
-                p: 2,
-              },
-            ],
+            parts: [{ p: 2 }],
             formText:
               "your brother / sleep / in the attic\u000b____________________________",
             kind: "line",
@@ -10968,11 +7568,7 @@ export const HS_LESSONS = [
             key: "hsLesson23|ex2|you / watch / television / every night",
             n: 4,
             prompt: "you / watch / television / every night",
-            parts: [
-              {
-                p: 3,
-              },
-            ],
+            parts: [{ p: 3 }],
             formText:
               "you / watch / television / every night\u000b____________________________",
             kind: "line",
@@ -10981,11 +7577,7 @@ export const HS_LESSONS = [
             key: "hsLesson23|ex2|the children / play / in the garden",
             n: 5,
             prompt: "the children / play / in the garden",
-            parts: [
-              {
-                p: 4,
-              },
-            ],
+            parts: [{ p: 4 }],
             formText:
               "the children / play / in the garden\u000b____________________________",
             kind: "line",
@@ -11008,9 +7600,7 @@ export const HS_LESSONS = [
           {
             text: "My dad watches television every evening.\u000b → _________________",
           },
-          {
-            text: "She is sleeping in a small bed.\u000b → _________________",
-          },
+          { text: "She is sleeping in a small bed.\u000b → _________________" },
           {
             text: "The cat is sleeping on the sofa.\u000b → _________________",
           },
@@ -11024,11 +7614,7 @@ export const HS_LESSONS = [
             key: "hsLesson23|ex3|they usually eat in the kitchen. →",
             n: 1,
             prompt: "They usually eat in the kitchen. →",
-            parts: [
-              {
-                p: 0,
-              },
-            ],
+            parts: [{ p: 0 }],
             formText:
               "They usually eat in the kitchen.\u000b → _________________",
             kind: "line",
@@ -11037,11 +7623,7 @@ export const HS_LESSONS = [
             key: "hsLesson23|ex3|my dad watches television every evening. →",
             n: 2,
             prompt: "My dad watches television every evening. →",
-            parts: [
-              {
-                p: 1,
-              },
-            ],
+            parts: [{ p: 1 }],
             formText:
               "My dad watches television every evening.\u000b → _________________",
             kind: "line",
@@ -11050,11 +7632,7 @@ export const HS_LESSONS = [
             key: "hsLesson23|ex3|she is sleeping in a small bed. →",
             n: 3,
             prompt: "She is sleeping in a small bed. →",
-            parts: [
-              {
-                p: 2,
-              },
-            ],
+            parts: [{ p: 2 }],
             formText:
               "She is sleeping in a small bed.\u000b → _________________",
             kind: "line",
@@ -11063,11 +7641,7 @@ export const HS_LESSONS = [
             key: "hsLesson23|ex3|the cat is sleeping on the sofa. →",
             n: 4,
             prompt: "The cat is sleeping on the sofa. →",
-            parts: [
-              {
-                p: 3,
-              },
-            ],
+            parts: [{ p: 3 }],
             formText:
               "The cat is sleeping on the sofa.\u000b → _________________",
             kind: "line",
@@ -11076,11 +7650,7 @@ export const HS_LESSONS = [
             key: "hsLesson23|ex3|you are having a shower in the bathroom. →",
             n: 5,
             prompt: "You are having a shower in the bathroom. →",
-            parts: [
-              {
-                p: 4,
-              },
-            ],
+            parts: [{ p: 4 }],
             formText:
               "You are having a shower in the bathroom.\u000b → _________________",
             kind: "line",
@@ -11097,36 +7667,16 @@ export const HS_LESSONS = [
         instruction:
           "Exercise 4: Make Wh-questions for the underlined parts./ Đặt câu hỏi Wh- cho phần được gạch chân",
         paras: [
-          {
-            text: "1. She goes to school by bus.",
-          },
-          {
-            text: " → ______________________________________",
-          },
-          {
-            text: "2. They are playing football in the park.",
-          },
-          {
-            text: " → ______________________________________",
-          },
-          {
-            text: "3. My brother bought a new laptop yesterday.",
-          },
-          {
-            text: " → ______________________________________",
-          },
-          {
-            text: "4. She is reading a book because she likes stories.",
-          },
-          {
-            text: "→ ______________________________________",
-          },
-          {
-            text: "5.We will visit our grandparents next Sunday.",
-          },
-          {
-            text: " → ______________________________________",
-          },
+          { text: "1. She goes to school by bus." },
+          { text: " → ______________________________________" },
+          { text: "2. They are playing football in the park." },
+          { text: " → ______________________________________" },
+          { text: "3. My brother bought a new laptop yesterday." },
+          { text: " → ______________________________________" },
+          { text: "4. She is reading a book because she likes stories." },
+          { text: "→ ______________________________________" },
+          { text: "5.We will visit our grandparents next Sunday." },
+          { text: " → ______________________________________" },
         ],
         tables: [],
         items: [
@@ -11134,14 +7684,7 @@ export const HS_LESSONS = [
             key: "hsLesson23|ex4|1. she goes to school by bus. →",
             n: 1,
             prompt: "1. She goes to school by bus. →",
-            parts: [
-              {
-                p: 0,
-              },
-              {
-                p: 1,
-              },
-            ],
+            parts: [{ p: 0 }, { p: 1 }],
             formText:
               "1. She goes to school by bus.\n → ______________________________________",
             kind: "line",
@@ -11150,14 +7693,7 @@ export const HS_LESSONS = [
             key: "hsLesson23|ex4|2. they are playing football in the park. →",
             n: 2,
             prompt: "2. They are playing football in the park. →",
-            parts: [
-              {
-                p: 2,
-              },
-              {
-                p: 3,
-              },
-            ],
+            parts: [{ p: 2 }, { p: 3 }],
             formText:
               "2. They are playing football in the park.\n → ______________________________________",
             kind: "line",
@@ -11166,14 +7702,7 @@ export const HS_LESSONS = [
             key: "hsLesson23|ex4|3. my brother bought a new laptop yesterday. →",
             n: 3,
             prompt: "3. My brother bought a new laptop yesterday. →",
-            parts: [
-              {
-                p: 4,
-              },
-              {
-                p: 5,
-              },
-            ],
+            parts: [{ p: 4 }, { p: 5 }],
             formText:
               "3. My brother bought a new laptop yesterday.\n → ______________________________________",
             kind: "line",
@@ -11182,14 +7711,7 @@ export const HS_LESSONS = [
             key: "hsLesson23|ex4|4. she is reading a book because she likes stories. →",
             n: 4,
             prompt: "4. She is reading a book because she likes stories. →",
-            parts: [
-              {
-                p: 6,
-              },
-              {
-                p: 7,
-              },
-            ],
+            parts: [{ p: 6 }, { p: 7 }],
             formText:
               "4. She is reading a book because she likes stories.\n→ ______________________________________",
             kind: "line",
@@ -11198,14 +7720,7 @@ export const HS_LESSONS = [
             key: "hsLesson23|ex4|5.we will visit our grandparents next sunday. →",
             n: 5,
             prompt: "5.We will visit our grandparents next Sunday. →",
-            parts: [
-              {
-                p: 8,
-              },
-              {
-                p: 9,
-              },
-            ],
+            parts: [{ p: 8 }, { p: 9 }],
             formText:
               "5.We will visit our grandparents next Sunday.\n → ______________________________________",
             kind: "line",
@@ -11234,12 +7749,8 @@ export const HS_LESSONS = [
           {
             text: "We doesn’t have a television.\u000b  → ______________________________________",
           },
-          {
-            text: "Is he like the new house?",
-          },
-          {
-            text: " → ______________________________________",
-          },
+          { text: "Is he like the new house?" },
+          { text: " → ______________________________________" },
         ],
         tables: [],
         items: [
@@ -11247,11 +7758,7 @@ export const HS_LESSONS = [
             key: "hsLesson23|ex5|my house don't have a kitchen. →",
             n: 1,
             prompt: "My house don't have a kitchen. →",
-            parts: [
-              {
-                p: 0,
-              },
-            ],
+            parts: [{ p: 0 }],
             formText:
               "My house don’t have a kitchen.\u000b  → ______________________________________",
             kind: "line",
@@ -11260,11 +7767,7 @@ export const HS_LESSONS = [
             key: "hsLesson23|ex5|are you do your homework now? →",
             n: 2,
             prompt: "Are you do your homework now? →",
-            parts: [
-              {
-                p: 1,
-              },
-            ],
+            parts: [{ p: 1 }],
             formText:
               "Are you do your homework now?\u000b  → ______________________________________",
             kind: "line",
@@ -11273,11 +7776,7 @@ export const HS_LESSONS = [
             key: "hsLesson23|ex5|they is playing in the garden. →",
             n: 3,
             prompt: "They is playing in the garden. →",
-            parts: [
-              {
-                p: 2,
-              },
-            ],
+            parts: [{ p: 2 }],
             formText:
               "They is playing in the garden.\u000b  → ______________________________________",
             kind: "line",
@@ -11286,11 +7785,7 @@ export const HS_LESSONS = [
             key: "hsLesson23|ex5|we doesn't have a television. →",
             n: 4,
             prompt: "We doesn't have a television. →",
-            parts: [
-              {
-                p: 3,
-              },
-            ],
+            parts: [{ p: 3 }],
             formText:
               "We doesn’t have a television.\u000b  → ______________________________________",
             kind: "line",
@@ -11299,14 +7794,7 @@ export const HS_LESSONS = [
             key: "hsLesson23|ex5|is he like the new house? →",
             n: 5,
             prompt: "Is he like the new house? →",
-            parts: [
-              {
-                p: 4,
-              },
-              {
-                p: 5,
-              },
-            ],
+            parts: [{ p: 4 }, { p: 5 }],
             formText:
               "Is he like the new house?\n → ______________________________________",
             kind: "line",
@@ -11392,18 +7880,8 @@ export const HS_LESSONS = [
             n: 1,
             prompt: "Tôi cầu nguyện mỗi sáng.",
             hint: "pray /preɪ/: cầu nguyện",
-            parts: [
-              {
-                t: 0,
-                r: 1,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 1,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 1, c: 2 }],
+            fb: { t: 0, r: 1, c: 4 },
             kind: "vi_en",
           },
           {
@@ -11411,18 +7889,8 @@ export const HS_LESSONS = [
             n: 2,
             prompt: "Chúng tôi ăn bánh chưng vào Tết.",
             hint: "sticky rice cake /raɪs keɪk/: bánh chưng",
-            parts: [
-              {
-                t: 0,
-                r: 2,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 2,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 2, c: 2 }],
+            fb: { t: 0, r: 2, c: 4 },
             kind: "vi_en",
           },
           {
@@ -11430,18 +7898,8 @@ export const HS_LESSONS = [
             n: 3,
             prompt: "Chúng tôi trang trí nhà bằng đèn lồng.",
             hint: "decorate /ˈdekəreɪt/: trang trí; lantern /ˈlæntərn/: đèn lồng",
-            parts: [
-              {
-                t: 0,
-                r: 3,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 3,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 3, c: 2 }],
+            fb: { t: 0, r: 3, c: 4 },
             kind: "vi_en",
           },
           {
@@ -11449,18 +7907,8 @@ export const HS_LESSONS = [
             n: 4,
             prompt: "Mọi người xem múa lân vào Tết.",
             hint: "dragon dance /ˈdræɡən dæns/: múa lân",
-            parts: [
-              {
-                t: 0,
-                r: 4,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 4,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 4, c: 2 }],
+            fb: { t: 0, r: 4, c: 4 },
             kind: "vi_en",
           },
           {
@@ -11468,18 +7916,8 @@ export const HS_LESSONS = [
             n: 5,
             prompt: "Chúng tôi thờ cúng tổ tiên vào Tết.",
             hint: "ancestor /ˈænsestər/: tổ tiên; worship /ˈwɜːrʃɪp/: thờ cúng",
-            parts: [
-              {
-                t: 0,
-                r: 5,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 5,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 5, c: 2 }],
+            fb: { t: 0, r: 5, c: 4 },
             kind: "vi_en",
           },
         ],
@@ -11514,11 +7952,7 @@ export const HS_LESSONS = [
             n: 1,
             prompt:
               "1. There is a big market near her house. (NEAR) → Her a big market.",
-            parts: [
-              {
-                p: 0,
-              },
-            ],
+            parts: [{ p: 0 }],
             formText:
               "1. There is a big market near her house. (NEAR) → Her ________________________ a big market.",
             kind: "blank",
@@ -11527,11 +7961,7 @@ export const HS_LESSONS = [
             key: "hsLesson24|ex2|2. minh cares about everybody. (person) → minh is .",
             n: 2,
             prompt: "2. Minh cares about everybody. (PERSON) → Minh is .",
-            parts: [
-              {
-                p: 1,
-              },
-            ],
+            parts: [{ p: 1 }],
             formText:
               "2. Minh cares about everybody. (PERSON) → Minh is ______________________  .",
             kind: "blank",
@@ -11541,11 +7971,7 @@ export const HS_LESSONS = [
             n: 3,
             prompt:
               "3. Tracy likes the dining room the best. (FAVOURITE) → The dining room is .",
-            parts: [
-              {
-                p: 2,
-              },
-            ],
+            parts: [{ p: 2 }],
             formText:
               "3. Tracy likes the dining room the best. (FAVOURITE) → The dining room is  _______________________ .",
             kind: "blank",
@@ -11555,11 +7981,7 @@ export const HS_LESSONS = [
             n: 4,
             prompt:
               "4. Thai Nguyen is not as crowded as Ha Noi. (MORE) → Ha Noi is Thai Nguyen.",
-            parts: [
-              {
-                p: 3,
-              },
-            ],
+            parts: [{ p: 3 }],
             formText:
               "4. Thai Nguyen is not as crowded as Ha Noi. (MORE) → Ha Noi is   ____________________   Thai Nguyen.",
             kind: "blank",
@@ -11579,21 +8001,13 @@ export const HS_LESSONS = [
           {
             text: "Everybody  \t ______________________ (cheer) and ___________________ (sing) happily at the moment.",
           },
-          {
-            text: "He usually ___________________ (watch) TV after dinner.",
-          },
-          {
-            text: "Where  __________________ (you/stay) at the moment?",
-          },
-          {
-            text: "There ____________  (be) some balloons by the window.",
-          },
+          { text: "He usually ___________________ (watch) TV after dinner." },
+          { text: "Where  __________________ (you/stay) at the moment?" },
+          { text: "There ____________  (be) some balloons by the window." },
           {
             text: "Ms Lien ________________  (not water) the plants now. She is cooking.",
           },
-          {
-            text: "You should __________ (keep) quiet.",
-          },
+          { text: "You should __________ (keep) quiet." },
         ],
         tables: [],
         items: [
@@ -11601,11 +8015,7 @@ export const HS_LESSONS = [
             key: "hsLesson24|ex3|everybody (cheer) and (sing) happily at the moment.",
             n: 1,
             prompt: "Everybody (cheer) and (sing) happily at the moment.",
-            parts: [
-              {
-                p: 0,
-              },
-            ],
+            parts: [{ p: 0 }],
             formText:
               "Everybody  \t ______________________ (cheer) and ___________________ (sing) happily at the moment.",
             kind: "blank",
@@ -11614,11 +8024,7 @@ export const HS_LESSONS = [
             key: "hsLesson24|ex3|he usually (watch) tv after dinner.",
             n: 2,
             prompt: "He usually (watch) TV after dinner.",
-            parts: [
-              {
-                p: 1,
-              },
-            ],
+            parts: [{ p: 1 }],
             formText: "He usually ___________________ (watch) TV after dinner.",
             kind: "blank",
           },
@@ -11626,11 +8032,7 @@ export const HS_LESSONS = [
             key: "hsLesson24|ex3|where (you/stay) at the moment?",
             n: 3,
             prompt: "Where (you/stay) at the moment?",
-            parts: [
-              {
-                p: 2,
-              },
-            ],
+            parts: [{ p: 2 }],
             formText: "Where  __________________ (you/stay) at the moment?",
             kind: "blank",
           },
@@ -11638,11 +8040,7 @@ export const HS_LESSONS = [
             key: "hsLesson24|ex3|there (be) some balloons by the window.",
             n: 4,
             prompt: "There (be) some balloons by the window.",
-            parts: [
-              {
-                p: 3,
-              },
-            ],
+            parts: [{ p: 3 }],
             formText: "There ____________  (be) some balloons by the window.",
             kind: "blank",
           },
@@ -11650,11 +8048,7 @@ export const HS_LESSONS = [
             key: "hsLesson24|ex3|ms lien (not water) the plants now. she is cooking.",
             n: 5,
             prompt: "Ms Lien (not water) the plants now. She is cooking.",
-            parts: [
-              {
-                p: 4,
-              },
-            ],
+            parts: [{ p: 4 }],
             formText:
               "Ms Lien ________________  (not water) the plants now. She is cooking.",
             kind: "blank",
@@ -11663,11 +8057,7 @@ export const HS_LESSONS = [
             key: "hsLesson24|ex3|you should (keep) quiet.",
             n: 6,
             prompt: "You should (keep) quiet.",
-            parts: [
-              {
-                p: 5,
-              },
-            ],
+            parts: [{ p: 5 }],
             formText: "You should __________ (keep) quiet.",
             kind: "blank",
           },
@@ -11686,9 +8076,7 @@ export const HS_LESSONS = [
           {
             text: "They _______aren’t helping_________ (help) the teacher right now.",
           },
-          {
-            text: "She _______isn’t staying________ (stay) in a hotel.",
-          },
+          { text: "She _______isn’t staying________ (stay) in a hotel." },
           {
             text: "I _______am not travelling_________ (travel) a lot these days.",
           },
@@ -11705,11 +8093,7 @@ export const HS_LESSONS = [
             key: "hsLesson24|ex4|they aren't helping (help) the teacher right now.",
             n: 1,
             prompt: "They aren't helping (help) the teacher right now.",
-            parts: [
-              {
-                p: 0,
-              },
-            ],
+            parts: [{ p: 0 }],
             formText:
               "They _______aren’t helping_________ (help) the teacher right now.",
             kind: "blank",
@@ -11718,11 +8102,7 @@ export const HS_LESSONS = [
             key: "hsLesson24|ex4|she isn't staying (stay) in a hotel.",
             n: 2,
             prompt: "She isn't staying (stay) in a hotel.",
-            parts: [
-              {
-                p: 1,
-              },
-            ],
+            parts: [{ p: 1 }],
             formText: "She _______isn’t staying________ (stay) in a hotel.",
             kind: "blank",
           },
@@ -11730,11 +8110,7 @@ export const HS_LESSONS = [
             key: "hsLesson24|ex4|i am not travelling (travel) a lot these days.",
             n: 3,
             prompt: "I am not travelling (travel) a lot these days.",
-            parts: [
-              {
-                p: 2,
-              },
-            ],
+            parts: [{ p: 2 }],
             formText:
               "I _______am not travelling_________ (travel) a lot these days.",
             kind: "blank",
@@ -11743,11 +8119,7 @@ export const HS_LESSONS = [
             key: "hsLesson24|ex4|we aren't studying (study) science at present.",
             n: 4,
             prompt: "We aren't studying (study) science at present.",
-            parts: [
-              {
-                p: 3,
-              },
-            ],
+            parts: [{ p: 3 }],
             formText:
               "We _______aren’t studying_________ (study) science at present.",
             kind: "blank",
@@ -11757,11 +8129,7 @@ export const HS_LESSONS = [
             n: 5,
             prompt:
               "The children aren't playing (play) football in the playground.",
-            parts: [
-              {
-                p: 4,
-              },
-            ],
+            parts: [{ p: 4 }],
             formText:
               "The children ________aren’t playing________ (play) football in the playground.",
             kind: "blank",
@@ -11794,11 +8162,7 @@ export const HS_LESSONS = [
             key: "hsLesson24|ex5|you/ have/ an art lesson on monday (no) →",
             n: 1,
             prompt: "you/ have/ an art lesson on Monday (no) →",
-            parts: [
-              {
-                p: 0,
-              },
-            ],
+            parts: [{ p: 0 }],
             formText:
               "you/ have/ an art lesson on Monday (no)\u000b  → ______________________________________",
             kind: "line",
@@ -11807,11 +8171,7 @@ export const HS_LESSONS = [
             key: "hsLesson24|ex5|they/ ride/ their bikes to school/ at the moment (yes) →",
             n: 2,
             prompt: "they/ ride/ their bikes to school/ at the moment (yes) →",
-            parts: [
-              {
-                p: 1,
-              },
-            ],
+            parts: [{ p: 1 }],
             formText:
               "they/ ride/ their bikes to school/ at the moment (yes)\u000b  → ______________________________________",
             kind: "line",
@@ -11820,11 +8180,7 @@ export const HS_LESSONS = [
             key: "hsLesson24|ex5|your parents/ at home now (yes) →",
             n: 3,
             prompt: "your parents/ at home now (yes) →",
-            parts: [
-              {
-                p: 2,
-              },
-            ],
+            parts: [{ p: 2 }],
             formText:
               "your parents/ at home now (yes)\u000b  → ______________________________________",
             kind: "line",
@@ -11904,18 +8260,8 @@ export const HS_LESSONS = [
             n: 1,
             prompt: "Chúng tôi luôn dọn nhà trước Tết.",
             hint: "always /ˈɔːlweɪz/: luôn luôn",
-            parts: [
-              {
-                t: 0,
-                r: 1,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 1,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 1, c: 2 }],
+            fb: { t: 0, r: 1, c: 4 },
             kind: "vi_en",
           },
           {
@@ -11923,18 +8269,8 @@ export const HS_LESSONS = [
             n: 2,
             prompt: "Cô ấy rất vui trong ngày Tết.",
             hint: "happy /ˈhæpi/: vui",
-            parts: [
-              {
-                t: 0,
-                r: 2,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 2,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 2, c: 2 }],
+            fb: { t: 0, r: 2, c: 4 },
             kind: "vi_en",
           },
           {
@@ -11942,18 +8278,8 @@ export const HS_LESSONS = [
             n: 3,
             prompt: "Họ đang xem pháo hoa.",
             hint: "fireworks /ˈfaɪəwɜːks/: pháo hoa",
-            parts: [
-              {
-                t: 0,
-                r: 3,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 3,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 3, c: 2 }],
+            fb: { t: 0, r: 3, c: 4 },
             kind: "vi_en",
           },
           {
@@ -11961,18 +8287,8 @@ export const HS_LESSONS = [
             n: 4,
             prompt: "Cha mẹ tôi cho tôi tiền lì xì.",
             hint: "lucky money /ˈlʌki ˈmʌni/: tiền lì xì",
-            parts: [
-              {
-                t: 0,
-                r: 4,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 4,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 4, c: 2 }],
+            fb: { t: 0, r: 4, c: 4 },
             kind: "vi_en",
           },
           {
@@ -11980,18 +8296,8 @@ export const HS_LESSONS = [
             n: 5,
             prompt: "Chúng tôi ăn bánh chưng cùng nhau.",
             hint: "sticky rice cake /ˈstɪki raɪs keɪk/: bánh chưng",
-            parts: [
-              {
-                t: 0,
-                r: 5,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 5,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 5, c: 2 }],
+            fb: { t: 0, r: 5, c: 4 },
             kind: "vi_en",
           },
         ],
@@ -12027,36 +8333,12 @@ export const HS_LESSONS = [
             n: 1,
             prompt: "/ɪ/",
             parts: [
-              {
-                t: 0,
-                r: 1,
-                c: 0,
-              },
-              {
-                t: 0,
-                r: 2,
-                c: 0,
-              },
-              {
-                t: 0,
-                r: 3,
-                c: 0,
-              },
-              {
-                t: 0,
-                r: 4,
-                c: 0,
-              },
-              {
-                t: 0,
-                r: 5,
-                c: 0,
-              },
-              {
-                t: 0,
-                r: 6,
-                c: 0,
-              },
+              { t: 0, r: 1, c: 0 },
+              { t: 0, r: 2, c: 0 },
+              { t: 0, r: 3, c: 0 },
+              { t: 0, r: 4, c: 0 },
+              { t: 0, r: 5, c: 0 },
+              { t: 0, r: 6, c: 0 },
             ],
             kind: "sort",
           },
@@ -12065,36 +8347,12 @@ export const HS_LESSONS = [
             n: 2,
             prompt: "/iː/",
             parts: [
-              {
-                t: 0,
-                r: 1,
-                c: 1,
-              },
-              {
-                t: 0,
-                r: 2,
-                c: 1,
-              },
-              {
-                t: 0,
-                r: 3,
-                c: 1,
-              },
-              {
-                t: 0,
-                r: 4,
-                c: 1,
-              },
-              {
-                t: 0,
-                r: 5,
-                c: 1,
-              },
-              {
-                t: 0,
-                r: 6,
-                c: 1,
-              },
+              { t: 0, r: 1, c: 1 },
+              { t: 0, r: 2, c: 1 },
+              { t: 0, r: 3, c: 1 },
+              { t: 0, r: 4, c: 1 },
+              { t: 0, r: 5, c: 1 },
+              { t: 0, r: 6, c: 1 },
             ],
             kind: "sort",
           },
@@ -12136,61 +8394,17 @@ export const HS_LESSONS = [
             n: 1,
             prompt: "/s/",
             parts: [
-              {
-                t: 0,
-                r: 1,
-                c: 0,
-              },
-              {
-                t: 0,
-                r: 2,
-                c: 0,
-              },
-              {
-                t: 0,
-                r: 3,
-                c: 0,
-              },
-              {
-                t: 0,
-                r: 4,
-                c: 0,
-              },
-              {
-                t: 0,
-                r: 5,
-                c: 0,
-              },
-              {
-                t: 0,
-                r: 6,
-                c: 0,
-              },
-              {
-                t: 0,
-                r: 7,
-                c: 0,
-              },
-              {
-                t: 0,
-                r: 8,
-                c: 0,
-              },
-              {
-                t: 0,
-                r: 9,
-                c: 0,
-              },
-              {
-                t: 0,
-                r: 10,
-                c: 0,
-              },
-              {
-                t: 0,
-                r: 11,
-                c: 0,
-              },
+              { t: 0, r: 1, c: 0 },
+              { t: 0, r: 2, c: 0 },
+              { t: 0, r: 3, c: 0 },
+              { t: 0, r: 4, c: 0 },
+              { t: 0, r: 5, c: 0 },
+              { t: 0, r: 6, c: 0 },
+              { t: 0, r: 7, c: 0 },
+              { t: 0, r: 8, c: 0 },
+              { t: 0, r: 9, c: 0 },
+              { t: 0, r: 10, c: 0 },
+              { t: 0, r: 11, c: 0 },
             ],
             kind: "sort",
           },
@@ -12199,61 +8413,17 @@ export const HS_LESSONS = [
             n: 2,
             prompt: "/ʃ/",
             parts: [
-              {
-                t: 0,
-                r: 1,
-                c: 1,
-              },
-              {
-                t: 0,
-                r: 2,
-                c: 1,
-              },
-              {
-                t: 0,
-                r: 3,
-                c: 1,
-              },
-              {
-                t: 0,
-                r: 4,
-                c: 1,
-              },
-              {
-                t: 0,
-                r: 5,
-                c: 1,
-              },
-              {
-                t: 0,
-                r: 6,
-                c: 1,
-              },
-              {
-                t: 0,
-                r: 7,
-                c: 1,
-              },
-              {
-                t: 0,
-                r: 8,
-                c: 1,
-              },
-              {
-                t: 0,
-                r: 9,
-                c: 1,
-              },
-              {
-                t: 0,
-                r: 10,
-                c: 1,
-              },
-              {
-                t: 0,
-                r: 11,
-                c: 1,
-              },
+              { t: 0, r: 1, c: 1 },
+              { t: 0, r: 2, c: 1 },
+              { t: 0, r: 3, c: 1 },
+              { t: 0, r: 4, c: 1 },
+              { t: 0, r: 5, c: 1 },
+              { t: 0, r: 6, c: 1 },
+              { t: 0, r: 7, c: 1 },
+              { t: 0, r: 8, c: 1 },
+              { t: 0, r: 9, c: 1 },
+              { t: 0, r: 10, c: 1 },
+              { t: 0, r: 11, c: 1 },
             ],
             kind: "sort",
           },
@@ -12296,66 +8466,18 @@ export const HS_LESSONS = [
             n: 1,
             prompt: "/s/",
             parts: [
-              {
-                t: 0,
-                r: 1,
-                c: 0,
-              },
-              {
-                t: 0,
-                r: 2,
-                c: 0,
-              },
-              {
-                t: 0,
-                r: 3,
-                c: 0,
-              },
-              {
-                t: 0,
-                r: 4,
-                c: 0,
-              },
-              {
-                t: 0,
-                r: 5,
-                c: 0,
-              },
-              {
-                t: 0,
-                r: 6,
-                c: 0,
-              },
-              {
-                t: 0,
-                r: 7,
-                c: 0,
-              },
-              {
-                t: 0,
-                r: 8,
-                c: 0,
-              },
-              {
-                t: 0,
-                r: 9,
-                c: 0,
-              },
-              {
-                t: 0,
-                r: 10,
-                c: 0,
-              },
-              {
-                t: 0,
-                r: 11,
-                c: 0,
-              },
-              {
-                t: 0,
-                r: 12,
-                c: 0,
-              },
+              { t: 0, r: 1, c: 0 },
+              { t: 0, r: 2, c: 0 },
+              { t: 0, r: 3, c: 0 },
+              { t: 0, r: 4, c: 0 },
+              { t: 0, r: 5, c: 0 },
+              { t: 0, r: 6, c: 0 },
+              { t: 0, r: 7, c: 0 },
+              { t: 0, r: 8, c: 0 },
+              { t: 0, r: 9, c: 0 },
+              { t: 0, r: 10, c: 0 },
+              { t: 0, r: 11, c: 0 },
+              { t: 0, r: 12, c: 0 },
             ],
             kind: "sort",
           },
@@ -12364,66 +8486,18 @@ export const HS_LESSONS = [
             n: 2,
             prompt: "/z/",
             parts: [
-              {
-                t: 0,
-                r: 1,
-                c: 1,
-              },
-              {
-                t: 0,
-                r: 2,
-                c: 1,
-              },
-              {
-                t: 0,
-                r: 3,
-                c: 1,
-              },
-              {
-                t: 0,
-                r: 4,
-                c: 1,
-              },
-              {
-                t: 0,
-                r: 5,
-                c: 1,
-              },
-              {
-                t: 0,
-                r: 6,
-                c: 1,
-              },
-              {
-                t: 0,
-                r: 7,
-                c: 1,
-              },
-              {
-                t: 0,
-                r: 8,
-                c: 1,
-              },
-              {
-                t: 0,
-                r: 9,
-                c: 1,
-              },
-              {
-                t: 0,
-                r: 10,
-                c: 1,
-              },
-              {
-                t: 0,
-                r: 11,
-                c: 1,
-              },
-              {
-                t: 0,
-                r: 12,
-                c: 1,
-              },
+              { t: 0, r: 1, c: 1 },
+              { t: 0, r: 2, c: 1 },
+              { t: 0, r: 3, c: 1 },
+              { t: 0, r: 4, c: 1 },
+              { t: 0, r: 5, c: 1 },
+              { t: 0, r: 6, c: 1 },
+              { t: 0, r: 7, c: 1 },
+              { t: 0, r: 8, c: 1 },
+              { t: 0, r: 9, c: 1 },
+              { t: 0, r: 10, c: 1 },
+              { t: 0, r: 11, c: 1 },
+              { t: 0, r: 12, c: 1 },
             ],
             kind: "sort",
           },
@@ -12432,66 +8506,18 @@ export const HS_LESSONS = [
             n: 3,
             prompt: "/ɪz/",
             parts: [
-              {
-                t: 0,
-                r: 1,
-                c: 2,
-              },
-              {
-                t: 0,
-                r: 2,
-                c: 2,
-              },
-              {
-                t: 0,
-                r: 3,
-                c: 2,
-              },
-              {
-                t: 0,
-                r: 4,
-                c: 2,
-              },
-              {
-                t: 0,
-                r: 5,
-                c: 2,
-              },
-              {
-                t: 0,
-                r: 6,
-                c: 2,
-              },
-              {
-                t: 0,
-                r: 7,
-                c: 2,
-              },
-              {
-                t: 0,
-                r: 8,
-                c: 2,
-              },
-              {
-                t: 0,
-                r: 9,
-                c: 2,
-              },
-              {
-                t: 0,
-                r: 10,
-                c: 2,
-              },
-              {
-                t: 0,
-                r: 11,
-                c: 2,
-              },
-              {
-                t: 0,
-                r: 12,
-                c: 2,
-              },
+              { t: 0, r: 1, c: 2 },
+              { t: 0, r: 2, c: 2 },
+              { t: 0, r: 3, c: 2 },
+              { t: 0, r: 4, c: 2 },
+              { t: 0, r: 5, c: 2 },
+              { t: 0, r: 6, c: 2 },
+              { t: 0, r: 7, c: 2 },
+              { t: 0, r: 8, c: 2 },
+              { t: 0, r: 9, c: 2 },
+              { t: 0, r: 10, c: 2 },
+              { t: 0, r: 11, c: 2 },
+              { t: 0, r: 12, c: 2 },
             ],
             kind: "sort",
           },
@@ -12513,15 +8539,11 @@ export const HS_LESSONS = [
           {
             text: "Câu gốc:  It is wrong of us to write on the walls or tables in our classroom.\u000b→  We mustn't _________________________________________________",
           },
-          {
-            text: "Câu gốc: My hair is short and curly.  \t",
-          },
+          { text: "Câu gốc: My hair is short and curly.  \t" },
           {
             text: "→I have ___________________________________________________",
           },
-          {
-            text: "Câu gốc: It’s not good to eat lots of sweets.",
-          },
+          { text: "Câu gốc: It’s not good to eat lots of sweets." },
           {
             text: " → You ____________________________________________________",
           },
@@ -12531,9 +8553,7 @@ export const HS_LESSONS = [
           {
             text: "Câu gốc:  My house is to the right of the bakery.\u000b→  The bakery ______________________________________",
           },
-          {
-            text: "Câu gốc: Parking in this street is prohibited.",
-          },
+          { text: "Câu gốc: Parking in this street is prohibited." },
           {
             text: " → You ____________________________________________________",
           },
@@ -12545,11 +8565,7 @@ export const HS_LESSONS = [
             n: 1,
             prompt:
               "Câu gốc: The square in Hoi An is smaller than the square in Ha Noi. → The square in Ha Noi",
-            parts: [
-              {
-                p: 0,
-              },
-            ],
+            parts: [{ p: 0 }],
             formText:
               "Câu gốc:  The square in Hoi An is smaller than the square in Ha Noi.\u000b→ The square in Ha Noi __________________________________",
             kind: "line",
@@ -12559,11 +8575,7 @@ export const HS_LESSONS = [
             n: 2,
             prompt:
               "Câu gốc: It is wrong of us to write on the walls or tables in our classroom. → We mustn't",
-            parts: [
-              {
-                p: 1,
-              },
-            ],
+            parts: [{ p: 1 }],
             formText:
               "Câu gốc:  It is wrong of us to write on the walls or tables in our classroom.\u000b→  We mustn't _________________________________________________",
             kind: "line",
@@ -12572,14 +8584,7 @@ export const HS_LESSONS = [
             key: "hsReview1|ex5|câu gốc: my hair is short and curly. →i have",
             n: 3,
             prompt: "Câu gốc: My hair is short and curly. →I have",
-            parts: [
-              {
-                p: 2,
-              },
-              {
-                p: 3,
-              },
-            ],
+            parts: [{ p: 2 }, { p: 3 }],
             formText:
               "Câu gốc: My hair is short and curly.  \t\n→I have ___________________________________________________",
             kind: "line",
@@ -12588,14 +8593,7 @@ export const HS_LESSONS = [
             key: "hsReview1|ex5|câu gốc: it's not good to eat lots of sweets. → you",
             n: 4,
             prompt: "Câu gốc: It's not good to eat lots of sweets. → You",
-            parts: [
-              {
-                p: 4,
-              },
-              {
-                p: 5,
-              },
-            ],
+            parts: [{ p: 4 }, { p: 5 }],
             formText:
               "Câu gốc: It’s not good to eat lots of sweets.\n → You ____________________________________________________",
             kind: "line",
@@ -12605,11 +8603,7 @@ export const HS_LESSONS = [
             n: 5,
             prompt:
               "Câu gốc: Does your father cycle to work? → Does your father get",
-            parts: [
-              {
-                p: 6,
-              },
-            ],
+            parts: [{ p: 6 }],
             formText:
               "Câu gốc: Does your father cycle to work?\u000b →  Does your father get ___________________________________________________",
             kind: "line",
@@ -12619,11 +8613,7 @@ export const HS_LESSONS = [
             n: 6,
             prompt:
               "Câu gốc: My house is to the right of the bakery. → The bakery",
-            parts: [
-              {
-                p: 7,
-              },
-            ],
+            parts: [{ p: 7 }],
             formText:
               "Câu gốc:  My house is to the right of the bakery.\u000b→  The bakery ______________________________________",
             kind: "line",
@@ -12632,14 +8622,7 @@ export const HS_LESSONS = [
             key: "hsReview1|ex5|câu gốc: parking in this street is prohibited. → you",
             n: 7,
             prompt: "Câu gốc: Parking in this street is prohibited. → You",
-            parts: [
-              {
-                p: 8,
-              },
-              {
-                p: 9,
-              },
-            ],
+            parts: [{ p: 8 }, { p: 9 }],
             formText:
               "Câu gốc: Parking in this street is prohibited.\n → You ____________________________________________________",
             kind: "line",
@@ -12713,18 +8696,8 @@ export const HS_LESSONS = [
             n: 1,
             prompt: "Tôi thường học tiếng Anh sau bữa tối.",
             hint: "usually /ˈjuːʒuəli/: thường; after /ˈɑːftə/: sau",
-            parts: [
-              {
-                t: 0,
-                r: 1,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 1,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 1, c: 2 }],
+            fb: { t: 0, r: 1, c: 4 },
             kind: "vi_en",
           },
           {
@@ -12732,18 +8705,8 @@ export const HS_LESSONS = [
             n: 2,
             prompt: "Cô ấy đang nấu bữa tối trong bếp.",
             hint: "cook /kʊk/: nấu; kitchen /ˈkɪtʃɪn/: nhà bếp",
-            parts: [
-              {
-                t: 0,
-                r: 2,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 2,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 2, c: 2 }],
+            fb: { t: 0, r: 2, c: 4 },
             kind: "vi_en",
           },
           {
@@ -12751,18 +8714,8 @@ export const HS_LESSONS = [
             n: 3,
             prompt: "Họ đã đi đến chùa hôm qua.",
             hint: "pagoda /pəˈɡəʊdə/: chùa",
-            parts: [
-              {
-                t: 0,
-                r: 3,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 3,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 3, c: 2 }],
+            fb: { t: 0, r: 3, c: 4 },
             kind: "vi_en",
           },
           {
@@ -12770,18 +8723,8 @@ export const HS_LESSONS = [
             n: 4,
             prompt: "Chúng ta phải giữ lớp học sạch sẽ.",
             hint: "",
-            parts: [
-              {
-                t: 0,
-                r: 4,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 4,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 4, c: 2 }],
+            fb: { t: 0, r: 4, c: 4 },
             kind: "vi_en",
           },
           {
@@ -12789,18 +8732,8 @@ export const HS_LESSONS = [
             n: 5,
             prompt: "Nhà của tôi lớn hơn nhà của bạn.",
             hint: "",
-            parts: [
-              {
-                t: 0,
-                r: 5,
-                c: 2,
-              },
-            ],
-            fb: {
-              t: 0,
-              r: 5,
-              c: 4,
-            },
+            parts: [{ t: 0, r: 5, c: 2 }],
+            fb: { t: 0, r: 5, c: 4 },
             kind: "vi_en",
           },
         ],
@@ -12815,15 +8748,9 @@ export const HS_LESSONS = [
         instruction:
           "Exercise 2: Chia động từ trong ngoặc ở thì hiện tại đơn hoặc hiện tại tiếp diễn.",
         paras: [
-          {
-            text: "Listen! The birds (sing) in the trees.→ _________________",
-          },
-          {
-            text: "My father (not work) on Sundays.  → _________________",
-          },
-          {
-            text: "We usually (go) to school by bike.  → _________________",
-          },
+          { text: "Listen! The birds (sing) in the trees.→ _________________" },
+          { text: "My father (not work) on Sundays.  → _________________" },
+          { text: "We usually (go) to school by bike.  → _________________" },
           {
             text: "I (meet) my best friend this afternoon.\t → _________________",
           },
@@ -12834,11 +8761,7 @@ export const HS_LESSONS = [
             key: "hsReview2|ex2|listen! the birds (sing) in the trees.→",
             n: 1,
             prompt: "Listen! The birds (sing) in the trees.→",
-            parts: [
-              {
-                p: 0,
-              },
-            ],
+            parts: [{ p: 0 }],
             formText:
               "Listen! The birds (sing) in the trees.→ _________________",
             kind: "line",
@@ -12847,11 +8770,7 @@ export const HS_LESSONS = [
             key: "hsReview2|ex2|my father (not work) on sundays. →",
             n: 2,
             prompt: "My father (not work) on Sundays. →",
-            parts: [
-              {
-                p: 1,
-              },
-            ],
+            parts: [{ p: 1 }],
             formText: "My father (not work) on Sundays.  → _________________",
             kind: "line",
           },
@@ -12859,11 +8778,7 @@ export const HS_LESSONS = [
             key: "hsReview2|ex2|we usually (go) to school by bike. →",
             n: 3,
             prompt: "We usually (go) to school by bike. →",
-            parts: [
-              {
-                p: 2,
-              },
-            ],
+            parts: [{ p: 2 }],
             formText: "We usually (go) to school by bike.  → _________________",
             kind: "line",
           },
@@ -12871,11 +8786,7 @@ export const HS_LESSONS = [
             key: "hsReview2|ex2|i (meet) my best friend this afternoon. →",
             n: 4,
             prompt: "I (meet) my best friend this afternoon. →",
-            parts: [
-              {
-                p: 3,
-              },
-            ],
+            parts: [{ p: 3 }],
             formText:
               "I (meet) my best friend this afternoon.\t → _________________",
             kind: "line",
@@ -12904,11 +8815,7 @@ export const HS_LESSONS = [
             key: "hsReview2|ex3|my house has a small garden. → there",
             n: 1,
             prompt: "My house has a small garden. → There",
-            parts: [
-              {
-                p: 0,
-              },
-            ],
+            parts: [{ p: 0 }],
             formText:
               "My house has a small garden.\u000b → There ___________________________",
             kind: "line",
@@ -12917,11 +8824,7 @@ export const HS_LESSONS = [
             key: "hsReview2|ex3|nam / be / my / new / classmate. → nam",
             n: 2,
             prompt: "Nam / be / my / new / classmate. → Nam",
-            parts: [
-              {
-                p: 1,
-              },
-            ],
+            parts: [{ p: 1 }],
             formText:
               "Nam / be / my / new / classmate.\u000b → Nam _____________________________",
             kind: "line",
