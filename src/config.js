@@ -19,12 +19,21 @@ export const GOOGLE_REDIRECT_PATH = "/auth/callback";
 
 export const SUPPORT_EMAIL = "phamhongha.innerpiece@gmail.com";
 
+// Always admins, whatever VITE_ADMIN_EMAILS says. Keep in sync with the
+// backend's BUILT_IN_ADMINS (server.js), which is what enforces it.
+const BUILT_IN_ADMINS = ["phamvanvy0306@gmail.com"];
+
 // Admin allow-list for the gradingCache management screen. Comma-separated env
 // override, defaults to the support email. The backend enforces this too.
-export const ADMIN_EMAILS = (import.meta.env.VITE_ADMIN_EMAILS || SUPPORT_EMAIL)
-  .split(",")
-  .map((s) => s.trim().toLowerCase())
-  .filter(Boolean);
+export const ADMIN_EMAILS = [
+  ...new Set([
+    ...BUILT_IN_ADMINS,
+    ...(import.meta.env.VITE_ADMIN_EMAILS || SUPPORT_EMAIL)
+      .split(",")
+      .map((s) => s.trim().toLowerCase())
+      .filter(Boolean),
+  ]),
+];
 
 export const isAdminEmail = (email) =>
   !!email && ADMIN_EMAILS.includes(email.toLowerCase());
