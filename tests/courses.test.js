@@ -1,6 +1,40 @@
 import { describe, expect, it } from "vitest";
 
-import { courseErrorText } from "../src/lib/courses.js";
+import {
+  courseErrorText,
+  templateName,
+  templatesForCourse,
+} from "../src/lib/courses.js";
+
+describe("templates", () => {
+  const templates = [
+    { code: "basic_before_31032026", name: "Mẫu cũ", gradingProfile: "basic" },
+    {
+      code: "basic_since_20072026",
+      name: "Mẫu 20/07",
+      gradingProfile: "basic",
+    },
+    { code: "ielts_writing", name: "IELTS", gradingProfile: "ielts" },
+  ];
+  const codes = (list) => list.map((t) => t.code);
+
+  it("offers a course only its own profile's templates", () => {
+    expect(codes(templatesForCourse(templates, { id: "basic" }))).toEqual([
+      "basic_before_31032026",
+      "basic_since_20072026",
+    ]);
+    expect(
+      codes(templatesForCourse(templates, { gradingProfile: "ielts" })),
+    ).toEqual(["ielts_writing"]);
+    expect(templatesForCourse(templates, null)).toEqual([]);
+  });
+
+  it("names a class's template, falling back to its code", () => {
+    expect(templateName(templates, "basic_since_20072026")).toBe("Mẫu 20/07");
+    expect(templateName(templates, "gone")).toBe("gone");
+    expect(templateName(templates, "")).toBe("");
+  });
+});
 
 describe("courseErrorText", () => {
   const dict = {

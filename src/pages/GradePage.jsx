@@ -4,6 +4,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   fetchAllClasses,
   fetchClassLessons,
+  fetchClassTypes,
   fetchClasses,
   fetchCourses,
   fetchCurrentLesson,
@@ -20,6 +21,7 @@ import AutoGradeScheduleModal from "../components/AutoGradeScheduleModal.jsx";
 import SearchableSelect from "../components/SearchableSelect.jsx";
 import { isAdminEmail } from "../config.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
+import { templateName } from "../lib/courses.js";
 import {
   executeFeedbackClear,
   planFeedbackClear,
@@ -69,6 +71,8 @@ export default function GradePage() {
   // Who actually pays for the selected class. An admin grading someone else's
   // class spends THAT teacher's points, so the badge must show their balance.
   const [payer, setPayer] = useState(null);
+  // Admin only: each class's course and doc template, shown on hover.
+  const [classInfo, setClassInfo] = useState({ courses: [], templates: [] });
   const currentLessonRef = useRef(null);
 
   const refreshPoint = async () => {
@@ -97,6 +101,20 @@ export default function GradePage() {
 
   const selectedClass = classes.find((cls) => cls.id === selectedClassId);
 
+  /** Admin hover text of a class: its course and doc template. */
+  const classTitle = (cls) => {
+    const course = classInfo.courses.find((c) => c.id === cls.courseId);
+    return t("grade.classInfo", {
+      course: course?.name || "—",
+      template:
+        templateName(classInfo.templates, cls.classType) ||
+        t("classManage.noTemplate"),
+    });
+  };
+  const classOptions = isAdmin
+    ? classes.map((cls) => ({ ...cls, title: classTitle(cls) }))
+    : classes;
+
   /** Plain message, no spinner — page loading and setup errors. */
   const say = (text) => setStatus({ phase: "idle", text, warnings: [] });
 
@@ -122,6 +140,19 @@ export default function GradePage() {
         if (cancelled) return;
         const activeClasses = classList.filter((c) => c.isActive !== false);
         setClasses(activeClasses);
+        if (admin) {
+          Promise.all([
+            fetchCourses({ includeInactive: true }),
+            fetchClassTypes(),
+          ])
+            .then(([courses, templates]) => {
+              if (!cancelled) setClassInfo({ courses, templates });
+            })
+            .catch((error) => {
+              if (error.message !== "RE-AUTH_NEEDED")
+                console.error("Class info fetch failed:", error);
+            });
+        }
         if (activeClasses.length === 0) {
           alert(t("grade.noClasses"));
         }
@@ -457,7 +488,7 @@ export default function GradePage() {
         className="mb-1"
         value={selectedClassId}
         onChange={handleClassChange}
-        options={classes}
+        options={classOptions}
         disabled={starting || clearing}
         placeholder={t("grade.selectClass")}
         searchPlaceholder={t("common.searchClassPlaceholder")}

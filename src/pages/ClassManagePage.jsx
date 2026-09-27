@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import {
   fetchAllClasses,
   fetchClassLessons,
+  fetchClassTypes,
   fetchClasses,
   fetchCourseLessons,
   fetchCourses,
@@ -16,6 +17,7 @@ import AutoGradeScheduleModal from "../components/AutoGradeScheduleModal.jsx";
 import { isAdminEmail } from "../config.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
 import { scheduleSummary } from "../lib/autoGrade.js";
+import { templateName, templatesForCourse } from "../lib/courses.js";
 import { formatVn } from "../lib/scheduleTime.js";
 import { LESSON_OPTIONS } from "../shared/constant.js";
 
@@ -44,7 +46,12 @@ export default function ClassManagePage() {
   // Edit modal state.
   const [active, setActive] = useState(null); // the class being edited
   const [editOpen, setEditOpen] = useState(false);
-  const [form, setForm] = useState({ name: "", lessonId: "", courseId: "" });
+  const [form, setForm] = useState({
+    name: "",
+    lessonId: "",
+    courseId: "",
+    template: "",
+  });
   const [lessons, setLessons] = useState([]);
   const [lessonsLoading, setLessonsLoading] = useState(false);
   const [formError, setFormError] = useState("");
@@ -53,6 +60,8 @@ export default function ClassManagePage() {
   // Every course, hidden ones included: classes on a hidden course still
   // show its name.
   const [courses, setCourses] = useState([]);
+  // The student-doc templates; a class uses one of its course's.
+  const [templates, setTemplates] = useState([]);
   const courseById = useMemo(
     () => new Map(courses.map((course) => [course.id, course])),
     [courses],
@@ -116,6 +125,12 @@ export default function ClassManagePage() {
           if (error.message !== "RE-AUTH_NEEDED")
             console.error("Courses fetch failed:", error);
         });
+      fetchClassTypes()
+        .then(setTemplates)
+        .catch((error) => {
+          if (error.message !== "RE-AUTH_NEEDED")
+            console.error("Templates fetch failed:", error);
+        });
     } catch (error) {
       if (error.message === "RE-AUTH_NEEDED") return;
       console.error("Reload error:", error);
@@ -148,6 +163,7 @@ export default function ClassManagePage() {
       name: cls.name || "",
       lessonId: cls.currentLesson || "",
       courseId: cls.courseId || "",
+      template: cls.classType || "",
     });
     setFormError("");
     setLessons([]);
@@ -167,7 +183,18 @@ export default function ClassManagePage() {
 
   /** Another course: its lessons, keeping the current one when it is there. */
   const changeCourse = async (courseId) => {
-    setForm((prev) => ({ ...prev, courseId }));
+    // Its templates: the class's own when the new course has it, else the
+    // only one, else none picked yet.
+    const list = templatesForCourse(templates, courseById.get(courseId));
+    setForm((prev) => ({
+      ...prev,
+      courseId,
+      template: list.some((item) => item.code === prev.template)
+        ? prev.template
+        : list.length === 1
+          ? list[0].code
+          : "",
+    }));
     setLessons([]);
     if (!courseId) return;
     setLessonsLoading(true);
@@ -196,7 +223,7 @@ export default function ClassManagePage() {
   const closeEdit = () => {
     setEditOpen(false);
     setActive(null);
-    setForm({ name: "", lessonId: "", courseId: "" });
+    setForm({ name: "", lessonId: "", courseId: "", template: "" });
     setLessons([]);
     setFormError("");
   };
@@ -218,14 +245,30 @@ export default function ClassManagePage() {
         setFormError(t("classManage.lessonRequired"));
         return;
       }
+      const formTemplates = templatesForCourse(
+        templates,
+        courseById.get(form.courseId),
+      );
+      if (form.courseId && formTemplates.length > 0 && !form.template) {
+        setFormError(t("classManage.templateRequired"));
+        return;
+      }
+      // A course without templates drops the old one ("").
+      const templateChanged =
+        !!form.courseId &&
+        (formTemplates.length > 0 ? form.template : "") !==
+          (active.classType || "");
 
-      if (nameChanged || courseChanged) {
+      if (nameChanged || courseChanged || templateChanged) {
         const res = await updateClass(active.id, {
           ...(nameChanged ? { name: newName } : {}),
           // A new course carries its lesson in the same request: the class
           // is never on a course that lacks its current lesson.
           ...(courseChanged
             ? { courseId: form.courseId, currentLesson: form.lessonId }
+            : {}),
+          ...(templateChanged
+            ? { classType: formTemplates.length > 0 ? form.template : "" }
             : {}),
         });
         if (!res.ok) {
@@ -264,6 +307,12 @@ export default function ClassManagePage() {
   };
 
   const courseLabel = (cls) => courseById.get(cls.courseId)?.name || "—";
+  const templateLabel = (cls) =>
+    templateName(templates, cls.classType) || t("classManage.noTemplate");
+  const editTemplates = templatesForCourse(
+    templates,
+    courseById.get(form.courseId),
+  );
 
   const handleDeactivate = async (cls) => {
     if (!window.confirm(t("classManage.deactivateConfirm"))) return;
@@ -342,7 +391,10 @@ export default function ClassManagePage() {
                   <tr key={c.id}>
                     <td>{c.name}</td>
                     <td className="cell-date">{c.id}</td>
-                    <td>{courseLabel(c)}</td>
+                    <td>
+                      {courseLabel(c)}
+                      <div className="field-note">{templateLabel(c)}</div>
+                    </td>
                     {isAdmin && (
                       <td>
                         {Array.isArray(c.teacherNames)
@@ -452,6 +504,25 @@ export default function ClassManagePage() {
                   ))}
                 </select>
               </div>
+              {editTemplates.length > 0 && (
+                <div className="field-group">
+                  <label>{t("classManage.templateLabel")}</label>
+                  <select
+                    value={form.template}
+                    onChange={(e) =>
+                      setForm({ ...form, template: e.target.value })
+                    }
+                    disabled={saving}
+                  >
+                    <option value="">{t("newClass.selectTemplate")}</option>
+                    {editTemplates.map((item) => (
+                      <option key={item.code} value={item.code}>
+                        {item.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
               <div className="field-group">
                 <label>{t("classManage.currentLessonLabel")}</label>
                 <select

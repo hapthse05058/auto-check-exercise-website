@@ -5,6 +5,7 @@ import { removeAccents } from "../lib/text.js";
 /**
  * Combobox chọn 1 mục có ô tìm kiếm để lọc.
  * onChange nhận id trực tiếp (không phải event). Chuỗi rỗng "" nghĩa là bỏ chọn.
+ * Mục nào có `title` thì hiện nó khi rê chuột (cả trên nút khi đang chọn).
  */
 export default function SearchableSelect({
   value = "",
@@ -101,6 +102,7 @@ export default function SearchableSelect({
         role="combobox"
         aria-expanded={isOpen}
         aria-haspopup="listbox"
+        title={selectedOption?.title}
       >
         <span className={selectedOption ? "" : "searchable-select-placeholder"}>
           {selectedOption ? selectedOption.name : placeholder}
@@ -140,6 +142,7 @@ export default function SearchableSelect({
                   className={`searchable-select-option${
                     index === highlightedIndex ? " highlighted" : ""
                   }${opt.id === value ? " selected" : ""}`}
+                  title={opt.title}
                   onClick={() => commit(opt.id)}
                   onMouseEnter={() => setHighlightedIndex(index)}
                 >

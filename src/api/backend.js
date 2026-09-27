@@ -191,6 +191,17 @@ async function courseResult(response, key) {
   return key ? data?.[key] : data;
 }
 
+/**
+ * The student-doc templates (`{id, code, name, gradingProfile}`); a class
+ * picks one of its course's (lib/courses.js templatesForCourse).
+ */
+export async function fetchClassTypes() {
+  const response = await authFetch("/class-types");
+  if (!response.ok) throw new Error("Failed to fetch class types");
+  const list = await response.json();
+  return Array.isArray(list) ? list : [];
+}
+
 /** The courses; hidden ones only when asked. */
 export async function fetchCourses({ includeInactive } = {}) {
   return courseResult(
