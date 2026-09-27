@@ -14,7 +14,9 @@
     "prettier": "prettier --check .",
     "format": "eslint . --fix && prettier --write .",
     "validate": "eslint . && prettier --check .",
-    "prepare": "husky"
+    "prepare": "husky",
+    "build:hs-template": "node scripts/buildHsTemplate.mjs",
+    "check:hs-template": "node scripts/buildHsTemplate.mjs --check"
   },
   "lint-staged": {
     "*.{js,jsx}": [

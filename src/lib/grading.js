@@ -73,6 +73,8 @@ function describeError(job, t) {
       return t("grading.gradingFailed", { msg: params.msg || "" });
     case "abandoned":
       return t("grading.jobAbandoned");
+    case "unknown_grading_profile":
+      return t("grading.unknownGradingProfile");
     default:
       return t("grading.jobFailed", { code: job.error });
   }

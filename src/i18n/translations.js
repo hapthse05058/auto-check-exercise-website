@@ -672,7 +672,11 @@ export const translations = {
       gradingLabel: "Grading type",
       gradingHint:
         "Basic: sentence/paragraph exercises. IELTS: IELTS Writing (Task 1, Task 2) with its own prompt and doc template.",
-      profile: { basic: "Basic", ielts: "IELTS Writing" },
+      profile: {
+        basic: "Basic",
+        ielts: "IELTS Writing",
+        hs: "HS (primary & lower secondary)",
+      },
       selectAll: "Select all",
       selectNone: "Clear",
       created: "Course {name} created.",
@@ -856,6 +860,10 @@ export const translations = {
         "{docId}: this lesson was not found in the document, skipped.",
       noTable: "{docId}: no exercise table found for this lesson, skipped.",
       nothingAtAll: "No feedback found to clear for this lesson.",
+      confirmHs:
+        "This will remove {cells} AI correction(s) across {docs} document(s), in {lesson} — class {class}.\n\nOnly text the AI wrote and nobody edited is removed; teachers' corrections stay.\nThis CANNOT be undone. Continue?",
+      unknownProfile:
+        "This class's course has a grading type this version does not know — nothing was cleared.",
       failed: "Failed clearing {docId}: {msg}",
       complete: "Done! Cleared {cells} cell(s) across {docs} document(s).",
       cacheHint:
@@ -901,6 +909,22 @@ export const translations = {
         "{docId}, table {table}: the AI returned an unusable answer twice — left empty, not charged. Run grading again.",
       ieltsNotConfigured:
         "IELTS grading is not set up on the server yet (no AI model configured).",
+      hsNotConfigured:
+        "HS grading is not set up on the server yet (no AI model configured).",
+      unknownGradingProfile:
+        "This class's course has a grading type this version does not know — nothing was graded. Please check the course.",
+      hsLessonUnknown:
+        "{docId}: this lesson is not part of the HS form, skipped.",
+      hsUnknownExercise:
+        '{docId}: exercise "{header}" is not in the HS form — not graded.',
+      hsExerciseMissing:
+        "{docId}: exercise {exercise} was not found in this lesson tab.",
+      hsUnreadableItems:
+        "{docId}: {count} answer(s) of {exercise} could not be read (the question text was changed) — not graded.",
+      hsAiInvalid:
+        "{docId}: {count} answer(s): the AI returned an unusable answer twice — left unmarked. Run grading again.",
+      hsKeyMissing:
+        "{docId}: {count} listening answer(s) have no answer key yet — not graded.",
       tableQuestionRef: "table {table} question {question}",
       noAnswers: "No answered questions found to grade.",
       noneGraded: "No exercise was graded.",
@@ -1588,7 +1612,7 @@ export const translations = {
       gradingLabel: "Kiểu chấm",
       gradingHint:
         "Basic: bài dịch câu / viết đoạn văn. IELTS: IELTS Writing (Task 1, Task 2) với prompt và template doc riêng.",
-      profile: { basic: "Basic", ielts: "IELTS Writing" },
+      profile: { basic: "Basic", ielts: "IELTS Writing", hs: "HS (cấp 1–2)" },
       selectAll: "Chọn tất cả",
       selectNone: "Bỏ chọn",
       created: "Đã tạo khóa {name}.",
@@ -1771,6 +1795,10 @@ export const translations = {
         "{docId}: không tìm thấy buổi học này trong tài liệu, bỏ qua.",
       noTable: "{docId}: không tìm thấy bảng bài tập cho buổi này, bỏ qua.",
       nothingAtAll: "Không tìm thấy feedback nào để xóa ở buổi này.",
+      confirmHs:
+        "Sẽ xóa {cells} đoạn chữa của AI trong {docs} tài liệu, ở {lesson} — lớp {class}.\n\nChỉ xóa phần AI viết mà chưa ai sửa; phần giáo viên chữa được giữ nguyên.\nThao tác này KHÔNG hoàn tác được. Tiếp tục?",
+      unknownProfile:
+        "Khóa học của lớp này có kiểu chấm mà phiên bản hiện tại không biết — chưa xóa gì.",
       failed: "Xóa {docId} thất bại: {msg}",
       complete: "Hoàn tất! Đã xóa {cells} ô ở {docs} tài liệu.",
       cacheHint:
@@ -1815,6 +1843,20 @@ export const translations = {
       ieltsAiInvalid:
         "{docId}, bảng {table}: AI trả kết quả không dùng được 2 lần — để trống, không trừ point. Hãy bấm chấm lại.",
       ieltsNotConfigured: "Server chưa cấu hình chấm IELTS (chưa có model AI).",
+      hsNotConfigured: "Server chưa cấu hình chấm lớp HS (chưa có model AI).",
+      unknownGradingProfile:
+        "Khóa học của lớp này có kiểu chấm mà phiên bản hiện tại không biết — chưa chấm bài nào. Vui lòng kiểm tra lại khóa học.",
+      hsLessonUnknown: "{docId}: buổi này không thuộc form lớp HS, bỏ qua.",
+      hsUnknownExercise:
+        '{docId}: bài "{header}" không có trong form lớp HS — chưa chấm.',
+      hsExerciseMissing:
+        "{docId}: không tìm thấy bài {exercise} trong buổi học này.",
+      hsUnreadableItems:
+        "{docId}: {count} câu của {exercise} không đọc được (đề bài bị sửa) — chưa chấm.",
+      hsAiInvalid:
+        "{docId}: {count} câu AI trả kết quả không dùng được 2 lần — để trống. Hãy bấm chấm lại.",
+      hsKeyMissing:
+        "{docId}: {count} câu nghe chưa có đáp án chuẩn — chưa chấm.",
       tableQuestionRef: "bảng {table} câu {question}",
       noAnswers: "Không tìm thấy câu trả lời nào để chấm.",
       noneGraded: "Không có bài nào được chấm.",

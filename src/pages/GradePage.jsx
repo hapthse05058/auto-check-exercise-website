@@ -342,7 +342,11 @@ export default function GradePage() {
             ? t("grading.noDocs")
             : error.message === "ielts_not_configured"
               ? t("grading.ieltsNotConfigured")
-              : t("grade.processFailed", { msg: error.message });
+              : error.message === "hs_not_configured"
+                ? t("grading.hsNotConfigured")
+                : error.message === "unknown_grading_profile"
+                  ? t("grading.unknownGradingProfile")
+                  : t("grade.processFailed", { msg: error.message });
       setStatus({ phase: "error", text, warnings: [] });
     } finally {
       setStarting(false);
@@ -378,7 +382,18 @@ export default function GradePage() {
             })
           ).find((item) => item.id === selectedClass.courseId)
         : null;
-      const gradingProfile = course?.gradingProfile || "basic";
+      // No course (or a failed lookup): Basic, as always. A course whose
+      // profile this version does not know (null) is refused — clearing it
+      // as Basic would wipe a column that is not Basic's.
+      const gradingProfile = course ? course.gradingProfile : "basic";
+      if (!["basic", "ielts", "hs"].includes(gradingProfile)) {
+        setStatus({
+          phase: "error",
+          text: t("clearFeedback.unknownProfile"),
+          warnings: [],
+        });
+        return;
+      }
       const plan = await planFeedbackClear({
         docLinksText,
         classId: selectedClassId,
@@ -402,13 +417,19 @@ export default function GradePage() {
       }
       // The "Chữa bài" column holds hand-typed teacher notes too, and they
       // cannot be told apart from AI feedback — so show the count and ask.
+      // HS removes only the AI's own, unedited text (its named ranges).
       const confirmed = window.confirm(
-        t("clearFeedback.confirm", {
-          cells: plan.cells,
-          docs: plan.plans.length,
-          lesson: lessonName,
-          class: selectedClass?.name,
-        }),
+        t(
+          gradingProfile === "hs"
+            ? "clearFeedback.confirmHs"
+            : "clearFeedback.confirm",
+          {
+            cells: plan.cells,
+            docs: plan.plans.length,
+            lesson: lessonName,
+            class: selectedClass?.name,
+          },
+        ),
       );
       if (!confirmed) {
         say("");
