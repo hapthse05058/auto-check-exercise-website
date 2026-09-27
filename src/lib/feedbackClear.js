@@ -19,7 +19,7 @@
 import { collectExerciseRows } from "./docTableDetect.js";
 import { buildClearFeedbackRequests } from "./docWriter.js";
 import { resolveDocRefs } from "./grading.js";
-import { collectIeltsRows } from "./ieltsDoc.js";
+import { collectIeltsRows, findIeltsTab } from "./ieltsDoc.js";
 import { batchUpdateDoc, getTabContent } from "../api/googleDocs.js";
 import { ensureValidGoogleToken } from "../auth/tokens.js";
 
@@ -37,16 +37,21 @@ async function scanDoc(
 ) {
   // Re-checked per doc: the Docs API needs a REAL Google token, not the JWT.
   const token = await ensureValidGoogleToken();
-  const tab = await getTabContent(ref.docId, token, lessonName);
+  const ielts = gradingProfile === "ielts";
+  const tab = await getTabContent(
+    ref.docId,
+    token,
+    lessonName,
+    ielts ? findIeltsTab : undefined,
+  );
   if (!tab) {
     warn(t("clearFeedback.tabMissing", { docId: ref.docId }));
     return null;
   }
 
-  const { rows } =
-    gradingProfile === "ielts"
-      ? collectIeltsRows(tab)
-      : collectExerciseRows(tab, classType);
+  const { rows } = ielts
+    ? collectIeltsRows(tab)
+    : collectExerciseRows(tab, classType);
   if (!rows.length) {
     warn(t("clearFeedback.noTable", { docId: ref.docId }));
     return null;

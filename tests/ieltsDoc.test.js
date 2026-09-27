@@ -10,8 +10,10 @@ import {
 import {
   KIND_IELTS_WRITING,
   collectIeltsRows,
+  findIeltsTab,
   imageIdsInCell,
   imageUri,
+  lessonNumberOf,
   resolveIeltsTable,
   selectIeltsItemsToGrade,
 } from "../src/lib/ieltsDoc.js";
@@ -289,5 +291,93 @@ describe("clearing the feedback (feedbackClear, IELTS class)", () => {
     for (const classType of ["basic", "basic_since_20072026", undefined]) {
       expect(collectExerciseRows(tab, classType).rows).toEqual([]);
     }
+  });
+});
+
+describe("findIeltsTab: the lesson's tab in a real IELTS doc", () => {
+  /** A tab (with child tabs) titled `title`; `ielts` = holds an IELTS table. */
+  const tabNamed = (title, { ielts = false, children = [] } = {}) => ({
+    ...makeTabFromTables(ielts ? [ieltsTable().tableRows] : [], title),
+    childTabs: children,
+  });
+  // The ES7.0 layout: "Buổi N" with child tabs "Writing buổi N", "Speaking…".
+  const doc = (writingHasTable = true) => [
+    tabNamed("Nội quy và Tài liệu"),
+    tabNamed("Buổi 2", {
+      children: [tabNamed("Writing -DCadj"), tabNamed("Reading - DCadj")],
+    }),
+    tabNamed("Buổi 12", {
+      children: [
+        tabNamed("Writing buổi 12", { ielts: writingHasTable }),
+        tabNamed("Speaking buổi 12"),
+      ],
+    }),
+    tabNamed("Buổi 1", {
+      children: [tabNamed("Writing buổi 1", { ielts: true })],
+    }),
+  ];
+  const titleOf = (tab) => tab?.tabProperties.title ?? null;
+
+  it("lesson BUỔI 12 → the child tab 'Writing buổi 12'", () => {
+    expect(titleOf(findIeltsTab(doc(), "BUỔI 12"))).toBe("Writing buổi 12");
+    expect(titleOf(findIeltsTab(doc(), "Buổi 012"))).toBe("Writing buổi 12");
+  });
+
+  it("matches the number exactly: BUỔI 1 is not BUỔI 12", () => {
+    expect(titleOf(findIeltsTab(doc(), "BUỔI 01"))).toBe("Writing buổi 1");
+  });
+
+  it("with no IELTS table anywhere, still returns the Writing tab (→ 'no table', not 'no tab')", () => {
+    expect(titleOf(findIeltsTab(doc(false), "BUỔI 12"))).toBe(
+      "Writing buổi 12",
+    );
+  });
+
+  it("falls back to 'Buổi N' when that is where the table is", () => {
+    const tabs = [
+      tabNamed("Buổi 5", {
+        ielts: true,
+        children: [tabNamed("Writing buổi 5")],
+      }),
+    ];
+    expect(titleOf(findIeltsTab(tabs, "BUỔI 05"))).toBe("Buổi 5");
+  });
+
+  it("a tab titled exactly like the lesson still works; none → null", () => {
+    expect(
+      titleOf(findIeltsTab([tabNamed("BUỔI 04", { ielts: true })], "BUỔI 04")),
+    ).toBe("BUỔI 04");
+    expect(findIeltsTab(doc(), "BUỔI 07")).toBeNull();
+    expect(findIeltsTab(doc(), "Lesson without number")).toBeNull();
+  });
+
+  it("lessons 1–2: a 'Writing…' tab without a number, as child or next sibling", () => {
+    // As children of "Buổi 2" (the doc() layout above).
+    const nested = doc().map((tab) =>
+      titleOf(tab) === "Buổi 2"
+        ? {
+            ...tab,
+            childTabs: [tabNamed("Writing -DCadj", { ielts: true })],
+          }
+        : tab,
+    );
+    expect(titleOf(findIeltsTab(nested, "BUỔI 02"))).toBe("Writing -DCadj");
+    // As flat siblings: "Buổi 1", "Reading", "Writing", "Buổi 2", "Writing".
+    const flat = [
+      tabNamed("Buổi 1"),
+      tabNamed("Reading"),
+      tabNamed("Writing", { ielts: true }),
+      tabNamed("Buổi 2"),
+      tabNamed("Writing -DCadj"),
+    ];
+    expect(titleOf(findIeltsTab(flat, "BUỔI 01"))).toBe("Writing");
+    // Lesson 2's writing tab has no table: still ITS tab, never lesson 1's.
+    expect(titleOf(findIeltsTab(flat, "BUỔI 02"))).toBe("Writing -DCadj");
+  });
+
+  it("lessonNumberOf reads the number in any case, with leading zeros", () => {
+    expect(lessonNumberOf("BUỔI 04")).toBe(4);
+    expect(lessonNumberOf("Writing buổi 21")).toBe(21);
+    expect(lessonNumberOf("Nội quy")).toBeNull();
   });
 });

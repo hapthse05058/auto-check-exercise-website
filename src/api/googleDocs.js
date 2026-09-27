@@ -2,11 +2,18 @@ import { findTabByTitle } from "../lib/docParser.js";
 
 /**
  * Fetches a Google Doc (with all tabs) and returns the tab whose title
- * matches `tabTitle`. Returns undefined when the tab is missing or the request
- * failed, so the caller can skip the document and carry on; the reason is
- * logged. Callers decide how (and in which language) to report the skip.
+ * matches `tabTitle` — or the one `findTab(tabs, tabTitle)` picks (an IELTS
+ * class matches its lesson to a "Writing buổi N" tab, ieltsDoc.findIeltsTab).
+ * Returns undefined when the tab is missing or the request failed, so the
+ * caller can skip the document and carry on; the reason is logged. Callers
+ * decide how (and in which language) to report the skip.
  */
-export async function getTabContent(docId, accessToken, tabTitle) {
+export async function getTabContent(
+  docId,
+  accessToken,
+  tabTitle,
+  findTab = findTabByTitle,
+) {
   const url = `https://docs.googleapis.com/v1/documents/${docId}?includeTabsContent=true`;
   try {
     const response = await fetch(url, {
@@ -23,7 +30,7 @@ export async function getTabContent(docId, accessToken, tabTitle) {
 
     const data = await response.json();
 
-    const targetTab = findTabByTitle(data.tabs, tabTitle);
+    const targetTab = findTab(data.tabs, tabTitle);
     if (!targetTab || !targetTab.documentTab) {
       throw new Error(`Tab with title ${tabTitle} not found in this document.`);
     }
