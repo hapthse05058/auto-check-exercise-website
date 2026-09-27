@@ -228,10 +228,6 @@ export default function GradingCachePage() {
   };
 
   const handleDelete = async (row) => {
-    const ok = window.confirm(
-      t("cache.deleteConfirm", { q: row.question, a: row.answer }),
-    );
-    if (!ok) return;
     try {
       const response = await deleteGradingCache(row.id);
       if (!response.ok) {
