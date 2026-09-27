@@ -222,6 +222,18 @@ describe("splitBySlots — what the student wrote in each blank", () => {
     expect(extra.trailing.text).toBe("I like it");
   });
 
+  it("reads the first copy when the sentence was written twice", () => {
+    const f = "1. There are ______ games in the museum today.";
+    const split = splitBySlots(
+      f,
+      "1. There are some games in the museum today. There are many games in the museum today.",
+    );
+    expect(split.fills.map((x) => x.text)).toEqual(["some"]);
+    expect(split.trailing.text).toBe(
+      "There are many games in the museum today.",
+    );
+  });
+
   it("refuses to guess when the question itself was changed", () => {
     expect(
       splitBySlots(form, "My friend usually studies in the library."),
