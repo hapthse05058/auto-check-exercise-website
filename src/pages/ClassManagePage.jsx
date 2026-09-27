@@ -34,6 +34,9 @@ function lessonLabel(currentLesson) {
   );
 }
 
+/** Template filter value for classes without a template. */
+const NO_TEMPLATE = "__none__";
+
 /** Columns shown until the user picks their own; the rest start hidden. */
 const DEFAULT_COLUMNS = {
   name: true,
@@ -81,6 +84,7 @@ export default function ClassManagePage() {
   const [search, setSearch] = useState("");
   const [searchField, setSearchField] = useState("all"); // CLASS_SEARCH_FIELDS
   const [statusFilter, setStatusFilter] = useState("active"); // active | inactive | all
+  const [templateFilter, setTemplateFilter] = useState(""); // "" = all | NO_TEMPLATE | a code
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState(t("classManage.loading"));
 
@@ -195,11 +199,30 @@ export default function ClassManagePage() {
     ...(Array.isArray(cls.teacherEmails) ? cls.teacherEmails : []),
   ];
 
+  // Every template a class can be filtered by: the current ones plus codes
+  // classes still carry that are no longer listed, by name.
+  const templateOptions = useMemo(() => {
+    const byCode = new Map(templates.map((item) => [item.code, item.name]));
+    for (const c of classes) {
+      if (c.classType && !byCode.has(c.classType)) {
+        byCode.set(c.classType, c.classType);
+      }
+    }
+    return [...byCode]
+      .map(([code, name]) => ({ code, name }))
+      .sort((a, b) => a.name.localeCompare(b.name, "vi"));
+  }, [templates, classes]);
+
   const filtered = useMemo(
     () =>
       classes.filter((c) => {
         if (statusFilter === "active" && !c.isActive) return false;
         if (statusFilter === "inactive" && c.isActive) return false;
+        if (templateFilter === NO_TEMPLATE) {
+          if (c.classType) return false;
+        } else if (templateFilter && c.classType !== templateFilter) {
+          return false;
+        }
         return classFieldMatches(
           {
             name: c.name,
@@ -211,7 +234,7 @@ export default function ClassManagePage() {
           search,
         );
       }),
-    [classes, courseById, search, searchField, statusFilter],
+    [classes, courseById, search, searchField, statusFilter, templateFilter],
   );
 
   // Only admins see other teachers' classes, so only they search by teacher.
@@ -565,6 +588,21 @@ export default function ClassManagePage() {
             <option value="active">{t("classManage.statusActive")}</option>
             <option value="inactive">{t("classManage.statusInactive")}</option>
             <option value="all">{t("classManage.statusAll")}</option>
+          </select>
+          <select
+            className="template-filter"
+            value={templateFilter}
+            onChange={(e) => setTemplateFilter(e.target.value)}
+            aria-label={t("classManage.filterTemplate")}
+            title={t("classManage.filterTemplate")}
+          >
+            <option value="">{t("classManage.templateAll")}</option>
+            <option value={NO_TEMPLATE}>{t("classManage.noTemplate")}</option>
+            {templateOptions.map((item) => (
+              <option key={item.code} value={item.code}>
+                {item.name}
+              </option>
+            ))}
           </select>
           <ColumnPicker
             columns={columns}

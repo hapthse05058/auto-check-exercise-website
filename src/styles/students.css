@@ -533,6 +533,11 @@
   opacity: 1;
 }
 
+/* Template names are long; the open list still shows them in full. */
+.cache-search select.template-filter {
+  max-width: 240px;
+}
+
 /* Row above a table holding its column chooser, left-aligned. */
 .table-toolbar {
   display: flex;
