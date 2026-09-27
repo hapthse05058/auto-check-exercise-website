@@ -303,3 +303,69 @@ export function makeBareSttTable() {
 export function rowsOf(tab) {
   return collectExerciseRows(tab).rows;
 }
+
+// ---------------------------------------------------------------------------
+// "Bài tập viết đoạn văn" — buổi 02 → 23
+// ---------------------------------------------------------------------------
+
+/** One indexed paragraph per line, contiguous from `start`. */
+const indexedLines = (text, start) => {
+  let cursor = start;
+  return String(text)
+    .split("\n")
+    .map((line) => {
+      const content = `${line}\n`;
+      const p = PIndexed(content, cursor);
+      cursor += content.length;
+      return p;
+    });
+};
+
+/**
+ * Bảng đoạn văn, dựng theo JSON thật của Docs API (đã dump từ template
+ * "KTN Kaizen mới 20/9", buổi 02 → 23 đều y hệt):
+ *
+ *   row 0: [tiêu đề, columnSpan 2] [ô giữ chỗ, content = "\n"] [GV sửa]
+ *   row 1: [Đoạn văn mẫu] [bài mẫu] ["\n"]
+ *   row 2: [Học viên viết] [bài học viên] [ô ghi feedback]
+ *
+ * `mergeMode` phủ thêm hai cách khác Docs API có thể trả ô bị gộp:
+ *   - "real"        ô giữ chỗ CÓ content (đúng như dump)
+ *   - "placeholder" ô giữ chỗ KHÔNG có content
+ *   - "omitted"     ô giữ chỗ bị lược hẳn khỏi tableCells
+ */
+export function makeParagraphTable({
+  topic = "Hobbies",
+  sample = "My favourite hobby is playing the guitar.\nI play it every weekend.",
+  student = "",
+  feedback = "",
+  mergeMode = "real",
+  at = 500,
+} = {}) {
+  const titleCell = {
+    content: [PIndexed(`Bài tập viết đoạn văn: ${topic} \n`, at)],
+    tableCellStyle: { columnSpan: 2 },
+  };
+  const header = { tableCells: [titleCell] };
+  if (mergeMode === "real") {
+    header.tableCells.push({ content: [PIndexed("\n", at + 40)] });
+  } else if (mergeMode === "placeholder") {
+    header.tableCells.push({});
+  }
+  header.tableCells.push({ content: [PIndexed("GV sửa\n", at + 42)] });
+
+  const sampleRow = row(
+    [PIndexed("Đoạn văn mẫu\n", at + 60)],
+    indexedLines(sample, at + 80),
+    [PIndexed("\n", at + 380)],
+  );
+  const studentRow = row(
+    [PIndexed("Học viên viết\n", at + 400)],
+    student ? indexedLines(student, at + 420) : [PIndexed("\n", at + 420)],
+    feedback ? indexedLines(feedback, at + 900) : [PIndexed("\n", at + 900)],
+  );
+  return [header, sampleRow, studentRow];
+}
+
+/** Where the paragraph table's feedback cell starts, for a given `at`. */
+export const paragraphFeedbackIndex = (at = 500) => at + 900;

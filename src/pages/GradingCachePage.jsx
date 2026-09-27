@@ -492,6 +492,7 @@ export default function GradingCachePage() {
                 >
                   <option value="">vi_en</option>
                   <option value="active_passive">active_passive</option>
+                  <option value="paragraph">paragraph</option>
                 </select>
               </div>
               <div className="field-group">
