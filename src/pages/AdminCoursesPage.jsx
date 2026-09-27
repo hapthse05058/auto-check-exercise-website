@@ -16,7 +16,7 @@ import { courseErrorText } from "../lib/courses.js";
 const EMPTY_FORM = { name: "", lessonIds: [], gradingProfile: "basic" };
 
 /** How a course's classes are graded — backend lib/courses.js GRADING_PROFILES. */
-const GRADING_PROFILES = ["basic", "ielts"];
+const GRADING_PROFILES = ["basic", "ielts", "hs"];
 
 /**
  * Admin: the courses a class can follow (Basic, IELTS, …), each with its

@@ -6,8 +6,11 @@
  * selected class type maps to — so other lessons living in the same document
  * are never touched. An IELTS class (course gradingProfile "ielts") has no
  * class-type tables: its IELTS WRITING tables (ieltsDoc.js) are cleared
- * instead, i.e. their "GV chữa" cell. Nothing here spends points or reads the
- * grading cache.
+ * instead, i.e. their "GV chữa" cell. An HS class (gradingProfile "hs") has
+ * its corrections inline, after each answer: only the text the AI wrote and
+ * nobody edited since is removed (hsDoc.js buildHsClearRequests), and "cells"
+ * counts those corrections. Nothing here spends points or reads the grading
+ * cache.
  *
  * Split into a read pass and a write pass on purpose: the "Chữa bài" column is
  * shared by the AI and anything a teacher typed by hand, and the two cannot be
@@ -19,6 +22,7 @@
 import { collectExerciseRows } from "./docTableDetect.js";
 import { buildClearFeedbackRequests } from "./docWriter.js";
 import { resolveDocRefs } from "./grading.js";
+import { buildHsClearRequests, findHsTab } from "./hsDoc.js";
 import { collectIeltsRows, findIeltsTab } from "./ieltsDoc.js";
 import { batchUpdateDoc, getTabContent } from "../api/googleDocs.js";
 import { ensureValidGoogleToken } from "../auth/tokens.js";
@@ -38,15 +42,20 @@ async function scanDoc(
   // Re-checked per doc: the Docs API needs a REAL Google token, not the JWT.
   const token = await ensureValidGoogleToken();
   const ielts = gradingProfile === "ielts";
+  const hs = gradingProfile === "hs";
   const tab = await getTabContent(
     ref.docId,
     token,
     lessonName,
-    ielts ? findIeltsTab : undefined,
+    ielts ? findIeltsTab : hs ? findHsTab : undefined,
   );
   if (!tab) {
     warn(t("clearFeedback.tabMissing", { docId: ref.docId }));
     return null;
+  }
+  if (hs) {
+    const { requests, removed } = buildHsClearRequests(tab);
+    return { token, requests, count: removed };
   }
 
   const { rows } = ielts
@@ -98,8 +107,9 @@ export async function planFeedbackClear({
         t,
       });
       if (!found || !found.requests.length) continue;
-      plans.push({ docId: ref.docId, cells: found.requests.length });
-      cells += found.requests.length;
+      const count = found.count ?? found.requests.length;
+      plans.push({ docId: ref.docId, cells: count });
+      cells += count;
     } catch (err) {
       // One bad doc must not sink the whole scan.
       console.error(err);
@@ -143,7 +153,7 @@ export async function executeFeedbackClear({
       if (!found || !found.requests.length) continue;
       await batchUpdateDoc(plan.docId, found.requests, found.token);
       clearedDocs += 1;
-      clearedCells += found.requests.length;
+      clearedCells += found.count ?? found.requests.length;
     } catch (err) {
       console.error(err);
       warn(t("clearFeedback.failed", { docId: plan.docId, msg: err.message }));
