@@ -163,6 +163,22 @@ describe("describeJob", () => {
       "table 2 question 4, table 3 question 1",
     );
   });
+
+  it("hides the per-doc warnings from non-admins, hint included", () => {
+    const warned = job({
+      written: 0,
+      warnings: [
+        { code: "unclassifiedTable", params: { docId: "d1", list: "10" } },
+      ],
+    });
+    const admin = describeJob(warned, t);
+    expect(admin.warnings).toHaveLength(1);
+    expect(admin.text).toContain(t("grading.seeWarnings"));
+
+    const teacher = describeJob(warned, t, { showWarnings: false });
+    expect(teacher.warnings).toEqual([]);
+    expect(teacher.text).toBe(t("grading.noneGraded"));
+  });
 });
 
 describe("isJobFinished", () => {

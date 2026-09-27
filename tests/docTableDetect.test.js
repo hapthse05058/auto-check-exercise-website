@@ -47,6 +47,20 @@ describe("detectTables", () => {
     expect(detectTables(tab).tables).toEqual([]);
   });
 
+  it("does not warn about bài tập TỰ CHỌN the students answered, nor absorb it", () => {
+    // Buổi 02 lớp KTN707: bảng TỰ CHỌN (bảng 10) có bài làm của học viên nên
+    // từng bị báo "không nhận ra được là bảng bài tập" cho cả 24 học viên.
+    // Đứng ngay sau một bảng bài tập cùng số cột, nó cũng không được bị coi là
+    // mảnh ngắt trang của bảng đó.
+    const tab = makeTabFromTables([
+      makeLegacyTable(),
+      makeLegacyTable("", "Bài làm của học viên"),
+    ]);
+    const { tables, unclassifiedWithQuestions } = detectTables(tab);
+    expect(tables.map((x) => x.tableIdx)).toEqual([0]);
+    expect(unclassifiedWithQuestions).toEqual([]);
+  });
+
   it("classifies the 4-column 'Tiếng Việt → Tiếng Anh' table as translation", () => {
     const tab = makeTabFromTables([makeTranslationTable4Col()]);
     expect(kinds(tab)).toEqual([KIND_VI_EN]);

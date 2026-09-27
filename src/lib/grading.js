@@ -82,10 +82,16 @@ function describeError(job, t) {
  * What the grading screen shows for a job: a spinner line while it runs, one
  * summary line when it ends, and the per-doc warnings either way.
  *
+ * The warnings name doc ids and table layouts — debugging detail that only
+ * confuses a teacher, so `showWarnings: false` (non-admins) drops them.
+ *
  * @returns {{phase: "running"|"done"|"error", text: string, warnings: string[]}}
  */
-export function describeJob(job, t) {
-  const warnings = (job.warnings || []).map((w) => translateWarning(w, t));
+export function describeJob(job, t, { showWarnings = true } = {}) {
+  const warnings = showWarnings
+    ? (job.warnings || []).map((w) => translateWarning(w, t))
+    : [];
+  const seeBelow = warnings.length ? ` ${t("grading.seeWarnings")}` : "";
 
   if (!isJobFinished(job)) {
     const processed = job.written + job.skipped + job.failed;
@@ -119,9 +125,10 @@ export function describeJob(job, t) {
   // Nothing was written — say why rather than claiming "0 students".
   return {
     phase: "done",
-    text: job.notice
-      ? t(`grading.${job.notice}`, job.noticeParams || {})
-      : t("grading.noneGraded"),
+    text:
+      (job.notice
+        ? t(`grading.${job.notice}`, job.noticeParams || {})
+        : t("grading.noneGraded")) + seeBelow,
     warnings,
   };
 }

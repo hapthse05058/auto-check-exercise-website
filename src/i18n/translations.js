@@ -777,7 +777,7 @@ export const translations = {
         "Finished grading for {n} student(s)!\nGrading student's exercises completed! You can review the result!!",
       allChecked: "All docs were already checked. Nothing to grade.",
       allSkippedOldFeedback:
-        "{count} doc(s) were skipped because they already hold older feedback, and still have ungraded exercises. See the warnings below.",
+        "{count} doc(s) were skipped because they already hold older feedback, and still have ungraded exercises.",
       skippedHasOldFeedback:
         '{docId}: skipped because the doc already holds older feedback, but {count} exercise table(s) are still ungraded (likely the newly added ones). Run "Clear feedback" first to grade them — note that this also removes the older feedback.',
       unclassifiedTable:
@@ -785,7 +785,8 @@ export const translations = {
       noTable: "{docId}: no exercise table found in this lesson tab.",
       tableQuestionRef: "table {table} question {question}",
       noAnswers: "No answered questions found to grade.",
-      noneGraded: "No exercise was graded. See the warnings below.",
+      noneGraded: "No exercise was graded.",
+      seeWarnings: "See the warnings below.",
       notEnough:
         "Not enough points: {need} exercise(s) to grade, {teacher} has {have}. Please contact admin to top up.",
       gradingFailed: "Grading failed: {msg}",
@@ -1574,7 +1575,7 @@ export const translations = {
         "Hoàn tất chấm bài cho {n} học sinh!\nĐã chấm xong bài của học sinh! Bạn có thể xem lại kết quả!!",
       allChecked: "Tất cả tài liệu đã được chấm. Không có gì để chấm.",
       allSkippedOldFeedback:
-        "{count} tài liệu bị bỏ qua vì đã có feedback cũ, trong đó vẫn còn bài tập chưa chấm. Xem cảnh báo bên dưới.",
+        "{count} tài liệu bị bỏ qua vì đã có feedback cũ, trong đó vẫn còn bài tập chưa chấm.",
       skippedHasOldFeedback:
         '{docId}: tài liệu đã có feedback cũ nên được bỏ qua, nhưng vẫn còn {count} bảng bài tập chưa chấm (nhiều khả năng là dạng bài mới bổ sung). Để chấm các bài này, vui lòng dùng chức năng "Xóa feedback" trước — lưu ý thao tác đó xóa cả feedback cũ.',
       unclassifiedTable:
@@ -1582,7 +1583,8 @@ export const translations = {
       noTable: "{docId}: không tìm thấy bảng bài tập nào trong buổi học này.",
       tableQuestionRef: "bảng {table} câu {question}",
       noAnswers: "Không tìm thấy câu trả lời nào để chấm.",
-      noneGraded: "Không có bài nào được chấm. Xem cảnh báo bên dưới.",
+      noneGraded: "Không có bài nào được chấm.",
+      seeWarnings: "Xem cảnh báo bên dưới.",
       notEnough:
         "Không đủ point: cần chấm {need} bài, {teacher} còn {have} point. Vui lòng liên hệ admin để nạp thêm point.",
       gradingFailed: "Chấm bài thất bại: {msg}",

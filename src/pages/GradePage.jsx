@@ -248,7 +248,7 @@ export default function GradePage() {
       try {
         const job = await fetchGradingJob(followed.id);
         if (cancelled) return;
-        const view = describeJob(job, t);
+        const view = describeJob(job, t, { showWarnings: isAdmin });
         const finished = isJobFinished(job);
         const looked = !followed.live && !sawRunning;
         setStatus(
@@ -280,7 +280,7 @@ export default function GradePage() {
       clearTimeout(timer);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- re-run per followed job only; `t` and the refreshers are stable enough for a status line
-  }, [followed]);
+  }, [followed, isAdmin]);
 
   const handleProcessAllDocs = async () => {
     if (starting || jobRunning || clearing) return;
