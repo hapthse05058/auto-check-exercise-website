@@ -155,7 +155,10 @@ export default function ClassManagePage() {
     setLoading(true);
     setStatus(t("classManage.loading"));
     try {
-      const list = admin ? await fetchAllClasses() : await fetchClasses(tid);
+      // Closed classes too: the status filter can show them.
+      const list = admin
+        ? await fetchAllClasses({ includeInactive: true })
+        : await fetchClasses(tid);
       const normalized = list.map((c) => ({
         ...c,
         isActive: c.isActive !== false,
@@ -530,7 +533,7 @@ export default function ClassManagePage() {
           <div className="topbar-left">
             <h2>
               {t("classManage.title")}{" "}
-              <span className="count-badge">{classes.length}</span>
+              <span className="count-badge">{filtered.length}</span>
             </h2>
             <p>{t("classManage.subtitle")}</p>
           </div>

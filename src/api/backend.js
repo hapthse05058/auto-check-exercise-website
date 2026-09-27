@@ -290,9 +290,14 @@ export async function createClass({
   });
 }
 
-/** Admin: list ALL classes (every teacher) with teacher names joined. */
-export async function fetchAllClasses() {
-  const response = await authFetch("/classes/all");
+/**
+ * Admin: list ALL classes (every teacher) with teacher names joined. Only the
+ * active ones unless `includeInactive` (the class-management screen).
+ */
+export async function fetchAllClasses({ includeInactive } = {}) {
+  const response = await authFetch(
+    `/classes/all${includeInactive ? "?includeInactive=1" : ""}`,
+  );
   if (!response.ok) throw new Error("Failed to fetch all classes");
   return response.json();
 }
