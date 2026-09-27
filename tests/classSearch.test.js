@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { classHaystack, filterClasses } from "../src/lib/classSearch.js";
+import {
+  classFieldMatches,
+  classHaystack,
+  filterClasses,
+} from "../src/lib/classSearch.js";
 
 const classes = [
   {
@@ -117,5 +121,49 @@ describe("filterClasses", () => {
   it("works without a teachers map", () => {
     expect(() => classHaystack(classes[0])).not.toThrow();
     expect(ids(filterClasses(classes, "lop 10", undefined))).toEqual(["c1"]);
+  });
+});
+
+describe("classFieldMatches", () => {
+  const values = {
+    name: "NHS87N",
+    course: "Basic",
+    teachers: ["Nguyễn Minh Anh", "anh.nguyen@example.com"],
+    lesson: "BUỔI 04",
+  };
+
+  it("matches everything on an empty query", () => {
+    expect(classFieldMatches(values, "name", "  ")).toBe(true);
+  });
+
+  it("searches only the chosen field", () => {
+    expect(classFieldMatches(values, "name", "nhs87")).toBe(true);
+    expect(classFieldMatches(values, "name", "basic")).toBe(false);
+    expect(classFieldMatches(values, "course", "basic")).toBe(true);
+    expect(classFieldMatches(values, "course", "nhs")).toBe(false);
+  });
+
+  it("matches a teacher by name without accents or by email", () => {
+    expect(classFieldMatches(values, "teacher", "minh anh")).toBe(true);
+    expect(classFieldMatches(values, "teacher", "@example.com")).toBe(true);
+    expect(classFieldMatches(values, "teacher", "basic")).toBe(false);
+  });
+
+  it("matches a lesson number exactly, with or without 'buổi'", () => {
+    expect(classFieldMatches(values, "lesson", "4")).toBe(true);
+    expect(classFieldMatches(values, "lesson", "04")).toBe(true);
+    expect(classFieldMatches(values, "lesson", "buổi 4")).toBe(true);
+    expect(classFieldMatches(values, "lesson", "Buoi 04")).toBe(true);
+    expect(
+      classFieldMatches({ ...values, lesson: "BUỔI 14" }, "lesson", "4"),
+    ).toBe(false);
+  });
+
+  it("'all' (or an unknown field) searches every field", () => {
+    for (const q of ["nhs87", "basic", "minh anh", "example.com", "buoi 4"]) {
+      expect(classFieldMatches(values, "all", q)).toBe(true);
+    }
+    expect(classFieldMatches(values, "all", "ielts")).toBe(false);
+    expect(classFieldMatches(values, undefined, "basic")).toBe(true);
   });
 });

@@ -484,10 +484,103 @@
   white-space: nowrap;
   color: var(--color-text-tertiary, #8a948f);
 }
+/* The td stays a table cell (display:flex on it broke the row's borders);
+   the buttons line up in an inner .row-actions. */
 .cache-table .cell-actions {
   white-space: nowrap;
+  width: 1%;
+}
+.row-actions {
   display: flex;
+  align-items: center;
   gap: 4px;
+}
+
+/* DataTable (TanStack Table) additions on top of .cache-table. */
+.data-table td {
+  vertical-align: middle;
+}
+.data-table tbody tr:last-child td {
+  border-bottom: none;
+}
+.data-table tbody tr:hover td {
+  background: #f7faf9;
+}
+.data-table tbody tr.row-selected:hover td {
+  background: #e4f2ec;
+}
+.data-table th.is-sorted {
+  color: var(--color-primary-dark);
+}
+.th-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.th-sort-icon {
+  font-size: 14px;
+  opacity: 0.35;
+}
+.th-sort:hover .th-sort-icon,
+.is-sorted .th-sort-icon {
+  opacity: 1;
+}
+
+/* Row above a table holding its column chooser, left-aligned. */
+.table-toolbar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 0.5rem;
+}
+.table-toolbar .column-picker-menu {
+  left: 0;
+  right: auto;
+}
+
+/* Column chooser next to a table's search row. */
+.column-picker {
+  flex: 0 0 auto;
+}
+.column-picker-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 100%;
+  font-size: 14px;
+  white-space: nowrap;
+}
+.column-picker-count {
+  font-size: 12px;
+  color: var(--color-text-tertiary);
+}
+.column-picker-menu {
+  gap: 0.4rem;
+  min-width: 230px;
+}
+.column-picker-menu .cache-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+.column-picker-reset {
+  margin-top: 0.25rem;
+  padding-top: 0.5rem;
+  border: none;
+  border-top: 1px solid var(--color-border-tertiary);
+  background: none;
+  text-align: left;
+  font: inherit;
+  font-size: 13px;
+  color: var(--color-primary-dark);
+  cursor: pointer;
 }
 .cache-table .cell-check {
   width: 36px;

@@ -14,9 +14,13 @@ import {
 } from "../api/backend.js";
 import { useAuth } from "../auth/AuthContext.jsx";
 import AutoGradeScheduleModal from "../components/AutoGradeScheduleModal.jsx";
+import ColumnPicker from "../components/ColumnPicker.jsx";
+import DataTable from "../components/DataTable.jsx";
 import { isAdminEmail } from "../config.js";
+import { useColumnVisibility } from "../hooks/useColumnVisibility.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
 import { scheduleSummary } from "../lib/autoGrade.js";
+import { CLASS_SEARCH_FIELDS, classFieldMatches } from "../lib/classSearch.js";
 import { templateName, templatesForCourse } from "../lib/courses.js";
 import { formatVn } from "../lib/scheduleTime.js";
 import { LESSON_OPTIONS } from "../shared/constant.js";
@@ -30,6 +34,42 @@ function lessonLabel(currentLesson) {
   );
 }
 
+/** Columns shown until the user picks their own; the rest start hidden. */
+const DEFAULT_COLUMNS = {
+  name: true,
+  code: false,
+  course: true,
+  template: false,
+  teacher: false,
+  currentLesson: true,
+  autoGrade: false,
+  status: false,
+  createdAt: false,
+};
+
+/**
+ * A class's createdAt as ISO, or undefined for classes created before it was
+ * stored. Also takes the {_seconds} a Firestore Timestamp serializes to.
+ */
+function createdAtIso(value) {
+  if (!value) return undefined;
+  if (typeof value === "string") return value;
+  const seconds = value._seconds ?? value.seconds;
+  return Number.isFinite(seconds)
+    ? new Date(seconds * 1000).toISOString()
+    : undefined;
+}
+
+/** ISO -> "27/09/2026" in Vietnam time. */
+function formatDate(iso) {
+  return new Date(iso).toLocaleDateString("vi-VN", {
+    timeZone: "Asia/Ho_Chi_Minh",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+}
+
 export default function ClassManagePage() {
   const { loadTeacherInfo } = useAuth();
   const navigate = useNavigate();
@@ -39,6 +79,7 @@ export default function ClassManagePage() {
   const [teacherId, setTeacherId] = useState("");
   const [classes, setClasses] = useState([]);
   const [search, setSearch] = useState("");
+  const [searchField, setSearchField] = useState("all"); // CLASS_SEARCH_FIELDS
   const [statusFilter, setStatusFilter] = useState("active"); // active | inactive | all
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState(t("classManage.loading"));
@@ -66,6 +107,9 @@ export default function ClassManagePage() {
     () => new Map(courses.map((course) => [course.id, course])),
     [courses],
   );
+
+  const [columnVisibility, setColumnVisibility, resetColumns] =
+    useColumnVisibility("classManageCols", DEFAULT_COLUMNS);
 
   // Auto-grading schedules by classId, and the class whose modal is open.
   const [schedules, setSchedules] = useState({});
@@ -140,22 +184,51 @@ export default function ClassManagePage() {
     }
   }
 
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    return classes.filter((c) => {
-      if (statusFilter === "active" && !c.isActive) return false;
-      if (statusFilter === "inactive" && c.isActive) return false;
-      if (!q) return true;
-      const haystack = [
-        c.name || "",
-        c.id || "",
-        ...(Array.isArray(c.teacherNames) ? c.teacherNames : []),
-      ]
-        .join(" ")
-        .toLowerCase();
-      return haystack.includes(q);
-    });
-  }, [classes, search, statusFilter]);
+  const courseLabel = (cls) => courseById.get(cls.courseId)?.name || "—";
+  const templateLabel = (cls) =>
+    templateName(templates, cls.classType) || t("classManage.noTemplate");
+  const teachersOf = (cls) => [
+    ...(Array.isArray(cls.teacherNames) ? cls.teacherNames : []),
+    ...(Array.isArray(cls.teacherEmails) ? cls.teacherEmails : []),
+  ];
+
+  const filtered = useMemo(
+    () =>
+      classes.filter((c) => {
+        if (statusFilter === "active" && !c.isActive) return false;
+        if (statusFilter === "inactive" && c.isActive) return false;
+        return classFieldMatches(
+          {
+            name: c.name,
+            course: courseById.get(c.courseId)?.name,
+            teachers: teachersOf(c),
+            lesson: c.currentLesson ? lessonLabel(c.currentLesson) : "",
+          },
+          searchField,
+          search,
+        );
+      }),
+    [classes, courseById, search, searchField, statusFilter],
+  );
+
+  // Only admins see other teachers' classes, so only they search by teacher.
+  const searchFields = CLASS_SEARCH_FIELDS.filter(
+    (field) => field !== "teacher" || isAdmin,
+  );
+  const fieldLabelKey = {
+    all: "classManage.fieldAll",
+    name: "classManage.fieldName",
+    course: "classManage.fieldCourse",
+    teacher: "classManage.fieldTeacher",
+    lesson: "classManage.fieldLesson",
+  };
+  const placeholderKey = {
+    all: "classManage.searchPlaceholder",
+    name: "classManage.placeholderName",
+    course: "classManage.placeholderCourse",
+    teacher: "classManage.placeholderTeacher",
+    lesson: "classManage.placeholderLesson",
+  };
 
   const openEdit = async (cls) => {
     setActive(cls);
@@ -306,9 +379,6 @@ export default function ClassManagePage() {
     return text === key ? t("classManage.saveFailed") : text;
   };
 
-  const courseLabel = (cls) => courseById.get(cls.courseId)?.name || "—";
-  const templateLabel = (cls) =>
-    templateName(templates, cls.classType) || t("classManage.noTemplate");
   const editTemplates = templatesForCourse(
     templates,
     courseById.get(form.courseId),
@@ -331,6 +401,128 @@ export default function ClassManagePage() {
     }
   };
 
+  // Each accessor gives the value the column sorts by; `undefined` = no value
+  // (sorted last). Teacher only exists for admins.
+  const columns = [
+    {
+      id: "name",
+      header: t("classManage.colName"),
+      accessorFn: (c) => c.name || undefined,
+    },
+    {
+      id: "code",
+      header: t("classManage.colCode"),
+      accessorFn: (c) => c.id,
+      meta: { className: "cell-date" },
+    },
+    {
+      id: "course",
+      header: t("classManage.colCourse"),
+      accessorFn: (c) => courseById.get(c.courseId)?.name,
+      cell: ({ row }) => courseLabel(row.original),
+    },
+    {
+      id: "template",
+      header: t("classManage.colTemplate"),
+      accessorFn: (c) => templateName(templates, c.classType) || undefined,
+      cell: ({ row }) => templateLabel(row.original),
+    },
+    ...(isAdmin
+      ? [
+          {
+            id: "teacher",
+            header: t("classManage.colTeacher"),
+            accessorFn: (c) =>
+              Array.isArray(c.teacherNames) && c.teacherNames.length
+                ? c.teacherNames.join(", ")
+                : undefined,
+            cell: ({ getValue }) => getValue() || "—",
+          },
+        ]
+      : []),
+    {
+      id: "currentLesson",
+      header: t("classManage.colCurrentLesson"),
+      accessorFn: (c) =>
+        c.currentLesson ? lessonLabel(c.currentLesson) : undefined,
+      cell: ({ getValue }) => getValue() || "—",
+    },
+    {
+      id: "autoGrade",
+      header: t("autoGrade.colHeader"),
+      // Sorted by the next run time.
+      accessorFn: (c) =>
+        schedules[c.id]?.enabled ? schedules[c.id].next?.runAt : undefined,
+      meta: { className: "auto-grade-cell" },
+      cell: ({ row }) => {
+        const schedule = schedules[row.original.id];
+        return schedule?.enabled && schedule.next ? (
+          <>
+            {scheduleSummary(schedule, t)}
+            <br />
+            {t("autoGrade.summaryOn", {
+              runAt: formatVn(schedule.next.runAt),
+            })}
+          </>
+        ) : (
+          "—"
+        );
+      },
+    },
+    {
+      id: "status",
+      header: t("classManage.colStatus"),
+      accessorFn: (c) =>
+        c.isActive
+          ? t("classManage.statusActive")
+          : t("classManage.statusInactive"),
+    },
+    {
+      id: "createdAt",
+      header: t("classManage.colCreatedAt"),
+      accessorFn: (c) => createdAtIso(c.createdAt),
+      meta: { className: "cell-date" },
+      cell: ({ getValue }) => (getValue() ? formatDate(getValue()) : "—"),
+    },
+    {
+      id: "action",
+      header: t("classManage.colAction"),
+      enableHiding: false,
+      meta: { className: "cell-actions" },
+      cell: ({ row }) => {
+        const c = row.original;
+        if (!c.isActive) {
+          return (
+            <span className="cell-date">{t("classManage.statusInactive")}</span>
+          );
+        }
+        return (
+          <div className="row-actions">
+            <button
+              className="btn-icon"
+              title={t("classManage.edit")}
+              aria-label={t("classManage.edit")}
+              onClick={() => openEdit(c)}
+            >
+              <i className="ti ti-edit" aria-hidden="true" />
+            </button>
+            <button
+              className="btn-icon"
+              title={t("autoGrade.button")}
+              aria-label={t("autoGrade.button")}
+              onClick={() => setScheduleFor(c)}
+            >
+              <i className="ti ti-clock" aria-hidden="true" />
+            </button>
+            <button className="btn-cancel" onClick={() => handleDeactivate(c)}>
+              {t("classManage.deactivate")}
+            </button>
+          </div>
+        );
+      },
+    },
+  ];
+
   return (
     <div className="page-wide">
       <div className="wrap">
@@ -345,9 +537,21 @@ export default function ClassManagePage() {
         </div>
 
         <div className="cache-search">
+          <select
+            value={searchField}
+            onChange={(e) => setSearchField(e.target.value)}
+            aria-label={t("classManage.searchIn")}
+            title={t("classManage.searchIn")}
+          >
+            {searchFields.map((field) => (
+              <option key={field} value={field}>
+                {t(fieldLabelKey[field])}
+              </option>
+            ))}
+          </select>
           <input
-            type="text"
-            placeholder={t("classManage.searchPlaceholder")}
+            type="search"
+            placeholder={t(placeholderKey[searchField])}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -359,6 +563,12 @@ export default function ClassManagePage() {
             <option value="inactive">{t("classManage.statusInactive")}</option>
             <option value="all">{t("classManage.statusAll")}</option>
           </select>
+          <ColumnPicker
+            columns={columns}
+            visibility={columnVisibility}
+            onChange={setColumnVisibility}
+            onReset={resetColumns}
+          />
         </div>
 
         {loading ? (
@@ -372,92 +582,13 @@ export default function ClassManagePage() {
             <p>{t("classManage.empty")}</p>
           </div>
         ) : (
-          <div className="cache-table-wrap">
-            <table className="cache-table">
-              <thead>
-                <tr>
-                  <th>{t("classManage.colName")}</th>
-                  <th>{t("classManage.colCode")}</th>
-                  <th>{t("classManage.colCourse")}</th>
-                  {isAdmin && <th>{t("classManage.colTeacher")}</th>}
-                  <th>{t("classManage.colCurrentLesson")}</th>
-                  <th>{t("autoGrade.colHeader")}</th>
-                  <th>{t("classManage.colStatus")}</th>
-                  <th>{t("classManage.colAction")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((c) => (
-                  <tr key={c.id}>
-                    <td>{c.name}</td>
-                    <td className="cell-date">{c.id}</td>
-                    <td>
-                      {courseLabel(c)}
-                      <div className="field-note">{templateLabel(c)}</div>
-                    </td>
-                    {isAdmin && (
-                      <td>
-                        {Array.isArray(c.teacherNames)
-                          ? c.teacherNames.join(", ")
-                          : "—"}
-                      </td>
-                    )}
-                    <td>{lessonLabel(c.currentLesson)}</td>
-                    <td className="auto-grade-cell">
-                      {schedules[c.id]?.enabled && schedules[c.id].next ? (
-                        <>
-                          {scheduleSummary(schedules[c.id], t)}
-                          <br />
-                          {t("autoGrade.summaryOn", {
-                            runAt: formatVn(schedules[c.id].next.runAt),
-                          })}
-                        </>
-                      ) : (
-                        "—"
-                      )}
-                    </td>
-                    <td>
-                      {c.isActive
-                        ? t("classManage.statusActive")
-                        : t("classManage.statusInactive")}
-                    </td>
-                    <td className="cell-actions">
-                      {c.isActive ? (
-                        <>
-                          <button
-                            className="btn-icon"
-                            title={t("classManage.edit")}
-                            aria-label={t("classManage.edit")}
-                            onClick={() => openEdit(c)}
-                          >
-                            <i className="ti ti-edit" aria-hidden="true" />
-                          </button>
-                          <button
-                            className="btn-icon"
-                            title={t("autoGrade.button")}
-                            aria-label={t("autoGrade.button")}
-                            onClick={() => setScheduleFor(c)}
-                          >
-                            <i className="ti ti-clock" aria-hidden="true" />
-                          </button>
-                          <button
-                            className="btn-cancel"
-                            onClick={() => handleDeactivate(c)}
-                          >
-                            {t("classManage.deactivate")}
-                          </button>
-                        </>
-                      ) : (
-                        <span className="cell-date">
-                          {t("classManage.statusInactive")}
-                        </span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <DataTable
+            data={filtered}
+            columns={columns}
+            getRowId={(c) => c.id}
+            columnVisibility={columnVisibility}
+            onColumnVisibilityChange={setColumnVisibility}
+          />
         )}
 
         <div className="status-line">{status}</div>

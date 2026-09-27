@@ -9,6 +9,7 @@ import {
   updateGradingCache,
 } from "../api/backend.js";
 import { useAuth } from "../auth/AuthContext.jsx";
+import DataTable from "../components/DataTable.jsx";
 import { isAdminEmail } from "../config.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
 
@@ -245,6 +246,101 @@ export default function GradingCachePage() {
     }
   };
 
+  // Server-paginated: sorting would only reorder the page on screen.
+  const clip = (field) => ({
+    className: "cell-clip",
+    cellProps: (r) => ({ title: r[field] }),
+  });
+  const columns = [
+    {
+      id: "select",
+      header: () => (
+        <input
+          type="checkbox"
+          checked={allSelected}
+          onChange={toggleAll}
+          aria-label="Select all on screen"
+        />
+      ),
+      meta: { className: "cell-check", headerClassName: "cell-check" },
+      cell: ({ row }) => (
+        <input
+          type="checkbox"
+          checked={selected.has(row.original.id)}
+          onChange={() => toggleOne(row.original.id)}
+          aria-label="Select record"
+        />
+      ),
+    },
+    {
+      id: "question",
+      header: t("cache.colQuestion"),
+      meta: clip("question"),
+      cell: ({ row }) => row.original.question,
+    },
+    {
+      id: "answer",
+      header: t("cache.colAnswer"),
+      meta: clip("answer"),
+      cell: ({ row }) => row.original.answer,
+    },
+    {
+      id: "feedback",
+      header: t("cache.colFeedback"),
+      meta: clip("feedback"),
+      cell: ({ row }) => row.original.feedback,
+    },
+    {
+      id: "model",
+      header: t("cache.colModel"),
+      cell: ({ row }) => row.original.model,
+    },
+    {
+      id: "pv",
+      header: t("cache.colPv"),
+      cell: ({ row }) => row.original.promptVersion,
+    },
+    {
+      id: "taskType",
+      header: t("cache.colTaskType"),
+      cell: ({ row }) => row.original.taskType || "vi_en",
+    },
+    {
+      id: "hits",
+      header: t("cache.colHits"),
+      cell: ({ row }) => row.original.hitCount,
+    },
+    {
+      id: "created",
+      header: t("cache.colCreated"),
+      meta: { className: "cell-date" },
+      cell: ({ row }) => formatDate(row.original.createdAt),
+    },
+    {
+      id: "action",
+      header: "",
+      meta: { className: "cell-actions" },
+      cell: ({ row }) => (
+        <div className="row-actions">
+          <button
+            className="btn-icon"
+            aria-label="Edit record"
+            onClick={() => openEdit(row.original)}
+          >
+            <i className="ti ti-edit" aria-hidden="true" />
+          </button>
+          <button
+            className="btn-icon danger"
+            aria-label="Delete record"
+            onClick={() => handleDelete(row.original)}
+          >
+            <i className="ti ti-trash" aria-hidden="true" />
+          </button>
+        </div>
+      ),
+    },
+  ];
+
   return (
     <div className="page-wide">
       <div className="wrap">
@@ -313,80 +409,15 @@ export default function GradingCachePage() {
             <p>{t("cache.empty")}</p>
           </div>
         ) : (
-          <div className="cache-table-wrap">
-            <table className="cache-table">
-              <thead>
-                <tr>
-                  <th className="cell-check">
-                    <input
-                      type="checkbox"
-                      checked={allSelected}
-                      onChange={toggleAll}
-                      aria-label="Select all on screen"
-                    />
-                  </th>
-                  <th>{t("cache.colQuestion")}</th>
-                  <th>{t("cache.colAnswer")}</th>
-                  <th>{t("cache.colFeedback")}</th>
-                  <th>{t("cache.colModel")}</th>
-                  <th>{t("cache.colPv")}</th>
-                  <th>{t("cache.colTaskType")}</th>
-                  <th>{t("cache.colHits")}</th>
-                  <th>{t("cache.colCreated")}</th>
-                  <th />
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((row) => (
-                  <tr
-                    key={row.id}
-                    className={
-                      selected.has(row.id) ? "row-selected" : undefined
-                    }
-                  >
-                    <td className="cell-check">
-                      <input
-                        type="checkbox"
-                        checked={selected.has(row.id)}
-                        onChange={() => toggleOne(row.id)}
-                        aria-label="Select record"
-                      />
-                    </td>
-                    <td className="cell-clip" title={row.question}>
-                      {row.question}
-                    </td>
-                    <td className="cell-clip" title={row.answer}>
-                      {row.answer}
-                    </td>
-                    <td className="cell-clip" title={row.feedback}>
-                      {row.feedback}
-                    </td>
-                    <td>{row.model}</td>
-                    <td>{row.promptVersion}</td>
-                    <td>{row.taskType || "vi_en"}</td>
-                    <td>{row.hitCount}</td>
-                    <td className="cell-date">{formatDate(row.createdAt)}</td>
-                    <td className="cell-actions">
-                      <button
-                        className="btn-icon"
-                        aria-label="Edit record"
-                        onClick={() => openEdit(row)}
-                      >
-                        <i className="ti ti-edit" aria-hidden="true" />
-                      </button>
-                      <button
-                        className="btn-icon danger"
-                        aria-label="Delete record"
-                        onClick={() => handleDelete(row)}
-                      >
-                        <i className="ti ti-trash" aria-hidden="true" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <DataTable
+            data={rows}
+            columns={columns}
+            getRowId={(r) => r.id}
+            enableSorting={false}
+            rowClassName={(r) =>
+              selected.has(r.id) ? "row-selected" : undefined
+            }
+          />
         )}
 
         {!loading && totalPages > 1 && (

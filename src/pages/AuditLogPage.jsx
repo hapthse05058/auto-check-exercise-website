@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import { fetchAuditFilterOptions, fetchAuditLogs } from "../api/backend.js";
 import { useAuth } from "../auth/AuthContext.jsx";
+import DataTable from "../components/DataTable.jsx";
 import MultiSelect from "../components/MultiSelect.jsx";
 import { isAdminEmail } from "../config.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
@@ -188,6 +189,108 @@ export default function AuditLogPage() {
 
   if (checking) return null;
 
+  // Server-paginated: sorting would only reorder the page on screen.
+  const columns = [
+    {
+      id: "time",
+      header: t("audit.colTime"),
+      meta: { className: "cell-date" },
+      cell: ({ row }) => formatDate(row.original.createdAt),
+    },
+    {
+      id: "actor",
+      header: t("audit.colActor"),
+      meta: {
+        className: "cell-clip",
+        cellProps: (r) => ({ title: r.actorEmail }),
+      },
+      cell: ({ row }) => {
+        const r = row.original;
+        return (
+          <>
+            {r.actorName || r.actorEmail || "—"}
+            {r.actorName && r.actorEmail ? (
+              <div className="audit-actor-email">{r.actorEmail}</div>
+            ) : null}
+          </>
+        );
+      },
+    },
+    {
+      id: "action",
+      header: t("audit.colAction"),
+      meta: { cellProps: (r) => ({ title: r.action }) },
+      cell: ({ row }) => actionLabel(row.original.action),
+    },
+    {
+      id: "resource",
+      header: t("audit.colResource"),
+      cell: ({ row }) => row.original.resourceType,
+    },
+    {
+      id: "severity",
+      header: t("audit.colSeverity"),
+      cell: ({ row }) => (
+        <span
+          className={`audit-severity audit-severity-${row.original.severity.toLowerCase()}`}
+        >
+          {row.original.severity}
+        </span>
+      ),
+    },
+    {
+      id: "entity",
+      header: t("audit.colEntity"),
+      meta: {
+        className: "cell-clip",
+        cellProps: (r) => ({ title: r.entityId }),
+      },
+      cell: ({ row }) => row.original.entityId || "—",
+    },
+    {
+      id: "result",
+      header: t("audit.colResult"),
+      meta: { cellProps: (r) => ({ title: `HTTP ${r.statusCode ?? "?"}` }) },
+      cell: ({ row }) =>
+        `${row.original.success ? "✓" : "✗"} ${row.original.statusCode ?? ""}`,
+    },
+    {
+      id: "duration",
+      header: t("audit.colDuration"),
+      cell: ({ row }) => {
+        const ms = row.original.durationMs;
+        return ms === null || ms === undefined ? "—" : `${ms}ms`;
+      },
+    },
+    {
+      id: "detail",
+      header: t("audit.colDetail"),
+      meta: {
+        className: "cell-clip",
+        cellProps: (r) => ({ title: r.detail }),
+      },
+      cell: ({ row }) => row.original.detail || "—",
+    },
+    {
+      id: "ip",
+      header: t("audit.colIp"),
+      cell: ({ row }) => row.original.ip || "—",
+    },
+    {
+      id: "requestId",
+      header: t("audit.colRequestId"),
+      meta: {
+        className: "cell-clip",
+        cellProps: (r) => ({
+          title: t("audit.copyRequestId", { id: r.requestId }),
+          onClick: () => navigator.clipboard?.writeText(r.requestId || ""),
+        }),
+      },
+      cell: ({ row }) =>
+        row.original.requestId ? row.original.requestId.slice(0, 8) : "—",
+    },
+  ];
+
   return (
     <div className="page-wide">
       <div className="wrap">
@@ -262,73 +365,12 @@ export default function AuditLogPage() {
             <p>{t("audit.empty")}</p>
           </div>
         ) : (
-          <div className="cache-table-wrap">
-            <table className="cache-table">
-              <thead>
-                <tr>
-                  <th>{t("audit.colTime")}</th>
-                  <th>{t("audit.colActor")}</th>
-                  <th>{t("audit.colAction")}</th>
-                  <th>{t("audit.colResource")}</th>
-                  <th>{t("audit.colSeverity")}</th>
-                  <th>{t("audit.colEntity")}</th>
-                  <th>{t("audit.colResult")}</th>
-                  <th>{t("audit.colDuration")}</th>
-                  <th>{t("audit.colDetail")}</th>
-                  <th>{t("audit.colIp")}</th>
-                  <th>{t("audit.colRequestId")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((row) => (
-                  <tr key={row.id}>
-                    <td className="cell-date">{formatDate(row.createdAt)}</td>
-                    <td className="cell-clip" title={row.actorEmail}>
-                      {row.actorName || row.actorEmail || "—"}
-                      {row.actorName && row.actorEmail ? (
-                        <div className="audit-actor-email">
-                          {row.actorEmail}
-                        </div>
-                      ) : null}
-                    </td>
-                    <td title={row.action}>{actionLabel(row.action)}</td>
-                    <td>{row.resourceType}</td>
-                    <td>
-                      <span
-                        className={`audit-severity audit-severity-${row.severity.toLowerCase()}`}
-                      >
-                        {row.severity}
-                      </span>
-                    </td>
-                    <td className="cell-clip" title={row.entityId}>
-                      {row.entityId || "—"}
-                    </td>
-                    <td title={`HTTP ${row.statusCode ?? "?"}`}>
-                      {row.success ? "✓" : "✗"} {row.statusCode ?? ""}
-                    </td>
-                    <td>
-                      {row.durationMs === null || row.durationMs === undefined
-                        ? "—"
-                        : `${row.durationMs}ms`}
-                    </td>
-                    <td className="cell-clip" title={row.detail}>
-                      {row.detail || "—"}
-                    </td>
-                    <td>{row.ip || "—"}</td>
-                    <td
-                      className="cell-clip"
-                      title={t("audit.copyRequestId", { id: row.requestId })}
-                      onClick={() =>
-                        navigator.clipboard?.writeText(row.requestId || "")
-                      }
-                    >
-                      {row.requestId ? row.requestId.slice(0, 8) : "—"}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <DataTable
+            data={rows}
+            columns={columns}
+            getRowId={(r) => r.id}
+            enableSorting={false}
+          />
         )}
 
         {!loading && totalPages > 1 && (

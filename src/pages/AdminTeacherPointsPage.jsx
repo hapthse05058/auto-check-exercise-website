@@ -9,6 +9,7 @@ import {
   updateTeacherPoint,
 } from "../api/backend.js";
 import { useAuth } from "../auth/AuthContext.jsx";
+import DataTable from "../components/DataTable.jsx";
 import { isAdminEmail } from "../config.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
 import { maskMoney } from "../lib/billing.js";
@@ -219,6 +220,103 @@ export default function AdminTeacherPointsPage() {
 
   const topupAmount = Number(form.amountVnd) || 0;
 
+  const columns = [
+    {
+      id: "teacher",
+      header: t("points.colTeacher"),
+      accessorFn: (r) => r.name || r.gmail,
+      cell: ({ row }) => (
+        <>
+          <div className="student-name">{row.original.name || "—"}</div>
+          <div className="cell-date">{row.original.gmail}</div>
+        </>
+      ),
+    },
+    {
+      id: "point",
+      header: t("points.colPoint"),
+      accessorFn: (r) => Number(r.point) || 0,
+    },
+    {
+      id: "topUpCount",
+      header: t("points.colTopUpCount"),
+      accessorFn: (r) => Number(r.topUpCount) || 0,
+    },
+    {
+      id: "lastTopUp",
+      header: t("points.colLastTopUp"),
+      accessorFn: (r) => r.lastTopUpAt || undefined,
+      meta: { className: "cell-date" },
+      cell: ({ row }) => formatDate(row.original.lastTopUpAt),
+    },
+    {
+      id: "action",
+      header: "",
+      meta: { className: "cell-actions" },
+      cell: ({ row }) => {
+        const r = row.original;
+        return (
+          <div className="row-actions">
+            <button
+              className="btn-icon"
+              title={t("points.topUp")}
+              aria-label={t("points.topUp")}
+              onClick={() => openTopUp(r)}
+            >
+              <i className="ti ti-coin" aria-hidden="true" />
+            </button>
+            <button
+              className="btn-icon"
+              title={t("points.editPoint")}
+              aria-label={t("points.editPoint")}
+              onClick={() => openEdit(r)}
+            >
+              <i className="ti ti-edit" aria-hidden="true" />
+            </button>
+            <button
+              className="btn-icon"
+              title={t("points.history")}
+              aria-label={t("points.history")}
+              onClick={() => openHistory(r)}
+            >
+              <i className="ti ti-history" aria-hidden="true" />
+            </button>
+            <button
+              className="btn-icon danger"
+              title={t("common.delete")}
+              aria-label={t("common.delete")}
+              onClick={() => handleDelete(r)}
+            >
+              <i className="ti ti-trash" aria-hidden="true" />
+            </button>
+          </div>
+        );
+      },
+    },
+  ];
+
+  // Top-up history (modal), newest first.
+  const historyColumns = [
+    {
+      id: "time",
+      header: t("points.hTime"),
+      accessorFn: (h) => h.topUpAt || undefined,
+      meta: { className: "cell-date" },
+      cell: ({ row }) => formatDate(row.original.topUpAt),
+    },
+    {
+      id: "amount",
+      header: t("points.hAmount"),
+      accessorFn: (h) => Number(h.amountVnd) || 0,
+      cell: ({ getValue }) => vnd(getValue()),
+    },
+    {
+      id: "points",
+      header: t("points.hPoints"),
+      accessorFn: (h) => Number(h.points) || 0,
+    },
+  ];
+
   return (
     <div className="page-wide">
       <div className="wrap">
@@ -292,66 +390,7 @@ export default function AdminTeacherPointsPage() {
             <p>{t("points.empty")}</p>
           </div>
         ) : (
-          <div className="cache-table-wrap">
-            <table className="cache-table">
-              <thead>
-                <tr>
-                  <th>{t("points.colTeacher")}</th>
-                  <th>{t("points.colPoint")}</th>
-                  <th>{t("points.colTopUpCount")}</th>
-                  <th>{t("points.colLastTopUp")}</th>
-                  <th />
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((r) => (
-                  <tr key={r.id}>
-                    <td>
-                      <div className="student-name">{r.name || "—"}</div>
-                      <div className="cell-date">{r.gmail}</div>
-                    </td>
-                    <td>{r.point}</td>
-                    <td>{r.topUpCount}</td>
-                    <td className="cell-date">{formatDate(r.lastTopUpAt)}</td>
-                    <td className="cell-actions">
-                      <button
-                        className="btn-icon"
-                        title={t("points.topUp")}
-                        aria-label={t("points.topUp")}
-                        onClick={() => openTopUp(r)}
-                      >
-                        <i className="ti ti-coin" aria-hidden="true" />
-                      </button>
-                      <button
-                        className="btn-icon"
-                        title={t("points.editPoint")}
-                        aria-label={t("points.editPoint")}
-                        onClick={() => openEdit(r)}
-                      >
-                        <i className="ti ti-edit" aria-hidden="true" />
-                      </button>
-                      <button
-                        className="btn-icon"
-                        title={t("points.history")}
-                        aria-label={t("points.history")}
-                        onClick={() => openHistory(r)}
-                      >
-                        <i className="ti ti-history" aria-hidden="true" />
-                      </button>
-                      <button
-                        className="btn-icon danger"
-                        title={t("common.delete")}
-                        aria-label={t("common.delete")}
-                        onClick={() => handleDelete(r)}
-                      >
-                        <i className="ti ti-trash" aria-hidden="true" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <DataTable data={filtered} columns={columns} getRowId={(r) => r.id} />
         )}
 
         <div className="status-line">{status}</div>
@@ -469,27 +508,10 @@ export default function AdminTeacherPointsPage() {
               {active.topUpHistory.length === 0 ? (
                 <p className="field-note">{t("points.noHistory")}</p>
               ) : (
-                <div className="cache-table-wrap">
-                  <table className="cache-table">
-                    <thead>
-                      <tr>
-                        <th>{t("points.hTime")}</th>
-                        <th>{t("points.hAmount")}</th>
-                        <th>{t("points.hPoints")}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {[...active.topUpHistory].reverse().map((h, i) => (
-                        // eslint-disable-next-line react/no-array-index-key -- no stable id; list is display-only and never reordered
-                        <tr key={i}>
-                          <td className="cell-date">{formatDate(h.topUpAt)}</td>
-                          <td>{vnd(h.amountVnd)}</td>
-                          <td>{h.points}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                <DataTable
+                  data={[...active.topUpHistory].reverse()}
+                  columns={historyColumns}
+                />
               )}
               <div className="modal-footer">
                 <button className="btn-cancel" onClick={closeModal}>

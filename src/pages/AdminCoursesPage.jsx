@@ -8,6 +8,7 @@ import {
   updateCourse,
 } from "../api/backend.js";
 import { useAuth } from "../auth/AuthContext.jsx";
+import DataTable from "../components/DataTable.jsx";
 import { isAdminEmail } from "../config.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
 import { courseErrorText } from "../lib/courses.js";
@@ -166,6 +167,51 @@ export default function AdminCoursesPage() {
     }
   };
 
+  const columns = [
+    { id: "name", header: t("courses.colName"), accessorFn: (c) => c.name },
+    {
+      id: "grading",
+      header: t("courses.colGrading"),
+      accessorFn: (c) => t(`courses.profile.${c.gradingProfile || "basic"}`),
+    },
+    {
+      id: "lessons",
+      header: t("courses.colLessons"),
+      accessorFn: (c) => c.lessonIds.length,
+      meta: { cellProps: (c) => ({ title: c.lessonIds.join(", ") }) },
+      cell: ({ getValue }) => t("courses.lessonCount", { n: getValue() }),
+    },
+    {
+      id: "status",
+      header: t("courses.colStatus"),
+      accessorFn: (c) =>
+        c.isActive ? t("courses.visible") : t("courses.hidden"),
+    },
+    {
+      id: "action",
+      header: t("courses.colAction"),
+      meta: { className: "cell-actions" },
+      cell: ({ row }) => {
+        const course = row.original;
+        return (
+          <div className="row-actions">
+            <button
+              className="btn-icon"
+              title={t("courses.edit")}
+              aria-label={t("courses.edit")}
+              onClick={() => openEdit(course)}
+            >
+              <i className="ti ti-edit" aria-hidden="true" />
+            </button>
+            <button className="btn-cancel" onClick={() => toggleHidden(course)}>
+              {course.isActive ? t("courses.hide") : t("courses.show")}
+            </button>
+          </div>
+        );
+      },
+    },
+  ];
+
   return (
     <div className="page-wide">
       <div className="wrap">
@@ -204,57 +250,7 @@ export default function AdminCoursesPage() {
             <p>{t("courses.empty")}</p>
           </div>
         ) : (
-          <div className="cache-table-wrap">
-            <table className="cache-table">
-              <thead>
-                <tr>
-                  <th>{t("courses.colName")}</th>
-                  <th>{t("courses.colGrading")}</th>
-                  <th>{t("courses.colLessons")}</th>
-                  <th>{t("courses.colStatus")}</th>
-                  <th>{t("courses.colAction")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {shown.map((course) => (
-                  <tr key={course.id}>
-                    <td>{course.name}</td>
-                    <td>
-                      {t(`courses.profile.${course.gradingProfile || "basic"}`)}
-                    </td>
-                    <td title={course.lessonIds.join(", ")}>
-                      {t("courses.lessonCount", {
-                        n: course.lessonIds.length,
-                      })}
-                    </td>
-                    <td>
-                      {course.isActive
-                        ? t("courses.visible")
-                        : t("courses.hidden")}
-                    </td>
-                    <td className="cell-actions">
-                      <button
-                        className="btn-icon"
-                        title={t("courses.edit")}
-                        aria-label={t("courses.edit")}
-                        onClick={() => openEdit(course)}
-                      >
-                        <i className="ti ti-edit" aria-hidden="true" />
-                      </button>
-                      <button
-                        className="btn-cancel"
-                        onClick={() => toggleHidden(course)}
-                      >
-                        {course.isActive
-                          ? t("courses.hide")
-                          : t("courses.show")}
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <DataTable data={shown} columns={columns} getRowId={(c) => c.id} />
         )}
 
         <div className="status-line">{status}</div>
