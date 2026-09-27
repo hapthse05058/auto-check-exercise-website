@@ -29,6 +29,7 @@ import {
   normalizeKey,
   normalizeText,
   paragraphChars,
+  underlinedText,
 } from "../src/lib/hsDoc.js";
 
 const ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -770,10 +771,13 @@ function buildItems(ex, region) {
         const formText = parts.map((k) => paras[k].text).join("\n");
         if (countSlots(formText) === 0) return; // a word bank or a note
         parts.forEach((k) => (paras[k].role = items.length));
+        // "Make Wh-questions for the underlined parts": what to ask about.
+        const underlined = underlinedText(paras[i]);
         add({
           prompt: normalizeText(formText),
           parts: parts.map((k) => ({ p: k })),
           formText,
+          ...(underlined ? { underlined } : {}),
         });
       });
       break;

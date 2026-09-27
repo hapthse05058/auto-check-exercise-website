@@ -423,6 +423,30 @@ describe("reading a student's answers", () => {
       translation: "Bạn cùng lớp của tôi luôn giúp tôi.",
     });
   });
+
+  it("gives a Wh-question the part it must ask about: the copy's underline, else the form's", () => {
+    const doc = loadHsFixture("blank");
+    const b23 = tabByTitle(doc, "Buổi 23");
+    // This copy underlines another part than the blank form does…
+    styleWord(doc, b23, "5.We will visit", "our grandparents", {
+      underline: false,
+    });
+    styleWord(doc, b23, "5.We will visit", "next Sunday", { underline: true });
+    // …and lost the underline of item 1 altogether.
+    styleWord(doc, b23, "1. She goes to school", "by bus", {
+      underline: false,
+    });
+    const ex4 = items(b23, "ex4");
+    expect(ex4.map((i) => i.underlined)).toEqual([
+      "by bus",
+      "in the park",
+      "a new laptop",
+      "because she likes stories",
+      "next Sunday",
+    ]);
+    // Only exercises that ask about underlined parts carry one.
+    expect(items(b23, "ex3").some((i) => "underlined" in i)).toBe(false);
+  });
 });
 
 /** Cell c of row r of the S/V/O table (the second table with "STT" first). */
