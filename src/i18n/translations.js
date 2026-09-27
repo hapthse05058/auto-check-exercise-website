@@ -671,7 +671,7 @@ export const translations = {
       lessonsLabel: "Lessons ({n} selected)",
       gradingLabel: "Grading type",
       gradingHint:
-        "Basic: sentence/paragraph exercises. IELTS: IELTS Writing (Task 1, Task 2) with its own prompt and doc template.",
+        "Basic: sentence/paragraph exercises. IELTS: IELTS Writing (Task 1, Task 2) with its own prompt and doc template. HS: the 24-lesson primary/lower-secondary form, corrected right after each answer.",
       profile: {
         basic: "Basic",
         ielts: "IELTS Writing",
@@ -679,6 +679,8 @@ export const translations = {
       },
       selectAll: "Select all",
       selectNone: "Clear",
+      lessonGroup: "{name} lessons ({n}/{total})",
+      otherLessons: "Other",
       created: "Course {name} created.",
       saved: "Course {name} saved.",
       hiddenDone: "Course {name} hidden.",
@@ -1611,10 +1613,12 @@ export const translations = {
       lessonsLabel: "Buổi học (đã chọn {n})",
       gradingLabel: "Kiểu chấm",
       gradingHint:
-        "Basic: bài dịch câu / viết đoạn văn. IELTS: IELTS Writing (Task 1, Task 2) với prompt và template doc riêng.",
+        "Basic: bài dịch câu / viết đoạn văn. IELTS: IELTS Writing (Task 1, Task 2) với prompt và template doc riêng. HS: form 24 buổi cấp 1–2, chữa ngay sau từng câu.",
       profile: { basic: "Basic", ielts: "IELTS Writing", hs: "HS (cấp 1–2)" },
       selectAll: "Chọn tất cả",
       selectNone: "Bỏ chọn",
+      lessonGroup: "Buổi {name} ({n}/{total})",
+      otherLessons: "khác",
       created: "Đã tạo khóa {name}.",
       saved: "Đã lưu khóa {name}.",
       hiddenDone: "Đã ẩn khóa {name}.",

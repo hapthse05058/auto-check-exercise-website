@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   courseErrorText,
+  groupLessonsByProfile,
   templateName,
   templatesForCourse,
 } from "../src/lib/courses.js";
@@ -55,5 +56,43 @@ describe("courseErrorText", () => {
 
   it("falls back for an unknown code", () => {
     expect(courseErrorText(new Error("weird"), t)).toBe("lỗi chung");
+  });
+});
+
+describe("groupLessonsByProfile — the course editor's lesson picker", () => {
+  const templates = [
+    { code: "basic_before_31032026", gradingProfile: "basic" },
+    { code: "basic_since_01042026" }, // no profile: Basic
+    { code: "hs_24buoi", gradingProfile: "hs" },
+  ];
+  const lessons = [
+    {
+      id: "lesson01",
+      name: "BUỔI 01",
+      classType: ["basic_before_31032026", "basic_since_01042026"],
+    },
+    { id: "lesson02", name: "BUỔI 02", classType: ["basic_since_01042026"] },
+    { id: "hsLesson01", name: "Buổi 01", classType: ["hs_24buoi"] },
+    { id: "odd", name: "Old", classType: "gone_template" },
+  ];
+  const shape = (groups) =>
+    groups.map((g) => [g.key, g.lessons.map((l) => l.id)]);
+
+  it("keeps Basic and HS lessons with the same name apart", () => {
+    expect(shape(groupLessonsByProfile(lessons, templates, "basic"))).toEqual([
+      ["basic", ["lesson01", "lesson02"]],
+      ["hs", ["hsLesson01"]],
+      ["", ["odd"]],
+    ]);
+  });
+
+  it("lists the course's own profile first", () => {
+    expect(groupLessonsByProfile(lessons, templates, "hs")[0].key).toBe("hs");
+  });
+
+  it("without templates, everything is one group", () => {
+    expect(shape(groupLessonsByProfile(lessons, [], "hs"))).toEqual([
+      ["", ["lesson01", "lesson02", "hsLesson01", "odd"]],
+    ]);
   });
 });

@@ -892,6 +892,13 @@
   text-decoration: underline;
   cursor: pointer;
 }
+.course-lesson-group + .course-lesson-group {
+  margin-top: 12px;
+}
+.course-lesson-actions .course-lesson-group-title {
+  margin-right: auto;
+  font-size: 13px;
+}
 .course-lesson-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
