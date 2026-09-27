@@ -5,6 +5,7 @@ import {
   fetchAllClasses,
   fetchClassLessons,
   fetchClasses,
+  fetchCourses,
   fetchCurrentLesson,
   fetchGradingJob,
   fetchGradingSchedule,
@@ -334,10 +335,24 @@ export default function GradePage() {
       warnings: [],
     });
     try {
+      // An IELTS class's feedback sits in its IELTS WRITING tables, not in
+      // the class-type tables — the class's course says which (backend
+      // lib/courses.js; no course or no profile = Basic). A failed lookup
+      // falls back to Basic, so it can never block a Basic class's clear.
+      const course = selectedClass?.courseId
+        ? (
+            await fetchCourses({ includeInactive: true }).catch((err) => {
+              console.error("Course lookup failed:", err);
+              return [];
+            })
+          ).find((item) => item.id === selectedClass.courseId)
+        : null;
+      const gradingProfile = course?.gradingProfile || "basic";
       const plan = await planFeedbackClear({
         docLinksText,
         classId: selectedClassId,
         classType: selectedClass?.classType,
+        gradingProfile,
         lessonName,
         t,
       });
@@ -373,6 +388,7 @@ export default function GradePage() {
         await executeFeedbackClear({
           plans: plan.plans,
           classType: selectedClass?.classType,
+          gradingProfile,
           lessonName,
           t,
         });

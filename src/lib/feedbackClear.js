@@ -4,7 +4,10 @@
  *
  * Scope is the tab whose title matches the selected lesson, in the tables the
  * selected class type maps to — so other lessons living in the same document
- * are never touched. Nothing here spends points or reads the grading cache.
+ * are never touched. An IELTS class (course gradingProfile "ielts") has no
+ * class-type tables: its IELTS WRITING tables (ieltsDoc.js) are cleared
+ * instead, i.e. their "GV chữa" cell. Nothing here spends points or reads the
+ * grading cache.
  *
  * Split into a read pass and a write pass on purpose: the "Chữa bài" column is
  * shared by the AI and anything a teacher typed by hand, and the two cannot be
@@ -16,6 +19,7 @@
 import { collectExerciseRows } from "./docTableDetect.js";
 import { buildClearFeedbackRequests } from "./docWriter.js";
 import { resolveDocRefs } from "./grading.js";
+import { collectIeltsRows } from "./ieltsDoc.js";
 import { batchUpdateDoc, getTabContent } from "../api/googleDocs.js";
 import { ensureValidGoogleToken } from "../auth/tokens.js";
 
@@ -27,7 +31,10 @@ import { ensureValidGoogleToken } from "../auth/tokens.js";
  * The token is returned alongside the requests because the caller must write
  * with the same one it read with — a long run can outlive a token otherwise.
  */
-async function scanDoc(ref, { classType, lessonName, warn, t }) {
+async function scanDoc(
+  ref,
+  { classType, gradingProfile, lessonName, warn, t },
+) {
   // Re-checked per doc: the Docs API needs a REAL Google token, not the JWT.
   const token = await ensureValidGoogleToken();
   const tab = await getTabContent(ref.docId, token, lessonName);
@@ -36,7 +43,10 @@ async function scanDoc(ref, { classType, lessonName, warn, t }) {
     return null;
   }
 
-  const { rows } = collectExerciseRows(tab, classType);
+  const { rows } =
+    gradingProfile === "ielts"
+      ? collectIeltsRows(tab)
+      : collectExerciseRows(tab, classType);
   if (!rows.length) {
     warn(t("clearFeedback.noTable", { docId: ref.docId }));
     return null;
@@ -58,6 +68,7 @@ export async function planFeedbackClear({
   docLinksText,
   classId,
   classType,
+  gradingProfile,
   lessonName,
   t,
 }) {
@@ -74,7 +85,13 @@ export async function planFeedbackClear({
   let cells = 0;
   for (const ref of refs) {
     try {
-      const found = await scanDoc(ref, { classType, lessonName, warn, t });
+      const found = await scanDoc(ref, {
+        classType,
+        gradingProfile,
+        lessonName,
+        warn,
+        t,
+      });
       if (!found || !found.requests.length) continue;
       plans.push({ docId: ref.docId, cells: found.requests.length });
       cells += found.requests.length;
@@ -97,6 +114,7 @@ export async function planFeedbackClear({
 export async function executeFeedbackClear({
   plans,
   classType,
+  gradingProfile,
   lessonName,
   t,
 }) {
@@ -110,7 +128,13 @@ export async function executeFeedbackClear({
       // Deliberately re-read instead of reusing the planned requests: those
       // indexes came from an earlier snapshot, and any edit made to the doc in
       // between would have shifted every one of them.
-      const found = await scanDoc(plan, { classType, lessonName, warn, t });
+      const found = await scanDoc(plan, {
+        classType,
+        gradingProfile,
+        lessonName,
+        warn,
+        t,
+      });
       if (!found || !found.requests.length) continue;
       await batchUpdateDoc(plan.docId, found.requests, found.token);
       clearedDocs += 1;

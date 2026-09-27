@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { collectExerciseRows } from "../src/lib/docTableDetect.js";
 import {
+  buildClearFeedbackRequests,
   buildFeedbackRequests,
   matchesOwnFeedback,
   targetsAlreadyFilled,
@@ -14,7 +15,12 @@ import {
   resolveIeltsTable,
   selectIeltsItemsToGrade,
 } from "../src/lib/ieltsDoc.js";
-import { P, makeParagraphTable, makeTabFromTables } from "./fixtures.js";
+import {
+  P,
+  PIndexed,
+  makeParagraphTable,
+  makeTabFromTables,
+} from "./fixtures.js";
 
 const image = (id, startIndex = 1) => ({
   paragraph: { elements: [{ inlineObjectElement: { inlineObjectId: id } }] },
@@ -241,5 +247,47 @@ describe("writing the feedback back (docWriter, unchanged)", () => {
     ];
     expect(targetsAlreadyFilled(results, rows)).toBe(true);
     expect(matchesOwnFeedback(results, rows)).toBe(false);
+  });
+});
+
+describe("clearing the feedback (feedbackClear, IELTS class)", () => {
+  /** An IELTS table whose "GV chữa" cell holds `paragraphs` (indexed). */
+  function gradedTable(start, paragraphs) {
+    const table = ieltsTable({ start });
+    table.tableRows[3].tableCells[1] = cell(...paragraphs);
+    return table;
+  }
+
+  it("deletes the whole GV chữa text of every IELTS table, bottom-up", () => {
+    const tab = tabWith([
+      gradedTable(100, [
+        PIndexed("1. BẢN CHỮA\n", 150),
+        PIndexed("I go → went\n", 162),
+      ]),
+      gradedTable(300, [PIndexed("Overall: 6.0\n", 350)]),
+    ]);
+    const requests = buildClearFeedbackRequests(
+      collectIeltsRows(tab).rows,
+      "t.x",
+    );
+    expect(requests.map((r) => r.deleteContentRange.range)).toEqual([
+      { startIndex: 350, endIndex: 362, tabId: "t.x" },
+      // The cell's last newline stays: it terminates the cell.
+      { startIndex: 150, endIndex: 173, tabId: "t.x" },
+    ]);
+  });
+
+  it("an empty GV chữa cell asks for nothing", () => {
+    const tab = tabWith([gradedTable(100, [PIndexed("\n", 150)])]);
+    expect(
+      buildClearFeedbackRequests(collectIeltsRows(tab).rows, "t.x"),
+    ).toEqual([]);
+  });
+
+  it("the Basic reader finds nothing to clear in an IELTS tab", () => {
+    const tab = tabWith([gradedTable(100, [PIndexed("1. BẢN CHỮA\n", 150)])]);
+    for (const classType of ["basic", "basic_since_20072026", undefined]) {
+      expect(collectExerciseRows(tab, classType).rows).toEqual([]);
+    }
   });
 });
