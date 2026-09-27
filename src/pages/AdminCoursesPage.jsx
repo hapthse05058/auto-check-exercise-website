@@ -12,7 +12,10 @@ import { isAdminEmail } from "../config.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
 import { courseErrorText } from "../lib/courses.js";
 
-const EMPTY_FORM = { name: "", lessonIds: [] };
+const EMPTY_FORM = { name: "", lessonIds: [], gradingProfile: "basic" };
+
+/** How a course's classes are graded — backend lib/courses.js GRADING_PROFILES. */
+const GRADING_PROFILES = ["basic", "ielts"];
 
 /**
  * Admin: the courses a class can follow (Basic, IELTS, …), each with its
@@ -92,7 +95,11 @@ export default function AdminCoursesPage() {
 
   const openEdit = (course) => {
     setActive(course);
-    setForm({ name: course.name, lessonIds: course.lessonIds });
+    setForm({
+      name: course.name,
+      lessonIds: course.lessonIds,
+      gradingProfile: course.gradingProfile || "basic",
+    });
     setFormError("");
     setModal("edit");
   };
@@ -125,6 +132,7 @@ export default function AdminCoursesPage() {
       const body = {
         name: form.name.trim(),
         lessonIds: form.lessonIds,
+        gradingProfile: form.gradingProfile,
       };
       if (modal === "create") {
         await createCourse(body);
@@ -201,6 +209,7 @@ export default function AdminCoursesPage() {
               <thead>
                 <tr>
                   <th>{t("courses.colName")}</th>
+                  <th>{t("courses.colGrading")}</th>
                   <th>{t("courses.colLessons")}</th>
                   <th>{t("courses.colStatus")}</th>
                   <th>{t("courses.colAction")}</th>
@@ -210,6 +219,9 @@ export default function AdminCoursesPage() {
                 {shown.map((course) => (
                   <tr key={course.id}>
                     <td>{course.name}</td>
+                    <td>
+                      {t(`courses.profile.${course.gradingProfile || "basic"}`)}
+                    </td>
                     <td title={course.lessonIds.join(", ")}>
                       {t("courses.lessonCount", {
                         n: course.lessonIds.length,
@@ -268,6 +280,22 @@ export default function AdminCoursesPage() {
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   autoFocus
                 />
+              </div>
+              <div className="field-group">
+                <label>{t("courses.gradingLabel")}</label>
+                <select
+                  value={form.gradingProfile}
+                  onChange={(e) =>
+                    setForm({ ...form, gradingProfile: e.target.value })
+                  }
+                >
+                  {GRADING_PROFILES.map((profile) => (
+                    <option key={profile} value={profile}>
+                      {t(`courses.profile.${profile}`)}
+                    </option>
+                  ))}
+                </select>
+                <small className="field-note">{t("courses.gradingHint")}</small>
               </div>
               <div className="field-group">
                 <label>

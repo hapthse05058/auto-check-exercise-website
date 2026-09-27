@@ -308,7 +308,9 @@ export default function GradePage() {
           ? t("grading.reauthToStart")
           : error.message === "no_docs"
             ? t("grading.noDocs")
-            : t("grade.processFailed", { msg: error.message });
+            : error.message === "ielts_not_configured"
+              ? t("grading.ieltsNotConfigured")
+              : t("grade.processFailed", { msg: error.message });
       setStatus({ phase: "error", text, warnings: [] });
     } finally {
       setStarting(false);

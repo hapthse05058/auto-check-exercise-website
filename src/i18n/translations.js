@@ -30,6 +30,7 @@ export const translations = {
       points: "{n} points",
       pointsTitle: "Your point balance",
       gradeSpeaking: "Grade speaking",
+      ieltsWriting: "Grade IELTS Writing",
       auditLog: "Audit log",
       support: "Contact for support: {email}",
       logout: "Logout",
@@ -429,6 +430,7 @@ export const translations = {
         student_bulkDelete: "Remove students from class",
         grading_run: "Grade exercises",
         grading_runExtension: "Grade exercises (extension)",
+        grading_ieltsWriting: "Grade IELTS Writing",
         grading_pointsSummary: "Points spent grading",
         doc_feedback_clear: "Clear doc feedback",
         points_consume: "Spend points",
@@ -563,6 +565,80 @@ export const translations = {
       filterNoActive: "No active class",
       filterAll: "All teachers",
     },
+    ielts: {
+      title: "Grade IELTS Writing",
+      subtitle:
+        "Paste the prompt and the student's writing. You get: corrections in the text → an improved version → comments on the 4 criteria with bands. 1 point per submission (grading the same submission again is free).",
+      task: {
+        task1: "Task 1 (chart)",
+        task2: "Task 2 (essay)",
+        paragraph: "Part of an essay (intro, overview, one paragraph…)",
+      },
+      classLabel: "Class (who pays)",
+      classNone: "No class — I pay",
+      classHint:
+        "Picking a class bills that class's teacher, as on the grading screen.",
+      promptLabel: "Prompt",
+      promptPlaceholder: {
+        task1:
+          "The graph below shows … Summarise the information by selecting and reporting the main features…",
+        task2:
+          "Some people think that … To what extent do you agree or disagree?",
+        paragraph:
+          "The prompt, and what the student had to write (e.g. Write the introduction and overview).",
+      },
+      chartLabel: "Chart (up to {max} images)",
+      chartAdd: "Add image",
+      chartAlt: "Chart {n}",
+      chartHint:
+        "Upload the chart image or press Ctrl+V to paste a screenshot. The AI reads the numbers from it.",
+      chartHintOptional:
+        "Optional: when the writing is about a chart (Introduction, Overview, sentences describing data), add the chart so the AI can check the numbers.",
+      essayLabel: "Student's writing",
+      essayPlaceholder: "Paste the student's writing, keeping its paragraphs.",
+      wordCount: "{n} words",
+      wordCountMin: "{n} words (minimum {min})",
+      grade: "Grade",
+      grading: "Grading…",
+      gradingHint: "The AI is grading — this usually takes 30–90 seconds.",
+      overall: "Overall",
+      copy: "Copy feedback",
+      copied: "Copied",
+      copyFailed: "Could not copy — select the text and copy it by hand.",
+      meta: "{words} words · {charged} point charged to {payer}",
+      fromCache: "graded before (cache)",
+      chartData: "Chart data the AI read",
+      chartDataHint:
+        "The chart is read once and every essay on it is graded against these numbers (~ = estimated from the gridlines). If a number is wrong, tell the admin to have the chart re-read.",
+      section: {
+        corrected: "1. Corrections",
+        improved: "2. Improved version",
+        comments: "3. Comments",
+      },
+      general: "Overall comment:",
+      advice: "How to improve:",
+      error: {
+        prompt_required: "Enter the prompt.",
+        essay_required: "Paste the student's writing.",
+        chart_required: "Task 1 needs the chart image.",
+        too_many_images: "At most {max} images.",
+        image_too_large: "The image is too large, even after compression.",
+        invalid_image: "That file is not an image the AI can read.",
+        invalid_task: "Pick a task type.",
+        prompt_too_long: "The prompt is too long.",
+        essay_too_long: "The writing is too long.",
+        payload_too_large: "The images are too large to send.",
+        insufficient_points: "Not enough points (balance: {point}).",
+        payer_not_found: "No teacher record to charge.",
+        ielts_ai_invalid:
+          "The AI returned an unusable answer twice. Nothing was charged — please try again.",
+        ielts_chart_unreadable:
+          "The AI could not read the chart image. Nothing was charged — try a clearer image.",
+        ielts_not_configured:
+          "IELTS grading is not set up on the server yet (no AI model configured).",
+        ielts_grade_failed: "Grading failed. Please try again.",
+      },
+    },
     courses: {
       title: "Manage courses",
       subtitle:
@@ -574,6 +650,7 @@ export const translations = {
       empty: "No courses yet.",
       count: "{n} course(s).",
       colName: "Course",
+      colGrading: "Grading",
       colLessons: "Lessons",
       colStatus: "Status",
       colAction: "Action",
@@ -587,6 +664,10 @@ export const translations = {
       editTitle: "Edit course",
       nameLabel: "Course name",
       lessonsLabel: "Lessons ({n} selected)",
+      gradingLabel: "Grading type",
+      gradingHint:
+        "Basic: sentence/paragraph exercises. IELTS: IELTS Writing (Task 1, Task 2) with its own prompt and doc template.",
+      profile: { basic: "Basic", ielts: "IELTS Writing" },
       selectAll: "Select all",
       selectNone: "Clear",
       created: "Course {name} created.",
@@ -607,6 +688,7 @@ export const translations = {
         course_inactive: "This course is hidden.",
         lesson_not_in_course: "The current lesson is not in this course.",
         course_failed: "Could not save the course.",
+        invalid_grading_profile: "Unknown grading type.",
       },
     },
     classManage: {
@@ -783,6 +865,17 @@ export const translations = {
       unclassifiedTable:
         "{docId}: table(s) {list} hold questions but could not be recognised as an exercise table, so they were not graded. Please check the layout.",
       noTable: "{docId}: no exercise table found in this lesson tab.",
+      ieltsTemplateInvalid:
+        "{docId}: IELTS table(s) {list} do not follow the template (title IELTS WRITING – TASK 1/TASK 2/ĐOẠN VĂN, rows Đề bài / Bài làm / GV chữa), skipped.",
+      ieltsChartMissing:
+        "{docId}, table {table}: Task 1 needs the chart image in the Đề bài cell (or it could not be downloaded) — not graded.",
+      ieltsTooManyImages:
+        "{docId}, table {table}: more than {max} images in Đề bài — not graded.",
+      ieltsInvalid: "{docId}, table {table}: cannot be graded ({code}).",
+      ieltsAiInvalid:
+        "{docId}, table {table}: the AI returned an unusable answer twice — left empty, not charged. Run grading again.",
+      ieltsNotConfigured:
+        "IELTS grading is not set up on the server yet (no AI model configured).",
       tableQuestionRef: "table {table} question {question}",
       noAnswers: "No answered questions found to grade.",
       noneGraded: "No exercise was graded.",
@@ -833,6 +926,7 @@ export const translations = {
       points: "{n} point",
       pointsTitle: "Số point hiện có",
       gradeSpeaking: "Chấm speaking",
+      ieltsWriting: "Chấm IELTS Writing",
       auditLog: "Nhật ký hoạt động",
       support: "Liên hệ hỗ trợ: {email}",
       logout: "Đăng xuất",
@@ -1229,6 +1323,7 @@ export const translations = {
         student_bulkDelete: "Xóa nhiều học sinh khỏi lớp",
         grading_run: "Chấm bài",
         grading_runExtension: "Chấm bài (extension)",
+        grading_ieltsWriting: "Chấm IELTS Writing",
         grading_pointsSummary: "Tổng point trừ sau khi chấm bài",
         doc_feedback_clear: "Xóa feedback trong Google Doc",
         points_consume: "Trừ điểm",
@@ -1361,6 +1456,80 @@ export const translations = {
       filterNoActive: "Không có lớp active",
       filterAll: "Tất cả giáo viên",
     },
+    ielts: {
+      title: "Chấm IELTS Writing",
+      subtitle:
+        "Dán đề và bài của học viên. Kết quả gồm: chữa trực tiếp trong bài → bài cải thiện → nhận xét 4 tiêu chí kèm band. Mỗi bài 1 point (chấm lại đúng bài đó thì không trừ nữa).",
+      task: {
+        task1: "Task 1 (biểu đồ)",
+        task2: "Task 2 (bài luận)",
+        paragraph: "Một phần bài (mở bài, overview, một đoạn…)",
+      },
+      classLabel: "Lớp (người trả point)",
+      classNone: "Không chọn lớp — tôi trả",
+      classHint:
+        "Chọn lớp thì trừ point của giáo viên lớp đó, giống màn hình chấm bài.",
+      promptLabel: "Đề bài",
+      promptPlaceholder: {
+        task1:
+          "The graph below shows … Summarise the information by selecting and reporting the main features…",
+        task2:
+          "Some people think that … To what extent do you agree or disagree?",
+        paragraph:
+          "Đề và yêu cầu (ví dụ: Viết Introduction và Overview cho đề sau…).",
+      },
+      chartLabel: "Ảnh biểu đồ (tối đa {max} ảnh)",
+      chartAdd: "Thêm ảnh",
+      chartAlt: "Biểu đồ {n}",
+      chartHint:
+        "Tải ảnh biểu đồ lên hoặc bấm Ctrl+V để dán ảnh chụp màn hình. AI đọc số liệu từ ảnh này.",
+      chartHintOptional:
+        "Không bắt buộc: nếu phần bài viết về một biểu đồ (Introduction, Overview, câu mô tả số liệu), hãy thêm ảnh để AI kiểm tra số liệu.",
+      essayLabel: "Bài làm của học viên",
+      essayPlaceholder: "Dán bài của học viên, giữ nguyên cách xuống đoạn.",
+      wordCount: "{n} từ",
+      wordCountMin: "{n} từ (tối thiểu {min})",
+      grade: "Chấm bài",
+      grading: "Đang chấm…",
+      gradingHint: "AI đang chấm — thường mất khoảng 30–90 giây.",
+      overall: "Overall",
+      copy: "Copy nhận xét",
+      copied: "Đã copy",
+      copyFailed: "Không copy được — hãy bôi đen và copy thủ công.",
+      meta: "{words} từ · trừ {charged} point của {payer}",
+      fromCache: "đã chấm trước đó (cache)",
+      chartData: "Số liệu AI đọc từ biểu đồ",
+      chartDataHint:
+        "Biểu đồ chỉ được đọc một lần, mọi bài cùng đề đều chấm theo bảng số liệu này (~ là số ước lượng theo vạch chia). Nếu thấy số sai, hãy báo admin để cho AI đọc lại biểu đồ.",
+      section: {
+        corrected: "1. Bản chữa",
+        improved: "2. Bài cải thiện",
+        comments: "3. Nhận xét",
+      },
+      general: "Nhận xét chung:",
+      advice: "Lời khuyên cải thiện:",
+      error: {
+        prompt_required: "Chưa nhập đề bài.",
+        essay_required: "Chưa dán bài của học viên.",
+        chart_required: "Task 1 cần ảnh biểu đồ.",
+        too_many_images: "Tối đa {max} ảnh.",
+        image_too_large: "Ảnh quá lớn, nén rồi vẫn không đủ nhỏ.",
+        invalid_image: "File này không phải ảnh AI đọc được.",
+        invalid_task: "Hãy chọn loại bài.",
+        prompt_too_long: "Đề bài quá dài.",
+        essay_too_long: "Bài làm quá dài.",
+        payload_too_large: "Ảnh quá lớn để gửi đi.",
+        insufficient_points: "Không đủ point (số dư: {point}).",
+        payer_not_found: "Không tìm thấy giáo viên để trừ point.",
+        ielts_ai_invalid:
+          "AI trả kết quả không dùng được 2 lần liền. Chưa trừ point — hãy thử lại.",
+        ielts_chart_unreadable:
+          "AI không đọc được ảnh biểu đồ. Chưa trừ point — hãy thử ảnh rõ hơn.",
+        ielts_not_configured:
+          "Server chưa cấu hình chấm IELTS (chưa có model AI).",
+        ielts_grade_failed: "Chấm bài không thành công. Hãy thử lại.",
+      },
+    },
     courses: {
       title: "Quản lý khóa",
       subtitle:
@@ -1372,6 +1541,7 @@ export const translations = {
       empty: "Chưa có khóa nào.",
       count: "{n} khóa.",
       colName: "Khóa",
+      colGrading: "Kiểu chấm",
       colLessons: "Số buổi",
       colStatus: "Trạng thái",
       colAction: "Hành động",
@@ -1385,6 +1555,10 @@ export const translations = {
       editTitle: "Sửa khóa",
       nameLabel: "Tên khóa",
       lessonsLabel: "Buổi học (đã chọn {n})",
+      gradingLabel: "Kiểu chấm",
+      gradingHint:
+        "Basic: bài dịch câu / viết đoạn văn. IELTS: IELTS Writing (Task 1, Task 2) với prompt và template doc riêng.",
+      profile: { basic: "Basic", ielts: "IELTS Writing" },
       selectAll: "Chọn tất cả",
       selectNone: "Bỏ chọn",
       created: "Đã tạo khóa {name}.",
@@ -1405,6 +1579,7 @@ export const translations = {
         course_inactive: "Khóa này đã bị ẩn.",
         lesson_not_in_course: "Buổi hiện tại không có trong khóa này.",
         course_failed: "Không lưu được khóa.",
+        invalid_grading_profile: "Kiểu chấm không hợp lệ.",
       },
     },
     classManage: {
@@ -1581,6 +1756,16 @@ export const translations = {
       unclassifiedTable:
         "{docId}: bảng {list} có câu hỏi nhưng không nhận ra được là bảng bài tập nên chưa được chấm. Vui lòng kiểm tra lại bố cục.",
       noTable: "{docId}: không tìm thấy bảng bài tập nào trong buổi học này.",
+      ieltsTemplateInvalid:
+        "{docId}: bảng IELTS số {list} chưa đúng template (tiêu đề IELTS WRITING – TASK 1/TASK 2/ĐOẠN VĂN, các dòng Đề bài / Bài làm / GV chữa), bỏ qua.",
+      ieltsChartMissing:
+        "{docId}, bảng {table}: Task 1 cần ảnh biểu đồ trong ô Đề bài (hoặc không tải được ảnh) — chưa chấm.",
+      ieltsTooManyImages:
+        "{docId}, bảng {table}: ô Đề bài có hơn {max} ảnh — chưa chấm.",
+      ieltsInvalid: "{docId}, bảng {table}: không chấm được ({code}).",
+      ieltsAiInvalid:
+        "{docId}, bảng {table}: AI trả kết quả không dùng được 2 lần — để trống, không trừ point. Hãy bấm chấm lại.",
+      ieltsNotConfigured: "Server chưa cấu hình chấm IELTS (chưa có model AI).",
       tableQuestionRef: "bảng {table} câu {question}",
       noAnswers: "Không tìm thấy câu trả lời nào để chấm.",
       noneGraded: "Không có bài nào được chấm.",

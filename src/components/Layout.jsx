@@ -125,6 +125,9 @@ function NavMenu() {
           <button className="menu-option" onClick={() => go("/grade")}>
             {t("nav.grade")}
           </button>
+          <button className="menu-option" onClick={() => go("/ielts-writing")}>
+            {t("nav.ieltsWriting")}
+          </button>
           <button className="menu-option" onClick={() => go("/classes/new")}>
             {t("nav.addClass")}
           </button>

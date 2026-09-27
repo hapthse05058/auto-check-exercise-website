@@ -380,6 +380,38 @@ export async function createGradingJob({
   throw new Error(data?.error || "grading_job_failed");
 }
 
+/**
+ * Grades one pasted IELTS Writing submission (backend lib/ieltsWriting.js).
+ * `images` are data URLs of the chart(s) — Task 1, or a paragraph about a chart.
+ *
+ * @returns {Promise<{result, feedback: string, cached: boolean,
+ *   charged: number, point: number, payerName: string}>}
+ * @throws {Error} the backend's error code as the message, with `.params`
+ *   (e.g. `insufficient_points` + {point, need}).
+ */
+export async function gradeIeltsWriting({
+  task,
+  prompt,
+  essay,
+  images,
+  classId,
+}) {
+  const response = await authFetch("/ielts-writing/grade", {
+    method: "POST",
+    body: { task, prompt, essay, images, classId: classId || undefined },
+  });
+  const data = await response.json().catch(() => null);
+  if (!response.ok) {
+    const error = new Error(
+      data?.error ||
+        (response.status === 413 ? "payload_too_large" : "ielts_grade_failed"),
+    );
+    error.params = data || {};
+    throw error;
+  }
+  return data;
+}
+
 /** Progress and outcome of one job (see describeJob in lib/grading.js). */
 export async function fetchGradingJob(jobId) {
   const response = await authFetch(
