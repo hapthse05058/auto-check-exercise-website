@@ -149,6 +149,21 @@ export async function fetchTeacherInfo() {
   return response.json();
 }
 
+/**
+ * Saves the teacher's own UI preferences (e.g. { theme: "dark" }) so they
+ * follow the account to other devices. Resolves to the stored preferences.
+ */
+export async function saveTeacherPreferences(preferences) {
+  const response = await authFetch("/teacher-info/preferences", {
+    method: "PATCH",
+    body: preferences,
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to save preferences (HTTP ${response.status})`);
+  }
+  return (await response.json()).preferences;
+}
+
 export async function signupTeacher(payload) {
   return authFetch("/teacher-signup", { method: "POST", body: payload });
 }

@@ -29,7 +29,9 @@ function systemTheme() {
 
 /**
  * Light / dark theme. With no saved choice the OS setting is followed (live);
- * once the user toggles, that choice is saved and wins.
+ * once the user toggles, that choice is saved and wins. This provider only
+ * knows this browser: syncing the choice with the account (so it follows the
+ * teacher to another device) is useSyncedTheme's job.
  */
 export function ThemeProvider({ children }) {
   const [stored, setStored] = useState(readStored);
@@ -48,17 +50,21 @@ export function ThemeProvider({ children }) {
     document.documentElement.dataset.theme = theme;
   }, [theme]);
 
-  const toggleTheme = useCallback(() => {
-    const next = theme === "dark" ? "light" : "dark";
+  /** Saves an explicit choice in this browser (it then beats the OS). */
+  const setTheme = useCallback((next) => {
+    if (!SUPPORTED.includes(next)) return;
     setStored(next);
     try {
       localStorage.setItem(STORAGE_KEY, next);
     } catch {
       // ignore storage failures
     }
-  }, [theme]);
+  }, []);
 
-  const value = useMemo(() => ({ theme, toggleTheme }), [theme, toggleTheme]);
+  const value = useMemo(
+    () => ({ theme, setTheme, isExplicit: stored !== null }),
+    [theme, setTheme, stored],
+  );
   return (
     <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
   );

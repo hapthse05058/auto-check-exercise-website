@@ -426,6 +426,7 @@ export const translations = {
       action: {
         teacher_create: "Create teacher",
         teacher_update: "Update teacher",
+        teacher_updatePreferences: "Change own preferences",
         teacher_delete: "Delete teacher",
         teacher_signup: "Teacher sign-up",
         class_create: "Create class",
@@ -1432,6 +1433,7 @@ export const translations = {
       action: {
         teacher_create: "Tạo giáo viên",
         teacher_update: "Sửa giáo viên",
+        teacher_updatePreferences: "Đổi tuỳ chọn cá nhân",
         teacher_delete: "Xóa giáo viên",
         teacher_signup: "Giáo viên tự đăng ký",
         class_create: "Tạo lớp",

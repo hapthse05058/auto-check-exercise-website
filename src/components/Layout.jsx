@@ -10,7 +10,7 @@ import { usePwaInstall } from "../hooks/usePwaInstall.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
 import { POINTS_CHANGED } from "../lib/pointEvents.js";
 import { refreshPushToken, startForegroundPushListener } from "../lib/push.js";
-import { useTheme } from "../theme/ThemeContext.jsx";
+import { useSyncedTheme } from "../theme/useSyncedTheme.js";
 
 function initials(name) {
   if (!name) return "?";
@@ -42,7 +42,7 @@ function LanguageSwitcher() {
 
 /** Light / dark toggle: shows the theme it switches TO. */
 function ThemeToggle() {
-  const { theme, toggleTheme } = useTheme();
+  const { theme, toggleTheme } = useSyncedTheme();
   const { t } = useLanguage();
   const label = theme === "dark" ? t("theme.toLight") : t("theme.toDark");
   return (
