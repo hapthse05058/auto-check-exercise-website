@@ -3,9 +3,32 @@ import { describe, expect, it } from "vitest";
 import {
   courseErrorText,
   groupLessonsByProfile,
+  templateCodeFromName,
+  templateErrorText,
   templateName,
   templatesForCourse,
 } from "../src/lib/courses.js";
+
+describe("template admin helpers", () => {
+  it("suggests a code from a Vietnamese name", () => {
+    expect(templateCodeFromName("Mẫu tháng 10/2026")).toBe("mau_thang_10_2026");
+    expect(templateCodeFromName("  Đề HS — lớp 5 ")).toBe("de_hs_lop_5");
+    expect(templateCodeFromName("")).toBe("");
+  });
+
+  it("explains a template API error", () => {
+    const t = (key, params) =>
+      ({
+        "templates.error.template_in_use": `in use: ${params?.classes}`,
+        "templates.error.template_failed": "failed",
+      })[key] ?? key;
+    const inUse = Object.assign(new Error("template_in_use"), {
+      params: { classes: ["A", "B"] },
+    });
+    expect(templateErrorText(inUse, t)).toBe("in use: A, B");
+    expect(templateErrorText(new Error("weird"), t)).toBe("failed");
+  });
+});
 
 describe("templates", () => {
   const templates = [

@@ -176,6 +176,14 @@ function NavMenu() {
             </button>
           )}
           {isAdmin && (
+            <button
+              className="menu-option"
+              onClick={() => go("/admin/templates")}
+            >
+              {t("nav.manageTemplates")}
+            </button>
+          )}
+          {isAdmin && (
             <button className="menu-option" onClick={() => go("/speaking")}>
               {t("nav.gradeSpeaking")}
             </button>

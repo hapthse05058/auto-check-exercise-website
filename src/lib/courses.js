@@ -61,3 +61,28 @@ export function courseErrorText(error, t) {
   });
   return text === key ? t("courses.error.course_failed") : text;
 }
+
+/**
+ * A template code suggested from its name: "Mẫu tháng 10/2026" →
+ * "mau_thang_10_2026" (lowercase ASCII, digits, "_"; backend TEMPLATE_CODE_RE).
+ */
+export function templateCodeFromName(name) {
+  return String(name || "")
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/đ/gi, "d")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .slice(0, 64);
+}
+
+/** Text for an Error thrown by the template API helpers. */
+export function templateErrorText(error, t) {
+  const code = error?.message || "template_failed";
+  const key = `templates.error.${code}`;
+  const text = t(key, {
+    classes: (error?.params?.classes || []).join(", "),
+  });
+  return text === key ? t("templates.error.template_failed") : text;
+}

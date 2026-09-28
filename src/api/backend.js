@@ -202,6 +202,39 @@ export async function fetchClassTypes() {
   return Array.isArray(list) ? list : [];
 }
 
+/** Admin: the templates, each with `classCount`, `activeClassCount`, `lessonCount`. */
+export async function fetchTemplateUsage() {
+  return courseResult(await authFetch("/class-types/usage"), "templates");
+}
+
+/** Admin: `{code, name, gradingProfile}`; the code is fixed afterwards. */
+export async function createTemplate(body) {
+  return courseResult(
+    await authFetch("/class-types", { method: "POST", body }),
+    "template",
+  );
+}
+
+/** Admin: `{name?, gradingProfile?}`. */
+export async function updateTemplate(templateId, body) {
+  return courseResult(
+    await authFetch(`/class-types/${encodeURIComponent(templateId)}`, {
+      method: "PATCH",
+      body,
+    }),
+    "template",
+  );
+}
+
+export async function deleteTemplate(templateId) {
+  return courseResult(
+    await authFetch(`/class-types/${encodeURIComponent(templateId)}`, {
+      method: "DELETE",
+    }),
+    "template",
+  );
+}
+
 /** The courses; hidden ones only when asked. */
 export async function fetchCourses({ includeInactive } = {}) {
   return courseResult(
