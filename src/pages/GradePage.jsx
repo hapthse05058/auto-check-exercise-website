@@ -18,6 +18,7 @@ import {
 } from "../api/backend.js";
 import { useAuth } from "../auth/AuthContext.jsx";
 import AutoGradeScheduleModal from "../components/AutoGradeScheduleModal.jsx";
+import ErrorNotice from "../components/ErrorNotice.jsx";
 import SearchableSelect from "../components/SearchableSelect.jsx";
 import { isAdminEmail } from "../config.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
@@ -74,6 +75,14 @@ export default function GradePage() {
   // Admin only: each class's course and doc template, shown on hover.
   const [classInfo, setClassInfo] = useState({ courses: [], templates: [] });
   const currentLessonRef = useRef(null);
+  // A load that failed and can be retried from the error box. Plain data, not
+  // a callback, so the retry always runs this render's handlers.
+  // null | { kind: "teacher" } | { kind: "lessons", classId, preferredLessonId }
+  const [loadError, setLoadError] = useState(null);
+  const [teacherLoading, setTeacherLoading] = useState(true);
+  // Tickets for in-flight loads: only the latest call may write state.
+  const initReqRef = useRef(0);
+  const lessonsReqRef = useRef(0);
 
   const refreshPoint = async () => {
     try {
@@ -118,53 +127,67 @@ export default function GradePage() {
   /** Plain message, no spinner — page loading and setup errors. */
   const say = (text) => setStatus({ phase: "idle", text, warnings: [] });
 
+  /**
+   * Teacher info + classes: on entry, and again from the error box's retry.
+   * Each call takes a ticket from initReqRef; a response whose ticket is no
+   * longer current (unmounted, or a newer call started) is dropped.
+   */
+  const loadInitialData = async () => {
+    const req = ++initReqRef.current;
+    const stale = () => req !== initReqRef.current;
+    setLoadError(null);
+    setTeacherLoading(true);
+    try {
+      say(t("grade.loadingTeacher"));
+      const teacherInfo = await loadTeacherInfo();
+      if (stale()) return;
+      if (!teacherInfo) {
+        navigate("/missing-teacher", { replace: true });
+        return;
+      }
+      const admin = isAdminEmail(teacherInfo.gmail);
+      setIsAdmin(admin);
+      refreshPoint();
+      // Admin can grade any class, so load every class; teachers see their own.
+      const classList = admin
+        ? await fetchAllClasses()
+        : await fetchClasses(teacherInfo.id);
+      if (stale()) return;
+      const activeClasses = classList.filter((c) => c.isActive !== false);
+      setClasses(activeClasses);
+      if (admin) {
+        Promise.all([
+          fetchCourses({ includeInactive: true }),
+          fetchClassTypes(),
+        ])
+          .then(([courses, templates]) => {
+            if (!stale()) setClassInfo({ courses, templates });
+          })
+          .catch((error) => {
+            if (error.message !== "RE-AUTH_NEEDED")
+              console.error("Class info fetch failed:", error);
+          });
+      }
+      if (activeClasses.length === 0) {
+        alert(t("grade.noClasses"));
+      }
+      say(t("grade.ready"));
+    } catch (error) {
+      if (stale() || error.message === "RE-AUTH_NEEDED") return;
+      console.error("Post-login error:", error);
+      say("");
+      setLoadError({ kind: "teacher" });
+    } finally {
+      if (!stale()) setTeacherLoading(false);
+    }
+  };
+
   // Load teacher info + classes once on entry.
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        say(t("grade.loadingTeacher"));
-        const teacherInfo = await loadTeacherInfo();
-        if (cancelled) return;
-        if (!teacherInfo) {
-          navigate("/missing-teacher", { replace: true });
-          return;
-        }
-        const admin = isAdminEmail(teacherInfo.gmail);
-        setIsAdmin(admin);
-        refreshPoint();
-        // Admin can grade any class, so load every class; teachers see their own.
-        const classList = admin
-          ? await fetchAllClasses()
-          : await fetchClasses(teacherInfo.id);
-        if (cancelled) return;
-        const activeClasses = classList.filter((c) => c.isActive !== false);
-        setClasses(activeClasses);
-        if (admin) {
-          Promise.all([
-            fetchCourses({ includeInactive: true }),
-            fetchClassTypes(),
-          ])
-            .then(([courses, templates]) => {
-              if (!cancelled) setClassInfo({ courses, templates });
-            })
-            .catch((error) => {
-              if (error.message !== "RE-AUTH_NEEDED")
-                console.error("Class info fetch failed:", error);
-            });
-        }
-        if (activeClasses.length === 0) {
-          alert(t("grade.noClasses"));
-        }
-        say(t("grade.ready"));
-      } catch (error) {
-        if (cancelled || error.message === "RE-AUTH_NEEDED") return;
-        console.error("Post-login error:", error);
-        say(t("grade.loadTeacherFailed"));
-      }
-    })();
+    loadInitialData();
     return () => {
-      cancelled = true;
+      // Void the ticket of any load still in flight.
+      initReqRef.current += 1;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- run once on mount; `t` is only used for status/error messages, adding it would re-fetch on language change
   }, [loadTeacherInfo, navigate]);
@@ -186,31 +209,40 @@ export default function GradePage() {
    * to the next one. It is only displayed, not saved as the current lesson.
    */
   const handleClassChange = async (classId, preferredLessonId = null) => {
+    // Switching class A → B fast must not let A's late lessons land on B.
+    const req = ++lessonsReqRef.current;
+    const stale = () => req !== lessonsReqRef.current;
     setSelectedClassId(classId);
     setSelectedLessonId("");
     setLessons([]);
+    setLoadError((prev) => (prev?.kind === "lessons" ? null : prev));
     currentLessonRef.current = null;
     refreshPayer(classId);
     refreshSchedule(classId);
-    if (!classId) return;
+    if (!classId) {
+      setLessonsLoading(false);
+      return;
+    }
 
     setLessonsLoading(true);
     try {
       const lessonList = await fetchClassLessons(classId);
+      if (stale()) return;
       setLessons(lessonList);
 
       const currentLesson = await fetchCurrentLesson(classId);
+      if (stale()) return;
       currentLessonRef.current = currentLesson;
       const shown = [preferredLessonId, currentLesson].find(
         (id) => id && lessonList.some((lesson) => lesson.id === id),
       );
       if (shown) setSelectedLessonId(shown);
     } catch (error) {
-      if (error.message === "RE-AUTH_NEEDED") return;
+      if (stale() || error.message === "RE-AUTH_NEEDED") return;
       console.error("Error fetching lessons:", error);
-      say(t("grade.loadLessonsFailed"));
+      setLoadError({ kind: "lessons", classId, preferredLessonId });
     } finally {
-      setLessonsLoading(false);
+      if (!stale()) setLessonsLoading(false);
     }
   };
 
@@ -486,10 +518,11 @@ export default function GradePage() {
     !jobRunning &&
     !clearing;
   // Why the grade button is off, while the fix is still up to the teacher.
-  // Mid-run the button's own label ("Processing...") already says why.
+  // Mid-run the button's own label ("Processing...") already says why, and a
+  // failed load has its own error box — one message at a time.
   const busy = starting || jobRunning || clearing;
   const processHint =
-    busy || lessonsLoading
+    busy || lessonsLoading || teacherLoading || loadError
       ? ""
       : !selectedClassId
         ? t("grade.hintSelectClass")
@@ -498,6 +531,11 @@ export default function GradePage() {
           : !selectedLessonId
             ? t("grade.hintSelectLesson")
             : "";
+
+  const retryLoad = () =>
+    loadError?.kind === "lessons"
+      ? handleClassChange(loadError.classId, loadError.preferredLessonId)
+      : loadInitialData();
 
   return (
     <div className="page-wide">
@@ -611,6 +649,16 @@ export default function GradePage() {
           cls={selectedClass}
           onClose={() => setScheduleOpen(false)}
           onSaved={() => refreshSchedule(selectedClassId)}
+        />
+      )}
+      {loadError && (
+        <ErrorNotice
+          message={t(
+            loadError.kind === "lessons"
+              ? "grade.loadLessonsFailed"
+              : "grade.loadTeacherFailed",
+          )}
+          onRetry={retryLoad}
         />
       )}
       <div className="status-output">

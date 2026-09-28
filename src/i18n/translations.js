@@ -20,6 +20,7 @@ export const translations = {
       columns: "Columns",
       resetColumns: "Reset to default",
       sortBy: "Sort by {col}",
+      retry: "Retry",
     },
     nav: {
       grade: "Grade exercises",
@@ -261,7 +262,8 @@ export const translations = {
       clearing: "Clearing...",
       loadingTeacher: "Loading teacher info...",
       ready: "Ready to process...",
-      loadTeacherFailed: "Failed to load teacher data. Please login again.",
+      loadTeacherFailed:
+        "Failed to load teacher data. Please retry; if it keeps failing, log in again.",
       noClasses:
         "No classes found for your account. Please create a class in the system first.",
       confirmLesson: "Update current lesson as {name}?",
@@ -1033,6 +1035,7 @@ export const translations = {
       columns: "Cột hiển thị",
       resetColumns: "Về mặc định",
       sortBy: "Sắp xếp theo {col}",
+      retry: "Thử lại",
     },
     nav: {
       grade: "Chấm bài",
@@ -1273,7 +1276,7 @@ export const translations = {
       loadingTeacher: "Đang tải thông tin giáo viên...",
       ready: "Sẵn sàng chấm bài...",
       loadTeacherFailed:
-        "Tải dữ liệu giáo viên thất bại. Vui lòng đăng nhập lại.",
+        "Tải dữ liệu giáo viên thất bại. Hãy thử lại, nếu vẫn lỗi thì đăng nhập lại.",
       noClasses:
         "Không tìm thấy lớp nào cho tài khoản của bạn. Vui lòng tạo lớp trong hệ thống trước.",
       confirmLesson: "Cập nhật buổi học hiện tại là {name}?",

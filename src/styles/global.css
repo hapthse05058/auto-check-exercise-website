@@ -932,6 +932,32 @@ textarea {
   color: var(--color-text-secondary);
   margin: 0 0 0.75rem;
 }
+/* A load failure with a way out (components/ErrorNotice.jsx). Same danger
+   language as .auto-grade-alert. */
+.error-notice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+  padding: 10px 12px;
+  margin: 0.5rem 0;
+  border-radius: var(--border-radius-md, 8px);
+  background: var(--color-danger-tint);
+  border: 1px solid var(--color-danger-tint-border);
+  color: var(--color-danger-text);
+  font-size: 13px;
+  line-height: 1.45;
+}
+.error-notice > .ti {
+  font-size: 18px;
+}
+.error-notice-text {
+  flex: 1 1 12rem;
+}
+.error-notice .secondary-btn {
+  padding: 5px 12px;
+  background: var(--color-background-primary);
+}
 /* What a disabled button is waiting for, just under it. */
 .field-hint {
   display: flex;
