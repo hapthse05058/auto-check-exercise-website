@@ -11,7 +11,10 @@ export default function ResetPasswordPage() {
   const navigate = useNavigate();
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [status, setStatus] = useState({ text: "", color: "black" });
+  const [status, setStatus] = useState({
+    text: "",
+    color: "var(--color-text-primary)",
+  });
   const [submitting, setSubmitting] = useState(false);
 
   // This screen is only meaningful after a successful forgot-password step
@@ -36,7 +39,7 @@ export default function ResetPasswordPage() {
     if (!password || !confirm) {
       setStatus({
         text: t("reset.needBoth"),
-        color: "red",
+        color: "var(--color-error)",
       });
       return;
     }
@@ -44,7 +47,7 @@ export default function ResetPasswordPage() {
     if (password.length < 6) {
       setStatus({
         text: t("reset.min"),
-        color: "red",
+        color: "var(--color-error)",
       });
       return;
     }
@@ -52,12 +55,15 @@ export default function ResetPasswordPage() {
     if (password !== confirm) {
       setStatus({
         text: t("reset.mismatch"),
-        color: "red",
+        color: "var(--color-error)",
       });
       return;
     }
 
-    setStatus({ text: t("reset.resetting"), color: "black" });
+    setStatus({
+      text: t("reset.resetting"),
+      color: "var(--color-text-primary)",
+    });
     setSubmitting(true);
 
     try {
@@ -65,7 +71,7 @@ export default function ResetPasswordPage() {
       if (!resetToken) {
         setStatus({
           text: t("reset.noToken"),
-          color: "red",
+          color: "var(--color-error)",
         });
         return;
       }
@@ -74,7 +80,7 @@ export default function ResetPasswordPage() {
 
       setStatus({
         text: t("reset.success"),
-        color: "green",
+        color: "var(--color-success)",
       });
 
       sessionStorage.removeItem("reset_token");
@@ -86,7 +92,7 @@ export default function ResetPasswordPage() {
       console.error("Reset password error:", error);
       setStatus({
         text: error.message || t("reset.serverError"),
-        color: "red",
+        color: "var(--color-error)",
       });
     } finally {
       setSubmitting(false);

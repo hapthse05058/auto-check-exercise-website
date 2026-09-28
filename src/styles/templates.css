@@ -2,20 +2,41 @@
    .tpl-profile-* and read by every piece below through --tpl-accent /
    --tpl-tint. */
 .tpl-profile-basic {
-  --tpl-accent: #1d9e75;
+  --tpl-accent: #167a5b;
   --tpl-tint: #e1f5ee;
 }
 .tpl-profile-ielts {
-  --tpl-accent: #2f6fd6;
+  --tpl-accent: #2867cc;
   --tpl-tint: #e6effc;
 }
 .tpl-profile-hs {
-  --tpl-accent: #c47a0a;
+  --tpl-accent: #9b6008;
   --tpl-tint: #fdf1dc;
 }
 .tpl-profile-all {
   --tpl-accent: var(--color-text-primary);
   --tpl-tint: var(--color-background-secondary);
+}
+/* Text / icons drawn ON a filled accent (the active filter pill). */
+.tpl-filter {
+  --tpl-on-accent: #fff;
+}
+/* Dark theme: accents lightened to read as text on a dark card; the filled
+   pill then takes dark text instead of white. */
+:root[data-theme="dark"] .tpl-profile-basic {
+  --tpl-accent: #45c99c;
+  --tpl-tint: #173a32;
+}
+:root[data-theme="dark"] .tpl-profile-ielts {
+  --tpl-accent: #7faaf2;
+  --tpl-tint: #1c2b44;
+}
+:root[data-theme="dark"] .tpl-profile-hs {
+  --tpl-accent: #eaa944;
+  --tpl-tint: #3a2c14;
+}
+:root[data-theme="dark"] .tpl-filter {
+  --tpl-on-accent: #121816;
 }
 
 /* ----- Toolbar: search + profile filter pills ------------------------- */
@@ -72,7 +93,7 @@
 .tpl-filter.is-active {
   background: var(--tpl-accent);
   border-color: var(--tpl-accent);
-  color: #fff;
+  color: var(--tpl-on-accent);
 }
 .tpl-filter-count {
   min-width: 18px;
@@ -85,8 +106,8 @@
   text-align: center;
 }
 .tpl-filter.is-active .tpl-filter-count {
-  background: rgba(255, 255, 255, 0.25);
-  color: #fff;
+  background: color-mix(in srgb, var(--tpl-on-accent) 25%, transparent);
+  color: var(--tpl-on-accent);
 }
 
 /* ----- Groups & cards --------------------------------------------------- */
@@ -340,13 +361,13 @@
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  background: #fcebeb;
-  color: #a32d2d;
+  background: var(--color-danger-tint);
+  color: var(--color-danger-text);
   font-size: 21px;
 }
 .tpl-delete-icon.is-blocked {
-  background: #fdf1dc;
-  color: #c47a0a;
+  background: var(--color-warning-tint);
+  color: var(--color-warning-dark);
 }
 .tpl-delete-text {
   margin: 0;

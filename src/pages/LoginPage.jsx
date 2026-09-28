@@ -13,7 +13,10 @@ export default function LoginPage() {
   const [method, setMethod] = useState("username");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [status, setStatus] = useState({ text: "", color: "black" });
+  const [status, setStatus] = useState({
+    text: "",
+    color: "var(--color-text-primary)",
+  });
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -27,12 +30,15 @@ export default function LoginPage() {
     if (!username.trim() || !password.trim()) {
       setStatus({
         text: t("login.needBoth"),
-        color: "red",
+        color: "var(--color-error)",
       });
       return;
     }
 
-    setStatus({ text: t("login.loggingIn"), color: "black" });
+    setStatus({
+      text: t("login.loggingIn"),
+      color: "var(--color-text-primary)",
+    });
     setSubmitting(true);
     try {
       const result = await loginWithUsernamePassword(
@@ -40,17 +46,17 @@ export default function LoginPage() {
         password.trim(),
       );
       if (!result.ok) {
-        setStatus({ text: result.error, color: "red" });
+        setStatus({ text: result.error, color: "var(--color-error)" });
         return;
       }
-      setStatus({ text: t("login.success"), color: "green" });
+      setStatus({ text: t("login.success"), color: "var(--color-success)" });
       onLoggedIn();
       navigate("/grade", { replace: true });
     } catch (error) {
       console.error("Login error:", error);
       setStatus({
         text: t("login.serverError"),
-        color: "red",
+        color: "var(--color-error)",
       });
     } finally {
       setSubmitting(false);

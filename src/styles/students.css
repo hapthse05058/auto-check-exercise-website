@@ -26,7 +26,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  background: #1d9e75;
+  background: var(--color-primary);
   border: none;
   border-radius: var(--border-radius-md);
   padding: 9px 16px;
@@ -38,7 +38,7 @@
   white-space: nowrap;
 }
 .btn-add:hover:not(:disabled) {
-  background: #0f6e56;
+  background: var(--color-primary-hover);
 }
 .empty-state {
   text-align: center;
@@ -66,18 +66,22 @@
   border-radius: var(--border-radius-lg);
   padding: 14px 16px;
   margin-bottom: 10px;
+  box-shadow: var(--shadow-card);
+}
+.student-card:hover {
+  border-color: var(--color-border-secondary);
 }
 .avatar {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: #e1f5ee;
+  background: var(--color-primary-tint);
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 500;
   font-size: 14px;
-  color: #0f6e56;
+  color: var(--color-primary-dark);
   flex-shrink: 0;
 }
 .student-info {
@@ -118,7 +122,7 @@
   max-width: 160px;
 }
 .meta-item a {
-  color: #185fa5;
+  color: var(--color-link);
   text-decoration: none;
   font-size: 13px;
   white-space: nowrap;
@@ -155,14 +159,16 @@
   color: var(--color-text-primary);
 }
 .btn-icon.danger:hover {
-  background: #fcebeb;
-  color: #a32d2d;
-  border-color: #f7c1c1;
+  background: var(--color-danger-tint);
+  color: var(--color-danger-text);
+  border-color: var(--color-danger-tint-border);
 }
 .modal-bg {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.35);
+  background: var(--color-overlay);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
   align-items: center;
   justify-content: center;
   padding: 2rem;
@@ -176,6 +182,7 @@
   background: var(--color-background-primary);
   border-radius: var(--border-radius-lg);
   border: 1px solid var(--color-border-secondary);
+  box-shadow: var(--shadow-popover);
   padding: 1.5rem;
   width: 100%;
   /* Wider than the old single-field modal so a 2-column row + delete button
@@ -214,7 +221,7 @@
 }
 /* Required-field asterisk in modal labels. */
 .required-mark {
-  color: #d33;
+  color: var(--color-error);
   font-weight: 700;
   margin-left: 2px;
 }
@@ -222,7 +229,7 @@
 .field-group input.input-error,
 .field-group select.input-error,
 .field-group textarea.input-error {
-  border: 1px solid #d33;
+  border: 1px solid var(--color-error);
   box-shadow: 0 0 0 2px rgba(211, 51, 51, 0.18);
   outline: none;
 }
@@ -267,7 +274,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: var(--color-primary, #00977b);
+  color: var(--color-primary-dark);
   font-size: 16px;
 }
 .btn-add-row:hover {
@@ -353,7 +360,7 @@
   margin: 0;
 }
 .notice-text.notice-error {
-  color: var(--color-warning-dark, #d97706);
+  color: var(--color-warning-dark);
 }
 /* Sequence-number badge shown before each student card's avatar. */
 .student-index {
@@ -385,15 +392,15 @@
 }
 /* Destructive text button (e.g. "Delete account"). */
 .btn-text-danger {
-  color: #a32d2d;
-  border-color: #f0c2c2;
+  color: var(--color-danger-text);
+  border-color: var(--color-danger-tint-border);
 }
 .btn-text-danger:hover {
-  background: #fcebeb;
-  border-color: #e7a9a9;
+  background: var(--color-danger-tint);
+  border-color: var(--color-danger-text);
 }
 .btn-confirm {
-  background: #1d9e75;
+  background: var(--color-primary);
   border: none;
   border-radius: var(--border-radius-md);
   padding: 8px 18px;
@@ -404,7 +411,11 @@
   font-family: var(--font-sans);
 }
 .btn-confirm:hover {
-  background: #0f6e56;
+  background: var(--color-primary-hover);
+}
+.btn-add:active:not(:disabled),
+.btn-confirm:active:not(:disabled) {
+  transform: translateY(1px);
 }
 .btn-confirm:disabled {
   opacity: 0.45;
@@ -412,14 +423,14 @@
 }
 .err {
   font-size: 12px;
-  color: #a32d2d;
+  color: var(--color-danger-text);
   margin-top: 4px;
   display: none;
 }
 .count-badge {
   display: inline-block;
-  background: #e1f5ee;
-  color: #0f6e56;
+  background: var(--color-primary-tint);
+  color: var(--color-primary-dark);
   font-size: 12px;
   font-weight: 500;
   padding: 2px 9px;
@@ -504,10 +515,10 @@
   border-bottom: none;
 }
 .data-table tbody tr:hover td {
-  background: #f7faf9;
+  background: var(--color-surface-subtle);
 }
 .data-table tbody tr.row-selected:hover td {
-  background: #e4f2ec;
+  background: var(--color-row-selected-hover);
 }
 .data-table th.is-sorted {
   color: var(--color-primary-dark);
@@ -592,7 +603,7 @@
   text-align: center;
 }
 .cache-table tr.row-selected td {
-  background: #eef7f3;
+  background: var(--color-row-selected);
 }
 .cache-bulkbar {
   display: flex;
@@ -738,16 +749,16 @@
   letter-spacing: 0.02em;
 }
 .audit-severity-info {
-  background: #eef2f1;
-  color: #51615c;
+  background: var(--color-background-secondary);
+  color: var(--color-text-secondary);
 }
 .audit-severity-warn {
-  background: #fdf1dc;
-  color: #8a6116;
+  background: var(--color-warning-tint);
+  color: var(--color-warning-text);
 }
 .audit-severity-critical {
-  background: #fbe4e4;
-  color: #a32020;
+  background: var(--color-danger-tint);
+  color: var(--color-danger-text);
 }
 .audit-actor-email {
   font-size: 11px;
@@ -805,6 +816,7 @@
 /* language switcher */
 .lang-switch {
   display: inline-flex;
+  height: 34px;
   border: 1px solid var(--color-border-secondary, #c9d4d0);
   border-radius: var(--border-radius-md, 6px);
   overflow: hidden;

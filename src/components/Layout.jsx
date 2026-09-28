@@ -10,6 +10,7 @@ import { usePwaInstall } from "../hooks/usePwaInstall.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
 import { POINTS_CHANGED } from "../lib/pointEvents.js";
 import { refreshPushToken, startForegroundPushListener } from "../lib/push.js";
+import { useTheme } from "../theme/ThemeContext.jsx";
 
 function initials(name) {
   if (!name) return "?";
@@ -36,6 +37,26 @@ function LanguageSwitcher() {
         {t("lang.en")}
       </button>
     </div>
+  );
+}
+
+/** Light / dark toggle: shows the theme it switches TO. */
+function ThemeToggle() {
+  const { theme, toggleTheme } = useTheme();
+  const { t } = useLanguage();
+  const label = theme === "dark" ? t("theme.toLight") : t("theme.toDark");
+  return (
+    <button
+      className="menu-btn theme-toggle"
+      onClick={toggleTheme}
+      title={label}
+      aria-label={label}
+    >
+      <i
+        className={`ti ${theme === "dark" ? "ti-sun" : "ti-moon"}`}
+        aria-hidden="true"
+      />
+    </button>
   );
 }
 
@@ -357,6 +378,7 @@ export default function Layout() {
           <h3 className="m-0">{t("common.appTitle")}</h3>
         </Link>
         <div className="header-right">
+          <ThemeToggle />
           <LanguageSwitcher />
           {/* Admins grade on the class teacher's points (the grading screen
               shows that balance), so their own would only mislead. */}

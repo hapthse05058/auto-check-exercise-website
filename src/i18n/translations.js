@@ -3,6 +3,7 @@
 export const translations = {
   en: {
     lang: { vi: "VI", en: "EN", label: "Language" },
+    theme: { toDark: "Switch to dark mode", toLight: "Switch to light mode" },
     common: {
       appTitle: "AI Exercise Checker tool - For Basic classes",
       save: "Save",
@@ -1008,6 +1009,10 @@ export const translations = {
 
   vi: {
     lang: { vi: "VI", en: "EN", label: "Ngôn ngữ" },
+    theme: {
+      toDark: "Chuyển sang giao diện tối",
+      toLight: "Chuyển sang giao diện sáng",
+    },
     common: {
       appTitle: "Công cụ chấm bài AI - Cho lớp Basic",
       save: "Lưu",

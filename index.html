@@ -11,6 +11,19 @@
       href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"
     />
     <title>AI Exercise Checker</title>
+    <script>
+      // Apply the saved (or OS) theme before first paint — see ThemeContext.jsx.
+      (function () {
+        try {
+          var t = localStorage.getItem("app_theme");
+          if (t !== "light" && t !== "dark")
+            t = matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light";
+          document.documentElement.dataset.theme = t;
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
