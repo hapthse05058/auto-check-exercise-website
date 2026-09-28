@@ -246,6 +246,22 @@ button {
     padding: 3px 8px;
     font-size: 12px;
   }
+  /* Header dropdowns hang from the header itself (sticky, full width), not
+     from their button: a 320px panel under a mid-header button would spill
+     off the left edge. */
+  .app-header .menu-wrapper {
+    position: static;
+  }
+  .app-header .menu-options {
+    top: 100%;
+    left: 0.75rem;
+    right: 0.75rem;
+    min-width: 0;
+    max-width: none;
+  }
+  .app-header .notif-popover {
+    max-height: calc(100dvh - 5rem);
+  }
 }
 
 /* The teacher's point balance, always visible in the header. */
