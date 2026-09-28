@@ -547,6 +547,87 @@ a.login-link {
   font-size: 11px;
   color: var(--color-text-tertiary);
 }
+/* New notifications arriving while the page is open (NotificationBell). */
+.notif-toasts {
+  position: fixed;
+  right: 16px;
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: min(360px, calc(100vw - 24px));
+  /* The empty stack must not swallow clicks on the page under it. */
+  pointer-events: none;
+}
+.notif-toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 8px 10px 12px;
+  border: 1px solid var(--color-border-tertiary);
+  border-left: 3px solid var(--color-primary);
+  border-radius: var(--border-radius-md, 8px);
+  background: var(--color-background-primary);
+  box-shadow: var(--shadow-popover);
+  animation: notif-toast-in 0.2s ease-out;
+}
+.notif-toast.sev-CRITICAL {
+  border-left-color: #d64545;
+}
+.notif-toast-icon {
+  font-size: 18px;
+  color: var(--color-primary-dark);
+  margin-top: 1px;
+}
+.notif-toast.sev-CRITICAL .notif-toast-icon {
+  color: var(--color-danger-text);
+}
+.notif-toast-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.notif-toast-content .notif-item-title {
+  font-weight: 600;
+}
+.notif-toast.clickable .notif-toast-content {
+  cursor: pointer;
+}
+.notif-toast-close {
+  border: none;
+  background: transparent;
+  color: var(--color-text-tertiary);
+  padding: 2px 4px;
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
+  line-height: 1;
+}
+.notif-toast-close:hover {
+  color: var(--color-text-primary);
+  background: var(--color-surface-hover);
+}
+@keyframes notif-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .notif-toast {
+    animation: none;
+  }
+}
+@media (max-width: 640px) {
+  .notif-toasts {
+    left: 12px;
+    right: 12px;
+    width: auto;
+  }
+}
 
 .profile-btn {
   width: 36px;

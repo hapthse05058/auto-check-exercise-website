@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 
 import {
@@ -17,6 +18,9 @@ import {
 
 /** Poll cadence, matched to AuthContext's proactiveTokenRefresh interval. */
 const POLL_MS = 60_000;
+/** How long a toast stays up (paused while hovered), and how many at once. */
+const TOAST_MS = 6000;
+const MAX_TOASTS = 3;
 
 /** "deepseek.lowBalance" -> "deepseekLowBalance" (the i18n key segment). */
 function typeKey(type) {
@@ -72,6 +76,57 @@ function renderNotification(item, t) {
 }
 
 /**
+ * One toast. Dismisses itself after TOAST_MS; hovering (or focusing) it holds
+ * the timer so a long body can be read.
+ */
+function NotificationToast({ item, t, linked, onOpen, onDismiss }) {
+  const [held, setHeld] = useState(false);
+  useEffect(() => {
+    if (held) return undefined;
+    const timer = setTimeout(() => onDismiss(item.id), TOAST_MS);
+    return () => clearTimeout(timer);
+  }, [held, item.id, onDismiss]);
+
+  const { title, body } = renderNotification(item, t);
+  return (
+    <div
+      className={`notif-toast sev-${item.severity}${linked ? " clickable" : ""}`}
+      onMouseEnter={() => setHeld(true)}
+      onMouseLeave={() => setHeld(false)}
+      onFocus={() => setHeld(true)}
+      onBlur={() => setHeld(false)}
+    >
+      <i className="ti ti-bell-ringing notif-toast-icon" aria-hidden="true" />
+      <div
+        className="notif-toast-content"
+        role={linked ? "link" : undefined}
+        tabIndex={linked ? 0 : undefined}
+        onClick={linked ? () => onOpen(item) : undefined}
+        onKeyDown={
+          linked
+            ? (event) => {
+                if (event.key === "Enter") onOpen(item);
+              }
+            : undefined
+        }
+      >
+        <span className="notif-item-title">{title}</span>
+        <span className="notif-item-body">{body}</span>
+      </div>
+      <button
+        type="button"
+        className="notif-toast-close"
+        onClick={() => onDismiss(item.id)}
+        title={t("common.close")}
+        aria-label={t("common.close")}
+      >
+        <i className="ti ti-x" aria-hidden="true" />
+      </button>
+    </div>
+  );
+}
+
+/**
  * Admin notification bell. Rendered only for admins (see Layout).
  *
  * Reuses the header dropdown pattern from NavMenu/ProfileMenu: `menu-wrapper` +
@@ -93,6 +148,9 @@ export default function NotificationBell() {
   // Ids already known to be unread; null until the first load, which only
   // takes note — the chime is for notifications arriving while the page is open.
   const seenUnreadRef = useRef(null);
+  // Notifications that arrived while the page was open, newest first. Raw
+  // items, rendered at display time so they follow the current language.
+  const [toasts, setToasts] = useState([]);
   const [soundOn, setSoundOn] = useState(notificationSoundEnabled);
   const { t } = useLanguage();
   const push = usePushNotifications();
@@ -114,6 +172,14 @@ export default function NotificationBell() {
     justReadRef.current = new Set();
     navigate(path);
   };
+  const dismissToast = useCallback(
+    (id) => setToasts((prev) => prev.filter((n) => n.id !== id)),
+    [],
+  );
+  const openToast = (item) => {
+    dismissToast(item.id);
+    openItem(item);
+  };
 
   const load = useCallback(async () => {
     try {
@@ -125,7 +191,11 @@ export default function NotificationBell() {
       } else {
         const fresh = unreadIds.filter((id) => !seenUnreadRef.current.has(id));
         fresh.forEach((id) => seenUnreadRef.current.add(id));
-        if (fresh.length > 0) playNotificationSound();
+        if (fresh.length > 0) {
+          playNotificationSound();
+          const arrived = results.filter((n) => fresh.includes(n.id));
+          setToasts((prev) => [...arrived, ...prev].slice(0, MAX_TOASTS));
+        }
       }
       setItems(results);
       setUnread(data.unreadCount || 0);
@@ -214,6 +284,8 @@ export default function NotificationBell() {
       }
       const stillUnread = items.filter((n) => !n.read).map((n) => n.id);
       justReadRef.current = new Set(stillUnread);
+      // The panel now shows them all; the toasts would only repeat it.
+      setToasts([]);
       if (stillUnread.length > 0) {
         setItems((prev) => prev.map((n) => ({ ...n, read: true })));
         setUnread(0);
@@ -305,6 +377,24 @@ export default function NotificationBell() {
             );
           })}
         </div>
+      )}
+
+      {/* Portalled to <body>: the header's backdrop-filter would otherwise
+          pin a position:fixed child to the header instead of the viewport. */}
+      {createPortal(
+        <div className="notif-toasts" role="status" aria-live="polite">
+          {toasts.map((item) => (
+            <NotificationToast
+              key={item.id}
+              item={item}
+              t={t}
+              linked={Boolean(pathOf(item))}
+              onOpen={openToast}
+              onDismiss={dismissToast}
+            />
+          ))}
+        </div>,
+        document.body,
       )}
     </div>
   );
