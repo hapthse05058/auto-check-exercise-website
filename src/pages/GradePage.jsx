@@ -485,6 +485,19 @@ export default function GradePage() {
     !starting &&
     !jobRunning &&
     !clearing;
+  // Why the grade button is off, while the fix is still up to the teacher.
+  // Mid-run the button's own label ("Processing...") already says why.
+  const busy = starting || jobRunning || clearing;
+  const processHint =
+    busy || lessonsLoading
+      ? ""
+      : !selectedClassId
+        ? t("grade.hintSelectClass")
+        : lessons.length === 0
+          ? t("grade.hintNoLessons")
+          : !selectedLessonId
+            ? t("grade.hintSelectLesson")
+            : "";
 
   return (
     <div className="page-wide">
@@ -558,6 +571,7 @@ export default function GradePage() {
           className="primary-btn"
           onClick={handleProcessAllDocs}
           disabled={!canProcess}
+          aria-describedby={processHint ? "grade-process-hint" : undefined}
         >
           {starting || jobRunning ? t("grade.processing") : t("grade.process")}
         </button>
@@ -579,6 +593,12 @@ export default function GradePage() {
           </button>
         )}
       </div>
+      {processHint && (
+        <p id="grade-process-hint" className="field-hint">
+          <i className="ti ti-info-circle" aria-hidden="true" />
+          {processHint}
+        </p>
+      )}
       {selectedClassId && (
         <p className="auto-grade-summary">
           {schedule?.enabled && schedule.next

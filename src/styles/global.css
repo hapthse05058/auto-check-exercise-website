@@ -932,6 +932,15 @@ textarea {
   color: var(--color-text-secondary);
   margin: 0 0 0.75rem;
 }
+/* What a disabled button is waiting for, just under it. */
+.field-hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin: 0 0 0.5rem;
+}
 .secondary-btn {
   background: none;
   border: 1px solid var(--color-primary);
