@@ -117,7 +117,12 @@ const NAV_GROUPS = [
     title: "nav.groupGrading",
     items: [
       { path: "/grade", label: "nav.grade", icon: "ti-checklist" },
-      { path: "/ielts-writing", label: "nav.ieltsWriting", icon: "ti-writing" },
+      {
+        path: "/ielts-writing",
+        label: "nav.ieltsWriting",
+        icon: "ti-writing",
+        admin: true,
+      },
       {
         path: "/speaking",
         label: "nav.gradeSpeaking",

@@ -5,7 +5,7 @@ import { useAuth } from "../auth/AuthContext.jsx";
 import { isAdminEmail } from "../config.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
 
-const SPEAKING_URL = "https://grader.io.vn/";
+const SPEAKING_URL = "https://sec.grader.io.vn/";
 
 export default function SpeakingPage() {
   const { loadTeacherInfo } = useAuth();
@@ -76,7 +76,7 @@ export default function SpeakingPage() {
           }}
           // No sandbox on purpose: a cross-origin iframe is already isolated from the
           // parent by the same-origin policy (it can't read our DOM/cookies). Enabling
-          // sandbox tends to break grader.io.vn's own login/scripts.
+          // sandbox tends to break sec.grader.io.vn's own login/scripts.
         />
       </div>
     </div>

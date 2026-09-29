@@ -79,13 +79,16 @@ export default function IeltsWritingPage() {
           navigate("/missing-teacher", { replace: true });
           return;
         }
-        const admin = isAdminEmail(teacherInfo.gmail);
-        setIsAdmin(admin);
-        // Only an admin picks a class: it bills that class's teacher.
-        if (admin) {
-          const list = await fetchAllClasses();
-          if (!cancelled) setClasses(Array.isArray(list) ? list : []);
+        // Admin only — the route is reachable by URL even though the menu
+        // item is hidden. Teachers grade IELTS classes from /grade.
+        if (!isAdminEmail(teacherInfo.gmail)) {
+          navigate("/grade", { replace: true });
+          return;
         }
+        setIsAdmin(true);
+        // The admin may pick a class: it bills that class's teacher.
+        const list = await fetchAllClasses();
+        if (!cancelled) setClasses(Array.isArray(list) ? list : []);
       } catch (err) {
         if (err.message !== "RE-AUTH_NEEDED")
           console.error("IELTS page load failed:", err);
@@ -191,6 +194,8 @@ export default function IeltsWritingPage() {
   }
 
   const result = outcome?.result;
+
+  if (!isAdmin) return null; // admin not confirmed yet → render nothing
 
   return (
     <div className="page-wide">
