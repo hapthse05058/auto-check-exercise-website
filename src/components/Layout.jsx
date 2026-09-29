@@ -107,11 +107,80 @@ function PointBadge() {
   );
 }
 
+/**
+ * The ☰ menu, grouped. Items and groups marked `admin` are hidden from
+ * teachers. On desktop each group is a column (styles: .nav-menu).
+ */
+const NAV_GROUPS = [
+  {
+    key: "grading",
+    title: "nav.groupGrading",
+    items: [
+      { path: "/grade", label: "nav.grade", icon: "ti-checklist" },
+      { path: "/ielts-writing", label: "nav.ieltsWriting", icon: "ti-writing" },
+      {
+        path: "/speaking",
+        label: "nav.gradeSpeaking",
+        icon: "ti-microphone",
+        admin: true,
+      },
+    ],
+  },
+  {
+    key: "classes",
+    title: "nav.groupClasses",
+    items: [
+      { path: "/classes/new", label: "nav.addClass", icon: "ti-circle-plus" },
+      {
+        path: "/classes/manage",
+        label: "nav.manageClasses",
+        icon: "ti-school",
+      },
+      { path: "/students/add", label: "nav.addStudents", icon: "ti-user-plus" },
+      {
+        path: "/students/manage",
+        label: "nav.manageStudents",
+        icon: "ti-users",
+      },
+    ],
+  },
+  {
+    key: "admin",
+    title: "nav.groupAdmin",
+    admin: true,
+    items: [
+      {
+        path: "/admin/teachers",
+        label: "nav.manageTeachers",
+        icon: "ti-id-badge-2",
+      },
+      {
+        path: "/admin/teacher-points",
+        label: "nav.managePoints",
+        icon: "ti-coins",
+      },
+      { path: "/admin/courses", label: "nav.manageCourses", icon: "ti-books" },
+      {
+        path: "/admin/templates",
+        label: "nav.manageTemplates",
+        icon: "ti-template",
+      },
+      {
+        path: "/admin/grading-cache",
+        label: "nav.manageCache",
+        icon: "ti-database",
+      },
+      { path: "/admin/audit-logs", label: "nav.auditLog", icon: "ti-history" },
+    ],
+  },
+];
+
 /** ☰ menu with navigation shortcuts (replaces the extension popup menu). */
 function NavMenu() {
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef(null);
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const { teacherInfo } = useAuth();
   const { t } = useLanguage();
 
@@ -131,96 +200,50 @@ function NavMenu() {
   };
 
   const isAdmin = isAdminEmail(teacherInfo?.gmail);
+  const groups = NAV_GROUPS.filter((group) => isAdmin || !group.admin)
+    .map((group) => ({
+      ...group,
+      items: group.items.filter((item) => isAdmin || !item.admin),
+    }))
+    .filter((group) => group.items.length > 0);
 
   return (
     <div className="menu-wrapper" ref={wrapperRef}>
       <button
         className="menu-btn"
         title="Menu"
+        aria-label="Menu"
+        aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
       >
         ☰
       </button>
       {open && (
-        <div className="menu-options">
-          <button className="menu-option" onClick={() => go("/grade")}>
-            {t("nav.grade")}
-          </button>
-          <button className="menu-option" onClick={() => go("/ielts-writing")}>
-            {t("nav.ieltsWriting")}
-          </button>
-          <button className="menu-option" onClick={() => go("/classes/new")}>
-            {t("nav.addClass")}
-          </button>
-          <button className="menu-option" onClick={() => go("/students/add")}>
-            {t("nav.addStudents")}
-          </button>
-          <button
-            className="menu-option"
-            onClick={() => go("/students/manage")}
-          >
-            {t("nav.manageStudents")}
-          </button>
-          <button className="menu-option" onClick={() => go("/classes/manage")}>
-            {t("nav.manageClasses")}
-          </button>
-          {isAdmin && (
-            <button
-              className="menu-option"
-              onClick={() => go("/admin/grading-cache")}
-            >
-              {t("nav.manageCache")}
-            </button>
-          )}
-          {isAdmin && (
-            <button
-              className="menu-option"
-              onClick={() => go("/admin/teacher-points")}
-            >
-              {t("nav.managePoints")}
-            </button>
-          )}
-          {isAdmin && (
-            <button
-              className="menu-option"
-              onClick={() => go("/admin/teachers")}
-            >
-              {t("nav.manageTeachers")}
-            </button>
-          )}
-          {isAdmin && (
-            <button
-              className="menu-option"
-              onClick={() => go("/admin/courses")}
-            >
-              {t("nav.manageCourses")}
-            </button>
-          )}
-          {isAdmin && (
-            <button
-              className="menu-option"
-              onClick={() => go("/admin/templates")}
-            >
-              {t("nav.manageTemplates")}
-            </button>
-          )}
-          {isAdmin && (
-            <button className="menu-option" onClick={() => go("/speaking")}>
-              {t("nav.gradeSpeaking")}
-            </button>
-          )}
-          {isAdmin && (
-            <button
-              className="menu-option"
-              onClick={() => go("/admin/audit-logs")}
-            >
-              {t("nav.auditLog")}
-            </button>
-          )}
-          <a className="menu-option" href={`mailto:${SUPPORT_EMAIL}`}>
-            {t("nav.support", { email: SUPPORT_EMAIL })}
-          </a>
-        </div>
+        <nav
+          className="menu-options nav-menu"
+          aria-label="Menu"
+          style={{ "--nav-cols": groups.length }}
+        >
+          {groups.map((group) => (
+            <div className="nav-group" key={group.key}>
+              <p className="nav-group-title">{t(group.title)}</p>
+              {group.items.map((item) => {
+                const active = pathname === item.path;
+                return (
+                  <button
+                    key={item.path}
+                    className={`menu-option nav-item${active ? " active" : ""}`}
+                    aria-current={active ? "page" : undefined}
+                    onClick={() => go(item.path)}
+                  >
+                    <i className={`ti ${item.icon}`} aria-hidden="true" />
+                    {t(item.label)}
+                  </button>
+                );
+              })}
+            </div>
+          ))}
+        </nav>
       )}
     </div>
   );
@@ -343,6 +366,18 @@ function ProfileMenu({ teacherInfo }) {
               {t("notif.pushIosHint")}
             </p>
           )}
+          {/* Moved out of the ☰ menu: it is not a page, and its long label
+              (it carries the address) widened every column there. */}
+          <a
+            className="menu-option install-option"
+            href={`mailto:${SUPPORT_EMAIL}`}
+          >
+            <i className="ti ti-help-circle" aria-hidden="true" />
+            {t("nav.contactSupport")}
+          </a>
+          <p className="profile-detail profile-support-email">
+            {SUPPORT_EMAIL}
+          </p>
         </div>
       )}
     </div>

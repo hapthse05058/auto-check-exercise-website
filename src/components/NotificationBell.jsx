@@ -8,6 +8,13 @@ import {
 } from "../api/backend.js";
 import { usePushNotifications } from "../hooks/usePushNotifications.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
+import {
+  NOTIFICATIONS_CHANGED,
+  isShownInBell,
+  pathOf,
+  relativeTime,
+  renderNotification,
+} from "../lib/notificationView.js";
 import { PUSH_EVENT } from "../lib/push.js";
 import {
   notificationSoundEnabled,
@@ -21,59 +28,6 @@ const POLL_MS = 60_000;
 /** How long a toast stays up (paused while hovered), and how many at once. */
 const TOAST_MS = 6000;
 const MAX_TOASTS = 3;
-
-/** "deepseek.lowBalance" -> "deepseekLowBalance" (the i18n key segment). */
-function typeKey(type) {
-  return String(type || "")
-    .split(".")
-    .map((part, i) => (i === 0 ? part : part[0].toUpperCase() + part.slice(1)))
-    .join("");
-}
-
-function relativeTime(iso, t) {
-  if (!iso) return "";
-  const minutes = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);
-  if (minutes < 1) return t("notif.justNow");
-  if (minutes < 60) return t("notif.minutesAgo", { n: minutes });
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return t("notif.hoursAgo", { n: hours });
-  return t("notif.daysAgo", { n: Math.floor(hours / 24) });
-}
-
-/**
- * Renders a notification through i18n when we have strings for its type, so it
- * follows the viewer's language. Falls back to the server-rendered title/body
- * otherwise — that way a notification type added on the backend still displays
- * correctly without a frontend release.
- */
-function renderNotification(item, t) {
-  const key = `notif.type.${typeKey(item.type)}`;
-  const title = t(key);
-  if (title === key) return { title: item.title, body: item.body };
-
-  const bodyKey = `${key}Body`;
-  // Two decimals, matching the server-rendered body, so the same alert reads
-  // identically whether it comes through i18n here or straight from Firestore.
-  const amount = (v) =>
-    v === null || v === undefined || v === "" ? "" : Number(v).toFixed(2);
-  // Every field of `data` is available as a placeholder, so a new notification
-  // type only needs its i18n strings — no change here. The balance-specific
-  // aliases below are extra names on top, not a replacement for the raw fields.
-  const vars = {
-    ...(item.data || {}),
-    balance: amount(item.data?.totalBalance),
-    currency: item.data?.currency ?? "",
-    threshold: amount(item.data?.threshold),
-  };
-  const body = t(bodyKey, vars);
-  // A body still carrying {placeholders} means the i18n string expects a field
-  // this notification does not have — fall back to what the server rendered
-  // rather than showing the user raw braces.
-  if (body === bodyKey || /\{[a-zA-Z]\w*\}/.test(body)) {
-    return { title, body: item.body };
-  }
-  return { title, body };
-}
 
 /**
  * One toast. Dismisses itself after TOAST_MS; hovering (or focusing) it holds
@@ -156,15 +110,6 @@ export default function NotificationBell() {
   const push = usePushNotifications();
   const navigate = useNavigate();
 
-  /** Only in-app paths are followed ("/grade?classId=…"), never a full URL. */
-  const pathOf = (item) => {
-    const path = item.data?.path;
-    return typeof path === "string" &&
-      path.startsWith("/") &&
-      !path.startsWith("//")
-      ? path
-      : null;
-  };
   const openItem = (item) => {
     const path = pathOf(item);
     if (!path) return;
@@ -249,7 +194,12 @@ export default function NotificationBell() {
   useEffect(() => {
     const onPush = () => load();
     window.addEventListener(PUSH_EVENT, onPush);
-    return () => window.removeEventListener(PUSH_EVENT, onPush);
+    // The notifications page marked something read: refresh the badge.
+    window.addEventListener(NOTIFICATIONS_CHANGED, onPush);
+    return () => {
+      window.removeEventListener(PUSH_EVENT, onPush);
+      window.removeEventListener(NOTIFICATIONS_CHANGED, onPush);
+    };
   }, [load]);
 
   useEffect(() => {
@@ -293,6 +243,17 @@ export default function NotificationBell() {
       }
       return true;
     });
+  };
+
+  // Old read notifications leave the dropdown; the notifications page keeps
+  // them. The ones this very opening marked read stay until it closes.
+  const shown = items.filter(
+    (item) => justReadRef.current.has(item.id) || isShownInBell(item),
+  );
+  const openAll = () => {
+    setOpen(false);
+    justReadRef.current = new Set();
+    navigate("/notifications");
   };
 
   return (
@@ -345,11 +306,11 @@ export default function NotificationBell() {
           )}
 
           {failed && <p className="notif-empty">{t("notif.loadFailed")}</p>}
-          {!failed && items.length === 0 && (
-            <p className="notif-empty">{t("notif.empty")}</p>
+          {!failed && shown.length === 0 && (
+            <p className="notif-empty">{t("notif.emptyRecent")}</p>
           )}
 
-          {items.map((item) => {
+          {shown.map((item) => {
             const { title, body } = renderNotification(item, t);
             const isNew = !item.read || justReadRef.current.has(item.id);
             const linked = Boolean(pathOf(item));
@@ -376,6 +337,11 @@ export default function NotificationBell() {
               </div>
             );
           })}
+
+          <button type="button" className="notif-see-all" onClick={openAll}>
+            {t("notif.seeAll")}
+            <i className="ti ti-arrow-right" aria-hidden="true" />
+          </button>
         </div>
       )}
 

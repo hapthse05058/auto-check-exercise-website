@@ -453,6 +453,67 @@ a.login-link {
   background: var(--color-surface-hover);
 }
 
+/* --- ☰ menu, grouped (Layout NavMenu) ------------------------------------ */
+.nav-menu {
+  gap: 0.25rem;
+}
+.nav-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+/* Phones and narrow windows: one column, a rule between groups. */
+.nav-group + .nav-group {
+  margin-top: 0.35rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--color-border-tertiary);
+}
+.nav-group-title {
+  margin: 0 0 0.2rem;
+  padding: 0 0.5rem;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-tertiary);
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+}
+.nav-item .ti {
+  font-size: 17px;
+  color: var(--color-text-secondary);
+}
+.nav-item.active {
+  background: var(--color-primary-tint);
+  color: var(--color-primary-dark);
+  font-weight: 600;
+}
+.nav-item.active .ti {
+  color: var(--color-primary-dark);
+}
+/* Desktop: one column per group, so the admin menu is ~6 rows, not 14. */
+@media (min-width: 900px) {
+  .menu-options.nav-menu {
+    display: grid;
+    grid-template-columns: repeat(var(--nav-cols, 1), max-content);
+    gap: 0 1rem;
+  }
+  .nav-group + .nav-group {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+    padding-left: 1rem;
+    border-left: 1px solid var(--color-border-tertiary);
+  }
+  .nav-item {
+    white-space: nowrap;
+  }
+}
+
 /* --- Notification bell (admin) ------------------------------------------ */
 .notif-btn {
   position: relative;
@@ -547,6 +608,94 @@ a.login-link {
   font-size: 11px;
   color: var(--color-text-tertiary);
 }
+/* "See all notifications", pinned to the bottom of the bell's panel. */
+.notif-see-all {
+  position: sticky;
+  bottom: -0.75rem;
+  margin: 0.25rem -0.75rem -0.75rem;
+  padding: 0.6rem 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: none;
+  border-top: 1px solid var(--color-border-tertiary);
+  background: var(--color-background-primary);
+  color: var(--color-primary-dark);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.notif-see-all:hover {
+  background: var(--color-surface-hover);
+}
+
+/* --- Notifications page (pages/NotificationsPage.jsx) --------------------- */
+.notif-page-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.notif-page-item {
+  padding: 0.65rem 0.8rem;
+  border: 1px solid var(--color-border-tertiary);
+  border-left-width: 3px;
+  background: var(--color-background-primary);
+}
+.notif-page-item:not(.unread) {
+  border-left-color: var(--color-border-tertiary);
+}
+.notif-page-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.notif-page-item .notif-item-title {
+  font-size: 14px;
+}
+.notif-page-item .notif-item-body {
+  font-size: 13px;
+}
+.notif-page-item .notif-time {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+}
+.notif-sev-badge {
+  flex: none;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--color-surface-subtle);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border-tertiary);
+}
+.notif-sev-badge.sev-WARN {
+  background: var(--color-warning-light);
+  color: var(--color-warning-text);
+  border-color: transparent;
+}
+.notif-sev-badge.sev-CRITICAL {
+  background: var(--color-danger-tint);
+  color: var(--color-danger-text);
+  border-color: var(--color-danger-tint-border);
+}
+.notif-link-icon {
+  font-size: 13px;
+}
+@media (max-width: 640px) {
+  .cache-search.notif-filters select {
+    flex: 1 1 calc(50% - 4px);
+    min-width: 0;
+  }
+}
+
 /* New notifications arriving while the page is open (NotificationBell). */
 .notif-toasts {
   position: fixed;
@@ -657,6 +806,15 @@ a.login-link {
   margin: 0.25rem 0;
   color: var(--color-text-secondary);
   word-break: break-all;
+}
+/* The support address, under "Contact support" in the avatar menu. */
+.profile-support-email {
+  margin: 0 0 0 calc(0.5rem + 1.5em);
+  font-size: 12px;
+  color: var(--color-text-tertiary);
+  /* One line: .profile-detail's break-all would split the address. */
+  word-break: normal;
+  white-space: nowrap;
 }
 .install-option {
   display: flex;

@@ -848,6 +848,25 @@ export async function fetchNotifications({ status = "all", limit = 50 } = {}) {
   return response.json();
 }
 
+/**
+ * The notifications page: everything addressed to the viewer, filtered.
+ * `status` all|unread|read, `category` all|grading|system, `severity`
+ * all|INFO|WARN|CRITICAL, `since` an ISO timestamp or "". Returns
+ * `{ results, truncated }`.
+ */
+export async function searchNotifications({
+  status = "all",
+  category = "all",
+  severity = "all",
+  since = "",
+} = {}) {
+  const params = new URLSearchParams({ status, category, severity });
+  if (since) params.set("since", since);
+  const response = await authFetch(`/notifications/search?${params}`);
+  if (!response.ok) throw new Error("Failed to search notifications");
+  return response.json();
+}
+
 export async function markNotificationRead(id) {
   const response = await authFetch(
     `/notifications/${encodeURIComponent(id)}/read`,
