@@ -6,7 +6,9 @@
  * selected class type maps to — so other lessons living in the same document
  * are never touched. An IELTS class (course gradingProfile "ielts") has no
  * class-type tables: its IELTS WRITING tables (ieltsDoc.js) are cleared
- * instead, i.e. their "GV chữa" cell. An HS class (gradingProfile "hs") has
+ * instead — the "GV chữa" cell of the old layout, and in the teachers'
+ * 2-column layout only the text the AI wrote below "GV chữa/nhận xét"
+ * (buildIeltsClearRequests). An HS class (gradingProfile "hs") has
  * its corrections inline, after each answer: only the text the AI wrote and
  * nobody edited since is removed (hsDoc.js buildHsClearRequests), and "cells"
  * counts those corrections. Nothing here spends points or reads the grading
@@ -23,7 +25,7 @@ import { collectExerciseRows } from "./docTableDetect.js";
 import { buildClearFeedbackRequests } from "./docWriter.js";
 import { resolveDocRefs } from "./grading.js";
 import { buildHsClearRequests, findHsTab } from "./hsDoc.js";
-import { collectIeltsRows, findIeltsTab } from "./ieltsDoc.js";
+import { buildIeltsClearRequests, findIeltsTab } from "./ieltsDoc.js";
 import { batchUpdateDoc, getTabContent } from "../api/googleDocs.js";
 import { ensureValidGoogleToken } from "../auth/tokens.js";
 
@@ -57,10 +59,16 @@ async function scanDoc(
     const { requests, removed } = buildHsClearRequests(tab);
     return { token, requests, count: removed };
   }
+  if (ielts) {
+    const { requests, count, rows } = buildIeltsClearRequests(tab);
+    if (!rows) {
+      warn(t("clearFeedback.noTable", { docId: ref.docId }));
+      return null;
+    }
+    return { token, requests, count };
+  }
 
-  const { rows } = ielts
-    ? collectIeltsRows(tab)
-    : collectExerciseRows(tab, classType);
+  const { rows } = collectExerciseRows(tab, classType);
   if (!rows.length) {
     warn(t("clearFeedback.noTable", { docId: ref.docId }));
     return null;
