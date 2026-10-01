@@ -645,12 +645,12 @@ describe("partial grading — the teacher corrected some items by hand", () => {
 });
 
 describe("writing corrections", () => {
-  it("formats like the class's teachers: ✅Well-done! / Câu đúng: … (…)", () => {
+  it("formats like the class's teachers: ✅ / Câu đúng: … (…)", () => {
     const append = { target: { mode: "append" } };
     const cell = { target: { mode: "cell" } };
     const inline = { target: { mode: "inline" } };
-    expect(formatHsFeedback(append, { correct: true })).toBe(" ✅Well-done!");
-    expect(formatHsFeedback(cell, { correct: true })).toBe("✅Well-done!");
+    expect(formatHsFeedback(append, { correct: true })).toBe(" ✅");
+    expect(formatHsFeedback(cell, { correct: true })).toBe("✅");
     expect(formatHsFeedback(inline, { correct: true })).toBe("✅");
     expect(
       formatHsFeedback(append, {
@@ -668,6 +668,26 @@ describe("writing corrections", () => {
     ).toBe("Câu đúng: A.\u000bB. (x)");
     expect(formatHsFeedback(inline, { correct: false, expected: "hall" })).toBe(
       " ❌ → **hall**",
+    );
+  });
+
+  it("adds the Vietnamese meaning when the verdict carries one (rearrange)", () => {
+    const append = { target: { mode: "append" } };
+    expect(
+      formatHsFeedback(append, {
+        correct: true,
+        translation: "Anh ấy chạy nhanh.",
+      }),
+    ).toBe(" ✅ Dịch: Anh ấy chạy nhanh.");
+    expect(
+      formatHsFeedback(append, {
+        correct: false,
+        corrected: "She has a **small bag**.",
+        explanation: "Adj đứng trước N nhé",
+        translation: "Cô ấy có một cái túi nhỏ.",
+      }),
+    ).toBe(
+      "\u000bCâu đúng: She has a **small bag**. (Adj đứng trước N nhé) Dịch: Cô ấy có một cái túi nhỏ.",
     );
   });
 
@@ -781,7 +801,7 @@ describe("Xóa feedback — only the AI's own, intact text", () => {
     // The teacher types right after the first AI note (outside its range),
     // and inside the second one.
     typeInto(doc, tab, "There is a lamp to the table.", " nha", {
-      after: "✅Well-done!",
+      after: "✅",
     });
     typeInto(doc, tab, "The children are playing", " rồi", {
       after: "S số ít",
@@ -790,7 +810,7 @@ describe("Xóa feedback — only the AI's own, intact text", () => {
     expect(plan).toMatchObject({ removed: 1, kept: 1 });
     applyRequests(doc, plan.requests);
     const first = paraText(findParagraph(tab, "There is a lamp to the table."));
-    expect(first).not.toContain("Well-done");
+    expect(first).not.toContain("✅");
     expect(first).toContain(" nha");
     expect(paraText(findParagraph(tab, "The children are playing"))).toContain(
       "S số ít rồi nhé",
