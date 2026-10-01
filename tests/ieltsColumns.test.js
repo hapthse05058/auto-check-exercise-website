@@ -15,6 +15,7 @@ import {
   buildFeedbackRequests,
 } from "../src/lib/docWriter.js";
 import {
+  LAYOUT_BELOW,
   LAYOUT_COLUMNS,
   buildIeltsClearRequests,
   buildIeltsFeedbackRequests,
@@ -247,6 +248,21 @@ describe("reading the 2-column layout", () => {
     expect(collectIeltsRows(makeColumnsTab(spec).tab).rows).toEqual([]);
   });
 
+  it("a cell holding only the template's part labels is not written yet", () => {
+    const labels = lesson4({
+      essay: ["Intro:", "Overview:", "Body 1:", "Body 2 :", "Conclusion"],
+    });
+    const rows = collectIeltsRows(makeColumnsTab(labels).tab).rows;
+    expect(selectIeltsItemsToGrade(rows)).toEqual({ items: [], graded: 0 });
+    const started = lesson4({
+      essay: ["Intro: The graph shows crime.", "Overview:"],
+    });
+    const [item] = selectIeltsItemsToGrade(
+      collectIeltsRows(makeColumnsTab(started).tab).rows,
+    ).items;
+    expect(item.answer).toBe("Intro: The graph shows crime.\nOverview:");
+  });
+
   it("an unwritten essay is not graded; anything below the heading means graded", () => {
     const empty = collectIeltsRows(
       makeColumnsTab(lesson4({ essay: [] })).tab,
@@ -394,6 +410,128 @@ describe("old-layout tables keep docWriter's behaviour byte for byte", () => {
     doc.apply(plan.requests);
     expect(doc.cell(0, 3, 1)).toBe("");
     expect(doc.cell(2, 0, 1)).toBe("GV chữa/nhận xét");
+  });
+});
+
+describe("the lesson's own table with a 'GV chữa/nhận xét' row below", () => {
+  const INTRO = "Intro: The line graph illustrates how much fish was eaten.";
+  const OVERVIEW = "Overview: Overall, chicken rose while the rest fell.";
+  /** Buổi 2, Exercise 2: the old Intro/Overview table plus a last row. */
+  const lesson2 = ({
+    intro = INTRO,
+    overview = OVERVIEW,
+    head = "GV chữa/nhận xét (Đoạn văn)",
+    fb = "",
+  } = {}) => [
+    "Exercise 2: Viết Intro và Overview cho 2 đề sau đây",
+    "The graph below shows the consumption of fish and different kinds of meat.",
+    { image: "fish" },
+    {
+      table: [
+        [intro.replace(/^(Intro:)/, "**$1**")],
+        [overview.replace(/^(Overview:)/, "**$1**")],
+        [[`**${head}**`, ...(fb ? [fb] : [])].join("\n")],
+      ],
+    },
+    "Gợi ý:",
+  ];
+
+  it("reads the rows above as the writing, the last row as the feedback cell", () => {
+    const { tab } = makeColumnsTab(lesson2());
+    const { rows } = collectIeltsRows(tab);
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({
+      layout: LAYOUT_BELOW,
+      tableIdx: 0,
+      rowIdx: 2,
+      task: "paragraph",
+      taskFromLabel: true,
+      essayText: `${INTRO}\n${OVERVIEW}`,
+      feedbackText: "",
+      imageIds: ["fish"],
+    });
+    expect(rows[0].promptText).toContain("consumption of fish");
+  });
+
+  it("the task comes from the heading, else it is guessed", () => {
+    const label = (head) =>
+      collectIeltsRows(makeColumnsTab(lesson2({ head })).tab).rows[0];
+    expect(label("GV chữa/nhận xét (Task 1)").task).toBe("task1");
+    expect(label("GV chữa/nhận xét – Task 2").task).toBe("task2");
+    expect(label("GV chữa/nhận xét")).toMatchObject({
+      task: "paragraph",
+      taskFromLabel: false,
+    });
+    expect(label("Nhận xét của GV").layout).toBe(LAYOUT_BELOW);
+  });
+
+  it("only the template's labels: not written yet", () => {
+    const blank = lesson2({ intro: "Intro:", overview: "Overview:" });
+    const rows = collectIeltsRows(makeColumnsTab(blank).tab).rows;
+    expect(selectIeltsItemsToGrade(rows)).toEqual({ items: [], graded: 0 });
+  });
+
+  it("two-column rows (buổi 11) are read row by row", () => {
+    const spec = [
+      "Exercise 2: viết mở bài và kết bài cho đề bài sau",
+      "1, New technologies have changed the way children spend their free time.",
+      {
+        table: [
+          ["**Introduction:**", "It is often argued that technology…"],
+          ["**Conclusion:**", "In conclusion, I believe…"],
+          ["**GV chữa/nhận xét (Đoạn văn)**", ""],
+        ],
+      },
+    ];
+    const [entry] = collectIeltsRows(makeColumnsTab(spec).tab).rows;
+    expect(entry.essayText).toBe(
+      "Introduction:\nIt is often argued that technology…\nConclusion:\nIn conclusion, I believe…",
+    );
+    const blank = [
+      ...spec.slice(0, 2),
+      {
+        table: [
+          ["**Introduction:**", ""],
+          ["**Conclusion:**", ""],
+          ["**GV chữa/nhận xét**", ""],
+        ],
+      },
+    ];
+    const rows = collectIeltsRows(makeColumnsTab(blank).tab).rows;
+    expect(selectIeltsItemsToGrade(rows).items).toEqual([]);
+  });
+
+  it("a teacher's comment row is not a feedback heading", () => {
+    const spec = lesson2({ head: "Nhận xét: Intro nhìn chung đúng và rõ ý." });
+    expect(collectIeltsRows(makeColumnsTab(spec).tab).rows).toEqual([]);
+  });
+
+  it("writes below the heading, clears only the AI's text", () => {
+    const doc = makeColumnsTab(lesson2());
+    const { rows } = collectIeltsRows(doc.tab);
+    const res = results(rows);
+    doc.apply(buildIeltsFeedbackRequests(res, rows, "t.w"));
+    expect(doc.cell(0, 2, 0)).toBe(
+      "GV chữa/nhận xét (Đoạn văn)\n1. BẢN CHỮA\nThe line graph illustrates the number of crimes → incidents (từ của đề).\n3. NHẬN XÉT\nEm viết khá tốt nha.",
+    );
+    expect(doc.cell(0, 0, 0)).toBe(INTRO);
+    expect(doc.cell(0, 1, 0)).toBe(OVERVIEW);
+    const after = collectIeltsRows(doc.tab).rows;
+    expect(matchesOwnIeltsFeedback(res, after, doc.tab)).toBe(true);
+    expect(selectIeltsItemsToGrade(after)).toMatchObject({
+      items: [],
+      graded: 1,
+    });
+
+    doc.type(0, 2, 0, "\nCô: tốt lắm.");
+    doc.apply(buildIeltsClearRequests(doc.tab).requests);
+    expect(doc.cell(0, 2, 0)).toBe("GV chữa/nhận xét (Đoạn văn)\nCô: tốt lắm.");
+    expect(doc.cell(0, 0, 0)).toBe(INTRO);
+  });
+
+  it("a 2-column table is still read as columns, not 'below'", () => {
+    const { rows } = collectIeltsRows(makeColumnsTab(lesson4()).tab);
+    expect(rows.map((r) => r.layout)).toEqual([LAYOUT_COLUMNS]);
   });
 });
 
