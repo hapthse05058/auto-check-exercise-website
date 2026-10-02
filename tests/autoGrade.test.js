@@ -2,129 +2,159 @@ import { describe, expect, it } from "vitest";
 
 import {
   nextSlotAfter,
+  partDay,
   runLabel,
+  scheduleSummary,
   scheduleToValue,
   slotErrorText,
   slotsToBody,
   validateSlots,
+  weekdayOf,
 } from "../src/lib/autoGrade.js";
-import { fromVnInput } from "../src/lib/scheduleTime.js";
+import { fromVnDate } from "../src/lib/scheduleTime.js";
 
 const HOUR = 60 * 60 * 1000;
-const WEEK = 7 * 24 * HOUR;
-// Tuesday 29/09/2026 20:00 → Wednesday 12:00, Thursday 20:00 → Friday 12:00.
-const TUE = { student: "2026-09-29T20:00", grader: "2026-09-30T12:00" };
-const THU = { student: "2026-10-01T20:00", grader: "2026-10-02T12:00" };
+const DAY = 24 * HOUR;
+const WEEK = 7 * DAY;
+// Wednesday 30/09/2026 morning, Friday 02/10/2026 evening.
+const WED = { id: "a", date: "2026-09-30", part: "morning" };
+const FRI = { id: "b", date: "2026-10-02", part: "evening" };
 
 describe("validateSlots", () => {
-  it("accepts several lessons a week in any order", () => {
-    expect(validateSlots([THU, TUE])).toBe(null);
+  it("accepts several days a week in any order", () => {
+    expect(validateSlots([FRI, WED])).toBe(null);
+    expect(weekdayOf(WED.date)).toBe(3);
   });
 
-  it("names the slot with bad deadlines", () => {
-    const bad = { student: "2026-10-01T20:00", grader: "2026-10-01T21:00" };
-    expect(validateSlots([TUE, bad])).toEqual({
-      key: "autoGrade.error.deadline_gap_too_short",
+  it("names the slot without a day, or with an unknown part", () => {
+    expect(validateSlots([WED, { date: "", part: "morning" }])).toEqual({
+      key: "autoGrade.dateRequired",
       params: { slot: 2 },
     });
-    expect(validateSlots([TUE, { student: "", grader: "" }]).key).toBe(
-      "autoGrade.bothRequired",
+    expect(validateSlots([{ date: "2026-09-31", part: "morning" }]).key).toBe(
+      "autoGrade.dateRequired",
+    );
+    expect(validateSlots([{ date: WED.date, part: "night" }]).key).toBe(
+      "autoGrade.error.invalid_part",
     );
   });
 
-  it("refuses a lesson whose grading runs into the next one — across the week too", () => {
-    const long = { student: "2026-09-29T20:00", grader: "2026-10-02T08:00" };
-    expect(validateSlots([long, THU])).toEqual({
-      key: "autoGrade.error.slots_overlap",
-      params: { slot: 1, other: 2 },
+  it("refuses two parts of the same weekday, across weeks too", () => {
+    expect(
+      validateSlots([WED, FRI, { date: "2026-10-07", part: "evening" }]),
+    ).toEqual({
+      key: "autoGrade.error.slots_same_day",
+      params: { slot: 1, other: 3 },
     });
-    // Monday 20:00 → next Tuesday 21:00 runs past Tuesday 20:00.
-    const monday = { student: "2026-10-05T20:00", grader: "2026-10-06T21:00" };
-    expect(validateSlots([TUE, monday]).key).toBe(
-      "autoGrade.error.slots_overlap",
-    );
   });
 
-  it("caps the number of lessons", () => {
+  it("caps the number of days", () => {
     expect(validateSlots([]).key).toBe("autoGrade.error.slots_required");
-    expect(validateSlots(Array(8).fill(TUE)).key).toBe(
+    expect(validateSlots(Array(8).fill(WED)).key).toBe(
       "autoGrade.error.too_many_slots",
     );
   });
 });
 
 describe("slots on the form", () => {
-  it("sends epoch ms", () => {
-    expect(slotsToBody([TUE])).toEqual({
+  it("sends the days and parts", () => {
+    expect(slotsToBody([WED, FRI])).toEqual({
       slots: [
-        {
-          studentDeadlineAt: fromVnInput(TUE.student),
-          graderDeadlineAt: fromVnInput(TUE.grader),
-        },
+        { date: "2026-09-30", part: "morning" },
+        { date: "2026-10-02", part: "evening" },
       ],
     });
   });
 
-  it("a new slot is the last one two days later, with its own id", () => {
-    const next = nextSlotAfter({ id: "a", ...TUE });
-    expect(next.student).toBe(THU.student);
-    expect(next.grader).toBe(THU.grader);
-    expect(next.id).not.toBe("a");
-    expect(nextSlotAfter({ student: "", grader: "" }).student).toBe("");
+  it("a new slot is the last one two days later, same part, with its own id", () => {
+    const next = nextSlotAfter(FRI);
+    expect(next.date).toBe("2026-10-04");
+    expect(next.part).toBe("evening");
+    expect(next.id).not.toBe("b");
+    expect(nextSlotAfter({ date: "", part: "morning" }).date).toBe("");
   });
 
-  it("a saved schedule shows each slot's upcoming week", () => {
-    const anchor = fromVnInput(TUE.student);
-    const gapMs = fromVnInput(TUE.grader) - anchor;
-    const schedule = { slots: [{ anchorStudentAt: anchor, gapMs }] };
-    // Three weeks later, after that week's grading deadline.
-    const [slot] = scheduleToValue(schedule, anchor + 3 * WEEK + gapMs + HOUR);
-    expect(slot.student).toBe("2026-10-27T20:00");
+  it("a saved schedule shows each day's upcoming date", () => {
+    const anchorDayAt = fromVnDate(WED.date);
+    const schedule = { slots: [{ anchorDayAt, part: "afternoon" }] };
+    const [slot] = scheduleToValue(schedule, anchorDayAt + 3 * WEEK + HOUR);
+    expect(slot.date).toBe("2026-10-21");
+    expect(slot.part).toBe("afternoon");
     expect(scheduleToValue(null)).toHaveLength(1);
   });
 
-  it("slots before the schedule's next one show the week after", () => {
-    const tue = fromVnInput(TUE.student);
-    const thu = fromVnInput(THU.student);
-    const gapMs = fromVnInput(TUE.grader) - tue;
+  it("days before the schedule's next one show the week after", () => {
+    const wed = fromVnDate(WED.date);
+    const fri = fromVnDate(FRI.date);
     const schedule = {
       slots: [
-        { anchorStudentAt: tue, gapMs },
-        { anchorStudentAt: thu, gapMs },
+        { anchorDayAt: wed, part: "morning" },
+        { anchorDayAt: fri, part: "evening" },
       ],
-      // Tuesday is graded; Thursday is next.
-      next: { studentDeadlineAt: thu },
+      // Wednesday is graded; Friday 23:30 is next.
+      next: { runAt: fri + 23.5 * HOUR },
     };
-    const [a, b] = scheduleToValue(schedule, tue + gapMs + HOUR);
-    expect(a.student).toBe("2026-10-06T20:00");
-    expect(b.student).toBe(THU.student);
+    const [a, b] = scheduleToValue(schedule, wed + 8 * HOUR);
+    expect(a.date).toBe("2026-10-07");
+    expect(b.date).toBe(FRI.date);
+  });
+
+  it("an old schedule graded after midnight shows the evening before", () => {
+    // Graded Wednesday 00:10 → Tuesday evening.
+    const tue = fromVnDate("2026-09-29");
+    const schedule = {
+      slots: [{ anchorDayAt: tue, part: "evening", kind: "deadlines" }],
+      next: { runAt: tue + DAY + 10 * 60 * 1000 },
+    };
+    expect(scheduleToValue(schedule)[0].date).toBe("2026-09-29");
   });
 });
 
 describe("wording", () => {
+  const t = (key, p = {}) =>
+    ({
+      "autoGrade.slotTitle": `Ngày chấm ${p.n}`,
+      "autoGrade.dateRequired": "Hãy chọn ngày chấm.",
+      "autoGrade.error.slots_same_day": `Ngày chấm ${p.slot} và ${p.other} trùng thứ`,
+      "autoGrade.partDay": `${p.part} ${p.weekday}`,
+      "autoGrade.part.morning": "Sáng",
+      "autoGrade.part.evening": "Tối",
+      "autoGrade.weekday3": "Thứ 4",
+      "autoGrade.weekday5": "Thứ 6",
+    })[key] ?? key;
+
   it("run keys read as time and day", () => {
     expect(runLabel("2026-09-26-2231")).toBe("22:31 26/09");
     expect(runLabel("2026-09-26")).toBe("26/09");
   });
 
-  it("slot errors name the lesson, overlaps name both", () => {
-    const t = (key, p = {}) =>
-      ({
-        "autoGrade.slotTitle": `Buổi ${p.n}`,
-        "autoGrade.bothRequired": "Chọn cả hai hạn.",
-        "autoGrade.error.slots_overlap": `Buổi ${p.slot} và ${p.other} chồng nhau`,
-      })[key] ?? key;
+  it("slot errors name the day, same-weekday errors name both", () => {
     expect(
-      slotErrorText({ key: "autoGrade.bothRequired", params: { slot: 2 } }, t),
-    ).toBe("Buổi 2: Chọn cả hai hạn.");
+      slotErrorText({ key: "autoGrade.dateRequired", params: { slot: 2 } }, t),
+    ).toBe("Ngày chấm 2: Hãy chọn ngày chấm.");
     expect(
       slotErrorText(
         {
-          key: "autoGrade.error.slots_overlap",
+          key: "autoGrade.error.slots_same_day",
           params: { slot: 1, other: 2 },
         },
         t,
       ),
-    ).toBe("Buổi 1 và 2 chồng nhau");
+    ).toBe("Ngày chấm 1 và 2 trùng thứ");
+  });
+
+  it("a schedule reads as parts and weekdays", () => {
+    expect(partDay("morning", 3, t)).toBe("Sáng Thứ 4");
+    expect(
+      scheduleSummary(
+        {
+          slots: [
+            { part: "morning", weekday: 3 },
+            { part: "evening", weekday: 5 },
+          ],
+        },
+        t,
+      ),
+    ).toBe("Sáng Thứ 4, Tối Thứ 6");
   });
 });

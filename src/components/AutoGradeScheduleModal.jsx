@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
 
 import AutoGradeScheduleFields from "./AutoGradeScheduleFields.jsx";
+import AutoGradeTimesAdmin from "./AutoGradeTimesAdmin.jsx";
 import {
   deleteGradingSchedule,
   fetchGradingSchedule,
   saveGradingSchedule,
 } from "../api/backend.js";
+import { useAuth } from "../auth/AuthContext.jsx";
+import { isAdminEmail } from "../config.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
 import {
   emptySlot,
@@ -24,6 +27,8 @@ import { formatVn } from "../lib/scheduleTime.js";
  */
 export default function AutoGradeScheduleModal({ cls, onClose, onSaved }) {
   const { t } = useLanguage();
+  const { teacherInfo } = useAuth();
+  const isAdmin = isAdminEmail(teacherInfo?.gmail);
   const [schedule, setSchedule] = useState(null);
   const [value, setValue] = useState(() => [emptySlot()]);
   const [loading, setLoading] = useState(true);
@@ -88,6 +93,20 @@ export default function AutoGradeScheduleModal({ cls, onClose, onSaved }) {
   };
 
   const enabled = Boolean(schedule?.enabled);
+  // Saved before grading days: its deadlines show as the day and part they
+  // grade in, and saving turns it into days.
+  const legacy = enabled && schedule.slots?.some((s) => s.kind === "deadlines");
+
+  /** After the admin changed times: the saved schedule, or re-read it. */
+  const handleTimesSaved = async (saved) => {
+    try {
+      const fresh = saved || (await fetchGradingSchedule(cls.id));
+      setSchedule(fresh);
+      onSaved?.(fresh);
+    } catch (err) {
+      if (err.message !== "RE-AUTH_NEEDED") setError(scheduleErrorText(err, t));
+    }
+  };
 
   return (
     <div className="modal-bg open">
@@ -117,12 +136,26 @@ export default function AutoGradeScheduleModal({ cls, onClose, onSaved }) {
                 {t("autoGrade.lastRun")} {lastRunText(schedule.lastRun, t)}
               </p>
             )}
+            {legacy && (
+              <p className="auto-grade-legacy">
+                <i className="ti ti-info-circle" aria-hidden="true" />
+                {t("autoGrade.legacyNote")}
+              </p>
+            )}
             <AutoGradeScheduleFields
               classId={cls.id}
               value={value}
               onChange={setValue}
               disabled={busy}
+              runTimes={schedule?.runTimes || null}
             />
+            {isAdmin && (
+              <AutoGradeTimesAdmin
+                classId={cls.id}
+                schedule={schedule}
+                onSaved={handleTimesSaved}
+              />
+            )}
           </>
         )}
 

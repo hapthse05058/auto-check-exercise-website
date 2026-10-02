@@ -1,18 +1,26 @@
 /**
  * Scheduled grading, the non-visual parts: validating the weekly slots (a
- * class may meet several times a week, each meeting with its own two
- * deadlines), turning the backend's error codes and run states into words,
- * and mapping a saved schedule back onto the form. The components live in
+ * class may be graded on several days a week, each in the morning, afternoon
+ * or evening — the admin sets the actual time of each part), turning the
+ * backend's error codes and run states into words, and mapping a saved
+ * schedule back onto the form. The components live in
  * components/AutoGradeSchedule*.jsx.
  */
-import { fromVnInput, toVnInput, weekdayTime } from "./scheduleTime.js";
+import { fromVnDate, toVnDate, vnDayStart } from "./scheduleTime.js";
 
 const HOUR = 60 * 60 * 1000;
-const WEEK = 7 * 24 * HOUR;
-/** Same limits as the backend (gradingSchedules DEFAULTS). */
-export const MIN_GAP_MS = 2 * HOUR;
-export const MAX_GAP_MS = WEEK;
+const DAY = 24 * HOUR;
+const WEEK = 7 * DAY;
+/** Same limit as the backend (gradingSchedules DEFAULTS). */
 export const MAX_SLOTS = 7;
+/** The parts of a day a teacher picks from (backend PARTS). */
+export const PARTS = ["morning", "afternoon", "evening"];
+/** Tabler icon of each part. */
+export const PART_ICONS = {
+  morning: "ti-sunrise",
+  afternoon: "ti-sun",
+  evening: "ti-moon",
+};
 
 // Each form slot carries an id of its own, so removing one in the middle
 // does not hand its inputs to the next.
@@ -21,24 +29,24 @@ const slotId = () => `slot-${++slotSeq}`;
 
 /** An empty form slot. */
 export function emptySlot() {
-  return { id: slotId(), student: "", grader: "" };
+  return { id: slotId(), date: "", part: "morning" };
 }
 
-/** Client-side check of one slot's two deadlines; an i18n key or null. */
-export function validateDeadlines({ student, grader }) {
-  const s = fromVnInput(student);
-  const g = fromVnInput(grader);
-  if (!Number.isFinite(s) || !Number.isFinite(g))
-    return "autoGrade.bothRequired";
-  if (g - s < MIN_GAP_MS) return "autoGrade.error.deadline_gap_too_short";
-  if (g - s > MAX_GAP_MS) return "autoGrade.error.deadline_gap_too_long";
+/** Weekday (0 = Sunday) of a "YYYY-MM-DD" in Vietnam, or null. */
+export function weekdayOf(date) {
+  const ms = fromVnDate(date);
+  return Number.isFinite(ms) ? new Date(ms + 7 * HOUR).getUTCDay() : null;
+}
+
+/** Client-side check of one slot; an i18n key or null. */
+export function validateSlot({ date, part }) {
+  if (!Number.isFinite(fromVnDate(date))) return "autoGrade.dateRequired";
+  if (!PARTS.includes(part)) return "autoGrade.error.invalid_part";
   return null;
 }
 
 /**
- * Every slot, then that no slot's grading runs into the next one's — the
- * backend's rule: within the week of the earliest deadline, each grading
- * deadline is at or before the next students' deadline. Returns
+ * Every slot, then one grading day per weekday — the backend's rule. Returns
  * {key, params} (1-based slot numbers, as the teacher sees them) or null.
  */
 export function validateSlots(slots) {
@@ -50,28 +58,19 @@ export function validateSlots(slots) {
     };
   }
   for (const [i, slot] of slots.entries()) {
-    const key = validateDeadlines(slot);
+    const key = validateSlot(slot);
     if (key) return { key, params: { slot: i + 1 } };
   }
-  const parsed = slots.map((slot, i) => {
-    const s = fromVnInput(slot.student);
-    return { s, gap: fromVnInput(slot.grader) - s, n: i + 1 };
-  });
-  const first = Math.min(...parsed.map((p) => p.s));
-  const sorted = parsed
-    .map((p) => ({ ...p, s: p.s - Math.floor((p.s - first) / WEEK) * WEEK }))
-    .sort((a, b) => a.s - b.s);
-  for (const [i, slot] of sorted.entries()) {
-    const next =
-      i + 1 < sorted.length
-        ? sorted[i + 1]
-        : { ...sorted[0], s: sorted[0].s + WEEK };
-    if (slot.s + slot.gap > next.s) {
+  const seen = new Map();
+  for (const [i, slot] of slots.entries()) {
+    const weekday = weekdayOf(slot.date);
+    if (seen.has(weekday)) {
       return {
-        key: "autoGrade.error.slots_overlap",
-        params: { slot: slot.n, other: next.n },
+        key: "autoGrade.error.slots_same_day",
+        params: { slot: seen.get(weekday), other: i + 1 },
       };
     }
+    seen.set(weekday, i + 1);
   }
   return null;
 }
@@ -79,23 +78,18 @@ export function validateSlots(slots) {
 /** The form's slots as the API body. */
 export function slotsToBody(slots) {
   return {
-    slots: slots.map((slot) => ({
-      studentDeadlineAt: fromVnInput(slot.student),
-      graderDeadlineAt: fromVnInput(slot.grader),
-    })),
+    slots: slots.map(({ date, part }) => ({ date, part })),
   };
 }
 
-/** A new slot: the one before it two days later, or an empty one. */
+/** A new slot: the one before it two days later, same part, or an empty one. */
 export function nextSlotAfter(slot) {
-  const s = fromVnInput(slot?.student);
-  const g = fromVnInput(slot?.grader);
-  if (!Number.isFinite(s) || !Number.isFinite(g)) return emptySlot();
-  const shift = 2 * 24 * HOUR;
+  const day = fromVnDate(slot?.date);
+  if (!Number.isFinite(day)) return emptySlot();
   return {
     id: slotId(),
-    student: toVnInput(s + shift),
-    grader: toVnInput(g + shift),
+    date: toVnDate(day + 2 * DAY),
+    part: slot.part || "morning",
   };
 }
 
@@ -105,13 +99,15 @@ export function scheduleErrorText(error, t) {
   const params = error?.params || {};
   const key = `autoGrade.error.${code}`;
   const text = t(key, {
-    minHours: params.minHours ?? 2,
     max: params.max ?? MAX_SLOTS,
     slot: params.slot ?? "",
     other: params.other ?? "",
+    part: params.part ? t(`autoGrade.part.${params.part}`) : "",
+    from: params.from ?? "",
+    to: params.to ?? "",
   });
   if (text === key) return t("autoGrade.error.generic", { code });
-  return params.slot && code !== "slots_overlap"
+  return params.slot && code !== "slots_same_day"
     ? `${t("autoGrade.slotTitle", { n: params.slot })}: ${text}`
     : text;
 }
@@ -119,47 +115,56 @@ export function scheduleErrorText(error, t) {
 /** A validateSlots() result in words, naming the slot when there are several. */
 export function slotErrorText(invalid, t) {
   if (!invalid) return "";
-  const params = { minHours: 2, max: MAX_SLOTS, ...(invalid.params || {}) };
+  const params = { max: MAX_SLOTS, ...(invalid.params || {}) };
   const text = t(invalid.key, params);
-  return invalid.params?.slot && invalid.key !== "autoGrade.error.slots_overlap"
+  return invalid.params?.slot &&
+    invalid.key !== "autoGrade.error.slots_same_day"
     ? `${t("autoGrade.slotTitle", { n: invalid.params.slot })}: ${text}`
     : text;
 }
 
 /**
  * The form's slots for a saved schedule, in week order: each slot's first
- * occurrence from the schedule's next one on (so a slot already graded this
- * week shows next week's dates), else the first whose grading deadline has
- * not passed.
+ * grading day from the schedule's next one on (so a day already graded this
+ * week shows next week's date), else from today. A schedule from before
+ * grading days comes back as the day and part its grading falls in.
  */
 export function scheduleToValue(schedule, now = Date.now()) {
   const slots = schedule?.slots || [];
   if (!slots.length) return [emptySlot()];
-  const from = schedule.next?.studentDeadlineAt;
-  return slots.map(({ anchorStudentAt, gapMs }) => {
-    const weeks = Math.max(
-      0,
-      Number.isFinite(from)
-        ? Math.ceil((from - anchorStudentAt) / WEEK)
-        : Math.ceil((now - anchorStudentAt - gapMs) / WEEK),
-    );
-    const s = anchorStudentAt + weeks * WEEK;
+  // Grading runs from 04:00 on, so 4 hours back lands on its day — and an
+  // old schedule's after-midnight run on the evening before.
+  const from = vnDayStart(
+    Number.isFinite(schedule.next?.runAt)
+      ? schedule.next.runAt - 4 * HOUR
+      : now,
+  );
+  return slots.map(({ anchorDayAt, part }) => {
+    const weeks = Math.max(0, Math.ceil((from - anchorDayAt) / WEEK));
     return {
       id: slotId(),
-      student: toVnInput(s),
-      grader: toVnInput(s + gapMs),
+      date: toVnDate(anchorDayAt + weeks * WEEK),
+      part: PARTS.includes(part) ? part : "morning",
     };
   });
 }
 
-/** "Thứ 3 20:00, Thứ 5 20:00" — when the students hand in, each week. */
+/** "Sáng Thứ 4, Tối Thứ 6" — when the class is graded, each week. */
 export function scheduleSummary(schedule, t) {
   return (schedule?.slots || [])
-    .map((slot) => weekdayTime(slot.studentDeadline, t))
+    .map((slot) => partDay(slot.part, slot.weekday, t))
     .join(", ");
 }
 
-/** A run key ("2026-09-26-2231", or an older "2026-09-26") as "22:31 26/09". */
+/** "Sáng Thứ 4" / "Wednesday morning". */
+export function partDay(part, weekday, t) {
+  return t("autoGrade.partDay", {
+    part: t(`autoGrade.part.${PARTS.includes(part) ? part : "morning"}`),
+    weekday: t(`autoGrade.weekday${weekday}`),
+  });
+}
+
+/** A run key ("2026-09-26-2231", or a day "2026-09-26") as "22:31 26/09". */
 export function runLabel(runKey) {
   const match = /^(\d{4})-(\d{2})-(\d{2})(?:-(\d{2})(\d{2}))?$/.exec(
     String(runKey || ""),

@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { validateDeadlines } from "../src/lib/autoGrade.js";
 import {
   formatVn,
+  fromVnDate,
   fromVnInput,
+  toVnDate,
   toVnInput,
+  vnDayStart,
   vnWeekTime,
 } from "../src/lib/scheduleTime.js";
 
@@ -34,19 +36,12 @@ describe("schedule time (Vietnam wall clock, whatever the browser zone)", () => 
     expect(toVnInput(NaN)).toBe("");
   });
 
-  it("deadline validation mirrors the backend limits", () => {
-    const student = "2026-09-29T20:00";
-    expect(validateDeadlines({ student, grader: "" })).toBe(
-      "autoGrade.bothRequired",
-    );
-    expect(validateDeadlines({ student, grader: "2026-09-29T21:30" })).toBe(
-      "autoGrade.error.deadline_gap_too_short",
-    );
-    expect(validateDeadlines({ student, grader: "2026-10-07T20:00" })).toBe(
-      "autoGrade.error.deadline_gap_too_long",
-    );
-    expect(validateDeadlines({ student, grader: "2026-09-30T12:00" })).toBe(
-      null,
-    );
+  it("dates are Vietnam days: midnight there, the evening before in UTC", () => {
+    const wed = fromVnDate("2026-09-30");
+    expect(wed).toBe(Date.UTC(2026, 8, 29, 17, 0));
+    expect(toVnDate(wed + 23 * 60 * 60 * 1000)).toBe("2026-09-30");
+    expect(vnDayStart(T0)).toBe(fromVnDate("2026-09-29"));
+    expect(Number.isNaN(fromVnDate("2026-09-31"))).toBe(true);
+    expect(Number.isNaN(fromVnDate(""))).toBe(true);
   });
 });

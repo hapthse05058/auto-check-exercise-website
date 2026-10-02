@@ -524,19 +524,43 @@ export async function fetchGradingSchedules() {
 }
 
 /**
- * What saving these weekly slots ({slots: [{studentDeadlineAt,
- * graderDeadlineAt}]}, first occurrences in epoch ms) would schedule. Free of
- * side effects on the backend, so it can be called on every edit.
+ * What saving these weekly slots ({slots: [{date: "YYYY-MM-DD", part}]}, the
+ * first grading days) would schedule. Free of side effects on the backend,
+ * so it can be called on every edit.
  */
 export async function previewGradingSchedule(classId, { slots }) {
   const query = new URLSearchParams({
     classId,
-    slots: slots
-      .map((slot) => `${slot.studentDeadlineAt}-${slot.graderDeadlineAt}`)
-      .join(","),
+    days: slots.map((slot) => `${slot.date}.${slot.part}`).join(","),
   });
   const response = await authFetch(`/grading-schedules/preview?${query}`);
   return scheduleResult(response, "preview");
+}
+
+/**
+ * Admin: the default grading time of each part of the day,
+ * `{runTimes: {morning, afternoon, evening}, parts: {part: {from, to}}}`.
+ */
+export async function fetchGradingSettings() {
+  return scheduleResult(await authFetch("/grading-schedules/settings"));
+}
+
+/** Admin: new default times ({part: "HH:mm"}); returns {runTimes, classes}. */
+export async function saveGradingSettings(runTimes) {
+  const response = await authFetch("/grading-schedules/settings", {
+    method: "PUT",
+    body: { runTimes },
+  });
+  return scheduleResult(response);
+}
+
+/** Admin: one class's own times ({part: "HH:mm"}; a part left out: default). */
+export async function saveClassRunTimes(classId, runTimes) {
+  const response = await authFetch(
+    `/grading-schedules/${encodeURIComponent(classId)}/run-time`,
+    { method: "PUT", body: { runTimes } },
+  );
+  return scheduleResult(response, "schedule");
 }
 
 export async function saveGradingSchedule(classId, { slots }) {

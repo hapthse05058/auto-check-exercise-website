@@ -9,35 +9,36 @@ import { isAdminEmail } from "../config.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
 import {
   MAX_SLOTS,
+  PARTS,
+  PART_ICONS,
   nextSlotAfter,
+  partDay,
   scheduleErrorText,
   slotsToBody,
-  validateDeadlines,
+  validateSlot,
   validateSlots,
+  weekdayOf,
 } from "../lib/autoGrade.js";
-import {
-  formatVn,
-  fromVnInput,
-  vnWeekTime,
-  weekdayTime,
-} from "../lib/scheduleTime.js";
+import { formatVn } from "../lib/scheduleTime.js";
 
 const PREVIEW_DEBOUNCE_MS = 400;
 
 /**
- * The weekly slots of a grading schedule — one per lesson the class has in a
- * week, each with the students' deadline and the grading deadline — with
- * what they mean: each slot's weekly repeat, when the first grading would run
- * (asked from the backend when the class already exists) and whether the
- * points look sufficient.
+ * The weekly slots of a grading schedule — the days the class is graded on,
+ * each in the morning, afternoon or evening (the admin sets each part's
+ * time) — with what they mean: each slot's weekly repeat, when the first
+ * grading would run (asked from the backend when the class already exists)
+ * and whether the points look sufficient.
  *
- * `value` is [{student, grader}] as datetime-local strings in Vietnam time.
+ * `value` is [{id, date: "YYYY-MM-DD", part}]; `runTimes` ({part: "HH:mm"},
+ * optional) the class's times, shown next to each part.
  */
 export default function AutoGradeScheduleFields({
   classId = null,
   value,
   onChange,
   disabled = false,
+  runTimes = null,
 }) {
   const { t } = useLanguage();
   const { teacherInfo } = useAuth();
@@ -46,12 +47,11 @@ export default function AutoGradeScheduleFields({
   const [estimate, setEstimate] = useState(null);
 
   const invalid = validateSlots(value);
-  // Stable dependency for the preview: the slots as epoch ms.
+  // Stable dependency for the preview: the days and parts, and the times (an
+  // admin may change them with the form open).
   const slotsKey = invalid
     ? ""
-    : value
-        .map((s) => `${fromVnInput(s.student)}-${fromVnInput(s.grader)}`)
-        .join(",");
+    : `${value.map((s) => `${s.date}.${s.part}`).join(",")}@${JSON.stringify(runTimes || {})}`;
 
   // Ask the backend what these slots would schedule (side-effect free).
   useEffect(() => {
@@ -103,9 +103,11 @@ export default function AutoGradeScheduleFields({
   const addSlot = () => onChange([...value, nextSlotAfter(value.at(-1))]);
   const removeSlot = (index) => onChange(value.filter((_, i) => i !== index));
 
-  // Only show "fill in both" once the teacher has started typing.
-  const touched = value.some((slot) => slot.student || slot.grader);
-  const overlap = invalid?.key === "autoGrade.error.slots_overlap";
+  // Only show the form's own errors once the teacher has picked a date.
+  const touched = value.some((slot) => slot.date);
+  const sameDay = invalid?.key === "autoGrade.error.slots_same_day";
+  const setPart = (index, part) =>
+    onChange(value.map((slot, i) => (i === index ? { ...slot, part } : slot)));
 
   return (
     <>
@@ -133,9 +135,7 @@ export default function AutoGradeScheduleFields({
       )}
 
       {value.map((slot, index) => {
-        const slotError = validateDeadlines(slot);
-        const s = fromVnInput(slot.student);
-        const g = fromVnInput(slot.grader);
+        const slotError = validateSlot(slot);
         return (
           <fieldset className="auto-grade-slot" key={slot.id}>
             <legend className="auto-grade-slot-head">
@@ -159,43 +159,64 @@ export default function AutoGradeScheduleFields({
             </legend>
             <div className="auto-grade-slot-fields">
               <div className="field-group">
-                <label htmlFor={`autoGradeStudent-${index}`}>
-                  {t("autoGrade.studentDeadline")}
+                <label htmlFor={`autoGradeDate-${index}`}>
+                  {t("autoGrade.dateLabel")}
                   <span className="required-mark">*</span>
                 </label>
                 <input
-                  id={`autoGradeStudent-${index}`}
-                  type="datetime-local"
-                  value={slot.student}
-                  onChange={setField(index, "student")}
+                  id={`autoGradeDate-${index}`}
+                  type="date"
+                  value={slot.date}
+                  onChange={setField(index, "date")}
                   disabled={disabled}
                 />
               </div>
               <div className="field-group">
-                <label htmlFor={`autoGradeGrader-${index}`}>
-                  {t("autoGrade.graderDeadline")}
+                <span className="field-label" id={`autoGradePart-${index}`}>
+                  {t("autoGrade.partLabel")}
                   <span className="required-mark">*</span>
-                </label>
-                <input
-                  id={`autoGradeGrader-${index}`}
-                  type="datetime-local"
-                  value={slot.grader}
-                  onChange={setField(index, "grader")}
-                  disabled={disabled}
-                />
+                </span>
+                <div
+                  className="part-toggle"
+                  role="radiogroup"
+                  aria-labelledby={`autoGradePart-${index}`}
+                >
+                  {PARTS.map((part) => (
+                    <button
+                      key={part}
+                      type="button"
+                      role="radio"
+                      data-part={part}
+                      aria-checked={slot.part === part}
+                      className={slot.part === part ? "active" : ""}
+                      onClick={() => setPart(index, part)}
+                      disabled={disabled}
+                    >
+                      <i
+                        className={`ti ${PART_ICONS[part]}`}
+                        aria-hidden="true"
+                      />
+                      <span className="part-toggle-name">
+                        {t(`autoGrade.part.${part}`)}
+                      </span>
+                      {runTimes?.[part] && (
+                        <span className="part-toggle-time">
+                          {runTimes[part]}
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
             {slotError ? (
-              (slot.student || slot.grader) && (
-                <p className="field-note error-text">
-                  {t(slotError, { minHours: 2 })}
-                </p>
+              slot.date && (
+                <p className="field-note error-text">{t(slotError)}</p>
               )
             ) : (
               <p className="field-note">
                 {t("autoGrade.repeats", {
-                  student: weekdayTime(vnWeekTime(s), t),
-                  grader: weekdayTime(vnWeekTime(g), t),
+                  when: partDay(slot.part, weekdayOf(slot.date), t),
                 })}
               </p>
             )}
@@ -213,7 +234,7 @@ export default function AutoGradeScheduleFields({
       </button>
 
       <div className="auto-grade-notes">
-        {overlap && touched && (
+        {sameDay && touched && (
           <p className="field-note error-text">
             {t(invalid.key, invalid.params)}
           </p>
@@ -226,9 +247,7 @@ export default function AutoGradeScheduleFields({
             })}
           </p>
         )}
-        {!invalid && !classId && (
-          <p className="field-note">{t("autoGrade.afterDeadlineNote")}</p>
-        )}
+        <p className="field-note">{t("autoGrade.timeNote")}</p>
         {previewError && (
           <p className="field-note error-text">{previewError}</p>
         )}

@@ -1163,6 +1163,222 @@ textarea {
 .auto-grade-slot .field-note {
   margin: 0;
 }
+.auto-grade-slot .field-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 5px;
+}
+.auto-grade-slot input[type="date"] {
+  min-height: 38px;
+}
+
+/* Morning / afternoon / evening: one segmented control per grading day. */
+.part-toggle {
+  display: flex;
+  gap: 3px;
+  padding: 3px;
+  border-radius: 10px;
+  background: var(--color-background-secondary);
+  border: 1px solid var(--color-border-tertiary);
+}
+.part-toggle button {
+  flex: 1 1 0;
+  min-width: 0;
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0 5px;
+  padding: 6px 4px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--color-text-secondary);
+  font: inherit;
+  font-size: 13px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    box-shadow 0.15s;
+}
+.part-toggle button i {
+  font-size: 16px;
+}
+.part-toggle button:hover:not(:disabled):not(.active) {
+  background: var(--color-surface-hover);
+  color: var(--color-text-primary);
+}
+.part-toggle button.active {
+  background: var(--color-background-primary);
+  color: var(--color-primary-dark);
+  font-weight: 600;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.08),
+    0 0 0 1px var(--color-primary-tint-border);
+}
+.part-toggle button:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+}
+.part-toggle button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+/* The admin's time sits on its own line under the part. */
+.part-toggle-time {
+  flex-basis: 100%;
+  text-align: center;
+  line-height: 1.2;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+.part-toggle button.active .part-toggle-time {
+  color: var(--color-primary);
+}
+/* Each part's icon keeps its own hue once picked (and in the admin table). */
+.part-toggle button.active[data-part="morning"] i,
+.auto-grade-admin-part i[data-part="morning"] {
+  color: var(--color-warning);
+}
+.part-toggle button.active[data-part="afternoon"] i,
+.auto-grade-admin-part i[data-part="afternoon"] {
+  color: var(--color-warning-dark);
+}
+.part-toggle button.active[data-part="evening"] i,
+.auto-grade-admin-part i[data-part="evening"] {
+  color: var(--color-primary);
+}
+@media (max-width: 420px) {
+  .part-toggle-time {
+    display: none;
+  }
+}
+
+.auto-grade-legacy {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin: 0 0 0.75rem;
+  padding: 8px 10px;
+  border-radius: var(--border-radius-md, 8px);
+  background: var(--color-warning-tint);
+  color: var(--color-warning-text);
+  font-size: 13px;
+  line-height: 1.45;
+}
+.auto-grade-legacy i {
+  font-size: 16px;
+  margin-top: 1px;
+}
+
+/* Admin: the actual hour of each part of the day. */
+.auto-grade-admin {
+  margin: 0.25rem 0 0.75rem;
+  padding: 0.75rem 0.85rem 0.6rem;
+  border-radius: var(--border-radius-md, 8px);
+  border: 1px solid var(--color-primary-tint-border);
+  background: var(--color-primary-tint);
+}
+.auto-grade-admin-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 0.6rem;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-primary-dark);
+}
+.auto-grade-admin-head i {
+  font-size: 18px;
+}
+.auto-grade-admin-badge {
+  margin-left: auto;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: var(--color-background-primary);
+  border: 1px solid var(--color-primary-tint-border);
+}
+.auto-grade-admin-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-radius: 8px;
+  background: var(--color-background-primary);
+  border: 1px solid var(--color-border-tertiary);
+  padding: 4px;
+}
+.auto-grade-admin-row {
+  display: grid;
+  grid-template-columns: minmax(96px, 1.1fr) 1fr 1fr;
+  gap: 8px;
+  align-items: center;
+  padding: 4px 6px;
+  border-radius: 6px;
+}
+.auto-grade-admin-row.is-head {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-tertiary);
+}
+.auto-grade-admin-row.is-used {
+  background: var(--color-surface-subtle);
+}
+.auto-grade-admin-row input[type="time"] {
+  width: 100%;
+  box-sizing: border-box;
+  font-variant-numeric: tabular-nums;
+}
+.auto-grade-admin-part {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+.auto-grade-admin-part i {
+  font-size: 18px;
+}
+.auto-grade-admin-part small {
+  display: block;
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--color-text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+.auto-grade-admin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0.6rem 0 0.4rem;
+}
+.auto-grade-admin-actions .secondary-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.auto-grade-admin .field-note {
+  margin: 0.2rem 0 0;
+  line-height: 1.45;
+}
+.auto-grade-admin-ok {
+  color: var(--color-primary-dark);
+  font-weight: 500;
+}
 .auto-grade-add {
   margin: 0 0 0.75rem;
 }

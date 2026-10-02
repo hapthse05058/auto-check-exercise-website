@@ -204,24 +204,43 @@ export const translations = {
       button: "Auto-grade",
       modalTitle: "Auto-grading · {class}",
       intro:
-        "For each lesson of the week, the system grades the class's current lesson between that lesson's two deadlines, then moves the class on to the next lesson. You are notified 30 minutes before and again when it is done. If no student has done the homework yet, nothing is graded and no points are spent — no need to worry. Make-up lessons: grade them by hand.",
+        "Pick the days the class is graded on and, for each, the morning, afternoon or evening. Every week the system grades the class's current lesson then and moves the class on to the next lesson. If no student has done the homework yet, nothing is graded and no points are spent. Make-up lessons: grade them by hand.",
       loading: "Loading schedule…",
-      studentDeadline: "Students' deadline",
-      graderDeadline: "Grading deadline",
-      slotTitle: "Lesson {n} of the week",
+      dateLabel: "Grading day",
+      partLabel: "Time of day",
+      part: {
+        morning: "Morning",
+        afternoon: "Afternoon",
+        evening: "Evening",
+      },
+      partDay: "{weekday} ({part})",
+      slotTitle: "Grading day {n}",
       slotSingle: "Repeats every week",
-      addSlot: "Add a lesson in the week",
-      removeSlot: "Remove this lesson",
-      repeats:
-        "Every week: students hand in by {student}, results ready by {grader}.",
+      addSlot: "Add a grading day",
+      removeSlot: "Remove this day",
+      repeats: "Every week: graded on {when}.",
       firstRun: "First run: {runAt}. Notification at {remindAt}.",
-      afterDeadlineNote:
-        "Grading runs at least 40 minutes after the students' deadline.",
+      timeNote:
+        "The exact time of each part of the day is set by the admin to stay clear of peak hours. You are notified 30 minutes before and again when it is done.",
+      dateRequired: "Choose a grading day.",
+      legacyNote:
+        "This schedule still uses the old deadlines. It is shown below as grading days — save it to switch over.",
+      admin: {
+        title: "Grading times by part of day",
+        defaultCol: "Default (all classes)",
+        classCol: "This class only",
+        saveDefaults: "Save defaults",
+        saveClass: "Save this class's times",
+        savedDefaults: "Defaults saved — {n} class(es) moved.",
+        savedClass: "This class's times are saved.",
+        hint: 'Leave "This class only" empty to use the default. A run already announced keeps its time; changes apply from the next one.',
+        classNotReady:
+          "A class's own times can be set once its schedule of days and parts is saved.",
+      },
       estimate:
         "Next time, {classes} scheduled class(es) can cost up to {need} points; {point} left.",
       estimateShort:
         "Next time, {classes} scheduled class(es) can cost up to {need} points but only {point} are left. Weeks the points cannot cover are cancelled.",
-      bothRequired: "Choose both deadlines.",
       pointsShortTitle: "Not enough points for auto-grading",
       pointsShortBody:
         "Next time, {classes} scheduled class(es) can cost up to {need} points but {who} only have {point} ({missing} short). A week the points cannot cover is cancelled at the notification — top up before then.",
@@ -255,8 +274,17 @@ export const translations = {
         invalid_deadlines: "Invalid dates.",
         slots_overlap:
           "Lessons {slot} and {other} overlap: a lesson's grading deadline must come before the next lesson's students' deadline.",
-        too_many_slots: "At most {max} lessons a week.",
-        slots_required: "Add at least one lesson.",
+        slots_same_day:
+          "Grading days {slot} and {other} fall on the same weekday — one part of the day per weekday.",
+        invalid_date: "Invalid date.",
+        invalid_part: "Choose morning, afternoon or evening.",
+        invalid_run_time: "The {part} time must be between {from} and {to}.",
+        schedule_needs_days:
+          "Save the schedule as days and parts before setting its own times.",
+        schedule_not_found: "This class has no grading schedule yet.",
+        admin_only: "Only an admin can change grading times.",
+        too_many_slots: "At most {max} grading days a week.",
+        slots_required: "Add at least one grading day.",
         google_reauth_required:
           "Sign in with Google again so the system can grade on your behalf.",
         no_current_lesson:
@@ -1260,24 +1288,43 @@ export const translations = {
       button: "Chấm bài tự động",
       modalTitle: "Chấm bài tự động · {class}",
       intro:
-        "Với mỗi buổi học trong tuần, hệ thống chấm buổi hiện tại của lớp trong khoảng giữa hai hạn của buổi đó, rồi tự chuyển lớp sang buổi kế tiếp. Bạn được báo trước 30 phút và báo lại khi chấm xong. Nếu chưa có học sinh nào làm bài thì hệ thống sẽ không chấm và không trừ point, bạn không cần lo. Buổi học bù thì hãy chấm tay.",
+        "Chọn ngày chấm và buổi chấm (sáng, chiều hoặc tối). Hằng tuần hệ thống sẽ chấm buổi học hiện tại của lớp vào thời điểm đó, rồi tự chuyển lớp sang buổi kế tiếp. Nếu chưa có học sinh nào làm bài thì hệ thống không chấm và không trừ point. Buổi học bù thì hãy chấm tay.",
       loading: "Đang tải lịch…",
-      studentDeadline: "Hạn nộp của học sinh",
-      graderDeadline: "Hạn chấm của giáo viên",
-      slotTitle: "Buổi {n} trong tuần",
+      dateLabel: "Ngày chấm",
+      partLabel: "Buổi",
+      part: {
+        morning: "Sáng",
+        afternoon: "Chiều",
+        evening: "Tối",
+      },
+      partDay: "{part} {weekday}",
+      slotTitle: "Ngày chấm {n}",
       slotSingle: "Lặp lại hằng tuần",
-      addSlot: "Thêm buổi học trong tuần",
-      removeSlot: "Bỏ buổi này",
-      repeats:
-        "Hằng tuần: học sinh nộp trước {student}, có kết quả trước {grader}.",
+      addSlot: "Thêm ngày chấm",
+      removeSlot: "Bỏ ngày này",
+      repeats: "Hằng tuần: chấm vào {when}.",
       firstRun: "Lần chấm đầu: {runAt}. Báo trước lúc {remindAt}.",
-      afterDeadlineNote:
-        "Hệ thống chấm sau hạn nộp của học sinh ít nhất 40 phút.",
+      timeNote:
+        "Giờ chấm cụ thể của từng buổi do admin sắp xếp để tránh giờ cao điểm. Bạn được báo trước 30 phút và báo lại khi chấm xong.",
+      dateRequired: "Hãy chọn ngày chấm.",
+      legacyNote:
+        "Lịch này vẫn theo hạn nộp/hạn chấm cũ, bên dưới đã đổi sang ngày + buổi tương ứng — bấm lưu để chuyển hẳn.",
+      admin: {
+        title: "Giờ chấm theo buổi",
+        defaultCol: "Mặc định (mọi lớp)",
+        classCol: "Riêng lớp này",
+        saveDefaults: "Lưu giờ mặc định",
+        saveClass: "Lưu giờ của lớp",
+        savedDefaults: "Đã lưu giờ mặc định — {n} lớp được dời giờ.",
+        savedClass: "Đã lưu giờ riêng của lớp.",
+        hint: 'Để trống ô "Riêng lớp này" = theo giờ mặc định. Lượt đã báo trước giữ giờ cũ; thay đổi áp dụng từ lượt sau.',
+        classNotReady:
+          "Đặt giờ riêng cho lớp được sau khi lịch theo ngày + buổi đã được lưu.",
+      },
       estimate:
         "Lần chấm tới, {classes} lớp đã hẹn giờ cần tối đa {need} point; còn {point} point.",
       estimateShort:
         "Lần chấm tới, {classes} lớp đã hẹn giờ cần tối đa {need} point nhưng chỉ còn {point} point. Lượt nào không đủ point sẽ bị huỷ.",
-      bothRequired: "Hãy chọn cả hai hạn.",
       pointsShortTitle: "Không đủ point để chấm tự động",
       pointsShortBody:
         "Lần chấm tới, {classes} lớp đã hẹn giờ cần tối đa {need} point nhưng {who} chỉ còn {point} point (thiếu {missing}). Lượt nào không đủ point sẽ bị huỷ lúc báo trước — hãy nạp thêm trước đó.",
@@ -1310,8 +1357,17 @@ export const translations = {
         invalid_deadlines: "Ngày giờ không hợp lệ.",
         slots_overlap:
           "Buổi {slot} và buổi {other} bị chồng nhau: hạn chấm của một buổi phải trước hạn nộp của buổi kế tiếp.",
-        too_many_slots: "Tối đa {max} buổi mỗi tuần.",
-        slots_required: "Hãy thêm ít nhất một buổi.",
+        slots_same_day:
+          "Ngày chấm {slot} và {other} trùng thứ trong tuần — mỗi thứ chỉ chấm một buổi.",
+        invalid_date: "Ngày không hợp lệ.",
+        invalid_part: "Hãy chọn buổi sáng, chiều hoặc tối.",
+        invalid_run_time: "Giờ buổi {part} phải trong khoảng {from}–{to}.",
+        schedule_needs_days:
+          "Hãy lưu lịch theo ngày + buổi trước khi đặt giờ riêng.",
+        schedule_not_found: "Lớp chưa có lịch chấm tự động.",
+        admin_only: "Chỉ admin được đổi giờ chấm.",
+        too_many_slots: "Tối đa {max} ngày chấm mỗi tuần.",
+        slots_required: "Hãy thêm ít nhất một ngày chấm.",
         google_reauth_required:
           "Cần đăng nhập lại bằng Google để hệ thống chấm thay bạn.",
         no_current_lesson:

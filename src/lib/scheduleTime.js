@@ -6,6 +6,7 @@
  * auto-check-exercise-be/backend/lib/gradingSchedules.js.
  */
 const VN_OFFSET_MS = 7 * 60 * 60 * 1000;
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 const pad = (n) => String(n).padStart(2, "0");
 
@@ -25,6 +26,23 @@ export function fromVnInput(value) {
   if (!match) return NaN;
   const [, y, mo, d, h, mi] = match.map(Number);
   return Date.UTC(y, mo - 1, d, h, mi) - VN_OFFSET_MS;
+}
+
+/** Midnight (Vietnam) of the day `ms` falls on. */
+export function vnDayStart(ms) {
+  return Math.floor((ms + VN_OFFSET_MS) / DAY_MS) * DAY_MS - VN_OFFSET_MS;
+}
+
+/** epoch ms → "YYYY-MM-DD" (Vietnam date) for <input type="date">. */
+export function toVnDate(ms) {
+  return toVnInput(ms).slice(0, 10);
+}
+
+/** "YYYY-MM-DD" → that day's midnight in Vietnam (epoch ms), NaN if invalid. */
+export function fromVnDate(value) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value || "")) return NaN;
+  const ms = fromVnInput(`${value}T00:00`);
+  return toVnDate(ms) === value ? ms : NaN; // not 2026-09-31
 }
 
 /** Weekday (0 = Sunday) and "HH:mm" of an instant, in Vietnam. */
