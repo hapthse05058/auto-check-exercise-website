@@ -2,6 +2,7 @@
  * How a notification is shown — shared by the header bell (its dropdown and
  * toasts) and the notifications page.
  */
+import { formatVnd } from "./billing.js";
 
 /** Fired on window when read state changed elsewhere (the notifications
  *  page), so the bell re-reads its badge instead of waiting for its poll. */
@@ -55,8 +56,15 @@ export function renderNotification(item, t) {
   // Every field of `data` is available as a placeholder, so a new notification
   // type only needs its i18n strings — no change here. The balance-specific
   // aliases below are extra names on top, not a replacement for the raw fields.
+  // Money fields (`…Vnd`) read as "1.600đ".
+  const money = Object.fromEntries(
+    Object.entries(item.data || {})
+      .filter(([k, v]) => k.endsWith("Vnd") && Number.isFinite(v))
+      .map(([k, v]) => [k, formatVnd(v)]),
+  );
   const vars = {
     ...(item.data || {}),
+    ...money,
     balance: amount(item.data?.totalBalance),
     currency: item.data?.currency ?? "",
     threshold: amount(item.data?.threshold),

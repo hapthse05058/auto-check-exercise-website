@@ -5,6 +5,9 @@
  */
 export const POINTS_CHANGED = "teacher-points-changed";
 
-export function announcePoints(point) {
-  window.dispatchEvent(new CustomEvent(POINTS_CHANGED, { detail: { point } }));
+/** `balanceVnd`: the fresh balance, in VND. */
+export function announceBalance(balanceVnd) {
+  window.dispatchEvent(
+    new CustomEvent(POINTS_CHANGED, { detail: { balanceVnd } }),
+  );
 }

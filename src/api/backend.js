@@ -449,9 +449,10 @@ export async function createGradingJob({
  * `images` are data URLs of the chart(s) — Task 1, or a paragraph about a chart.
  *
  * @returns {Promise<{result, feedback: string, cached: boolean,
- *   charged: number, point: number, payerName: string}>}
+ *   charged: number, chargedVnd: number, balanceVnd: number,
+ *   payerName: string}>}
  * @throws {Error} the backend's error code as the message, with `.params`
- *   (e.g. `insufficient_points` + {point, need}).
+ *   (e.g. `insufficient_points` + {balanceVnd, needVnd}).
  */
 export async function gradeIeltsWriting({
   task,
@@ -581,7 +582,8 @@ export async function deleteGradingSchedule(classId) {
 
 /**
  * The most the payer's scheduled classes can cost next time, against the
- * balance: `{point, needMax, classes, teacherName}`. With a classId, the payer
+ * balance: `{balanceVnd, priceVnd, needMax, needMaxVnd, classes, teacherName}`
+ * (needMax counts docs, needMaxVnd prices them at the auto price). With a classId, the payer
  * is that class's (for an admin: its teacher).
  */
 export async function fetchScheduleEstimate(classId) {
@@ -654,29 +656,29 @@ export async function bulkDeleteGradingCache(ids) {
 }
 
 // ---------------------------------------------------------------------------
-// Teacher points
+// Teacher balance (VND; the routes keep their old "teacher-points" names)
 // ---------------------------------------------------------------------------
 
-/** Current point balance of the logged-in teacher (0 when no record). */
-export async function fetchMyPoint() {
+/** Current balance (VND) of the logged-in teacher (0 when no record). */
+export async function fetchMyBalance() {
   const response = await authFetch("/teacher-points/me");
-  if (!response.ok) throw new Error("Failed to fetch point balance");
+  if (!response.ok) throw new Error("Failed to fetch balance");
   const data = await response.json();
-  return data.point ?? 0;
+  return data.balanceVnd ?? 0;
 }
 
 /**
  * Balance of whoever pays for this class — the class's teacher when an admin is
  * grading, the caller otherwise. Resolved server-side from the class record.
  */
-export async function fetchPayerPoint(classId) {
+export async function fetchPayerBalance(classId) {
   const response = await authFetch(
     `/teacher-points/payer?classId=${encodeURIComponent(classId || "")}`,
   );
-  if (!response.ok) throw new Error("Failed to fetch payer point balance");
+  if (!response.ok) throw new Error("Failed to fetch payer balance");
   const data = await response.json();
   return {
-    point: data.point ?? 0,
+    balanceVnd: data.balanceVnd ?? 0,
     teacherId: data.teacherId || "",
     teacherName: data.teacherName || "",
   };
@@ -762,7 +764,7 @@ export async function deleteTeacher(
   });
 }
 
-/** All TeacherPoint records. */
+/** One balance row per teacher: `{balanceVnd, topUpHistory, …}`. */
 export async function fetchTeacherPoints() {
   const response = await authFetch("/teacher-points");
   if (!response.ok) throw new Error("Failed to fetch teacher points");
@@ -787,7 +789,7 @@ export async function deleteTeacherPoint(id) {
   });
 }
 
-/** Tops up a teacher's points from a VND amount. */
+/** Tops up a teacher's balance by a VND amount (a multiple of 70.000đ). */
 export async function topUpTeacherPoint(id, amountVnd) {
   return authFetch(`/teacher-points/${encodeURIComponent(id)}/topup`, {
     method: "POST",
@@ -795,7 +797,7 @@ export async function topUpTeacherPoint(id, amountVnd) {
   });
 }
 
-/** Admin billing summary `{ totalTopUpVnd, totalCommissionVnd }`. */
+/** Admin billing summary `{ totalTopUpVnd (= revenue), totalCommissionVnd }`. */
 export async function fetchBilling() {
   const response = await authFetch("/teacher-points/billing");
   if (!response.ok) throw new Error("Failed to fetch billing");

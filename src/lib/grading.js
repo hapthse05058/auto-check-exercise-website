@@ -7,6 +7,7 @@
  * This module only starts that job and turns what the backend reports into
  * what the grading screen shows.
  */
+import { formatVnd } from "./billing.js";
 import { parseDocLinks } from "./docParser.js";
 import { createGradingJob, fetchStudentDocRefs } from "../api/backend.js";
 
@@ -63,7 +64,11 @@ function describeError(job, t) {
   const params = job.errorParams || {};
   switch (job.error) {
     case "not_enough_points":
-      return t("grading.notEnough", params);
+      return t("grading.notEnough", {
+        ...params,
+        needVnd: formatVnd(params.needVnd),
+        haveVnd: formatVnd(params.haveVnd),
+      });
     case "google_reauth_required":
       return t("grading.reauthRequired", {
         written: job.written,

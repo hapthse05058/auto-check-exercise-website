@@ -11,8 +11,8 @@ import {
   fetchGradingJob,
   fetchGradingSchedule,
   fetchLatestGradingJob,
-  fetchMyPoint,
-  fetchPayerPoint,
+  fetchMyBalance,
+  fetchPayerBalance,
   recordFeedbackClearSummary,
   updateCurrentLessonForClass,
 } from "../api/backend.js";
@@ -22,13 +22,14 @@ import ErrorNotice from "../components/ErrorNotice.jsx";
 import SearchableSelect from "../components/SearchableSelect.jsx";
 import { isAdminEmail } from "../config.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
+import { PRICE_AUTO_VND, PRICE_MANUAL_VND, formatVnd } from "../lib/billing.js";
 import { templateName } from "../lib/courses.js";
 import {
   executeFeedbackClear,
   planFeedbackClear,
 } from "../lib/feedbackClear.js";
 import { describeJob, isJobFinished, startGradingJob } from "../lib/grading.js";
-import { announcePoints } from "../lib/pointEvents.js";
+import { announceBalance } from "../lib/pointEvents.js";
 import { formatVn } from "../lib/scheduleTime.js";
 import { playSuccessSound } from "../lib/sound.js";
 
@@ -70,7 +71,7 @@ export default function GradePage() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [saveCache, setSaveCache] = useState(true);
   // Who actually pays for the selected class. An admin grading someone else's
-  // class spends THAT teacher's points, so the badge must show their balance.
+  // class spends THAT teacher's balance, so the badge must show it.
   const [payer, setPayer] = useState(null);
   // Admin only: each class's course and doc template, shown on hover.
   const [classInfo, setClassInfo] = useState({ courses: [], templates: [] });
@@ -87,10 +88,10 @@ export default function GradePage() {
   const refreshPoint = async () => {
     try {
       // The header badge shows it (lib/pointEvents.js).
-      announcePoints(await fetchMyPoint());
+      announceBalance(await fetchMyBalance());
     } catch (error) {
       if (error.message !== "RE-AUTH_NEEDED")
-        console.error("Point fetch failed:", error);
+        console.error("Balance fetch failed:", error);
     }
   };
 
@@ -100,10 +101,10 @@ export default function GradePage() {
       return;
     }
     try {
-      setPayer(await fetchPayerPoint(classId));
+      setPayer(await fetchPayerBalance(classId));
     } catch (error) {
       if (error.message !== "RE-AUTH_NEEDED")
-        console.error("Payer point fetch failed:", error);
+        console.error("Payer balance fetch failed:", error);
       setPayer(null);
     }
   };
@@ -215,6 +216,8 @@ export default function GradePage() {
     setSelectedClassId(classId);
     setSelectedLessonId("");
     setLessons([]);
+    // The previous class's last run is not this class's.
+    say(t("grade.ready"));
     setLoadError((prev) => (prev?.kind === "lessons" ? null : prev));
     currentLessonRef.current = null;
     refreshPayer(classId);
@@ -261,6 +264,8 @@ export default function GradePage() {
   const handleLessonChange = async (event) => {
     const lessonId = event.target.value;
     setSelectedLessonId(lessonId);
+    // Cleared until the effect below finds this lesson's own last run.
+    say(t("grade.ready"));
     if (!selectedClassId || !lessonId) return;
 
     const lessonName = lessons.find((item) => item.id === lessonId)?.name;
@@ -312,12 +317,20 @@ export default function GradePage() {
       try {
         const job = await fetchGradingJob(followed.id);
         if (cancelled) return;
-        const view = describeJob(job, t, { showWarnings: isAdmin });
         const finished = isJobFinished(job);
         const looked = !followed.live && !sawRunning;
+        // An earlier run's warnings are old news: only a run started or
+        // watched from this screen shows them.
+        const view = describeJob(job, t, {
+          showWarnings: isAdmin && !(looked && finished),
+        });
         setStatus(
           looked && finished
-            ? { ...view, text: `${t("grading.lastRun")} ${view.text}` }
+            ? {
+                ...view,
+                // Dated: a run from days ago must not read as today's.
+                text: `${t("grading.lastRun", { at: formatVn(job.finishedAt || job.createdAt) })} ${view.text}`,
+              }
             : view,
         );
         setJobRunning(!finished);
@@ -549,7 +562,7 @@ export default function GradePage() {
             <span className="count-badge">
               {t("grade.payerPoint", {
                 teacher: payer.teacherName,
-                point: payer.point,
+                balance: formatVnd(payer.balanceVnd),
               })}
             </span>
           ) : (
@@ -642,6 +655,16 @@ export default function GradePage() {
           {schedule?.enabled && schedule.next
             ? t("autoGrade.summaryOn", { runAt: formatVn(schedule.next.runAt) })
             : t("autoGrade.summaryOff")}
+          {" · "}
+          {t(
+            schedule?.enabled
+              ? "autoGrade.summaryPriceOn"
+              : "autoGrade.summaryPriceOff",
+            {
+              auto: formatVnd(PRICE_AUTO_VND),
+              manual: formatVnd(PRICE_MANUAL_VND),
+            },
+          )}
         </p>
       )}
       {scheduleOpen && selectedClass && (

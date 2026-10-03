@@ -4,9 +4,11 @@ import { useNavigate } from "react-router-dom";
 import { fetchAuditFilterOptions, fetchAuditLogs } from "../api/backend.js";
 import { useAuth } from "../auth/AuthContext.jsx";
 import DataTable from "../components/DataTable.jsx";
+import DateInputVn from "../components/DateInputVn.jsx";
 import MultiSelect from "../components/MultiSelect.jsx";
 import { isAdminEmail } from "../config.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
+import { formatDateTimeVn } from "../lib/scheduleTime.js";
 
 const PAGE_SIZE = 50;
 // Same debounce as the teacher management screen, so typing does not spam the API.
@@ -40,14 +42,7 @@ function toDateInput(date) {
   return new Date(date.getTime() - offset).toISOString().slice(0, 10);
 }
 
-function formatDate(iso) {
-  if (!iso) return "—";
-  try {
-    return new Date(iso).toLocaleString();
-  } catch {
-    return iso;
-  }
-}
+const formatDate = (iso) => formatDateTimeVn(iso, { seconds: true });
 
 /**
  * Read-only audit trail (admin only). Entries are written server-side by the
@@ -336,8 +331,7 @@ export default function AuditLogPage() {
 
           <label className="audit-date">
             {t("audit.from")}
-            <input
-              type="date"
+            <DateInputVn
               value={from}
               max={to}
               onChange={(e) => setFrom(e.target.value)}
@@ -345,8 +339,7 @@ export default function AuditLogPage() {
           </label>
           <label className="audit-date">
             {t("audit.to")}
-            <input
-              type="date"
+            <DateInputVn
               value={to}
               min={from}
               onChange={(e) => setTo(e.target.value)}

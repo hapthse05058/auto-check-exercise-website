@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 
+import DateInputVn from "./DateInputVn.jsx";
 import {
   fetchScheduleEstimate,
   previewGradingSchedule,
@@ -19,6 +20,7 @@ import {
   validateSlots,
   weekdayOf,
 } from "../lib/autoGrade.js";
+import { formatVnd } from "../lib/billing.js";
 import { formatVn } from "../lib/scheduleTime.js";
 
 const PREVIEW_DEBOUNCE_MS = 400;
@@ -28,7 +30,7 @@ const PREVIEW_DEBOUNCE_MS = 400;
  * each in the morning, afternoon or evening (the admin sets each part's
  * time) — with what they mean: each slot's weekly repeat, when the first
  * grading would run (asked from the backend when the class already exists)
- * and whether the points look sufficient.
+ * and whether the balance looks sufficient.
  *
  * `value` is [{id, date: "YYYY-MM-DD", part}]; `runTimes` ({part: "HH:mm"},
  * optional) the class's times, shown next to each part.
@@ -86,8 +88,10 @@ export default function AutoGradeScheduleFields({
 
   // Short: the balance cannot cover every scheduled class at full
   // attendance — or there is nothing at all, which cancels even the first run.
+  // All money in VND: needMaxVnd prices every student at the auto price.
   const short =
-    estimate && (estimate.point <= 0 || estimate.point < estimate.needMax);
+    estimate &&
+    (estimate.balanceVnd <= 0 || estimate.balanceVnd < estimate.needMaxVnd);
   // An admin sets schedules for other teachers: name whose balance it is.
   const payerName =
     isAdminEmail(teacherInfo?.gmail) && estimate?.teacherName
@@ -122,9 +126,12 @@ export default function AutoGradeScheduleFields({
                   ? "autoGrade.pointsShortBody"
                   : "autoGrade.pointsEmptyBody",
                 {
-                  need: estimate.needMax,
-                  point: estimate.point,
-                  missing: Math.max(0, estimate.needMax - estimate.point),
+                  docs: estimate.needMax,
+                  need: formatVnd(estimate.needMaxVnd),
+                  balance: formatVnd(estimate.balanceVnd),
+                  missing: formatVnd(
+                    Math.max(0, estimate.needMaxVnd - estimate.balanceVnd),
+                  ),
                   classes: estimate.classes?.length ?? 0,
                   who: payerName || t("autoGrade.pointsYou"),
                 },
@@ -163,9 +170,8 @@ export default function AutoGradeScheduleFields({
                   {t("autoGrade.dateLabel")}
                   <span className="required-mark">*</span>
                 </label>
-                <input
+                <DateInputVn
                   id={`autoGradeDate-${index}`}
-                  type="date"
                   value={slot.date}
                   onChange={setField(index, "date")}
                   disabled={disabled}
@@ -254,8 +260,10 @@ export default function AutoGradeScheduleFields({
         {estimate && !short && (
           <p className="field-note">
             {t("autoGrade.estimate", {
-              need: estimate.needMax,
-              point: estimate.point,
+              docs: estimate.needMax,
+              price: formatVnd(estimate.priceVnd),
+              need: formatVnd(estimate.needMaxVnd),
+              balance: formatVnd(estimate.balanceVnd),
               classes: estimate.classes?.length ?? 0,
             })}
           </p>

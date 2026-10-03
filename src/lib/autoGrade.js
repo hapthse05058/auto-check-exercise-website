@@ -22,6 +22,24 @@ export const PART_ICONS = {
   evening: "ti-moon",
 };
 
+/**
+ * DeepSeek's peak hours, Vietnam time, [from, to) in minutes of the day: Monday
+ * to Friday 9:00–12:00 and 14:00–18:00 Beijing time. Any other time, weekends
+ * and Chinese holidays included, is off-peak at half the price.
+ */
+export const PEAK_RANGES = [
+  { from: 8 * 60, to: 11 * 60 },
+  { from: 13 * 60, to: 17 * 60 },
+];
+
+/** Whether a time ("HH:mm", Vietnam) falls in DeepSeek's weekday peak hours. */
+export function isPeakTime(value) {
+  const match = /^(\d{2}):(\d{2})$/.exec(String(value || ""));
+  if (!match) return false;
+  const minutes = Number(match[1]) * 60 + Number(match[2]);
+  return PEAK_RANGES.some((r) => minutes >= r.from && minutes < r.to);
+}
+
 // Each form slot carries an id of its own, so removing one in the middle
 // does not hand its inputs to the next.
 let slotSeq = 0;
@@ -170,8 +188,8 @@ export function runLabel(runKey) {
     String(runKey || ""),
   );
   if (!match) return String(runKey || "");
-  const [, , month, day, hh, mm] = match;
-  return hh ? `${hh}:${mm} ${day}/${month}` : `${day}/${month}`;
+  const [, year, month, day, hh, mm] = match;
+  return hh ? `${day}/${month}/${year} ${hh}:${mm}` : `${day}/${month}/${year}`;
 }
 
 /** One line on how the schedule's last grading went. */

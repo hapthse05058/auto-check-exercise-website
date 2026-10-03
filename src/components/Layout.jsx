@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 
-import { fetchMyPoint } from "../api/backend.js";
+import { fetchMyBalance } from "../api/backend.js";
 import { useAuth } from "../auth/AuthContext.jsx";
 import { SUPPORT_EMAIL, isAdminEmail } from "../config.js";
 import NotificationBell from "./NotificationBell.jsx";
 import { usePushNotifications } from "../hooks/usePushNotifications.js";
 import { usePwaInstall } from "../hooks/usePwaInstall.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
+import { formatVnd } from "../lib/billing.js";
 import { POINTS_CHANGED } from "../lib/pointEvents.js";
 import { refreshPushToken, startForegroundPushListener } from "../lib/push.js";
 import { useSyncedTheme } from "../theme/useSyncedTheme.js";
@@ -63,27 +64,29 @@ function ThemeToggle() {
 const POINT_REFRESH_MS = 60 * 1000;
 
 /**
- * The signed-in teacher's point balance, always in the header. Re-read on
+ * The signed-in teacher's balance (VND), always in the header. Re-read on
  * every page change, when the tab regains focus and once a minute (scheduled
- * grading spends points in the background); screens that read a fresh
+ * grading spends it in the background); screens that read a fresh
  * balance themselves announce it (lib/pointEvents.js).
  */
 function PointBadge() {
   const { t } = useLanguage();
   const location = useLocation();
-  const [point, setPoint] = useState(null);
+  const [balance, setBalance] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
     const load = () =>
-      fetchMyPoint()
-        .then((value) => !cancelled && setPoint(value))
+      fetchMyBalance()
+        .then((value) => !cancelled && setBalance(value))
         .catch(() => {});
     load();
     const timer = setInterval(load, POINT_REFRESH_MS);
     const onFocus = () => load();
     const onAnnounce = (event) => {
-      if (Number.isFinite(event.detail?.point)) setPoint(event.detail.point);
+      if (Number.isFinite(event.detail?.balanceVnd)) {
+        setBalance(event.detail.balanceVnd);
+      }
     };
     window.addEventListener("focus", onFocus);
     window.addEventListener(POINTS_CHANGED, onAnnounce);
@@ -95,14 +98,14 @@ function PointBadge() {
     };
   }, [location.pathname]);
 
-  if (point === null) return null;
+  if (balance === null) return null;
   return (
     <span
-      className={`point-badge ${point <= 0 ? "empty" : ""}`}
+      className={`point-badge ${balance <= 0 ? "empty" : ""}`}
       title={t("nav.pointsTitle")}
     >
       <i className="ti ti-coins" aria-hidden="true" />
-      {t("nav.points", { n: point.toLocaleString("vi-VN") })}
+      {formatVnd(balance)}
     </span>
   );
 }

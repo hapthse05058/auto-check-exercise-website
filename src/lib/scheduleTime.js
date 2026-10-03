@@ -57,10 +57,23 @@ export function vnWeekTime(ms) {
 /** "HH:mm dd/MM" in Vietnam. */
 export function formatVn(ms) {
   if (!Number.isFinite(ms)) return "";
+  return formatDateTimeVn(ms);
+}
+
+/**
+ * A full timestamp the Vietnamese way, in Vietnam time whatever the browser's
+ * locale or timezone: "02/10/2026 17:39" ("…:40" with `seconds`). Takes an
+ * ISO string or epoch ms; "—" when there is none, the input when unparsable.
+ */
+export function formatDateTimeVn(value, { seconds = false } = {}) {
+  if (value === null || value === undefined || value === "") return "—";
+  const ms = typeof value === "number" ? value : Date.parse(value);
+  if (!Number.isFinite(ms)) return String(value);
   const d = new Date(ms + VN_OFFSET_MS);
   return (
-    `${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())} ` +
-    `${pad(d.getUTCDate())}/${pad(d.getUTCMonth() + 1)}`
+    `${pad(d.getUTCDate())}/${pad(d.getUTCMonth() + 1)}/${d.getUTCFullYear()} ` +
+    `${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}` +
+    (seconds ? `:${pad(d.getUTCSeconds())}` : "")
   );
 }
 

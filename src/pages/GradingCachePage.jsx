@@ -12,6 +12,7 @@ import { useAuth } from "../auth/AuthContext.jsx";
 import DataTable from "../components/DataTable.jsx";
 import { isAdminEmail } from "../config.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
+import { formatDateTimeVn } from "../lib/scheduleTime.js";
 
 const SEARCH_FIELD_KEYS = [
   { value: "question", key: "fieldQuestion" },
@@ -32,14 +33,7 @@ const EMPTY_FORM = {
   hitCount: 0,
 };
 
-function formatDate(iso) {
-  if (!iso) return "—";
-  try {
-    return new Date(iso).toLocaleString();
-  } catch {
-    return iso;
-  }
-}
+const formatDate = (iso) => formatDateTimeVn(iso);
 
 export default function GradingCachePage() {
   const { loadTeacherInfo } = useAuth();

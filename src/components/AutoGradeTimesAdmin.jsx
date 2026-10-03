@@ -1,99 +1,32 @@
-import { useEffect, useState } from "react";
-
-import {
-  fetchGradingSettings,
-  saveClassRunTimes,
-  saveGradingSettings,
-} from "../api/backend.js";
+import TimeSelect from "./TimeSelect.jsx";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
-import { PARTS, PART_ICONS, scheduleErrorText } from "../lib/autoGrade.js";
-
-/** "12:00" → "11:59": the last minute a part's time may be. */
-function lastMinute(to) {
-  const [h, m] = String(to || "24:00")
-    .split(":")
-    .map(Number);
-  const minutes = h * 60 + m - 1;
-  return `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`;
-}
+import { PARTS, PART_ICONS, isPeakTime } from "../lib/autoGrade.js";
 
 /**
  * Admin only: when each part of the day is actually graded — the default for
  * every class, and this class's own times (empty = the default). Teachers
  * only pick days and parts; this is where the hours are kept out of peak
- * time. `schedule` is the class's saved schedule (or null);
- * `onSaved(schedule)` gets it back after this class's times change.
+ * time. The modal owns the values and saves them: `defaults` and `own` are
+ * {part: "HH:mm"}, `onChange({defaults?, own?})` reports an edit, and
+ * `onSaveDefaults` saves the defaults alone (they move every class).
+ * `settings` is the backend's {runTimes, parts} (null while loading).
  */
-export default function AutoGradeTimesAdmin({ classId, schedule, onSaved }) {
+export default function AutoGradeTimesAdmin({
+  settings,
+  defaults,
+  own,
+  usedParts,
+  onChange,
+  onSaveDefaults,
+  busy,
+  message,
+  error,
+}) {
   const { t } = useLanguage();
-  const [settings, setSettings] = useState(null);
-  const [defaults, setDefaults] = useState({});
-  const [own, setOwn] = useState({});
-  const [busy, setBusy] = useState("");
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    let cancelled = false;
-    fetchGradingSettings()
-      .then((result) => {
-        if (cancelled) return;
-        setSettings(result);
-        setDefaults(result.runTimes || {});
-      })
-      .catch((err) => {
-        if (!cancelled && err.message !== "RE-AUTH_NEEDED") {
-          setError(scheduleErrorText(err, t));
-        }
-      });
-    return () => {
-      cancelled = true;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- load once
-  }, []);
-
-  useEffect(() => {
-    setOwn(schedule?.customRunTimes || {});
-  }, [schedule]);
-
-  // A class's own times need a saved schedule of days and parts.
-  const classReady = Boolean(schedule?.enabled && schedule.runTimes);
-  const usedParts = new Set((schedule?.slots || []).map((slot) => slot.part));
-
-  const run = async (kind, action) => {
-    setBusy(kind);
-    setMessage("");
-    setError("");
-    try {
-      await action();
-    } catch (err) {
-      if (err.message !== "RE-AUTH_NEEDED") setError(scheduleErrorText(err, t));
-    } finally {
-      setBusy("");
-    }
-  };
-
-  const saveDefaults = () =>
-    run("defaults", async () => {
-      const result = await saveGradingSettings(defaults);
-      setDefaults(result.runTimes);
-      setSettings((s) => ({ ...s, runTimes: result.runTimes }));
-      setMessage(t("autoGrade.admin.savedDefaults", { n: result.classes }));
-      // This class may have moved with the defaults.
-      onSaved?.(null);
-    });
-
-  const saveOwn = () =>
-    run("class", async () => {
-      const body = Object.fromEntries(
-        PARTS.filter((part) => own[part]).map((part) => [part, own[part]]),
-      );
-      const saved = await saveClassRunTimes(classId, body);
-      setMessage(t("autoGrade.admin.savedClass"));
-      onSaved?.(saved);
-    });
-
   const range = (part) => settings?.parts?.[part];
+  const anyPeak = PARTS.some(
+    (part) => isPeakTime(defaults[part]) || isPeakTime(own[part]),
+  );
 
   return (
     <section
@@ -106,6 +39,11 @@ export default function AutoGradeTimesAdmin({ classId, schedule, onSaved }) {
         <span className="auto-grade-admin-badge">Admin</span>
       </header>
 
+      <p className="auto-grade-admin-peak-note">
+        <i className="ti ti-info-circle" aria-hidden="true" />
+        <span>{t("autoGrade.admin.peakNote")}</span>
+      </p>
+
       <div className="auto-grade-admin-grid" role="table">
         <div className="auto-grade-admin-row is-head" role="row">
           <span role="columnheader">{t("autoGrade.partLabel")}</span>
@@ -114,8 +52,7 @@ export default function AutoGradeTimesAdmin({ classId, schedule, onSaved }) {
         </div>
         {PARTS.map((part) => {
           const r = range(part);
-          const min = r?.from;
-          const max = r ? lastMinute(r.to) : undefined;
+          const partName = t(`autoGrade.part.${part}`);
           return (
             <div
               className={`auto-grade-admin-row${usedParts.has(part) ? " is-used" : ""}`}
@@ -129,7 +66,7 @@ export default function AutoGradeTimesAdmin({ classId, schedule, onSaved }) {
                   aria-hidden="true"
                 />
                 <span>
-                  {t(`autoGrade.part.${part}`)}
+                  {partName}
                   {r && (
                     <small>
                       {r.from}–{r.to}
@@ -138,29 +75,30 @@ export default function AutoGradeTimesAdmin({ classId, schedule, onSaved }) {
                 </span>
               </span>
               <span role="cell">
-                <input
-                  type="time"
-                  aria-label={`${t("autoGrade.admin.defaultCol")} · ${t(`autoGrade.part.${part}`)}`}
+                <TimeSelect
+                  ariaLabel={`${t("autoGrade.admin.defaultCol")} · ${partName}`}
+                  minuteAriaLabel={`${t("autoGrade.admin.defaultCol")} · ${partName} · ${t("autoGrade.admin.minute")}`}
                   value={defaults[part] || ""}
-                  min={min}
-                  max={max}
-                  onChange={(e) =>
-                    setDefaults((d) => ({ ...d, [part]: e.target.value }))
+                  from={r?.from}
+                  to={r?.to}
+                  markPeak
+                  onChange={(v) =>
+                    onChange({ defaults: { ...defaults, [part]: v } })
                   }
-                  disabled={!settings || Boolean(busy)}
+                  disabled={!settings || busy}
                 />
               </span>
               <span role="cell">
-                <input
-                  type="time"
-                  aria-label={`${t("autoGrade.admin.classCol")} · ${t(`autoGrade.part.${part}`)}`}
+                <TimeSelect
+                  ariaLabel={`${t("autoGrade.admin.classCol")} · ${partName}`}
+                  minuteAriaLabel={`${t("autoGrade.admin.classCol")} · ${partName} · ${t("autoGrade.admin.minute")}`}
                   value={own[part] || ""}
-                  min={min}
-                  max={max}
-                  onChange={(e) =>
-                    setOwn((o) => ({ ...o, [part]: e.target.value }))
-                  }
-                  disabled={!classReady || Boolean(busy)}
+                  from={r?.from}
+                  to={r?.to}
+                  allowEmpty
+                  markPeak
+                  onChange={(v) => onChange({ own: { ...own, [part]: v } })}
+                  disabled={!settings || busy}
                 />
               </span>
             </div>
@@ -168,40 +106,26 @@ export default function AutoGradeTimesAdmin({ classId, schedule, onSaved }) {
         })}
       </div>
 
+      {anyPeak && (
+        <p className="field-note auto-grade-admin-peak-warn">
+          <i className="ti ti-alert-triangle" aria-hidden="true" />{" "}
+          {t("autoGrade.admin.peakWarn")}
+        </p>
+      )}
+
       <div className="auto-grade-admin-actions">
         <button
           type="button"
           className="secondary-btn"
-          onClick={saveDefaults}
-          disabled={!settings || Boolean(busy)}
+          onClick={onSaveDefaults}
+          disabled={!settings || busy}
         >
-          {busy === "defaults" ? (
-            <span className="spinner" aria-hidden="true" />
-          ) : (
-            <i className="ti ti-world" aria-hidden="true" />
-          )}{" "}
+          <i className="ti ti-world" aria-hidden="true" />{" "}
           {t("autoGrade.admin.saveDefaults")}
-        </button>
-        <button
-          type="button"
-          className="secondary-btn"
-          onClick={saveOwn}
-          disabled={!classReady || Boolean(busy)}
-        >
-          {busy === "class" ? (
-            <span className="spinner" aria-hidden="true" />
-          ) : (
-            <i className="ti ti-school" aria-hidden="true" />
-          )}{" "}
-          {t("autoGrade.admin.saveClass")}
         </button>
       </div>
 
-      <p className="field-note">
-        {classReady
-          ? t("autoGrade.admin.hint")
-          : t("autoGrade.admin.classNotReady")}
-      </p>
+      <p className="field-note">{t("autoGrade.admin.hint")}</p>
       {message && <p className="field-note auto-grade-admin-ok">{message}</p>}
       {error && <p className="field-note error-text">{error}</p>}
     </section>

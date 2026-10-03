@@ -921,3 +921,51 @@
   border: 1px solid var(--color-border-tertiary, #dfe5e2);
   border-radius: var(--border-radius-md, 8px);
 }
+
+/* Top-up amount: a stepper (multiples of 70.000đ) + presets, no free typing. */
+.topup-stepper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.topup-stepper .btn-icon {
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--color-border-secondary, #c9d4d0);
+  border-radius: var(--border-radius-md, 6px);
+}
+.topup-amount {
+  flex: 1 1 auto;
+  min-width: 0;
+  text-align: center;
+  font-size: 22px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-primary-dark, #0f6e56);
+}
+.topup-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+.topup-presets button {
+  padding: 4px 10px;
+  border: 1px solid var(--color-border-tertiary, #dfe7e4);
+  border-radius: 999px;
+  background: var(--color-background-primary, #fff);
+  color: var(--color-text-secondary, #51615c);
+  font: inherit;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+.topup-presets button:hover:not(:disabled) {
+  background: var(--color-surface-hover, #f0f7f4);
+}
+.topup-presets button.active {
+  border-color: var(--color-primary, #00846b);
+  background: var(--color-primary-tint, #e1f5ee);
+  color: var(--color-primary-dark, #0f6e56);
+  font-weight: 600;
+}

@@ -12,22 +12,21 @@ import { useAuth } from "../auth/AuthContext.jsx";
 import DataTable from "../components/DataTable.jsx";
 import { isAdminEmail } from "../config.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
-import { maskMoney } from "../lib/billing.js";
+import {
+  PRICE_AUTO_VND,
+  PRICE_MANUAL_VND,
+  TOPUP_MAX_VND,
+  TOPUP_STEP_VND,
+  clampTopUp,
+  formatVnd as vnd,
+  maskMoney,
+  revenueOfTopUp,
+} from "../lib/billing.js";
+import { formatDateTimeVn } from "../lib/scheduleTime.js";
 
-const TOPUP_STEP = 60000;
-const TOPUP_MIN = 60000;
-const TOPUP_MAX = 6000000;
-const VND_PER_POINT = 600;
-
-const vnd = (n) => (Number(n) || 0).toLocaleString("vi-VN") + "đ";
-const formatDate = (iso) => {
-  if (!iso) return "—";
-  try {
-    return new Date(iso).toLocaleString();
-  } catch {
-    return iso;
-  }
-};
+/** One-click amounts for the top-up dialog, in steps of 70.000đ. */
+const TOPUP_PRESETS = [1, 2, 5, 10, 20].map((n) => n * TOPUP_STEP_VND);
+const formatDate = (iso) => formatDateTimeVn(iso);
 
 export default function AdminTeacherPointsPage() {
   const { loadTeacherInfo } = useAuth();
@@ -121,13 +120,13 @@ export default function AdminTeacherPointsPage() {
 
   const openEdit = (rec) => {
     setActive(rec);
-    setForm({ point: rec.point });
+    setForm({ balanceVnd: rec.balanceVnd });
     setFormError("");
     setModal("edit");
   };
   const openTopUp = (rec) => {
     setActive(rec);
-    setForm({ amountVnd: TOPUP_MIN });
+    setForm({ amountVnd: TOPUP_STEP_VND });
     setFormError("");
     setModal("topup");
   };
@@ -137,15 +136,18 @@ export default function AdminTeacherPointsPage() {
   };
 
   const handleEdit = async () => {
-    if (!Number.isFinite(Number(form.point))) {
+    const balanceVnd = Number(form.balanceVnd);
+    if (
+      form.balanceVnd === "" ||
+      !Number.isInteger(balanceVnd) ||
+      balanceVnd < 0
+    ) {
       setFormError(t("points.pointNumberErr"));
       return;
     }
     setSaving(true);
     try {
-      const res = await updateTeacherPoint(active.id, {
-        point: Number(form.point),
-      });
+      const res = await updateTeacherPoint(active.id, { balanceVnd });
       if (!res.ok) {
         setFormError(t("points.updateFailed"));
         return;
@@ -161,18 +163,14 @@ export default function AdminTeacherPointsPage() {
   };
 
   const handleTopUp = async () => {
+    // The stepper only ever holds a valid amount; this guards the request.
     const amount = Number(form.amountVnd);
-    if (
-      !Number.isInteger(amount) ||
-      amount < TOPUP_MIN ||
-      amount > TOPUP_MAX ||
-      amount % TOPUP_STEP !== 0
-    ) {
+    if (clampTopUp(amount) !== amount) {
       setFormError(
         t("points.amountErr", {
-          step: vnd(TOPUP_STEP),
-          min: vnd(TOPUP_MIN),
-          max: vnd(TOPUP_MAX),
+          step: vnd(TOPUP_STEP_VND),
+          min: vnd(TOPUP_STEP_VND),
+          max: vnd(TOPUP_MAX_VND),
         }),
       );
       return;
@@ -188,8 +186,8 @@ export default function AdminTeacherPointsPage() {
       closeModal();
       setStatus(
         t("points.toppedUp", {
+          who: active.name || active.gmail,
           amount: vnd(amount),
-          points: amount / VND_PER_POINT,
         }),
       );
       await reload();
@@ -219,6 +217,14 @@ export default function AdminTeacherPointsPage() {
   };
 
   const topupAmount = Number(form.amountVnd) || 0;
+  /** Moves the top-up by whole steps of 70.000đ, within [70k, 7M]. */
+  const stepTopUp = (steps) =>
+    setForm((f) => ({
+      ...f,
+      amountVnd: clampTopUp(
+        (Number(f.amountVnd) || 0) + steps * TOPUP_STEP_VND,
+      ),
+    }));
 
   const columns = [
     {
@@ -233,9 +239,10 @@ export default function AdminTeacherPointsPage() {
       ),
     },
     {
-      id: "point",
+      id: "balance",
       header: t("points.colPoint"),
-      accessorFn: (r) => Number(r.point) || 0,
+      accessorFn: (r) => Number(r.balanceVnd) || 0,
+      cell: ({ getValue }) => vnd(getValue()),
     },
     {
       id: "topUpCount",
@@ -305,15 +312,20 @@ export default function AdminTeacherPointsPage() {
       cell: ({ row }) => formatDate(row.original.topUpAt),
     },
     {
-      id: "amount",
+      id: "credit",
       header: t("points.hAmount"),
-      accessorFn: (h) => Number(h.amountVnd) || 0,
-      cell: ({ getValue }) => vnd(getValue()),
+      accessorFn: (h) => Number(h.creditVnd) || 0,
+      cell: ({ row, getValue }) =>
+        // Before VND a top-up bought points: say how many, too.
+        row.original.points
+          ? `${vnd(getValue())} (${t("points.hLegacyPoints", { n: row.original.points })})`
+          : vnd(getValue()),
     },
     {
-      id: "points",
-      header: t("points.hPoints"),
-      accessorFn: (h) => Number(h.points) || 0,
+      id: "revenue",
+      header: t("points.hRevenue"),
+      accessorFn: (h) => Number(h.revenueVnd) || 0,
+      cell: ({ getValue }) => vnd(getValue()),
     },
   ];
 
@@ -326,7 +338,12 @@ export default function AdminTeacherPointsPage() {
               {t("points.title")}{" "}
               <span className="count-badge">{records.length}</span>
             </h2>
-            <p>{t("points.subtitle")}</p>
+            <p>
+              {t("points.subtitle", {
+                manual: vnd(PRICE_MANUAL_VND),
+                auto: vnd(PRICE_AUTO_VND),
+              })}
+            </p>
           </div>
         </div>
 
@@ -405,14 +422,24 @@ export default function AdminTeacherPointsPage() {
                 </h3>
               </div>
               <div className="field-group">
-                <label>{t("points.pointLabel")}</label>
+                <label htmlFor="balanceVnd">{t("points.pointLabel")}</label>
                 <input
+                  id="balanceVnd"
                   type="number"
-                  value={form.point}
-                  onChange={(e) => setForm({ ...form, point: e.target.value })}
+                  min={0}
+                  step={100}
+                  value={form.balanceVnd}
+                  onChange={(e) =>
+                    setForm({ ...form, balanceVnd: e.target.value })
+                  }
                   autoFocus
                 />
               </div>
+              <p className="field-note">
+                {t("points.balancePreview", {
+                  balance: vnd(form.balanceVnd),
+                })}
+              </p>
               {formError && (
                 <div className="err" style={{ display: "block" }}>
                   {formError}
@@ -447,26 +474,66 @@ export default function AdminTeacherPointsPage() {
                   {t("points.topUpTitle", { who: active.name || active.gmail })}
                 </h3>
               </div>
+              {/* No free typing: the amount only moves in steps of 70.000đ
+                  (− / + or a preset), so it cannot be mistyped. */}
               <div className="field-group">
-                <label>
-                  {t("points.amountLabel", { step: vnd(TOPUP_STEP) })}
-                </label>
-                <input
-                  type="number"
-                  min={TOPUP_MIN}
-                  max={TOPUP_MAX}
-                  step={TOPUP_STEP}
-                  value={form.amountVnd}
-                  onChange={(e) =>
-                    setForm({ ...form, amountVnd: e.target.value })
-                  }
-                  autoFocus
-                />
+                <span className="field-label" id="topup-amount-label">
+                  {t("points.amountLabel", { step: vnd(TOPUP_STEP_VND) })}
+                </span>
+                <div
+                  className="topup-stepper"
+                  role="group"
+                  aria-labelledby="topup-amount-label"
+                >
+                  <button
+                    type="button"
+                    className="btn-icon"
+                    onClick={() => stepTopUp(-1)}
+                    disabled={saving || topupAmount <= TOPUP_STEP_VND}
+                    aria-label={t("points.stepDown", {
+                      step: vnd(TOPUP_STEP_VND),
+                    })}
+                    title={t("points.stepDown", { step: vnd(TOPUP_STEP_VND) })}
+                  >
+                    <i className="ti ti-minus" aria-hidden="true" />
+                  </button>
+                  <output className="topup-amount" aria-live="polite">
+                    {vnd(topupAmount)}
+                  </output>
+                  <button
+                    type="button"
+                    className="btn-icon"
+                    onClick={() => stepTopUp(1)}
+                    disabled={saving || topupAmount >= TOPUP_MAX_VND}
+                    aria-label={t("points.stepUp", {
+                      step: vnd(TOPUP_STEP_VND),
+                    })}
+                    title={t("points.stepUp", { step: vnd(TOPUP_STEP_VND) })}
+                    autoFocus
+                  >
+                    <i className="ti ti-plus" aria-hidden="true" />
+                  </button>
+                </div>
+                <div className="topup-presets">
+                  {TOPUP_PRESETS.map((amount) => (
+                    <button
+                      key={amount}
+                      type="button"
+                      className={amount === topupAmount ? "active" : ""}
+                      aria-pressed={amount === topupAmount}
+                      onClick={() => setForm({ ...form, amountVnd: amount })}
+                      disabled={saving}
+                    >
+                      {vnd(amount)}
+                    </button>
+                  ))}
+                </div>
               </div>
               <p className="field-note">
                 {t("points.amountHint", {
-                  points: topupAmount / VND_PER_POINT || 0,
-                  commission: vnd((topupAmount / VND_PER_POINT) * 100),
+                  after: vnd((Number(active.balanceVnd) || 0) + topupAmount),
+                  revenue: vnd(revenueOfTopUp(topupAmount)),
+                  commission: vnd(topupAmount - revenueOfTopUp(topupAmount)),
                 })}
               </p>
               {formError && (

@@ -7,6 +7,7 @@ import {
 } from "../src/lib/docTableDetect.js";
 import { getCellText } from "../src/lib/docParser.js";
 import {
+  P,
   makeBareSttTable,
   makeLegacyTable,
   makeOverallTable,
@@ -14,6 +15,7 @@ import {
   makeTabFromTables,
   makeTranslationTable4Col,
   makeVocabTable,
+  row,
 } from "./fixtures.js";
 
 const kinds = (tab) => detectTables(tab).tables.map((t) => t.kind);
@@ -114,6 +116,40 @@ describe("detectTables", () => {
     ]);
     expect(tables[1].continuation).toBe(true);
     expect(unclassifiedWithQuestions).toEqual([]);
+  });
+
+  it("does not warn about a headerless table under the BÀI TẬP TỰ CHỌN marker", () => {
+    // Buổi 02/03 (mọi template): bảng sắp xếp từ tự chọn mở đầu luôn bằng câu
+    // 1, không có header "Bài làm của học viên", nên từng bị báo nhầm "bảng 10
+    // có câu hỏi nhưng không nhận ra được là bảng bài tập".
+    const sentences = [
+      row2("1. day / books / read / I / every /.", "→ I read books every day."),
+      row2(
+        "2. now / lunch / eating / She / is /.",
+        "→ She is eating lunch now.",
+      ),
+    ];
+    const tab = makeTabFromTables([
+      makeLegacyTable(),
+      makeOverallTable(),
+      [row([P("BÀI TẬP TỰ CHỌN")])],
+      sentences,
+    ]);
+    const { tables, unclassifiedWithQuestions } = detectTables(tab);
+    expect(tables.map((x) => x.tableIdx)).toEqual([0]);
+    expect(unclassifiedWithQuestions).toEqual([]);
+  });
+
+  it("still reports such a table when there is no TỰ CHỌN marker before it", () => {
+    const sentences = [
+      row2("1. day / books / read / I / every /.", "→ I read books every day."),
+    ];
+    const tab = makeTabFromTables([
+      makeLegacyTable(),
+      makeOverallTable(),
+      sentences,
+    ]);
+    expect(detectTables(tab).unclassifiedWithQuestions).toEqual([2]);
   });
 
   it("reports a table full of questions it could not classify", () => {
