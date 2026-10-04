@@ -765,6 +765,46 @@
   color: var(--color-text-tertiary, #8a948f);
 }
 
+/* ExpandableText: one clipped line + a toggle that shows the whole text. */
+.expandable-text {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  min-width: 0;
+}
+.expandable-text-body {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.expandable-text.is-expanded .expandable-text-body {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.cache-table td:has(.expandable-text.is-expanded) {
+  max-width: 320px;
+}
+.expandable-text-toggle {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  margin: -3px -4px -3px 0;
+  padding: 0;
+  border: 1px solid var(--color-border-tertiary);
+  border-radius: 6px;
+  background: var(--color-background-secondary);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+.expandable-text-toggle:hover {
+  color: var(--color-text-primary);
+}
+
 /* teacher-points billing panel */
 .billing-panel {
   display: flex;

@@ -3,10 +3,13 @@ import { useNavigate } from "react-router-dom";
 
 import { fetchAuditFilterOptions, fetchAuditLogs } from "../api/backend.js";
 import { useAuth } from "../auth/AuthContext.jsx";
+import ColumnPicker from "../components/ColumnPicker.jsx";
 import DataTable from "../components/DataTable.jsx";
 import DateInputVn from "../components/DateInputVn.jsx";
+import ExpandableText from "../components/ExpandableText.jsx";
 import MultiSelect from "../components/MultiSelect.jsx";
 import { isAdminEmail } from "../config.js";
+import { useColumnVisibility } from "../hooks/useColumnVisibility.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
 import { formatDateTimeVn } from "../lib/scheduleTime.js";
 
@@ -35,6 +38,9 @@ const FILTER_FIELDS = [
 ];
 
 const DEFAULT_WINDOW_DAYS = 7;
+
+// Every column starts shown; the admin hides what they do not need.
+const DEFAULT_COLUMNS = {};
 
 /** YYYY-MM-DD in local time, for the native date inputs. */
 function toDateInput(date) {
@@ -77,6 +83,9 @@ export default function AuditLogPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
 
+  const [columnVisibility, setColumnVisibility, resetColumns] =
+    useColumnVisibility("auditLogCols", DEFAULT_COLUMNS);
+
   const fieldType =
     FILTER_FIELDS.find((f) => f.value === field)?.type ?? "text";
 
@@ -89,6 +98,19 @@ export default function AuditLogPage() {
     const key = `audit.action.${String(action).replace(/\./g, "_")}`;
     const label = t(key);
     return label === key ? action : label;
+  };
+
+  /** Same fallback idea for the other enum filters (type, result). */
+  const enumLabel = (group) => (value) => {
+    const key = `audit.${group}.${value}`;
+    const label = t(key);
+    return label === key ? value : label;
+  };
+  const resourceTypeLabel = enumLabel("resourceType");
+  const OPTION_LABELS = {
+    action: actionLabel,
+    resourceType: resourceTypeLabel,
+    success: enumLabel("success"),
   };
 
   useEffect(() => {
@@ -218,9 +240,23 @@ export default function AuditLogPage() {
       cell: ({ row }) => actionLabel(row.original.action),
     },
     {
+      id: "detail",
+      header: t("audit.colDetail"),
+      meta: {
+        className: "cell-clip",
+        cellProps: (r) => ({ title: r.detail }),
+      },
+      cell: ({ row }) =>
+        row.original.detail ? (
+          <ExpandableText text={row.original.detail} />
+        ) : (
+          "—"
+        ),
+    },
+    {
       id: "resource",
       header: t("audit.colResource"),
-      cell: ({ row }) => row.original.resourceType,
+      cell: ({ row }) => resourceTypeLabel(row.original.resourceType),
     },
     {
       id: "severity",
@@ -256,15 +292,6 @@ export default function AuditLogPage() {
         const ms = row.original.durationMs;
         return ms === null || ms === undefined ? "—" : `${ms}ms`;
       },
-    },
-    {
-      id: "detail",
-      header: t("audit.colDetail"),
-      meta: {
-        className: "cell-clip",
-        cellProps: (r) => ({ title: r.detail }),
-      },
-      cell: ({ row }) => row.original.detail || "—",
     },
     {
       id: "ip",
@@ -318,7 +345,7 @@ export default function AuditLogPage() {
               options={options[field] || []}
               placeholder={t("audit.allValues")}
               summaryText={(n) => t("audit.selectedCount", { n })}
-              renderLabel={field === "action" ? actionLabel : undefined}
+              renderLabel={OPTION_LABELS[field]}
             />
           ) : (
             <input
@@ -347,6 +374,15 @@ export default function AuditLogPage() {
           </label>
         </div>
 
+        <div className="table-toolbar">
+          <ColumnPicker
+            columns={columns}
+            visibility={columnVisibility}
+            onChange={setColumnVisibility}
+            onReset={resetColumns}
+          />
+        </div>
+
         {loading ? (
           <div className="cache-loading">
             <span className="spinner" aria-hidden="true" />
@@ -363,6 +399,8 @@ export default function AuditLogPage() {
             columns={columns}
             getRowId={(r) => r.id}
             enableSorting={false}
+            columnVisibility={columnVisibility}
+            onColumnVisibilityChange={setColumnVisibility}
           />
         )}
 

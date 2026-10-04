@@ -1713,3 +1713,24 @@ textarea {
   opacity: 0;
   pointer-events: none;
 }
+/* iOS Safari opens no picker from showPicker() or focus() on a hidden date
+   input, so on touch screens the (still invisible) native input covers the
+   field and takes the tap itself. 16px keeps iOS from zooming in on focus. */
+@media (pointer: coarse) {
+  .date-vn > input.date-vn-native[type="date"] {
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    z-index: 1;
+    display: block;
+    -webkit-appearance: none;
+    appearance: none;
+    font-size: 16px;
+    pointer-events: auto;
+  }
+  .date-vn > input.date-vn-native[type="date"]:disabled {
+    pointer-events: none;
+  }
+}
