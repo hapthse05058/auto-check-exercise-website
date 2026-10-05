@@ -671,14 +671,19 @@ describe("writing corrections", () => {
     );
   });
 
-  it("adds the Vietnamese meaning when the verdict carries one (rearrange)", () => {
+  it("adds the Vietnamese meaning to a correction only (rearrange)", () => {
     const append = { target: { mode: "append" } };
+    const cell = { target: { mode: "cell" } };
+    // A right sentence is not translated (an older cached verdict may carry one).
     expect(
       formatHsFeedback(append, {
         correct: true,
         translation: "Anh ấy chạy nhanh.",
       }),
-    ).toBe(" ✅ Dịch: Anh ấy chạy nhanh.");
+    ).toBe(" ✅");
+    expect(
+      formatHsFeedback(cell, { correct: true, translation: "Anh ấy chạy nhanh." }),
+    ).toBe("✅");
     expect(
       formatHsFeedback(append, {
         correct: false,
