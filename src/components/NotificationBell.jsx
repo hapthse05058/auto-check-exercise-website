@@ -19,9 +19,17 @@ import { PUSH_EVENT } from "../lib/push.js";
 import {
   notificationSoundEnabled,
   playNotificationSound,
+  playSuccessSound,
   setNotificationSoundEnabled,
   unlockAudioOnFirstGesture,
 } from "../lib/sound.js";
+
+/** A run finished: these chime like the grading screen does, not the bell. */
+const GRADING_DONE_TYPES = new Set([
+  "grading.jobDone",
+  "grading.autoDone",
+  "grading.doneByAdmin",
+]);
 
 /** Poll cadence, matched to AuthContext's proactiveTokenRefresh interval. */
 const POLL_MS = 60_000;
@@ -137,8 +145,15 @@ export default function NotificationBell() {
         const fresh = unreadIds.filter((id) => !seenUnreadRef.current.has(id));
         fresh.forEach((id) => seenUnreadRef.current.add(id));
         if (fresh.length > 0) {
-          playNotificationSound();
           const arrived = results.filter((n) => fresh.includes(n.id));
+          if (
+            notificationSoundEnabled() &&
+            arrived.some((n) => GRADING_DONE_TYPES.has(n.type))
+          ) {
+            playSuccessSound();
+          } else {
+            playNotificationSound();
+          }
           setToasts((prev) => [...arrived, ...prev].slice(0, MAX_TOASTS));
         }
       }

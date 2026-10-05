@@ -719,11 +719,20 @@
   flex: 0 0 auto;
   pointer-events: none;
 }
+/* Wrapped, never clipped: an option is read in full (long action names). */
 .multiselect-row-label {
   flex: 1 1 auto;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.35;
+}
+/* Phones: the multiselect takes its own row, so its list is screen-wide. */
+@media (max-width: 600px) {
+  .cache-search .searchable-select.multi-select {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
 }
 
 /* audit log screen — severity badge + the actor's secondary email line */

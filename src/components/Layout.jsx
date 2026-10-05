@@ -41,9 +41,11 @@ function LanguageSwitcher() {
   );
 }
 
-/** Light / dark toggle: shows the theme it switches TO. */
-function ThemeToggle() {
-  const { theme, toggleTheme } = useSyncedTheme();
+/**
+ * Light / dark toggle: shows the theme it switches TO. Signed out only — the
+ * signed-in header keeps it in the ☰ menu's settings (ThemeSwitch).
+ */
+function ThemeToggle({ theme, toggleTheme }) {
   const { t } = useLanguage();
   const label = theme === "dark" ? t("theme.toLight") : t("theme.toDark");
   return (
@@ -58,6 +60,30 @@ function ThemeToggle() {
         aria-hidden="true"
       />
     </button>
+  );
+}
+
+/** Light | Dark, segmented like the language switch (☰ menu settings). */
+function ThemeSwitch({ theme, toggleTheme }) {
+  const { t } = useLanguage();
+  const choose = (next) => next !== theme && toggleTheme();
+  return (
+    <div className="lang-switch" role="group" aria-label={t("theme.label")}>
+      {["light", "dark"].map((value) => (
+        <button
+          key={value}
+          className={`lang-option ${theme === value ? "active" : ""}`}
+          aria-pressed={theme === value}
+          onClick={() => choose(value)}
+        >
+          <i
+            className={`ti ${value === "dark" ? "ti-moon" : "ti-sun"}`}
+            aria-hidden="true"
+          />{" "}
+          {t(`theme.${value}`)}
+        </button>
+      ))}
+    </div>
   );
 }
 
@@ -183,8 +209,11 @@ const NAV_GROUPS = [
   },
 ];
 
-/** ☰ menu with navigation shortcuts (replaces the extension popup menu). */
-function NavMenu() {
+/**
+ * ☰ menu with navigation shortcuts (replaces the extension popup menu), and
+ * the theme + language settings, kept out of the header so it fits a phone.
+ */
+function NavMenu({ theme, toggleTheme }) {
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef(null);
   const navigate = useNavigate();
@@ -230,7 +259,7 @@ function NavMenu() {
         <nav
           className="menu-options nav-menu"
           aria-label="Menu"
-          style={{ "--nav-cols": groups.length }}
+          style={{ "--nav-cols": groups.length + 1 }}
         >
           {groups.map((group) => (
             <div className="nav-group" key={group.key}>
@@ -251,6 +280,17 @@ function NavMenu() {
               })}
             </div>
           ))}
+          <div className="nav-group nav-settings">
+            <p className="nav-group-title">{t("nav.groupSettings")}</p>
+            <div className="nav-setting">
+              <span>{t("theme.label")}</span>
+              <ThemeSwitch theme={theme} toggleTheme={toggleTheme} />
+            </div>
+            <div className="nav-setting">
+              <span>{t("lang.label")}</span>
+              <LanguageSwitcher />
+            </div>
+          </div>
         </nav>
       )}
     </div>
@@ -396,6 +436,9 @@ export default function Layout() {
   const { isAuthenticated, teacherInfo, logout } = useAuth();
   const { t } = useLanguage();
   const navigate = useNavigate();
+  // Here, always mounted: the hook syncs the theme with the account, so it
+  // must not live in the ☰ menu, which only renders while open.
+  const themeControl = useSyncedTheme();
   // On app start, re-assert this browser's FCM token (tokens rotate; saveDevice
   // is an idempotent merge and push.js rate-limits it to once a day) and start
   // the foreground listener so a push arriving on a focused tab updates the bell
@@ -421,14 +464,15 @@ export default function Layout() {
           <h3 className="m-0">{t("common.appTitle")}</h3>
         </Link>
         <div className="header-right">
-          <ThemeToggle />
-          <LanguageSwitcher />
+          {/* Signed in, both live in the ☰ menu (it is not there signed out). */}
+          {!isAuthenticated && <ThemeToggle {...themeControl} />}
+          {!isAuthenticated && <LanguageSwitcher />}
           {/* Admins grade on the class teacher's points (the grading screen
               shows that balance), so their own would only mislead. */}
           {isAuthenticated &&
             teacherInfo &&
             !isAdminEmail(teacherInfo.gmail) && <PointBadge />}
-          {isAuthenticated && <NavMenu />}
+          {isAuthenticated && <NavMenu {...themeControl} />}
           {isAuthenticated && <NotificationBell />}
           {isAuthenticated && <ProfileMenu teacherInfo={teacherInfo} />}
           {isAuthenticated && (

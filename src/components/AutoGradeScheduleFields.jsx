@@ -25,6 +25,10 @@ import { formatVn } from "../lib/scheduleTime.js";
 
 const PREVIEW_DEBOUNCE_MS = 400;
 
+/** A run key starts with its date: "2026-10-04" → "04/10/2026". */
+const runKeyDateVn = (runKey) =>
+  String(runKey).slice(0, 10).split("-").reverse().join("/");
+
 /**
  * The weekly slots of a grading schedule — the days the class is graded on,
  * each in the morning, afternoon or evening (the admin sets each part's
@@ -250,6 +254,20 @@ export default function AutoGradeScheduleFields({
             {t("autoGrade.firstRun", {
               runAt: formatVn(preview.next.runAt),
               remindAt: formatVn(preview.next.remindAt),
+            })}
+          </p>
+        )}
+        {!invalid && preview?.next?.replacesRunKey && (
+          <p className="field-note warning-text">
+            {t("autoGrade.dayRegrade", {
+              date: runKeyDateVn(preview.next.replacesRunKey),
+            })}
+          </p>
+        )}
+        {!invalid && preview?.next?.skippedRunKey && (
+          <p className="field-note warning-text">
+            {t("autoGrade.dayTaken", {
+              date: runKeyDateVn(preview.next.skippedRunKey),
             })}
           </p>
         )}

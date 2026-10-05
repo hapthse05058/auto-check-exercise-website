@@ -495,6 +495,20 @@ a.login-link {
 .nav-item.active .ti {
   color: var(--color-primary-dark);
 }
+/* Settings group: a label and its switch on one row. */
+.nav-setting {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 8px;
+  font-size: 14px;
+  color: var(--color-text-primary);
+}
+.nav-setting .lang-option .ti {
+  font-size: 13px;
+}
+
 /* Desktop: one column per group, so the admin menu is ~6 rows, not 14. */
 @media (min-width: 900px) {
   .menu-options.nav-menu {
@@ -998,6 +1012,9 @@ textarea {
 .error-text {
   color: var(--color-error);
   margin-top: 0.25rem;
+}
+.warning-text {
+  color: var(--color-warning-text);
 }
 
 .missing-teacher-box {

@@ -184,12 +184,17 @@ export function partDay(part, weekday, t) {
 
 /** A run key ("2026-09-26-2231", or a day "2026-09-26") as "22:31 26/09". */
 export function runLabel(runKey) {
-  const match = /^(\d{4})-(\d{2})-(\d{2})(?:-(\d{2})(\d{2}))?$/.exec(
-    String(runKey || ""),
-  );
+  // A re-grade on the same day ends in -r2, -r3…: "04/10/2026 (#2)".
+  const match =
+    /^(\d{4})-(\d{2})-(\d{2})(?:-(\d{2})(\d{2}))?(?:-r(\d+))?$/.exec(
+      String(runKey || ""),
+    );
   if (!match) return String(runKey || "");
-  const [, year, month, day, hh, mm] = match;
-  return hh ? `${day}/${month}/${year} ${hh}:${mm}` : `${day}/${month}/${year}`;
+  const [, year, month, day, hh, mm, retake] = match;
+  const date = hh
+    ? `${day}/${month}/${year} ${hh}:${mm}`
+    : `${day}/${month}/${year}`;
+  return retake ? `${date} (#${retake})` : date;
 }
 
 /** One line on how the schedule's last grading went. */

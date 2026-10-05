@@ -345,6 +345,8 @@ export default function AuditLogPage() {
               options={options[field] || []}
               placeholder={t("audit.allValues")}
               summaryText={(n) => t("audit.selectedCount", { n })}
+              searchPlaceholder={t("audit.searchValues")}
+              noResultsText={t("audit.noValues")}
               renderLabel={OPTION_LABELS[field]}
             />
           ) : (

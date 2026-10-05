@@ -3,7 +3,13 @@
 export const translations = {
   en: {
     lang: { vi: "VI", en: "EN", label: "Language" },
-    theme: { toDark: "Switch to dark mode", toLight: "Switch to light mode" },
+    theme: {
+      toDark: "Switch to dark mode",
+      toLight: "Switch to light mode",
+      label: "Theme",
+      light: "Light",
+      dark: "Dark",
+    },
     common: {
       appTitle: "AI Exercise Checker tool - For Basic classes",
       save: "Save",
@@ -44,6 +50,7 @@ export const translations = {
       groupGrading: "Grading",
       groupClasses: "Classes & students",
       groupAdmin: "Admin",
+      groupSettings: "Settings",
       logout: "Logout",
       hi: "Hi {name}!",
       there: "there",
@@ -221,6 +228,10 @@ export const translations = {
       removeSlot: "Remove this day",
       repeats: "Every week: graded on {when}.",
       firstRun: "First run: {runAt}. Notification at {remindAt}.",
+      dayTaken:
+        "The class is being graded automatically on {date} right now, so the first run moves to a later date.",
+      dayRegrade:
+        "The class was already graded automatically on {date}. Saving adds a re-grade: documents that already have feedback are skipped (clear it first to grade them again), and every document graded again is charged as usual.",
       timeNote:
         "The exact time of each part of the day is set by the admin to stay clear of peak hours. You are notified 30 minutes before and again when it is done.",
       dateRequired: "Choose a grading day.",
@@ -467,6 +478,8 @@ export const translations = {
       filterField: "Field to filter",
       allValues: "All",
       selectedCount: "{n} selected",
+      searchValues: "Search…",
+      noValues: "No matching option.",
       searchPlaceholder: "Filter value (contains)…",
       from: "From",
       to: "To",
@@ -703,7 +716,7 @@ export const translations = {
     ielts: {
       title: "Grade IELTS Writing",
       subtitle:
-        "Paste the prompt and the student's writing. You get: corrections in the text → an improved version → comments on the 4 criteria with bands. {price} per submission (grading the same submission again is free).",
+        "Paste the prompt and the student's writing. You get: corrections in the text → an improved version → comments on the 4 criteria with bands. {price} per grading (grading the same submission again is charged again).",
       task: {
         task1: "Task 1 (chart)",
         task2: "Task 2 (essay)",
@@ -1139,6 +1152,9 @@ export const translations = {
     theme: {
       toDark: "Chuyển sang giao diện tối",
       toLight: "Chuyển sang giao diện sáng",
+      label: "Giao diện",
+      light: "Sáng",
+      dark: "Tối",
     },
     common: {
       appTitle: "Công cụ chấm bài AI - Cho lớp Basic",
@@ -1180,6 +1196,7 @@ export const translations = {
       groupGrading: "Chấm bài",
       groupClasses: "Lớp & học sinh",
       groupAdmin: "Quản trị",
+      groupSettings: "Cài đặt",
       logout: "Đăng xuất",
       hi: "Chào {name}!",
       there: "bạn",
@@ -1357,6 +1374,10 @@ export const translations = {
       removeSlot: "Bỏ ngày này",
       repeats: "Hằng tuần: chấm vào {when}.",
       firstRun: "Lần chấm đầu: {runAt}. Báo trước lúc {remindAt}.",
+      dayTaken:
+        "Ngày {date} lớp đang được chấm tự động, nên lần chấm đầu dời sang ngày sau.",
+      dayRegrade:
+        "Ngày {date} lớp đã được chấm tự động. Lưu lịch sẽ tạo thêm một lượt chấm lại: bài đã có nhận xét sẽ được bỏ qua (xóa nhận xét trước nếu muốn chấm lại bài đó); mỗi bài được chấm lại vẫn tính tiền như bình thường.",
       timeNote:
         "Giờ chấm cụ thể của từng buổi do admin sắp xếp để tránh giờ cao điểm. Bạn được báo trước 30 phút và báo lại khi chấm xong.",
       dateRequired: "Hãy chọn ngày chấm.",
@@ -1600,6 +1621,8 @@ export const translations = {
       filterField: "Trường cần lọc",
       allValues: "Tất cả",
       selectedCount: "Đã chọn {n}",
+      searchValues: "Tìm…",
+      noValues: "Không có lựa chọn phù hợp.",
       searchPlaceholder: "Giá trị cần lọc (chứa)…",
       from: "Từ ngày",
       to: "Đến ngày",
@@ -1834,7 +1857,7 @@ export const translations = {
     ielts: {
       title: "Chấm IELTS Writing",
       subtitle:
-        "Dán đề và bài của học viên. Kết quả gồm: chữa trực tiếp trong bài → bài cải thiện → nhận xét 4 tiêu chí kèm band. Mỗi bài {price} (chấm lại đúng bài đó thì không trừ nữa).",
+        "Dán đề và bài của học viên. Kết quả gồm: chữa trực tiếp trong bài → bài cải thiện → nhận xét 4 tiêu chí kèm band. Mỗi lần chấm {price} (chấm lại bài đó cũng tính tiền).",
       task: {
         task1: "Task 1 (biểu đồ)",
         task2: "Task 2 (bài luận)",
