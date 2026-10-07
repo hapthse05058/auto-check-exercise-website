@@ -355,6 +355,12 @@ button {
 }
 
 /* Page controls are block-level, so buttons need this to sit side by side. */
+/* A primary button with a leading icon (settings pages). */
+.primary-btn.with-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
 .button-row {
   display: flex;
   gap: 8px;

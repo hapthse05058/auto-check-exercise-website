@@ -210,7 +210,6 @@ describe("template update messages", () => {
       const lines = [
         t("grade.updateTemplate"),
         t("grade.updatingTemplate"),
-        t("grade.updateTemplateTitle"),
         t("grade.confirmUpdateTemplate", { lesson: "BUỔI 06", class: "A" }),
         t("grade.templateUpdated", { updated: 3, total: 4, tables: 9 }),
         t("grade.templateUnchanged", { n: 1 }),
@@ -218,9 +217,18 @@ describe("template update messages", () => {
         t("grade.templateNoTable", { n: 2 }),
         t("grade.templateJobRunning"),
         t("grade.templateUpdateFailed", { msg: "boom" }),
+        t("settings.autoGradeTitle"),
+        t("settings.autoGradeIntro"),
+        t("settings.templateTitle"),
+        t("settings.templateIntro"),
+        t("settings.templateIeltsOnly"),
+        t("settings.loadFailed"),
+        t("nav.groupSettings"),
+        t("nav.autoGrade"),
+        t("nav.updateTemplate"),
       ];
       for (const line of lines) {
-        expect(line, line).not.toMatch(/^grade\./);
+        expect(line, line).not.toMatch(/^(grade|settings|nav)\./);
         expect(line, line).not.toMatch(/\{[a-zA-Z]\w*\}/);
       }
     });

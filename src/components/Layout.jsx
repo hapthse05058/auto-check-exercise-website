@@ -150,6 +150,22 @@ const NAV_GROUPS = [
     ],
   },
   {
+    key: "settings",
+    title: "nav.groupSettings",
+    items: [
+      {
+        path: "/settings/auto-grade",
+        label: "nav.autoGrade",
+        icon: "ti-clock",
+      },
+      {
+        path: "/settings/template",
+        label: "nav.updateTemplate",
+        icon: "ti-layout-rows",
+      },
+    ],
+  },
+  {
     key: "admin",
     title: "nav.groupAdmin",
     admin: true,

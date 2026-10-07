@@ -42,6 +42,9 @@ export const translations = {
       groupGrading: "Grading",
       groupClasses: "Classes & students",
       groupAdmin: "Admin",
+      groupSettings: "Settings",
+      autoGrade: "Auto-grading",
+      updateTemplate: "Update template",
       logout: "Logout",
       hi: "Hi {name}!",
       there: "there",
@@ -309,6 +312,17 @@ export const translations = {
         missed: "{runKey}: missed, could not grade before the deadline.",
       },
     },
+    settings: {
+      autoGradeTitle: "Auto-grading",
+      autoGradeIntro:
+        "Pick a class to see or change its weekly auto-grading schedule.",
+      templateTitle: "Update IELTS template",
+      templateIntro:
+        "Pick a class and a lesson: every student's doc gets the current IELTS template for that lesson (feedback table + NHẬN XÉT, comment column on sentence tables). Graded exercises are left as they are; no points are used. Best done before students start the lesson.",
+      templateIeltsOnly:
+        "This class is not an IELTS class — there is no template to update.",
+      loadFailed: "Failed to load your classes. Please reload the page.",
+    },
     grade: {
       title: "Grade exercises",
       payerPoint: "{teacher}: {point} point(s) left",
@@ -332,8 +346,6 @@ export const translations = {
       clearing: "Clearing...",
       updateTemplate: "Update template",
       updatingTemplate: "Updating template...",
-      updateTemplateTitle:
-        "Brings this lesson of every student's doc to the current IELTS template (feedback table + NHẬN XÉT, comment column on sentence tables). Graded exercises are left as they are; no points are used.",
       confirmUpdateTemplate:
         "Update {lesson} of class {class} to the current IELTS template?\nGraded exercises are left as they are, and no points are used.",
       templateUpdated:
@@ -1059,9 +1071,9 @@ export const translations = {
         "{docId}, table {table}: more than {max} images in Đề bài — not graded.",
       ieltsInvalid: "{docId}, table {table}: cannot be graded ({code}).",
       ieltsTemplateOutdated:
-        '{docId}: {count} table(s) are still on an older template and were not graded — press "Update template" first.',
+        '{docId}: {count} table(s) are still on an older template and were not graded — use Menu ☰ → Settings → "Update template" first.',
       allIeltsTemplateOutdated:
-        '{count} doc(s) are still on an older IELTS template, so nothing was graded. Press "Update template", then grade again.',
+        '{count} doc(s) are still on an older IELTS template, so nothing was graded. Use Menu ☰ → Settings → "Update template", then grade again.',
       ieltsAiInvalid:
         "{docId}, table {table}: the AI returned an unusable answer twice — left empty, not charged. Run grading again.",
       ieltsNotConfigured:
@@ -1147,6 +1159,9 @@ export const translations = {
       groupGrading: "Chấm bài",
       groupClasses: "Lớp & học sinh",
       groupAdmin: "Quản trị",
+      groupSettings: "Cài đặt",
+      autoGrade: "Chấm tự động",
+      updateTemplate: "Cập nhật template",
       logout: "Đăng xuất",
       hi: "Chào {name}!",
       there: "bạn",
@@ -1412,6 +1427,16 @@ export const translations = {
         missed: "{runKey}: bỏ lỡ, không kịp chấm trước hạn.",
       },
     },
+    settings: {
+      autoGradeTitle: "Chấm tự động",
+      autoGradeIntro: "Chọn lớp để xem hoặc đổi lịch chấm tự động hằng tuần.",
+      templateTitle: "Cập nhật template IELTS",
+      templateIntro:
+        "Chọn lớp và buổi: doc của mọi học viên sẽ được đưa về template IELTS hiện tại ở buổi đó (bảng chữa + NHẬN XÉT, cột nhận xét ở bảng viết câu). Bài đã chấm giữ nguyên, không trừ point. Nên làm trước khi học viên làm bài.",
+      templateIeltsOnly:
+        "Lớp này không phải lớp IELTS nên không có template để cập nhật.",
+      loadFailed: "Tải danh sách lớp thất bại. Hãy tải lại trang.",
+    },
     grade: {
       title: "Chấm bài",
       payerPoint: "{teacher}: còn {point} point",
@@ -1433,22 +1458,20 @@ export const translations = {
       hintNoLessons: "Lớp này chưa có buổi học nào.",
       clearFeedback: "Xóa feedback",
       clearing: "Đang xóa...",
-      updateTemplate: "Cập nhật mẫu",
-      updatingTemplate: "Đang cập nhật mẫu...",
-      updateTemplateTitle:
-        "Đưa buổi học này trong doc của mọi học viên về mẫu IELTS hiện tại (bảng chữa + NHẬN XÉT, cột nhận xét ở bảng viết câu). Bài đã chấm giữ nguyên, không trừ point.",
+      updateTemplate: "Cập nhật template",
+      updatingTemplate: "Đang cập nhật template...",
       confirmUpdateTemplate:
-        "Cập nhật {lesson} của lớp {class} sang mẫu IELTS hiện tại?\nBài đã chấm giữ nguyên, không trừ point.",
+        "Cập nhật {lesson} của lớp {class} sang template IELTS hiện tại?\nBài đã chấm giữ nguyên, không trừ point.",
       templateUpdated:
-        "Đã cập nhật mẫu cho {updated}/{total} tài liệu ({tables} bảng).",
-      templateUnchanged: "{n} tài liệu đã đúng mẫu sẵn.",
+        "Đã cập nhật template cho {updated}/{total} tài liệu ({tables} bảng).",
+      templateUnchanged: "{n} tài liệu đã đúng template sẵn.",
       templateNotUpdated:
         "{n} tài liệu không cập nhật được (không đọc được, thiếu tab buổi học, hoặc Docs từ chối) — hãy thử lại.",
       templateNoTable:
         "{n} bài viết của buổi này chưa có bảng để học viên viết — cần thêm bảng vào bài thì mới chấm được.",
       templateJobRunning:
-        "Buổi này đang được chấm — đợi chấm xong rồi hãy cập nhật mẫu.",
-      templateUpdateFailed: "Cập nhật mẫu thất bại: {msg}",
+        "Buổi này đang được chấm — đợi chấm xong rồi hãy cập nhật template.",
+      templateUpdateFailed: "Cập nhật template thất bại: {msg}",
       loadingTeacher: "Đang tải thông tin giáo viên...",
       ready: "Sẵn sàng chấm bài...",
       loadTeacherFailed:
@@ -2153,9 +2176,9 @@ export const translations = {
         "{docId}, bảng {table}: ô Đề bài có hơn {max} ảnh — chưa chấm.",
       ieltsInvalid: "{docId}, bảng {table}: không chấm được ({code}).",
       ieltsTemplateOutdated:
-        '{docId}: {count} bảng vẫn đang ở mẫu cũ nên chưa chấm — hãy bấm "Cập nhật mẫu" trước.',
+        '{docId}: {count} bảng vẫn đang ở template cũ nên chưa chấm — vào Menu ☰ → Cài đặt → "Cập nhật template" trước.',
       allIeltsTemplateOutdated:
-        '{count} tài liệu vẫn đang ở mẫu IELTS cũ nên chưa chấm được. Hãy bấm "Cập nhật mẫu" rồi chấm lại.',
+        '{count} tài liệu vẫn đang ở template IELTS cũ nên chưa chấm được. Vào Menu ☰ → Cài đặt → "Cập nhật template", rồi chấm lại.',
       ieltsAiInvalid:
         "{docId}, bảng {table}: AI trả kết quả không dùng được 2 lần — để trống, không trừ point. Hãy bấm chấm lại.",
       ieltsNotConfigured: "Server chưa cấu hình chấm IELTS (chưa có model AI).",
