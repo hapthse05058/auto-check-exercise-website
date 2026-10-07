@@ -30,7 +30,12 @@ function unitsOf(spec) {
       });
       return { text, boldAt };
     };
-    return { kind: "table", rows: block.table.map((row) => row.map(cellOf)) };
+    return {
+      kind: "table",
+      rows: block.table.map((row) => row.map(cellOf)),
+      widths: block.widths || null,
+      spans: (block.spans || []).map((s) => [...s]),
+    };
   });
 }
 
@@ -95,18 +100,26 @@ function render(state) {
     } else {
       const start = at;
       at += 1; // the table itself
-      const tableRows = unit.rows.map((row) => {
+      const tableRows = unit.rows.map((row, r) => {
+        const rowStart = at;
         at += 1; // the row
-        return {
-          tableCells: row.map((cell) => {
-            at += 1; // the cell
-            state.offsets.push({ unit: cell, start: at });
-            const cellStart = at;
-            const paras = paragraphsOf(cell.text, cell.boldAt || []);
-            return { startIndex: cellStart, endIndex: at, content: paras };
-          }),
-        };
+        const tableCells = row.map((cell, c) => {
+          const cellStart = at;
+          at += 1; // the cell
+          state.offsets.push({ unit: cell, start: at });
+          const paras = paragraphsOf(cell.text, cell.boldAt || []);
+          // [row, column, rowSpan]: a cell merged down over the rows below.
+          const span = (unit.spans || []).find((s) => s[0] === r && s[1] === c);
+          return {
+            startIndex: cellStart,
+            endIndex: at,
+            content: paras,
+            ...(span ? { tableCellStyle: { rowSpan: span[2] } } : {}),
+          };
+        });
+        return { startIndex: rowStart, endIndex: at, tableCells };
       });
+      at += 1; // the table's end, as in the Docs API
       content.push({
         startIndex: start,
         endIndex: at,
@@ -114,6 +127,16 @@ function render(state) {
           rows: unit.rows.length,
           columns: unit.rows[0].length,
           tableRows,
+          ...(unit.widths
+            ? {
+                tableStyle: {
+                  tableColumnProperties: unit.widths.map((w) => ({
+                    widthType: "FIXED_WIDTH",
+                    width: { magnitude: w, unit: "PT" },
+                  })),
+                },
+              }
+            : {}),
         },
       });
     }
@@ -171,6 +194,114 @@ export function makeColumnsTab(spec, title = "Writing buổi 4") {
       .filter((k) => delta > 0 || k < local || k >= local - delta)
       .map((k) => (k >= local ? k + delta : k));
   };
+  /** The table unit starting at Docs index `index`, with its rendered block. */
+  const tableAt = (index) => {
+    const blocks = tab.documentTab.body.content.filter((b) => b.table);
+    const units = state.units.filter((u) => u.kind === "table");
+    const k = blocks.findIndex((b) => b.startIndex === index);
+    if (k < 0) throw new Error(`ieltsColumnsDoc: no table starts at ${index}`);
+    return { unit: units[k], block: blocks[k] };
+  };
+  const emptyCell = () => ({ text: "\n", boldAt: [] });
+  const totalLength = () => tab.documentTab.body.content.at(-1)?.endIndex ?? 1;
+  /**
+   * Table structure, as the Docs API does it (measured on a real doc): a new
+   * table goes after an empty paragraph inserted at its location; rows and
+   * columns come with one empty paragraph per cell. Named ranges after the
+   * change move with it; one inside a table being reshaped is not modelled.
+   */
+  const structural = (kind, body) => {
+    const before = totalLength();
+    let from;
+    if (kind === "insertTable") {
+      const { index } = body.location;
+      const o = unitAt(state, index);
+      if (o.unit.kind !== "p")
+        throw new Error("insertTable outside a paragraph");
+      const local = index - o.start;
+      const bold = o.unit.boldAt || [];
+      const left = {
+        kind: "p",
+        text: `${o.unit.text.slice(0, local)}\n`,
+        boldAt: bold.filter((k) => k < local),
+      };
+      const right = {
+        kind: "p",
+        text: o.unit.text.slice(local),
+        boldAt: bold.filter((k) => k >= local).map((k) => k - local),
+      };
+      const table = {
+        kind: "table",
+        widths: null,
+        rows: Array.from({ length: body.rows }, () =>
+          Array.from({ length: body.columns }, emptyCell),
+        ),
+      };
+      state.units.splice(state.units.indexOf(o.unit), 1, left, table, right);
+      from = index;
+    } else {
+      const location = body.tableCellLocation ||
+        body.tableRange?.tableCellLocation || {
+          tableStartLocation: body.tableStartLocation,
+        };
+      const { unit, block } = tableAt(location.tableStartLocation.index);
+      from = block.endIndex;
+      const insideTable = Object.values(state.named).some((g) =>
+        g.namedRanges.some((nr) =>
+          nr.ranges.some(
+            (r) =>
+              r.startIndex >= block.startIndex && r.startIndex < block.endIndex,
+          ),
+        ),
+      );
+      if (insideTable && kind !== "updateTableColumnProperties") {
+        throw new Error(
+          "ieltsColumnsDoc: reshaping a table holding a named range",
+        );
+      }
+      const { rowIndex, columnIndex } = location;
+      unit.spans ||= [];
+      if (kind === "insertTableColumn") {
+        const at = columnIndex + (body.insertRight ? 1 : 0);
+        for (const row of unit.rows) row.splice(at, 0, emptyCell());
+        if (unit.widths) unit.widths.splice(at, 0, unit.widths[columnIndex]);
+        // As Docs does: the new cell beside a cell merged down is merged too.
+        const beside = unit.spans.filter((s) => s[1] === columnIndex);
+        for (const s of unit.spans) if (s[1] >= at) s[1] += 1;
+        if (body.insertRight) {
+          for (const [r, , span] of beside) unit.spans.push([r, at, span]);
+        }
+      } else if (kind === "unmergeTableCells") {
+        unit.spans = unit.spans.filter((s) => s[1] !== columnIndex);
+      } else if (kind === "insertTableRow") {
+        const at = rowIndex + (body.insertBelow ? 1 : 0);
+        unit.rows.splice(at, 0, unit.rows[0].map(emptyCell));
+        for (const s of unit.spans) if (s[0] >= at) s[0] += 1;
+      } else if (kind === "deleteTableRow") {
+        unit.rows.splice(rowIndex, 1);
+      } else if (kind === "deleteTableColumn") {
+        for (const row of unit.rows) row.splice(columnIndex, 1);
+        if (unit.widths) unit.widths.splice(columnIndex, 1);
+      } else if (kind === "updateTableColumnProperties") {
+        unit.widths ||= unit.rows[0].map(() => null);
+        for (const k of body.columnIndices) {
+          unit.widths[k] = body.tableColumnProperties.width.magnitude;
+        }
+      }
+    }
+    refresh();
+    shiftRanges(from, totalLength() - before);
+  };
+  const STRUCTURAL = [
+    "insertTable",
+    "insertTableColumn",
+    "insertTableRow",
+    "deleteTableRow",
+    "deleteTableColumn",
+    "updateTableColumnProperties",
+    "unmergeTableCells",
+  ];
+
   let seq = 0;
   const apply = (requests) => {
     for (const request of requests) {
@@ -232,6 +363,14 @@ export function makeColumnsTab(spec, title = "Writing buổi 4") {
         });
       } else if (kind === "deleteNamedRange") {
         delete state.named[body.name];
+      } else if (STRUCTURAL.includes(kind)) {
+        structural(kind, body);
+      } else if (
+        kind === "updateParagraphStyle" ||
+        kind === "deleteParagraphBullets"
+      ) {
+        // Paragraph looks are not modelled; the range must still exist.
+        unitAt(state, body.range.startIndex, body.range.endIndex);
       } else {
         throw new Error(`ieltsColumnsDoc: unsupported ${kind}`);
       }
@@ -242,6 +381,34 @@ export function makeColumnsTab(spec, title = "Writing buổi 4") {
   return {
     tab,
     apply,
+    /** The tab as text: "¶ line" per paragraph, "[a | b]" per table row. */
+    outline: () =>
+      state.units.flatMap((u) =>
+        u.kind === "p"
+          ? u.text
+              .replace(/\n$/, "")
+              .split("\n")
+              .map((line) => `¶ ${line}`)
+          : u.kind === "img"
+            ? ["¶ [image]"]
+            : u.rows.map(
+                (row) =>
+                  `[${row.map((c) => c.text.replace(/\n$/, "").replace(/\n/g, "⏎")).join(" | ")}]`,
+              ),
+      ),
+    /** Column widths of table `t` (null when not fixed). */
+    widths: (t) => state.units.filter((u) => u.kind === "table")[t].widths,
+    /** Bold characters of the top-level paragraphs, as the text they spell. */
+    boldParagraphs: () =>
+      state.units
+        .filter((u) => u.kind === "p")
+        .map((u) =>
+          [...(u.boldAt || [])]
+            .sort((a, b) => a - b)
+            .map((k) => u.text[k])
+            .join(""),
+        )
+        .join(""),
     /** Cell text of table `t`, row `r`, cell `c` (final "\n" dropped). */
     cell: (t, r, c) =>
       state.units

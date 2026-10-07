@@ -1042,6 +1042,8 @@ export const translations = {
       ieltsTooManyImages:
         "{docId}, table {table}: more than {max} images in Đề bài — not graded.",
       ieltsInvalid: "{docId}, table {table}: cannot be graded ({code}).",
+      ieltsTemplateUpdateFailed:
+        "{docId}: the lesson could not be updated to the current template (table + NHẬN XÉT, sentence comment column) — graded as it is.",
       ieltsAiInvalid:
         "{docId}, table {table}: the AI returned an unusable answer twice — left empty, not charged. Run grading again.",
       ieltsNotConfigured:
@@ -2116,6 +2118,8 @@ export const translations = {
       ieltsTooManyImages:
         "{docId}, bảng {table}: ô Đề bài có hơn {max} ảnh — chưa chấm.",
       ieltsInvalid: "{docId}, bảng {table}: không chấm được ({code}).",
+      ieltsTemplateUpdateFailed:
+        "{docId}: không cập nhật được buổi này sang mẫu mới (bảng chữa + NHẬN XÉT, cột nhận xét câu) — chấm theo mẫu hiện có.",
       ieltsAiInvalid:
         "{docId}, bảng {table}: AI trả kết quả không dùng được 2 lần — để trống, không trừ point. Hãy bấm chấm lại.",
       ieltsNotConfigured: "Server chưa cấu hình chấm IELTS (chưa có model AI).",
