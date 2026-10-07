@@ -22,8 +22,9 @@ import { playSuccessSound } from "../lib/sound.js";
  * The ☰ menu's "Settings" group — a class's occasional set-up, kept off the
  * grading screen:
  *  - section "autoGrade": the weekly auto-grading schedule;
- *  - section "template":  IELTS only, brings a lesson of every student's doc
- *    to the current feedback template (backend gradingJobs.updateTemplates).
+ *  - section "template":  IELTS only, brings lessons X to Y of every
+ *    student's doc to the current feedback template (backend
+ *    gradingJobs.updateTemplates).
  */
 export default function SettingsPage({ section }) {
   const { loadTeacherInfo } = useAuth();
@@ -34,7 +35,9 @@ export default function SettingsPage({ section }) {
   const [courses, setCourses] = useState(null);
   const [classId, setClassId] = useState("");
   const [lessons, setLessons] = useState([]);
-  const [lessonId, setLessonId] = useState("");
+  // The template update's range, "from" and "to" lesson (the same for one).
+  const [fromId, setFromId] = useState("");
+  const [toId, setToId] = useState("");
   const [lessonsLoading, setLessonsLoading] = useState(false);
   const [schedule, setSchedule] = useState(null);
   const [scheduleOpen, setScheduleOpen] = useState(false);
@@ -105,7 +108,8 @@ export default function SettingsPage({ section }) {
     const stale = () => req !== lessonsReq.current;
     setClassId(id);
     setLessons([]);
-    setLessonId("");
+    setFromId("");
+    setToId("");
     setStatus({ phase: "idle", text: "" });
     refreshSchedule(id);
     if (!id) return;
@@ -115,7 +119,10 @@ export default function SettingsPage({ section }) {
       if (stale()) return;
       setLessons(list);
       const current = await fetchCurrentLesson(id);
-      if (!stale() && list.some((l) => l.id === current)) setLessonId(current);
+      if (!stale() && list.some((l) => l.id === current)) {
+        setFromId(current);
+        setToId(current);
+      }
     } catch (error) {
       if (stale() || error.message === "RE-AUTH_NEEDED") return;
       console.error("Lessons fetch failed:", error);
@@ -125,13 +132,35 @@ export default function SettingsPage({ section }) {
     }
   };
 
+  // The lessons from "from" to "to", in the class's order.
+  const fromIndex = lessons.findIndex((l) => l.id === fromId);
+  const toIndex = lessons.findIndex((l) => l.id === toId);
+  const range =
+    fromIndex >= 0 && toIndex >= fromIndex
+      ? lessons.slice(fromIndex, toIndex + 1)
+      : [];
+
+  const handleFromChange = (id) => {
+    setFromId(id);
+    // "To" never comes before "from".
+    const from = lessons.findIndex((l) => l.id === id);
+    if (!toId || lessons.findIndex((l) => l.id === toId) < from) setToId(id);
+  };
+
   const handleUpdateTemplate = async () => {
-    if (running || !classId || !lessonId) return;
-    const lessonName = lessons.find((l) => l.id === lessonId)?.name;
+    if (running || !classId || !range.length) return;
+    const lessonLabel =
+      range.length === 1
+        ? range[0].name
+        : t("settings.templateRange", {
+            from: range[0].name,
+            to: range.at(-1).name,
+            n: range.length,
+          });
     if (
       !window.confirm(
         t("grade.confirmUpdateTemplate", {
-          lesson: lessonName,
+          lesson: lessonLabel,
           class: selectedClass?.name,
         }),
       )
@@ -140,7 +169,10 @@ export default function SettingsPage({ section }) {
     setRunning(true);
     setStatus({ phase: "running", text: t("grade.updatingTemplate") });
     try {
-      const r = await updateLessonTemplate({ classId, lessonId });
+      const r = await updateLessonTemplate({
+        classId,
+        lessonIds: range.map((l) => l.id),
+      });
       const lines = [t("grade.templateUpdated", r)];
       if (r.unchanged) {
         lines.push(t("grade.templateUnchanged", { n: r.unchanged }));
@@ -163,7 +195,9 @@ export default function SettingsPage({ section }) {
               ? t("grade.templateJobRunning")
               : error.message === "not_ielts_class"
                 ? t("settings.templateIeltsOnly")
-                : t("grade.templateUpdateFailed", { msg: error.message });
+                : error.message === "too_many_lessons"
+                  ? t("settings.templateTooManyLessons")
+                  : t("grade.templateUpdateFailed", { msg: error.message });
       setStatus({ phase: "error", text });
     } finally {
       setRunning(false);
@@ -221,28 +255,50 @@ export default function SettingsPage({ section }) {
       )}
       {isTemplate && profile === "ielts" && (
         <>
-          <select
-            className="mb-1"
-            value={lessonId}
-            onChange={(e) => setLessonId(e.target.value)}
-            disabled={lessonsLoading || lessons.length === 0 || running}
-          >
-            <option value="">
-              {lessonsLoading
-                ? t("grade.loadingLessons")
-                : t("grade.selectLesson")}
-            </option>
-            {lessons.map((lesson) => (
-              <option key={lesson.id} value={lesson.id}>
-                {lesson.name}
-              </option>
+          <div className="template-range mb-1">
+            {[
+              ["templateFrom", fromId, handleFromChange, lessons],
+              [
+                "templateTo",
+                toId,
+                setToId,
+                fromIndex >= 0 ? lessons.slice(fromIndex) : lessons,
+              ],
+            ].map(([label, value, onChange, options]) => (
+              <div className="field-group" key={label}>
+                <label htmlFor={`template-${label}`}>
+                  {t(`settings.${label}`)}
+                </label>
+                <select
+                  id={`template-${label}`}
+                  value={value}
+                  onChange={(e) => onChange(e.target.value)}
+                  disabled={lessonsLoading || lessons.length === 0 || running}
+                >
+                  <option value="">
+                    {lessonsLoading
+                      ? t("grade.loadingLessons")
+                      : t("grade.selectLesson")}
+                  </option>
+                  {options.map((lesson) => (
+                    <option key={lesson.id} value={lesson.id}>
+                      {lesson.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
             ))}
-          </select>
+          </div>
+          {range.length > 1 && (
+            <p className="field-hint">
+              {t("settings.templateRangeCount", { n: range.length })}
+            </p>
+          )}
           <div className="button-row mb-1">
             <button
               className="primary-btn with-icon"
               onClick={handleUpdateTemplate}
-              disabled={!lessonId || running}
+              disabled={!range.length || running}
             >
               <i className="ti ti-layout-rows" aria-hidden="true" />
               {running

@@ -445,18 +445,20 @@ export async function createGradingJob({
 }
 
 /**
- * IELTS classes: brings the lesson of every student's doc (or of `docIds`) to
- * the current feedback template. Nothing is graded or charged.
+ * IELTS classes: brings the lessons `lessonIds` of every student's doc (or of
+ * `docIds`) to the current feedback template. Nothing is graded or charged.
  *
- * @returns {Promise<{total: number, updated: number, unchanged: number,
- *   skipped: number, failed: number, tables: number, noTable: number}>}
+ * @returns {Promise<{lessons: number, total: number, updated: number,
+ *   unchanged: number, skipped: number, failed: number, tables: number,
+ *   noTable: number}>}
  * @throws {Error} "GOOGLE_REAUTH_REQUIRED", or the backend's error code
- *   (`job_in_progress` while the lesson is being graded).
+ *   (`job_in_progress` while one of the lessons is being graded,
+ *   `too_many_lessons`).
  */
-export async function updateIeltsTemplates({ classId, lessonId, docIds }) {
+export async function updateIeltsTemplates({ classId, lessonIds, docIds }) {
   const response = await authFetch("/ielts-template-updates", {
     method: "POST",
-    body: { classId, lessonId, docIds },
+    body: { classId, lessonIds, docIds },
   });
   const data = await response.json().catch(() => null);
   if (response.ok) return data;

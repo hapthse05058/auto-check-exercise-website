@@ -53,16 +53,17 @@ export async function startGradingJob({
 }
 
 /**
- * IELTS: brings `lessonId` of the class's docs (or the pasted ones) to the
- * current template. Resolves with the backend's summary once every doc is done.
+ * IELTS: brings `lessonIds` (Buổi X to Buổi Y) of the class's docs (or the
+ * pasted ones) to the current template. Resolves with the backend's summary
+ * once every doc is done.
  */
 export async function updateLessonTemplate({
   docLinksText,
   classId,
-  lessonId,
+  lessonIds,
 }) {
   const docIds = pastedDocIds(docLinksText);
-  return updateIeltsTemplates({ classId, lessonId, docIds });
+  return updateIeltsTemplates({ classId, lessonIds, docIds });
 }
 
 /** True once the backend will not touch this job again. */

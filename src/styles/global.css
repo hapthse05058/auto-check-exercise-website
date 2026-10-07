@@ -1178,6 +1178,15 @@ textarea {
   letter-spacing: 0.05em;
   margin-bottom: 5px;
 }
+/* Settings → IELTS template: "from lesson" and "to lesson" side by side. */
+.template-range {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0 0.75rem;
+}
+.template-range select {
+  width: 100%;
+}
 .auto-grade-slot input[type="date"] {
   min-height: 38px;
 }

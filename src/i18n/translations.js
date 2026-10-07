@@ -318,7 +318,13 @@ export const translations = {
         "Pick a class to see or change its weekly auto-grading schedule.",
       templateTitle: "Update IELTS template",
       templateIntro:
-        "Pick a class and a lesson: every student's doc gets the current IELTS template for that lesson (feedback table + NHẬN XÉT, comment column on sentence tables). Graded exercises are left as they are; no points are used. Best done before students start the lesson.",
+        "Pick a class and the lessons (from … to …): every student's doc gets the current IELTS template in those lessons (feedback table + NHẬN XÉT, comment column on sentence tables). Graded exercises are left as they are; no points are used. Best done before students start the lessons.",
+      templateFrom: "From lesson",
+      templateTo: "To lesson",
+      templateRange: "{from} to {to} ({n} lessons)",
+      templateRangeCount: "{n} lessons will be updated.",
+      templateTooManyLessons:
+        "Too many lessons at once for this class — pick a shorter range.",
       templateIeltsOnly:
         "This class is not an IELTS class — there is no template to update.",
       loadFailed: "Failed to load your classes. Please reload the page.",
@@ -354,9 +360,9 @@ export const translations = {
       templateNotUpdated:
         "{n} doc(s) could not be updated (not readable, lesson tab missing, or Docs refused) — try again.",
       templateNoTable:
-        "{n} writing exercise(s) of this lesson have no table to write in — add one to the lesson so they can be graded.",
+        "{n} writing exercise(s) of the chosen lesson(s) have no table to write in — add one to the lesson so they can be graded.",
       templateJobRunning:
-        "This lesson is being graded right now — update the template once grading has finished.",
+        "A chosen lesson is being graded right now — update the template once grading has finished.",
       templateUpdateFailed: "Template update failed: {msg}",
       loadingTeacher: "Loading teacher info...",
       ready: "Ready to process...",
@@ -1432,7 +1438,13 @@ export const translations = {
       autoGradeIntro: "Chọn lớp để xem hoặc đổi lịch chấm tự động hằng tuần.",
       templateTitle: "Cập nhật template IELTS",
       templateIntro:
-        "Chọn lớp và buổi: doc của mọi học viên sẽ được đưa về template IELTS hiện tại ở buổi đó (bảng chữa + NHẬN XÉT, cột nhận xét ở bảng viết câu). Bài đã chấm giữ nguyên, không trừ point. Nên làm trước khi học viên làm bài.",
+        "Chọn lớp và các buổi (từ buổi … đến buổi …): doc của mọi học viên sẽ được đưa về template IELTS hiện tại ở những buổi đó (bảng chữa + NHẬN XÉT, cột nhận xét ở bảng viết câu). Bài đã chấm giữ nguyên, không trừ point. Nên làm trước khi học viên làm bài.",
+      templateFrom: "Từ buổi",
+      templateTo: "Đến buổi",
+      templateRange: "từ {from} đến {to} ({n} buổi)",
+      templateRangeCount: "Sẽ cập nhật {n} buổi.",
+      templateTooManyLessons:
+        "Quá nhiều buổi cho một lần với lớp này — hãy chọn khoảng ngắn hơn.",
       templateIeltsOnly:
         "Lớp này không phải lớp IELTS nên không có template để cập nhật.",
       loadFailed: "Tải danh sách lớp thất bại. Hãy tải lại trang.",
@@ -1468,9 +1480,9 @@ export const translations = {
       templateNotUpdated:
         "{n} tài liệu không cập nhật được (không đọc được, thiếu tab buổi học, hoặc Docs từ chối) — hãy thử lại.",
       templateNoTable:
-        "{n} bài viết của buổi này chưa có bảng để học viên viết — cần thêm bảng vào bài thì mới chấm được.",
+        "{n} bài viết ở (các) buổi đã chọn chưa có bảng để học viên viết — cần thêm bảng vào bài thì mới chấm được.",
       templateJobRunning:
-        "Buổi này đang được chấm — đợi chấm xong rồi hãy cập nhật template.",
+        "Có buổi đang được chấm — đợi chấm xong rồi hãy cập nhật template.",
       templateUpdateFailed: "Cập nhật template thất bại: {msg}",
       loadingTeacher: "Đang tải thông tin giáo viên...",
       ready: "Sẵn sàng chấm bài...",
