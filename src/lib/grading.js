@@ -8,7 +8,11 @@
  * what the grading screen shows.
  */
 import { parseDocLinks } from "./docParser.js";
-import { createGradingJob, fetchStudentDocRefs } from "../api/backend.js";
+import {
+  createGradingJob,
+  fetchStudentDocRefs,
+  updateIeltsTemplates,
+} from "../api/backend.js";
 
 /**
  * Which docs an action applies to: the pasted links when the textarea has any,
@@ -18,6 +22,18 @@ import { createGradingJob, fetchStudentDocRefs } from "../api/backend.js";
 export async function resolveDocRefs(docLinksText, classId) {
   const trimmed = (docLinksText || "").trim();
   return trimmed ? parseDocLinks(trimmed) : fetchStudentDocRefs(classId);
+}
+
+/**
+ * The doc ids of the pasted links, or undefined (the whole class) when the
+ * textarea is empty. Throws "no_docs" when it holds no doc link at all.
+ */
+function pastedDocIds(docLinksText) {
+  const trimmed = (docLinksText || "").trim();
+  if (!trimmed) return undefined;
+  const docIds = [...new Set(parseDocLinks(trimmed).map((ref) => ref.docId))];
+  if (!docIds.length) throw new Error("no_docs");
+  return docIds;
 }
 
 /**
@@ -32,12 +48,21 @@ export async function startGradingJob({
   lessonId,
   useCache = true,
 }) {
-  const trimmed = (docLinksText || "").trim();
-  const docIds = trimmed
-    ? [...new Set(parseDocLinks(trimmed).map((ref) => ref.docId))]
-    : undefined;
-  if (trimmed && !docIds.length) throw new Error("no_docs");
+  const docIds = pastedDocIds(docLinksText);
   return createGradingJob({ classId, lessonId, docIds, useCache });
+}
+
+/**
+ * IELTS: brings `lessonId` of the class's docs (or the pasted ones) to the
+ * current template. Resolves with the backend's summary once every doc is done.
+ */
+export async function updateLessonTemplate({
+  docLinksText,
+  classId,
+  lessonId,
+}) {
+  const docIds = pastedDocIds(docLinksText);
+  return updateIeltsTemplates({ classId, lessonId, docIds });
 }
 
 /** True once the backend will not touch this job again. */

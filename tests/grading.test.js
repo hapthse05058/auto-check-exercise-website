@@ -50,6 +50,14 @@ describe("describeJob", () => {
           }),
           t,
         ),
+        describeJob(
+          job({
+            written: 0,
+            notice: "allIeltsTemplateOutdated",
+            noticeParams: { count: 2 },
+          }),
+          t,
+        ),
         describeJob(job({ written: 0 }), t),
         describeJob(job({ reauthRequired: true }), t),
         ...[
@@ -74,6 +82,10 @@ describe("describeJob", () => {
               {
                 code: "skippedHasOldFeedback",
                 params: { docId: "d1", count: 1 },
+              },
+              {
+                code: "ieltsTemplateOutdated",
+                params: { docId: "d1", count: 2 },
               },
               { code: "noMatch", params: { docId: "d1" } },
               { code: "failedDoc", params: { docId: "d1", msg: "403" } },
@@ -189,4 +201,28 @@ describe("isJobFinished", () => {
       expect(isJobFinished({ status })).toBe(false);
     }
   });
+});
+
+describe("template update messages", () => {
+  for (const lang of ["en", "vi"]) {
+    const t = makeT(lang);
+    it(`[${lang}] every line the update button can show exists and is filled in`, () => {
+      const lines = [
+        t("grade.updateTemplate"),
+        t("grade.updatingTemplate"),
+        t("grade.updateTemplateTitle"),
+        t("grade.confirmUpdateTemplate", { lesson: "BUỔI 06", class: "A" }),
+        t("grade.templateUpdated", { updated: 3, total: 4, tables: 9 }),
+        t("grade.templateUnchanged", { n: 1 }),
+        t("grade.templateNotUpdated", { n: 1 }),
+        t("grade.templateNoTable", { n: 2 }),
+        t("grade.templateJobRunning"),
+        t("grade.templateUpdateFailed", { msg: "boom" }),
+      ];
+      for (const line of lines) {
+        expect(line, line).not.toMatch(/^grade\./);
+        expect(line, line).not.toMatch(/\{[a-zA-Z]\w*\}/);
+      }
+    });
+  }
 });

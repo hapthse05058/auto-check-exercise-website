@@ -445,6 +445,28 @@ export async function createGradingJob({
 }
 
 /**
+ * IELTS classes: brings the lesson of every student's doc (or of `docIds`) to
+ * the current feedback template. Nothing is graded or charged.
+ *
+ * @returns {Promise<{total: number, updated: number, unchanged: number,
+ *   skipped: number, failed: number, tables: number, noTable: number}>}
+ * @throws {Error} "GOOGLE_REAUTH_REQUIRED", or the backend's error code
+ *   (`job_in_progress` while the lesson is being graded).
+ */
+export async function updateIeltsTemplates({ classId, lessonId, docIds }) {
+  const response = await authFetch("/ielts-template-updates", {
+    method: "POST",
+    body: { classId, lessonId, docIds },
+  });
+  const data = await response.json().catch(() => null);
+  if (response.ok) return data;
+  if (data?.error === "google_reauth_required") {
+    throw new Error("GOOGLE_REAUTH_REQUIRED");
+  }
+  throw new Error(data?.error || "template_update_failed");
+}
+
+/**
  * Grades one pasted IELTS Writing submission (backend lib/ieltsWriting.js).
  * `images` are data URLs of the chart(s) — Task 1, or a paragraph about a chart.
  *

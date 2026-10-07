@@ -27,7 +27,12 @@ import {
   executeFeedbackClear,
   planFeedbackClear,
 } from "../lib/feedbackClear.js";
-import { describeJob, isJobFinished, startGradingJob } from "../lib/grading.js";
+import {
+  describeJob,
+  isJobFinished,
+  startGradingJob,
+  updateLessonTemplate,
+} from "../lib/grading.js";
 import { announcePoints } from "../lib/pointEvents.js";
 import { formatVn } from "../lib/scheduleTime.js";
 import { playSuccessSound } from "../lib/sound.js";
@@ -67,6 +72,10 @@ export default function GradePage() {
   const [followed, setFollowed] = useState(null); // { id, live } | null
   const [jobRunning, setJobRunning] = useState(false);
   const [clearing, setClearing] = useState(false);
+  const [updatingTemplate, setUpdatingTemplate] = useState(false);
+  // The selected class's grading profile ("basic" | "ielts" | "hs"), from
+  // its course; null until known. Only IELTS has a template to update.
+  const [classProfile, setClassProfile] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [saveCache, setSaveCache] = useState(true);
   // Who actually pays for the selected class. An admin grading someone else's
@@ -219,6 +228,21 @@ export default function GradePage() {
     currentLessonRef.current = null;
     refreshPayer(classId);
     refreshSchedule(classId);
+    setClassProfile(null);
+    const courseId = classes.find((c) => c.id === classId)?.courseId;
+    if (courseId) {
+      fetchCourses({ includeInactive: true })
+        .then((list) => {
+          const course = list.find((c) => c.id === courseId);
+          if (!stale()) setClassProfile(course?.gradingProfile || "basic");
+        })
+        .catch((error) => {
+          if (error.message !== "RE-AUTH_NEEDED")
+            console.error("Course lookup failed:", error);
+        });
+    } else if (classId) {
+      setClassProfile("basic");
+    }
     if (!classId) {
       setLessonsLoading(false);
       return;
@@ -347,7 +371,7 @@ export default function GradePage() {
   }, [followed, isAdmin]);
 
   const handleProcessAllDocs = async () => {
-    if (starting || jobRunning || clearing) return;
+    if (starting || jobRunning || clearing || updatingTemplate) return;
     setStarting(true);
     setStatus({
       phase: "running",
@@ -391,7 +415,7 @@ export default function GradePage() {
    * numbers before anything irreversible happens.
    */
   const handleClearFeedback = async () => {
-    if (starting || jobRunning || clearing) return;
+    if (starting || jobRunning || clearing || updatingTemplate) return;
     const lessonName = lessons.find(
       (item) => item.id === selectedLessonId,
     )?.name;
@@ -511,16 +535,76 @@ export default function GradePage() {
     }
   };
 
+  /**
+   * IELTS only: brings the selected lesson of the class's docs to the current
+   * template, so grading has its feedback slots. Graded tables stay as they
+   * are and no points are used — the backend does it all in one request.
+   */
+  const handleUpdateTemplate = async () => {
+    if (starting || jobRunning || clearing || updatingTemplate) return;
+    const lessonName = lessons.find(
+      (item) => item.id === selectedLessonId,
+    )?.name;
+    const confirmed = window.confirm(
+      t("grade.confirmUpdateTemplate", {
+        lesson: lessonName,
+        class: selectedClass?.name,
+      }),
+    );
+    if (!confirmed) return;
+    setUpdatingTemplate(true);
+    setStatus({
+      phase: "running",
+      text: t("grade.updatingTemplate"),
+      warnings: [],
+    });
+    try {
+      const r = await updateLessonTemplate({
+        docLinksText,
+        classId: selectedClassId,
+        lessonId: selectedLessonId,
+      });
+      const lines = [t("grade.templateUpdated", r)];
+      if (r.unchanged)
+        lines.push(t("grade.templateUnchanged", { n: r.unchanged }));
+      if (r.failed + r.skipped) {
+        lines.push(t("grade.templateNotUpdated", { n: r.failed + r.skipped }));
+      }
+      if (r.noTable) lines.push(t("grade.templateNoTable", { n: r.noTable }));
+      setStatus({
+        phase: r.failed ? "error" : "done",
+        text: lines.join("\n"),
+        warnings: [],
+      });
+      if (r.updated) playSuccessSound();
+    } catch (error) {
+      if (error.message === "RE-AUTH_NEEDED") return;
+      console.error("Template update error:", error);
+      const text =
+        error.message === "GOOGLE_REAUTH_REQUIRED"
+          ? t("grading.reauthToStart")
+          : error.message === "no_docs"
+            ? t("grading.noDocs")
+            : error.message === "job_in_progress"
+              ? t("grade.templateJobRunning")
+              : t("grade.templateUpdateFailed", { msg: error.message });
+      setStatus({ phase: "error", text, warnings: [] });
+    } finally {
+      setUpdatingTemplate(false);
+    }
+  };
+
   const canProcess =
     selectedClassId &&
     selectedLessonId &&
     !starting &&
     !jobRunning &&
-    !clearing;
+    !clearing &&
+    !updatingTemplate;
   // Why the grade button is off, while the fix is still up to the teacher.
   // Mid-run the button's own label ("Processing...") already says why, and a
   // failed load has its own error box — one message at a time.
-  const busy = starting || jobRunning || clearing;
+  const busy = starting || jobRunning || clearing || updatingTemplate;
   const processHint =
     busy || lessonsLoading || teacherLoading || loadError
       ? ""
@@ -561,7 +645,7 @@ export default function GradePage() {
         value={selectedClassId}
         onChange={handleClassChange}
         options={classOptions}
-        disabled={starting || clearing}
+        disabled={starting || clearing || updatingTemplate}
         placeholder={t("grade.selectClass")}
         searchPlaceholder={t("common.searchClassPlaceholder")}
         noResultsText={t("common.noClassesFound")}
@@ -571,7 +655,11 @@ export default function GradePage() {
         value={selectedLessonId}
         onChange={handleLessonChange}
         disabled={
-          lessonsLoading || lessons.length === 0 || starting || clearing
+          lessonsLoading ||
+          lessons.length === 0 ||
+          starting ||
+          clearing ||
+          updatingTemplate
         }
       >
         <option value="">
@@ -589,7 +677,7 @@ export default function GradePage() {
         rows={10}
         value={docLinksText}
         onChange={(e) => setDocLinksText(e.target.value)}
-        disabled={starting || clearing}
+        disabled={starting || clearing || updatingTemplate}
       />
       {isAdmin && (
         <label className="cache-toggle mb-1" title={t("grade.saveCacheTitle")}>
@@ -597,7 +685,7 @@ export default function GradePage() {
             type="checkbox"
             checked={saveCache}
             onChange={(e) => setSaveCache(e.target.checked)}
-            disabled={starting || clearing}
+            disabled={starting || clearing || updatingTemplate}
           />
           <span>
             {saveCache ? t("grade.saveCacheOn") : t("grade.saveCacheOff")}
@@ -613,6 +701,19 @@ export default function GradePage() {
         >
           {starting || jobRunning ? t("grade.processing") : t("grade.process")}
         </button>
+        {classProfile === "ielts" && (
+          <button
+            className="secondary-btn"
+            onClick={handleUpdateTemplate}
+            disabled={!canProcess}
+            title={t("grade.updateTemplateTitle")}
+          >
+            <i className="ti ti-layout-rows" aria-hidden="true" />
+            {updatingTemplate
+              ? t("grade.updatingTemplate")
+              : t("grade.updateTemplate")}
+          </button>
+        )}
         <button
           className="secondary-btn"
           onClick={() => setScheduleOpen(true)}
