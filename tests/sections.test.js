@@ -68,6 +68,28 @@ describe("section headings", () => {
     );
   });
 
+  it("keeps a heading whose hint column has a stray hint", () => {
+    // Real KTN721 buổi 03: the hint of question 5 was left in the heading row.
+    expect(
+      sectionHeadingOf(
+        row(
+          [P("Be going to: Tương lai gần có dự định trước\n")],
+          [P("Dùng TLHT BĐ: will have been + PII\n")],
+          [P("\n")],
+        ),
+      ),
+    ).toBe("Be going to: Tương lai gần có dự định trước");
+    // …but not when the feedback column is filled, or a cell holds an item.
+    expect(
+      sectionHeadingOf(row([P("Be going to\n")], [P("\n")], [P("✅ Đúng\n")])),
+    ).toBe(null);
+    expect(
+      sectionHeadingOf(
+        row([P("Be going to\n")], [P("→ I am going to swim\n")], [P("\n")]),
+      ),
+    ).toBe(null);
+  });
+
   it("never takes a question cell for a heading", () => {
     // A cell whose first line is not numbered is skipped by resolveRowCells
     // (unchanged); it must not become the heading of the questions after it.
