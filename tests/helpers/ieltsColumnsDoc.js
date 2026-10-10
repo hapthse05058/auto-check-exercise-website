@@ -74,9 +74,11 @@ function render(state) {
   const content = [];
   state.offsets = [];
   for (const unit of state.units) {
+    unit.start = at;
     if (unit.kind === "p") {
       state.offsets.push({ unit, start: at });
       content.push(...paragraphsOf(unit.text, unit.boldAt || []));
+      unit.end = at;
     } else if (unit.kind === "img") {
       content.push({
         startIndex: at,
@@ -97,6 +99,7 @@ function render(state) {
         },
       });
       at += 2;
+      unit.end = at;
     } else {
       const start = at;
       at += 1; // the table itself
@@ -120,6 +123,7 @@ function render(state) {
         return { startIndex: rowStart, endIndex: at, tableCells };
       });
       at += 1; // the table's end, as in the Docs API
+      unit.end = at;
       content.push({
         startIndex: start,
         endIndex: at,
@@ -190,9 +194,11 @@ export function makeColumnsTab(spec, title = "Writing buổi 4") {
     }
   };
   const boldShift = (unit, local, delta) => {
-    unit.boldAt = (unit.boldAt || [])
-      .filter((k) => delta > 0 || k < local || k >= local - delta)
-      .map((k) => (k >= local ? k + delta : k));
+    for (const key of ["boldAt", "italicAt"]) {
+      unit[key] = (unit[key] || [])
+        .filter((k) => delta > 0 || k < local || k >= local - delta)
+        .map((k) => (k >= local ? k + delta : k));
+    }
   };
   /** The table unit starting at Docs index `index`, with its rendered block. */
   const tableAt = (index) => {
@@ -302,6 +308,57 @@ export function makeColumnsTab(spec, title = "Writing buổi 4") {
     "unmergeTableCells",
   ];
 
+  /**
+   * Deletes [startIndex, endIndex) across top-level blocks: blocks wholly
+   * inside go, a paragraph cut at either end keeps the rest (Docs merges
+   * what is left of the two). A table may only go whole.
+   */
+  const deleteBlocks = (startIndex, endIndex) => {
+    const len = endIndex - startIndex;
+    const keep = [];
+    let head = null;
+    let tail = null;
+    for (const unit of state.units) {
+      if (unit.end <= startIndex || unit.start >= endIndex) {
+        keep.push(unit);
+        continue;
+      }
+      const whole = unit.start >= startIndex && unit.end <= endIndex;
+      if (whole) {
+        if (!head) keep.push((head = { marker: true }));
+        continue;
+      }
+      if (unit.kind !== "p") {
+        throw new Error("ieltsColumnsDoc: a delete cutting into a table");
+      }
+      const from = Math.max(startIndex, unit.start) - unit.start;
+      const to = Math.min(endIndex, unit.end) - unit.start;
+      const rest = unit.text.slice(0, from) + unit.text.slice(to);
+      if (unit.start < startIndex) {
+        head = { kind: "p", text: rest };
+        keep.push(head);
+      } else {
+        tail = { kind: "p", text: rest };
+        keep.push(tail);
+      }
+    }
+    state.units = keep.filter((u) => !u.marker);
+    if (head && tail && !head.marker) {
+      head.text = head.text.replace(/\n$/, "") + tail.text;
+      state.units.splice(state.units.indexOf(tail), 1);
+    }
+    for (const group of Object.values(state.named)) {
+      for (const nr of group.namedRanges) {
+        for (const r of nr.ranges) {
+          if (r.startIndex >= endIndex) {
+            r.startIndex -= len;
+            r.endIndex -= len;
+          }
+        }
+      }
+    }
+  };
+
   let seq = 0;
   const apply = (requests) => {
     for (const request of requests) {
@@ -316,6 +373,15 @@ export function makeColumnsTab(spec, title = "Writing buổi 4") {
         shiftRanges(index, body.text.length);
       } else if (kind === "deleteContentRange") {
         const { startIndex, endIndex } = body.range;
+        const inOne = state.offsets.some(
+          (x) =>
+            startIndex >= x.start && endIndex <= x.start + x.unit.text.length,
+        );
+        if (!inOne) {
+          deleteBlocks(startIndex, endIndex);
+          refresh();
+          continue;
+        }
         const o = unitAt(state, startIndex, endIndex);
         const local = startIndex - o.start;
         const len = endIndex - startIndex;
@@ -336,15 +402,20 @@ export function makeColumnsTab(spec, title = "Writing buổi 4") {
           }
         }
       } else if (kind === "updateTextStyle") {
-        if (!("bold" in body.textStyle)) continue;
         const { startIndex, endIndex } = body.range;
         const o = unitAt(state, startIndex, endIndex);
-        const set = new Set(o.unit.boldAt || []);
-        for (let i = startIndex; i < endIndex; i++) {
-          if (body.textStyle.bold) set.add(i - o.start);
-          else set.delete(i - o.start);
+        for (const [style, key] of [
+          ["bold", "boldAt"],
+          ["italic", "italicAt"],
+        ]) {
+          if (!(style in body.textStyle)) continue;
+          const set = new Set(o.unit[key] || []);
+          for (let i = startIndex; i < endIndex; i++) {
+            if (body.textStyle[style]) set.add(i - o.start);
+            else set.delete(i - o.start);
+          }
+          o.unit[key] = [...set];
         }
-        o.unit.boldAt = [...set];
       } else if (kind === "createNamedRange") {
         const group = (state.named[body.name] ||= {
           name: body.name,
@@ -418,6 +489,14 @@ export function makeColumnsTab(spec, title = "Writing buổi 4") {
     boldOf: (t, r, c) => {
       const cell = state.units.filter((u) => u.kind === "table")[t].rows[r][c];
       return [...(cell.boldAt || [])]
+        .sort((a, b) => a - b)
+        .map((k) => cell.text[k])
+        .join("");
+    },
+    /** Italic characters of a cell, as the text they spell. */
+    italicOf: (t, r, c) => {
+      const cell = state.units.filter((u) => u.kind === "table")[t].rows[r][c];
+      return [...(cell.italicAt || [])]
         .sort((a, b) => a - b)
         .map((k) => cell.text[k])
         .join("");

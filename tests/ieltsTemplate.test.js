@@ -1,10 +1,11 @@
 /**
- * The IELTS template the teachers asked for on 2026-10-07, and the update
- * that turns a lesson into it (ieltsDoc.js planIeltsTemplateUpdate):
+ * The IELTS template the teachers asked for on 2026-10-09 ("review"), and
+ * the update that turns a lesson into it (ieltsDoc.js planIeltsTemplateUpdate):
  *
- *   | Intro: <student>          |          (the lesson's own table)
- *   | GV chữa/nhận xét | BẢN CẢI THIỆN |    (the pair table)
- *   NHẬN XÉT                                (the comments go below it)
+ *   | Intro: <student>          |          (the lesson's own table, one per prompt)
+ *   | Bài chữa 1 | Bài cải thiện 1 |        (ONE table per exercise, a row each)
+ *   Nhận xét chung                          (the comments go below these)
+ *   Lời khuyên cải thiện
  *
  * and a "GV chữa/nhận xét" column on short-sentence tables. Converted on the
  * small Docs model (helpers/ieltsColumnsDoc.js), whose table indexes follow
@@ -14,7 +15,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   KIND_IELTS_SENTENCES,
-  LAYOUT_PAIR,
+  LAYOUT_REVIEW,
   LAYOUT_SENTENCES,
   buildIeltsClearRequests,
   buildIeltsFeedbackRequests,
@@ -88,11 +89,31 @@ const original = ({
   "Sau khi viết xong, hãy tích vào các ô sau đây",
 ];
 
+/** Exercise 2 with two prompts, as buổi 2: "Viết Intro và Overview cho 2 đề". */
+const twoPrompts = () => {
+  const spec = original();
+  spec.splice(
+    7,
+    0,
+    "The bar chart shows young people in education.",
+    { image: "chart3" },
+    {
+      table: [["Intro: The bar chart shows people."], ["Overview: More men."]],
+    },
+  );
+  return spec;
+};
+
 const convert = (spec) => {
   const doc = makeColumnsTab(spec, "Writing buổi 2");
   const plan = planIeltsTemplateUpdate(doc.tab);
   doc.apply(plan.requests);
   return { doc, plan };
+};
+
+const sliceFrom = (outline, line, n) => {
+  const at = outline.indexOf(line);
+  return outline.slice(at, at + n);
 };
 
 describe("exerciseKind: which exercises are written", () => {
@@ -119,7 +140,7 @@ describe("exerciseKind: which exercises are written", () => {
 });
 
 describe("planIeltsTemplateUpdate on the course's own doc", () => {
-  it("adds the pair table + NHẬN XÉT under the writing, a column to sentence tables", () => {
+  it("adds the review table + its two lines under the writing, a column to sentence tables", () => {
     const { doc, plan } = convert(original());
     expect(plan.changes.map((c) => [c.kind, c.tableIdx, c.written])).toEqual([
       ["essay", 1, true],
@@ -136,8 +157,9 @@ describe("planIeltsTemplateUpdate on the course's own doc", () => {
       "[Intro: The graph shows fish.]",
       "[Overview: Overall, chicken rose.]",
       "¶ ",
-      "[GV chữa/nhận xét | BẢN CẢI THIỆN]",
-      "¶ NHẬN XÉT",
+      "[Bài chữa 1 | Bài cải thiện 1]",
+      "¶ Nhận xét chung",
+      "¶ Lời khuyên cải thiện",
       "¶ Gợi ý:",
       "¶ Fish là danh từ đếm được không?",
       "¶ Exercise 3: Viết câu mô tả số liệu của các đối tượng trong biểu đồ",
@@ -161,25 +183,48 @@ describe("planIeltsTemplateUpdate on the course's own doc", () => {
       "¶ Sau khi viết xong, hãy tích vào các ô sau đây",
     ]);
     // Headings bold; the fixed-width table shared out again (45% comments).
-    expect(doc.boldOf(2, 0, 0)).toBe("GV chữa/nhận xét");
-    expect(doc.boldOf(2, 0, 1)).toBe("BẢN CẢI THIỆN");
-    expect(doc.boldParagraphs()).toBe("NHẬN XÉT");
+    expect(doc.boldOf(2, 0, 0)).toBe("Bài chữa 1");
+    expect(doc.boldOf(2, 0, 1)).toBe("Bài cải thiện 1");
+    expect(doc.boldParagraphs()).toBe(
+      "Nhận xét chung" + "Lời khuyên cải thiện",
+    );
     expect(doc.widths(4)).toEqual([423.5, 346.5]);
   });
 
+  it("an exercise with two prompts gets ONE table, a row per prompt", () => {
+    const { doc, plan } = convert(twoPrompts());
+    expect(plan.changes.filter((c) => c.kind === "essay").length).toBe(2);
+    expect(
+      sliceFrom(doc.outline(), "[Intro: The bar chart shows people.]", 7),
+    ).toEqual([
+      "[Intro: The bar chart shows people.]",
+      "[Overview: More men.]",
+      "¶ ",
+      "[Bài chữa 1 | Bài cải thiện 1]",
+      "[Bài chữa 2 | Bài cải thiện 2]",
+      "¶ Nhận xét chung",
+      "¶ Lời khuyên cải thiện",
+    ]);
+    expect(doc.boldOf(3, 1, 0)).toBe("Bài chữa 2");
+    expect(doc.boldOf(3, 1, 1)).toBe("Bài cải thiện 2");
+  });
+
   it("runs once: the converted tab plans nothing", () => {
-    const { doc } = convert(original());
-    const again = planIeltsTemplateUpdate(doc.tab);
-    expect(again.requests).toEqual([]);
-    expect(again.changes).toEqual([]);
+    for (const spec of [original(), twoPrompts()]) {
+      const { doc } = convert(spec);
+      const again = planIeltsTemplateUpdate(doc.tab);
+      expect(again.requests).toEqual([]);
+      expect(again.changes).toEqual([]);
+    }
   });
 
   it("reads the converted tab: the writing, its prompt, the sentences", () => {
     const { doc } = convert(original());
     const { rows } = collectIeltsRows(doc.tab);
-    const pair = rows.find((r) => r.layout === LAYOUT_PAIR);
-    expect(pair).toMatchObject({
+    const review = rows.find((r) => r.layout === LAYOUT_REVIEW);
+    expect(review).toMatchObject({
       tableIdx: 2,
+      rowIdx: 0,
       task: "paragraph",
       essayText:
         "Intro: The graph shows fish.\nOverview: Overall, chicken rose.",
@@ -188,7 +233,8 @@ describe("planIeltsTemplateUpdate on the course's own doc", () => {
       imageIds: ["chart1"],
       feedbackText: "",
     });
-    expect(pair.reviewAt).not.toBeNull();
+    expect(review.review.generalAt).not.toBeNull();
+    expect(review.review.adviceAt).toBeGreaterThan(review.review.generalAt);
     const sentences = rows.filter((r) => r.layout === LAYOUT_SENTENCES);
     expect(
       sentences.map((r) => [r.tableIdx, r.rowIdx, r.cells, r.answered]),
@@ -223,6 +269,35 @@ describe("planIeltsTemplateUpdate on the course's own doc", () => {
     expect(items[2].columns).toEqual(["Loại chủ ngữ", "Câu mô tả"]);
   });
 
+  it("two prompts: each row reads its own writing, prompt and chart", () => {
+    const { doc } = convert(twoPrompts());
+    const rows = collectIeltsRows(doc.tab).rows.filter(
+      (r) => r.layout === LAYOUT_REVIEW,
+    );
+    expect(
+      rows.map((r) => [r.tableIdx, r.rowIdx, r.essayText, r.imageIds]),
+    ).toEqual([
+      [
+        3,
+        0,
+        "Intro: The graph shows fish.\nOverview: Overall, chicken rose.",
+        ["chart1"],
+      ],
+      [
+        3,
+        1,
+        "Intro: The bar chart shows people.\nOverview: More men.",
+        ["chart3"],
+      ],
+    ]);
+    expect(rows[0].promptText).toBe(
+      "Exercise 2: Viết Intro và Overview cho đề sau đây\nThe graph below shows the consumption of fish and meat.",
+    );
+    expect(rows[1].promptText).toBe(
+      "Exercise 2: Viết Intro và Overview cho đề sau đây\nThe bar chart shows young people in education.",
+    );
+  });
+
   it("an exercise without a table is reported", () => {
     const doc = makeColumnsTab([
       "Exercise 3: Viết câu mô tả sự thay đổi trong bản đồ dưới đây",
@@ -237,17 +312,33 @@ describe("planIeltsTemplateUpdate on the course's own doc", () => {
   });
 });
 
+/** Exercise 2 on the 2026-10-07 template: its writing, then the pair table. */
+const onPairTemplate = (feedback = "") => {
+  const spec = original();
+  spec.splice(
+    7,
+    0,
+    "",
+    {
+      table: [[`**GV chữa/nhận xét**${feedback}`, "**BẢN CẢI THIỆN**"]],
+    },
+    "NHẬN XÉT",
+  );
+  return spec;
+};
+
 describe("planIeltsTemplateUpdate on the older templates", () => {
-  it("'GV chữa/nhận xét' row below, still empty: the row goes, the pair comes", () => {
+  it("'GV chữa/nhận xét' row below, still empty: the row goes, the review table comes", () => {
     const { doc } = convert(original({ feedbackRow: "**GV chữa/nhận xét**" }));
-    const outline = doc.outline();
-    const at = outline.indexOf("[Intro: The graph shows fish.]");
-    expect(outline.slice(at, at + 5)).toEqual([
+    expect(
+      sliceFrom(doc.outline(), "[Intro: The graph shows fish.]", 6),
+    ).toEqual([
       "[Intro: The graph shows fish.]",
       "[Overview: Overall, chicken rose.]",
       "¶ ",
-      "[GV chữa/nhận xét | BẢN CẢI THIỆN]",
-      "¶ NHẬN XÉT",
+      "[Bài chữa 1 | Bài cải thiện 1]",
+      "¶ Nhận xét chung",
+      "¶ Lời khuyên cải thiện",
     ]);
   });
 
@@ -257,6 +348,39 @@ describe("planIeltsTemplateUpdate on the older templates", () => {
     );
     const plan = planIeltsTemplateUpdate(doc.tab);
     expect(plan.changes.map((c) => c.kind)).toEqual(["sentences", "sentences"]);
+    expect(plan.skipped).toEqual([
+      {
+        exercise: "Exercise 2: Viết Intro và Overview cho đề sau đây",
+        reason: "graded",
+      },
+    ]);
+  });
+
+  it("the 2026-10-07 pair table, still empty, is replaced by the review table", () => {
+    const { doc, plan } = convert(onPairTemplate());
+    expect(plan.changes.map((c) => c.kind)).toEqual([
+      "essay",
+      "sentences",
+      "sentences",
+    ]);
+    expect(
+      sliceFrom(doc.outline(), "[Intro: The graph shows fish.]", 7),
+    ).toEqual([
+      "[Intro: The graph shows fish.]",
+      "[Overview: Overall, chicken rose.]",
+      "¶ ",
+      "[Bài chữa 1 | Bài cải thiện 1]",
+      "¶ Nhận xét chung",
+      "¶ Lời khuyên cải thiện",
+      "¶ Gợi ý:",
+    ]);
+    expect(doc.outline().join("\n")).not.toMatch(/BẢN CẢI THIỆN|NHẬN XÉT/);
+    expect(planIeltsTemplateUpdate(doc.tab).requests).toEqual([]);
+  });
+
+  it("a pair table that holds feedback was graded: left as it is", () => {
+    const doc = makeColumnsTab(onPairTemplate("\nEm viết tốt."));
+    const plan = planIeltsTemplateUpdate(doc.tab);
     expect(plan.skipped).toEqual([
       {
         exercise: "Exercise 2: Viết Intro và Overview cho đề sau đây",
@@ -281,16 +405,17 @@ describe("planIeltsTemplateUpdate on the older templates", () => {
       },
       "Sau khi viết xong, hãy tích vào các ô sau đây",
     ]);
-    expect(doc.outline().slice(3, 7)).toEqual([
+    expect(doc.outline().slice(3, 8)).toEqual([
       "[Bài viết của học viên (Task 1)⏎The line graph shows crimes.]",
       "¶ ",
-      "[GV chữa/nhận xét | BẢN CẢI THIỆN]",
-      "¶ NHẬN XÉT",
+      "[Bài chữa 1 | Bài cải thiện 1]",
+      "¶ Nhận xét chung",
+      "¶ Lời khuyên cải thiện",
     ]);
     expect(doc.widths(0)).toEqual([770]);
-    const pair = collectIeltsRows(doc.tab).rows[0];
-    expect(pair).toMatchObject({
-      layout: LAYOUT_PAIR,
+    const review = collectIeltsRows(doc.tab).rows[0];
+    expect(review).toMatchObject({
+      layout: LAYOUT_REVIEW,
       task: "task1",
       taskFromLabel: true,
       essayText: "The line graph shows crimes.",
@@ -299,21 +424,24 @@ describe("planIeltsTemplateUpdate on the older templates", () => {
 });
 
 const PARTS = {
-  corrected: "Intro: The graph **shows** → illustrates (từ vựng) fish.",
+  corrected:
+    "Intro: The graph **shows** → illustrates (từ vựng: illustrate) the consumption of fish.",
   improved: "The line graph illustrates fish consumption.",
   review:
     "**Nhận xét chung:** Em viết rõ ý.\n**Lời khuyên cải thiện:** Em học thêm từ nha.",
+  general: "Em viết rõ ý.",
+  advice: "Em học thêm từ nha.",
 };
 const FEEDBACK = `**BẢN CHỮA**\n${PARTS.corrected}\n\n**BẢN CẢI THIỆN**\n${PARTS.improved}\n\n**NHẬN XÉT**\n${PARTS.review}`;
 
-/** Converted, then graded: the pair entry gets PARTS, sentences a comment each. */
+/** Converted, then graded: the review row gets PARTS, sentences a comment each. */
 const graded = (spec = original()) => {
   const { doc } = convert(spec);
   const { rows } = collectIeltsRows(doc.tab);
-  const pair = rows.find((r) => r.layout === LAYOUT_PAIR);
+  const review = rows.find((r) => r.layout === LAYOUT_REVIEW);
   const res = [
     {
-      rowKey: `${pair.tableIdx}:0`,
+      rowKey: `${review.tableIdx}:0`,
       questionIndex: null,
       aiFeedback: FEEDBACK,
       parts: PARTS,
@@ -332,25 +460,26 @@ const graded = (spec = original()) => {
 };
 
 describe("grading into the new template", () => {
-  it("corrected | improved side by side, the comments under NHẬN XÉT, one comment per sentence", () => {
+  it("Bài chữa | Bài cải thiện side by side, mistakes bold, explanations italic, comments under their lines", () => {
     const { doc } = graded();
     expect(doc.cell(2, 0, 0)).toBe(
-      "GV chữa/nhận xét\nIntro: The graph shows → illustrates (từ vựng) fish.",
+      "Bài chữa 1\nIntro: The graph shows → illustrates (từ vựng: illustrate) the consumption of fish.",
     );
-    expect(doc.boldOf(2, 0, 0)).toBe("GV chữa/nhận xét" + "shows");
+    expect(doc.boldOf(2, 0, 0)).toBe("Bài chữa 1" + "shows");
+    expect(doc.italicOf(2, 0, 0)).toBe("(từ vựng: illustrate)");
     expect(doc.cell(2, 0, 1)).toBe(
-      "BẢN CẢI THIỆN\nThe line graph illustrates fish consumption.",
+      "Bài cải thiện 1\nThe line graph illustrates fish consumption.",
     );
-    const outline = doc.outline();
-    const at = outline.indexOf("¶ NHẬN XÉT");
-    expect(outline.slice(at, at + 4)).toEqual([
-      "¶ NHẬN XÉT",
-      "¶ Nhận xét chung: Em viết rõ ý.",
-      "¶ Lời khuyên cải thiện: Em học thêm từ nha.",
+    expect(doc.italicOf(2, 0, 1)).toBe("");
+    expect(sliceFrom(doc.outline(), "¶ Nhận xét chung", 5)).toEqual([
+      "¶ Nhận xét chung",
+      "¶ Em viết rõ ý.",
+      "¶ Lời khuyên cải thiện",
+      "¶ Em học thêm từ nha.",
       "¶ Gợi ý:",
     ]);
     expect(doc.boldParagraphs()).toBe(
-      "NHẬN XÉT" + "Nhận xét chung:" + "Lời khuyên cải thiện:",
+      "Nhận xét chung" + "Lời khuyên cải thiện",
     );
     expect(doc.cell(4, 1, 1)).toBe(
       "The fruit production in Spain decrease → decreased (thì) steadily.",
@@ -358,6 +487,97 @@ describe("grading into the new template", () => {
     expect(doc.boldOf(4, 1, 1)).toBe("decrease");
     expect(doc.cell(5, 1, 2)).toBe("✅");
     expect(doc.cell(4, 2, 1)).toBe(""); // an unwritten row gets nothing
+  });
+
+  it("italics: only the explanation right after each fix, never the student's own brackets", () => {
+    const { doc } = convert(original());
+    const { rows } = collectIeltsRows(doc.tab);
+    const corrected =
+      "Intro: I **goes** → go (S-V) to (my) school **everyday** → every day (adv: every day (adv)). " +
+      "I have **know** → known (HTHT: have + Pii). **teh** → the graph (a chart) rose " +
+      "**sharp** → sharply (trạng từ) and **make** → reach (collocation).\n" +
+      // Seen on a real essay: the explanation at the end of the sentence.
+      "Overview: The changes **of** → in the village of Stokeford in 1930. (giới từ: changes in sth) " +
+      "It **grow** → grew fast. (see the map) In my opinion, **I think** → (bỏ) (trùng nghĩa) it is good.";
+    doc.apply(
+      buildIeltsFeedbackRequests(
+        [
+          {
+            rowKey: "2:0",
+            aiFeedback: "x",
+            parts: { ...PARTS, corrected },
+          },
+        ],
+        rows,
+        doc.tab.tabProperties.tabId,
+      ),
+    );
+    expect(doc.italicOf(2, 0, 0)).toBe(
+      "(S-V)" +
+        "(adv: every day (adv))" +
+        "(HTHT: have + Pii)" +
+        "(trạng từ)" +
+        "(collocation)" +
+        "(giới từ: changes in sth)" +
+        "(trùng nghĩa)",
+    );
+    expect(doc.boldOf(2, 0, 0)).toBe(
+      "Bài chữa 1" +
+        "goes" +
+        "everyday" +
+        "know" +
+        "teh" +
+        "sharp" +
+        "make" +
+        "of" +
+        "grow" +
+        "I think",
+    );
+  });
+
+  it("two prompts: a row each, the comments 'Bài 1: …', 'Bài 2: …'", () => {
+    const { doc } = convert(twoPrompts());
+    const { rows } = collectIeltsRows(doc.tab);
+    const tabId = doc.tab.tabProperties.tabId;
+    const two = {
+      corrected: "Intro: The bar chart **show** → shows (S-V) people.",
+      improved: "The bar chart shows young people.",
+      general: "Bài ngắn gọn.",
+      advice: "Thêm số liệu.",
+    };
+    doc.apply(
+      buildIeltsFeedbackRequests(
+        [
+          { rowKey: "3:1", aiFeedback: "x", parts: two },
+          { rowKey: "3:0", aiFeedback: "x", parts: PARTS },
+        ],
+        rows,
+        tabId,
+      ),
+    );
+    expect(doc.cell(3, 0, 0)).toMatch(/^Bài chữa 1\nIntro: The graph shows/);
+    expect(doc.cell(3, 1, 0)).toBe(
+      "Bài chữa 2\nIntro: The bar chart show → shows (S-V) people.",
+    );
+    expect(doc.cell(3, 1, 1)).toBe(
+      "Bài cải thiện 2\nThe bar chart shows young people.",
+    );
+    expect(sliceFrom(doc.outline(), "¶ Nhận xét chung", 7)).toEqual([
+      "¶ Nhận xét chung",
+      "¶ Bài 1: Em viết rõ ý.",
+      "¶ Bài 2: Bài ngắn gọn.",
+      "¶ Lời khuyên cải thiện",
+      "¶ Bài 1: Em học thêm từ nha.",
+      "¶ Bài 2: Thêm số liệu.",
+      "¶ Gợi ý:",
+    ]);
+    // Read back: both rows graded, nothing planned twice.
+    const after = collectIeltsRows(doc.tab).rows;
+    expect(
+      selectIeltsItemsToGrade(after).items.filter(
+        (i) => i.type === "ielts_writing",
+      ),
+    ).toEqual([]);
   });
 
   it("recognises its own write; nothing is graded twice", () => {
@@ -369,57 +589,57 @@ describe("grading into the new template", () => {
   });
 
   it("the next exercise's prompt never picks up the comments", () => {
-    const spec = original();
-    // A second Intro/Overview prompt of the same exercise, after the first.
-    spec.splice(9, 0, "The bar chart shows young people in education.", {
-      table: [["Intro: The bar chart shows people."]],
-    });
-    const { doc } = graded(spec);
-    const second = collectIeltsRows(doc.tab).rows.filter(
-      (r) => r.layout === LAYOUT_PAIR,
-    )[1];
-    expect(second.promptText).toBe(
-      "Exercise 2: Viết Intro và Overview cho đề sau đây\nThe bar chart shows young people in education.",
+    const { doc } = graded();
+    const sentences = collectIeltsRows(doc.tab).rows.filter(
+      (r) => r.layout === LAYOUT_SENTENCES,
     );
+    expect(sentences[0].promptText).not.toMatch(/Nhận xét|Em viết|Lời khuyên/);
   });
 
-  it("without a NHẬN XÉT line, the comments follow the corrected writing", () => {
+  it("without the two lines, the comments follow the corrected writing", () => {
     const { doc } = convert(original());
     const tabId = doc.tab.tabProperties.tabId;
-    // The teacher deleted the NHẬN XÉT line.
-    const line = doc.tab.documentTab.body.content.find(
-      (b) =>
-        (b.paragraph?.elements || [])
-          .map((e) => e.textRun?.content)
-          .join("") === "NHẬN XÉT\n",
-    );
-    doc.apply([
-      {
-        deleteContentRange: {
-          range: {
-            startIndex: line.startIndex,
-            endIndex: line.endIndex - 1,
-            tabId,
+    // The teacher deleted both lines (their text; the paragraphs stay empty).
+    for (const text of ["Lời khuyên cải thiện\n", "Nhận xét chung\n"]) {
+      const line = doc.tab.documentTab.body.content.find(
+        (b) =>
+          (b.paragraph?.elements || [])
+            .map((e) => e.textRun?.content)
+            .join("") === text,
+      );
+      doc.apply([
+        {
+          deleteContentRange: {
+            range: {
+              startIndex: line.startIndex,
+              endIndex: line.endIndex - 1,
+              tabId,
+            },
           },
         },
-      },
-    ]);
+      ]);
+    }
     const { rows } = collectIeltsRows(doc.tab);
-    const pair = rows.find((r) => r.layout === LAYOUT_PAIR);
-    expect(pair.reviewAt).toBeNull();
+    const review = rows.find((r) => r.layout === LAYOUT_REVIEW);
+    expect(review.review.generalAt).toBeNull();
     doc.apply(
       buildIeltsFeedbackRequests(
-        [{ rowKey: `${pair.tableIdx}:0`, aiFeedback: FEEDBACK, parts: PARTS }],
+        [
+          {
+            rowKey: `${review.tableIdx}:0`,
+            aiFeedback: FEEDBACK,
+            parts: PARTS,
+          },
+        ],
         rows,
         tabId,
       ),
     );
     expect(doc.cell(2, 0, 0)).toBe(
       [
-        "GV chữa/nhận xét",
-        "Intro: The graph shows → illustrates (từ vựng) fish.",
+        "Bài chữa 1",
+        "Intro: The graph shows → illustrates (từ vựng: illustrate) the consumption of fish.",
         "",
-        "NHẬN XÉT",
         "Nhận xét chung: Em viết rõ ý.",
         "Lời khuyên cải thiện: Em học thêm từ nha.",
       ].join("\n"),
@@ -430,7 +650,7 @@ describe("grading into the new template", () => {
     const { doc, template } = graded();
     doc.type(5, 2, 2, "Cô: em viết thêm câu này nhé.");
     const plan = buildIeltsClearRequests(doc.tab);
-    expect(plan.count).toBe(5); // corrected, improved, review, 2 sentences
+    expect(plan.count).toBe(6); // corrected, improved, general, advice, 2 sentences
     doc.apply(plan.requests);
     const expected = template.map((line) =>
       line === "[Chủ ngữ người |  | ]"

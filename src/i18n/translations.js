@@ -318,7 +318,7 @@ export const translations = {
         "Pick a class to see or change its weekly auto-grading schedule.",
       templateTitle: "Update IELTS template",
       templateIntro:
-        "Pick a class and the lessons (from … to …): every student's doc gets the current IELTS template in those lessons (feedback table + NHẬN XÉT, comment column on sentence tables). Graded exercises are left as they are; no points are used. Best done before students start the lessons.",
+        "Pick a class and the lessons (from … to …): every student's doc gets the current IELTS template in those lessons (a “Bài chữa | Bài cải thiện” table per writing exercise + “Nhận xét chung” / “Lời khuyên cải thiện”, comment column on sentence tables). Graded exercises are left as they are; no points are used. Best done before students start the lessons.",
       templateFrom: "From lesson",
       templateTo: "To lesson",
       templateRange: "{from} to {to} ({n} lessons)",
@@ -1438,7 +1438,7 @@ export const translations = {
       autoGradeIntro: "Chọn lớp để xem hoặc đổi lịch chấm tự động hằng tuần.",
       templateTitle: "Cập nhật template IELTS",
       templateIntro:
-        "Chọn lớp và các buổi (từ buổi … đến buổi …): doc của mọi học viên sẽ được đưa về template IELTS hiện tại ở những buổi đó (bảng chữa + NHẬN XÉT, cột nhận xét ở bảng viết câu). Bài đã chấm giữ nguyên, không trừ point. Nên làm trước khi học viên làm bài.",
+        "Chọn lớp và các buổi (từ buổi … đến buổi …): doc của mọi học viên sẽ được đưa về template IELTS hiện tại ở những buổi đó (mỗi bài viết một bảng “Bài chữa | Bài cải thiện” + “Nhận xét chung” / “Lời khuyên cải thiện”, cột nhận xét ở bảng viết câu). Bài đã chấm giữ nguyên, không trừ point. Nên làm trước khi học viên làm bài.",
       templateFrom: "Từ buổi",
       templateTo: "Đến buổi",
       templateRange: "từ {from} đến {to} ({n} buổi)",
