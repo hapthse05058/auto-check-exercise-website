@@ -986,14 +986,44 @@
   border: 1px solid var(--color-border-secondary, #c9d4d0);
   border-radius: var(--border-radius-md, 6px);
 }
+/* The typed amount: big digits with a fixed "đ" after them. */
 .topup-amount {
   flex: 1 1 auto;
   min-width: 0;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 10px;
+  height: 44px;
+  border: 1px solid var(--color-border-secondary, #c9d4d0);
+  border-radius: var(--border-radius-md, 6px);
+  background: var(--color-background-primary, #fff);
   font-size: 22px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
   color: var(--color-primary-dark, #0f6e56);
+}
+.topup-amount:focus-within {
+  border-color: var(--color-primary, #00846b);
+  box-shadow: 0 0 0 3px var(--color-primary-tint, #e1f5ee);
+}
+.topup-amount input {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  text-align: right;
+}
+/* The box draws the focus ring (:focus-within), not the bare input. */
+.topup-amount input:focus {
+  border: 0;
+  box-shadow: none;
 }
 .topup-presets {
   display: flex;

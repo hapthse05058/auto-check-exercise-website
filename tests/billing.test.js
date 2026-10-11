@@ -1,13 +1,19 @@
 import { describe, expect, it } from "vitest";
 import {
-  clampTopUp,
   formatVnd,
+  formatVndDigits,
   gradingCostEstimate,
+  isValidTopUp,
   maskMoney,
+  parseVndInput,
+  stepTopUp,
   PRICE_AUTO_VND,
   PRICE_MANUAL_VND,
   revenueOfTopUp,
   salerCostVnd,
+  TOPUP_MAX_VND,
+  TOPUP_MIN_VND,
+  TOPUP_PRESETS,
   TOPUP_STEP_VND,
 } from "../src/lib/billing.js";
 
@@ -102,15 +108,48 @@ describe("formatVnd", () => {
   });
 });
 
-describe("clampTopUp", () => {
-  it("snaps to a multiple of 70.000đ within [70k, 7M]", () => {
-    expect(TOPUP_STEP_VND).toBe(70000);
-    expect(clampTopUp(140000)).toBe(140000);
-    expect(clampTopUp(100000)).toBe(70000); // nearest step
-    expect(clampTopUp(110000)).toBe(140000);
-    expect(clampTopUp(0)).toBe(70000);
-    expect(clampTopUp(-70000)).toBe(70000);
-    expect(clampTopUp(99999999)).toBe(7000000);
+describe("top-up amounts", () => {
+  it("any whole đ from 1.000đ to 10.000.000đ, like the backend", () => {
+    expect(TOPUP_MIN_VND).toBe(1000);
+    expect(TOPUP_MAX_VND).toBe(10000000);
+    for (const ok of [1000, 70000, 100000, 123456, 10000000]) {
+      expect(isValidTopUp(ok), String(ok)).toBe(true);
+    }
+    for (const bad of [null, 0, 999, -50000, 10000001, 70000.5, NaN]) {
+      expect(isValidTopUp(bad), String(bad)).toBe(false);
+    }
+  });
+
+  it("presets are round amounts, every one valid", () => {
+    expect(TOPUP_PRESETS).toEqual([
+      50000, 100000, 200000, 500000, 1000000, 2000000,
+    ]);
+    expect(TOPUP_PRESETS.every(isValidTopUp)).toBe(true);
+  });
+
+  it("− / + go to the next round 50.000đ, within [50k, 10M]", () => {
+    expect(TOPUP_STEP_VND).toBe(50000);
+    expect(stepTopUp(100000, 1)).toBe(150000);
+    expect(stepTopUp(100000, -1)).toBe(50000);
+    expect(stepTopUp(123000, 1)).toBe(150000);
+    expect(stepTopUp(123000, -1)).toBe(100000);
+    expect(stepTopUp(null, 1)).toBe(50000);
+    expect(stepTopUp(50000, -1)).toBe(50000);
+    expect(stepTopUp(10000000, 1)).toBe(10000000);
+  });
+
+  it("reads what was typed as digits only", () => {
+    expect(parseVndInput("150.000")).toBe(150000);
+    expect(parseVndInput("150000đ")).toBe(150000);
+    expect(parseVndInput("1 234 567")).toBe(1234567);
+    expect(parseVndInput("")).toBeNull();
+    expect(parseVndInput("abc")).toBeNull();
+    expect(parseVndInput("9".repeat(20))).toBe(9999999999);
+  });
+
+  it("shows the typed amount grouped, without đ", () => {
+    expect(formatVndDigits(150000)).toBe("150.000");
+    expect(formatVndDigits(null)).toBe("");
   });
 });
 

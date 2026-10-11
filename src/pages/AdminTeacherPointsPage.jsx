@@ -16,16 +16,19 @@ import {
   PRICE_AUTO_VND,
   PRICE_MANUAL_VND,
   TOPUP_MAX_VND,
+  TOPUP_MIN_VND,
+  TOPUP_PRESETS,
   TOPUP_STEP_VND,
-  clampTopUp,
+  formatVndDigits,
   formatVnd as vnd,
+  isValidTopUp,
   maskMoney,
+  parseVndInput,
   revenueOfTopUp,
+  stepTopUp,
 } from "../lib/billing.js";
 import { formatDateTimeVn } from "../lib/scheduleTime.js";
 
-/** One-click amounts for the top-up dialog, in steps of 70.000đ. */
-const TOPUP_PRESETS = [1, 2, 5, 10, 20].map((n) => n * TOPUP_STEP_VND);
 const formatDate = (iso) => formatDateTimeVn(iso);
 
 export default function AdminTeacherPointsPage() {
@@ -126,7 +129,7 @@ export default function AdminTeacherPointsPage() {
   };
   const openTopUp = (rec) => {
     setActive(rec);
-    setForm({ amountVnd: TOPUP_STEP_VND });
+    setForm({ amountVnd: 100000 });
     setFormError("");
     setModal("topup");
   };
@@ -163,13 +166,12 @@ export default function AdminTeacherPointsPage() {
   };
 
   const handleTopUp = async () => {
-    // The stepper only ever holds a valid amount; this guards the request.
-    const amount = Number(form.amountVnd);
-    if (clampTopUp(amount) !== amount) {
+    // Typed freely, so checked here as the backend will (isValidTopUp).
+    const amount = form.amountVnd;
+    if (!isValidTopUp(amount)) {
       setFormError(
         t("points.amountErr", {
-          step: vnd(TOPUP_STEP_VND),
-          min: vnd(TOPUP_STEP_VND),
+          min: vnd(TOPUP_MIN_VND),
           max: vnd(TOPUP_MAX_VND),
         }),
       );
@@ -217,14 +219,15 @@ export default function AdminTeacherPointsPage() {
   };
 
   const topupAmount = Number(form.amountVnd) || 0;
-  /** Moves the top-up by whole steps of 70.000đ, within [70k, 7M]. */
-  const stepTopUp = (steps) =>
-    setForm((f) => ({
-      ...f,
-      amountVnd: clampTopUp(
-        (Number(f.amountVnd) || 0) + steps * TOPUP_STEP_VND,
-      ),
-    }));
+  /** − / +: to the next round 50.000đ (lib/billing.js stepTopUp). */
+  const moveTopUp = (direction) => {
+    setFormError("");
+    setForm((f) => ({ ...f, amountVnd: stepTopUp(f.amountVnd, direction) }));
+  };
+  const typeTopUp = (text) => {
+    setFormError("");
+    setForm((f) => ({ ...f, amountVnd: parseVndInput(text) }));
+  };
 
   const columns = [
     {
@@ -474,21 +477,21 @@ export default function AdminTeacherPointsPage() {
                   {t("points.topUpTitle", { who: active.name || active.gmail })}
                 </h3>
               </div>
-              {/* No free typing: the amount only moves in steps of 70.000đ
-                  (− / + or a preset), so it cannot be mistyped. */}
+              {/* Any amount can be typed (what the teacher paid); − / + and
+                  the presets are round shortcuts. */}
               <div className="field-group">
-                <span className="field-label" id="topup-amount-label">
-                  {t("points.amountLabel", { step: vnd(TOPUP_STEP_VND) })}
-                </span>
+                <label className="field-label" htmlFor="topup-amount">
+                  {t("points.amountLabel")}
+                </label>
                 <div
                   className="topup-stepper"
                   role="group"
-                  aria-labelledby="topup-amount-label"
+                  aria-label={t("points.amountGroup")}
                 >
                   <button
                     type="button"
                     className="btn-icon"
-                    onClick={() => stepTopUp(-1)}
+                    onClick={() => moveTopUp(-1)}
                     disabled={saving || topupAmount <= TOPUP_STEP_VND}
                     aria-label={t("points.stepDown", {
                       step: vnd(TOPUP_STEP_VND),
@@ -497,19 +500,31 @@ export default function AdminTeacherPointsPage() {
                   >
                     <i className="ti ti-minus" aria-hidden="true" />
                   </button>
-                  <output className="topup-amount" aria-live="polite">
-                    {vnd(topupAmount)}
-                  </output>
+                  <div className="topup-amount">
+                    <input
+                      id="topup-amount"
+                      type="text"
+                      inputMode="numeric"
+                      autoComplete="off"
+                      value={formatVndDigits(form.amountVnd)}
+                      onChange={(e) => typeTopUp(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && handleTopUp()}
+                      placeholder="0"
+                      disabled={saving}
+                      aria-invalid={Boolean(formError)}
+                      autoFocus
+                    />
+                    <span aria-hidden="true">đ</span>
+                  </div>
                   <button
                     type="button"
                     className="btn-icon"
-                    onClick={() => stepTopUp(1)}
+                    onClick={() => moveTopUp(1)}
                     disabled={saving || topupAmount >= TOPUP_MAX_VND}
                     aria-label={t("points.stepUp", {
                       step: vnd(TOPUP_STEP_VND),
                     })}
                     title={t("points.stepUp", { step: vnd(TOPUP_STEP_VND) })}
-                    autoFocus
                   >
                     <i className="ti ti-plus" aria-hidden="true" />
                   </button>
@@ -521,7 +536,10 @@ export default function AdminTeacherPointsPage() {
                       type="button"
                       className={amount === topupAmount ? "active" : ""}
                       aria-pressed={amount === topupAmount}
-                      onClick={() => setForm({ ...form, amountVnd: amount })}
+                      onClick={() => {
+                        setFormError("");
+                        setForm({ ...form, amountVnd: amount });
+                      }}
                       disabled={saving}
                     >
                       {vnd(amount)}

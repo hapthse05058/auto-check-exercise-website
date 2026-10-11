@@ -8,9 +8,17 @@ export const PRICE_MANUAL_VND = 800;
 /** Price of one doc graded by a scheduled ("chấm tự động") run. */
 export const PRICE_AUTO_VND = 700;
 
-/** Top-ups are whole multiples of 70.000đ, up to 100 steps. */
-export const TOPUP_STEP_VND = 70000;
-export const TOPUP_MAX_VND = 7000000;
+/**
+ * A top-up is any whole number of đ in [1.000đ, 10.000.000đ] — what the
+ * teacher actually paid (backend isValidTopUp). The ceiling only catches a
+ * mistyped extra zero.
+ */
+export const TOPUP_MIN_VND = 1000;
+export const TOPUP_MAX_VND = 10000000;
+/** The − / + buttons move by round 50.000đ steps. */
+export const TOPUP_STEP_VND = 50000;
+/** Quick picks: round amounts. */
+export const TOPUP_PRESETS = [50000, 100000, 200000, 500000, 1000000, 2000000];
 
 /** Admin revenue from a top-up: amount × 6/7 (≈ 0.85714; 70.000đ → 60.000đ). */
 export function revenueOfTopUp(amountVnd) {
@@ -74,11 +82,45 @@ export function gradingCostEstimate({ docCount, unitPriceVnd, balanceVnd }) {
   };
 }
 
-/** Clamps a top-up to a valid multiple of the step, within [step, max]. */
-export function clampTopUp(amountVnd) {
-  const steps = Math.round((Number(amountVnd) || 0) / TOPUP_STEP_VND);
-  const max = TOPUP_MAX_VND / TOPUP_STEP_VND;
-  return Math.min(max, Math.max(1, steps)) * TOPUP_STEP_VND;
+/** A top-up the backend accepts: a whole number of đ within [min, max]. */
+export function isValidTopUp(amountVnd) {
+  return (
+    Number.isInteger(amountVnd) &&
+    amountVnd >= TOPUP_MIN_VND &&
+    amountVnd <= TOPUP_MAX_VND
+  );
+}
+
+/**
+ * The − / + buttons: to the next round step down or up, so a typed 123.000đ
+ * becomes 100.000đ or 150.000đ rather than 73.000đ / 173.000đ. Kept within
+ * [step, max]; `direction` is -1 or 1.
+ */
+export function stepTopUp(amountVnd, direction) {
+  const amount = Math.max(0, Math.round(Number(amountVnd) || 0));
+  const next =
+    direction > 0
+      ? (Math.floor(amount / TOPUP_STEP_VND) + 1) * TOPUP_STEP_VND
+      : (Math.ceil(amount / TOPUP_STEP_VND) - 1) * TOPUP_STEP_VND;
+  return Math.min(TOPUP_MAX_VND, Math.max(TOPUP_STEP_VND, next));
+}
+
+/**
+ * What the admin typed in the amount box, as đ: digits only, so "150.000",
+ * "150000đ" and "150 000" all read 150000. Empty → null. Capped at 10 digits
+ * so a held-down key cannot grow it past a safe integer.
+ */
+export function parseVndInput(text) {
+  const digits = String(text ?? "")
+    .replace(/\D/g, "")
+    .slice(0, 10);
+  return digits ? Number(digits) : null;
+}
+
+/** 150000 → "150.000": the amount box's text while typing (no "đ"). */
+export function formatVndDigits(amountVnd) {
+  if (!Number.isFinite(amountVnd)) return "";
+  return formatVnd(amountVnd).replace(/đ$/, "");
 }
 
 /** Mask used for a hidden money value (never exposes the real digits). */

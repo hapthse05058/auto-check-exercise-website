@@ -813,7 +813,7 @@ export async function deleteTeacherPoint(id) {
   });
 }
 
-/** Tops up a teacher's balance by a VND amount (a multiple of 70.000đ). */
+/** Tops up a teacher's balance by any whole VND amount (1.000đ–10.000.000đ). */
 export async function topUpTeacherPoint(id, amountVnd) {
   return authFetch(`/teacher-points/${encodeURIComponent(id)}/topup`, {
     method: "POST",
