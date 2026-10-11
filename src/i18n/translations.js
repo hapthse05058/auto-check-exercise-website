@@ -271,8 +271,6 @@ export const translations = {
       disableConfirm: "Turn off auto-grading for {class}?",
       summaryOn: "Auto-grading: next run {runAt}",
       summaryOff: "No auto-grading schedule",
-      summaryPriceOn: "auto-graded {auto}/exercise",
-      summaryPriceOff: "graded by hand {manual}/exercise",
       priceOn:
         "Auto-grading on: each exercise the system grades automatically costs {auto}. Grading by hand costs {manual} per exercise.",
       priceOff:
@@ -347,6 +345,23 @@ export const translations = {
       templateIeltsOnly:
         "This class is not an IELTS class — there is no template to update.",
       loadFailed: "Failed to load your classes. Please reload the page.",
+    },
+    gradeCost: {
+      title: "Cost of grading this lesson",
+      formula: "{n} exercise(s) × {price} = {total}",
+      manualTag: "(graded by hand)",
+      sourceClass: "The class has {n} student(s) with a document link.",
+      sourcePasted: "{n} pasted document(s).",
+      onlyDone:
+        "Only the exercises students have done are graded and charged, so the real amount can be lower.",
+      balanceYours: "Your balance",
+      balanceOf: "{teacher}'s balance",
+      balanceOk: "{who}: {balance} → at least {after} left after grading.",
+      balanceShort:
+        "{who}: {balance}, enough for {k} exercise(s) only. If more than {k} students did the lesson, nothing is graded — please contact admin to top up.",
+      autoLine: "Next auto-grading ({runAt}): at most {formula}.",
+      noDocs:
+        "No student of this class has a document link yet — nothing to grade, nothing charged.",
     },
     grade: {
       title: "Grade exercises",
@@ -1170,7 +1185,11 @@ export const translations = {
       noneGraded: "No exercise was graded.",
       seeWarnings: "See the warnings below.",
       notEnough:
-        "Balance too low: {need} exercise(s) to grade cost {needVnd}, {teacher} has {haveVnd}. Please contact admin to top up.",
+        "Balance too low: {need} exercise(s) × {price} = {needVnd} to grade, {teacher} has {haveVnd}. Nothing was graded or charged. Please contact admin to top up.",
+      chargedLine: "Charged: {n} exercise(s) × {price} = {total}.",
+      alreadyPaidLine:
+        "{n} exercise(s) were paid for before, not charged again.",
+      notChargedLine: "Nothing was charged.",
       gradingFailed: "Grading failed: {msg}",
       failedDoc: "Failed {docId}: {msg}",
       tabMissing:
@@ -1455,8 +1474,6 @@ export const translations = {
       disableConfirm: "Tắt chấm tự động cho lớp {class}?",
       summaryOn: "Chấm tự động: lần tới {runAt}",
       summaryOff: "Chưa hẹn giờ chấm tự động",
-      summaryPriceOn: "chấm tự động {auto}/bài",
-      summaryPriceOff: "chấm tay {manual}/bài",
       priceOn:
         "Khi bật chấm tự động: mỗi bài hệ thống tự chấm tính {auto}/bài. Chấm tay tính {manual}/bài.",
       priceOff:
@@ -1529,6 +1546,23 @@ export const translations = {
       templateIeltsOnly:
         "Lớp này không phải lớp IELTS nên không có template để cập nhật.",
       loadFailed: "Tải danh sách lớp thất bại. Hãy tải lại trang.",
+    },
+    gradeCost: {
+      title: "Chi phí chấm buổi này",
+      formula: "{n} bài × {price} = {total}",
+      manualTag: "(chấm tay)",
+      sourceClass: "Lớp có {n} học sinh có link tài liệu.",
+      sourcePasted: "Đã dán {n} tài liệu.",
+      onlyDone:
+        "Chỉ bài học sinh đã làm mới được chấm và trừ tiền, nên số tiền thực tế có thể ít hơn.",
+      balanceYours: "Số dư của bạn",
+      balanceOf: "Số dư của {teacher}",
+      balanceOk: "{who}: {balance} → sau khi chấm còn ít nhất {after}.",
+      balanceShort:
+        "{who}: {balance}, chỉ đủ chấm {k} bài. Nếu có hơn {k} học sinh làm bài thì hệ thống sẽ không chấm — vui lòng liên hệ admin để nạp thêm.",
+      autoLine: "Lần chấm tự động tới ({runAt}): tối đa {formula}.",
+      noDocs:
+        "Lớp chưa có học sinh nào có link tài liệu — không có gì để chấm, không trừ tiền.",
     },
     grade: {
       title: "Chấm bài",
@@ -2340,7 +2374,10 @@ export const translations = {
       noneGraded: "Không có bài nào được chấm.",
       seeWarnings: "Xem cảnh báo bên dưới.",
       notEnough:
-        "Không đủ số dư: cần chấm {need} bài ({needVnd}), {teacher} còn {haveVnd}. Vui lòng liên hệ admin để nạp thêm tiền.",
+        "Không đủ số dư: cần chấm {need} bài × {price} = {needVnd}, {teacher} còn {haveVnd}. Chưa chấm và chưa trừ tiền bài nào. Vui lòng liên hệ admin để nạp thêm tiền.",
+      chargedLine: "Đã trừ: {n} bài × {price} = {total}.",
+      alreadyPaidLine: "{n} bài đã trả tiền trước đó nên không trừ lại.",
+      notChargedLine: "Không trừ tiền.",
       gradingFailed: "Chấm bài thất bại: {msg}",
       failedDoc: "Lỗi {docId}: {msg}",
       tabMissing:

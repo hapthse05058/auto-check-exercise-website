@@ -13,16 +13,19 @@ import {
   fetchLatestGradingJob,
   fetchMyBalance,
   fetchPayerBalance,
+  fetchStudentDocRefs,
   recordFeedbackClearSummary,
   updateCurrentLessonForClass,
 } from "../api/backend.js";
 import { useAuth } from "../auth/AuthContext.jsx";
 import ErrorNotice from "../components/ErrorNotice.jsx";
+import GradeCostNote from "../components/GradeCostNote.jsx";
 import SearchableSelect from "../components/SearchableSelect.jsx";
 import { isAdminEmail } from "../config.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
-import { PRICE_AUTO_VND, PRICE_MANUAL_VND, formatVnd } from "../lib/billing.js";
+import { formatVnd } from "../lib/billing.js";
 import { templateName } from "../lib/courses.js";
+import { parseDocLinks } from "../lib/docParser.js";
 import {
   executeFeedbackClear,
   planFeedbackClear,
@@ -71,6 +74,10 @@ export default function GradePage() {
   // Who actually pays for the selected class. An admin grading someone else's
   // class spends THAT teacher's balance, so the badge must show it.
   const [payer, setPayer] = useState(null);
+  // How many docs a run on the whole class opens (students with a doc link,
+  // one per doc) — the "docs" of the cost shown before grading. null = not
+  // known yet, or the lookup failed (the cost box then stays hidden).
+  const [classDocCount, setClassDocCount] = useState(null);
   // Admin only: each class's course and doc template, shown on hover.
   const [classInfo, setClassInfo] = useState({ courses: [], templates: [] });
   const currentLessonRef = useRef(null);
@@ -108,6 +115,11 @@ export default function GradePage() {
   };
 
   const selectedClass = classes.find((cls) => cls.id === selectedClassId);
+
+  // Pasted links narrow the run to those docs (lib/grading.js pastedDocIds).
+  const pastedDocCount = docLinksText.trim()
+    ? new Set(parseDocLinks(docLinksText.trim()).map((ref) => ref.docId)).size
+    : null;
 
   /** Admin hover text of a class: its course and doc template. */
   const classTitle = (cls) => {
@@ -220,10 +232,19 @@ export default function GradePage() {
     currentLessonRef.current = null;
     refreshPayer(classId);
     refreshSchedule(classId);
+    setClassDocCount(null);
     if (!classId) {
       setLessonsLoading(false);
       return;
     }
+    fetchStudentDocRefs(classId)
+      .then((refs) => {
+        if (!stale()) setClassDocCount(new Set(refs.map((r) => r.docId)).size);
+      })
+      .catch((error) => {
+        if (error.message !== "RE-AUTH_NEEDED")
+          console.error("Student docs fetch failed:", error);
+      });
 
     setLessonsLoading(true);
     try {
@@ -615,6 +636,19 @@ export default function GradePage() {
           </span>
         </label>
       )}
+      {selectedClassId && (
+        <GradeCostNote
+          docCount={pastedDocCount ?? classDocCount}
+          pasted={pastedDocCount !== null}
+          balanceVnd={payer ? payer.balanceVnd : null}
+          payerName={isAdmin ? payer?.teacherName : ""}
+          autoRunAt={
+            schedule?.enabled && schedule.next && pastedDocCount === null
+              ? schedule.next.runAt
+              : null
+          }
+        />
+      )}
       <div className="button-row mb-1">
         <button
           className="primary-btn"
@@ -645,16 +679,6 @@ export default function GradePage() {
           {schedule?.enabled && schedule.next
             ? t("autoGrade.summaryOn", { runAt: formatVn(schedule.next.runAt) })
             : t("autoGrade.summaryOff")}
-          {" · "}
-          {t(
-            schedule?.enabled
-              ? "autoGrade.summaryPriceOn"
-              : "autoGrade.summaryPriceOff",
-            {
-              auto: formatVnd(PRICE_AUTO_VND),
-              manual: formatVnd(PRICE_MANUAL_VND),
-            },
-          )}
         </p>
       )}
       {loadError && (

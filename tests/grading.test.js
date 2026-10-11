@@ -153,6 +153,78 @@ describe("describeJob", () => {
     expect(view.text).toContain("Cô Hà");
   });
 
+  it("spells a shortfall out as docs × price", () => {
+    const view = describeJob(
+      job({
+        status: "failed",
+        error: "not_enough_points",
+        unitPriceVnd: 800,
+        errorParams: {
+          need: 25,
+          needVnd: 20000,
+          haveVnd: 5000,
+          teacher: "Cô Hà",
+        },
+      }),
+      makeT("vi"),
+    );
+    expect(view.text).toContain("25 bài × 800đ = 20.000đ");
+    expect(view.text).toContain("Cô Hà còn 5.000đ");
+  });
+
+  describe("what a finished run charged", () => {
+    const vi = makeT("vi");
+
+    it("docs × price = total", () => {
+      const view = describeJob(
+        job({ written: 25, charged: 25, unitPriceVnd: 800, chargedVnd: 20000 }),
+        vi,
+      );
+      expect(view.text).toContain("Đã trừ: 25 bài × 800đ = 20.000đ.");
+    });
+
+    it("names docs paid for before, so a lower total is explained", () => {
+      const view = describeJob(
+        job({
+          written: 3,
+          charged: 2,
+          alreadyPaid: 1,
+          unitPriceVnd: 700,
+          chargedVnd: 1400,
+        }),
+        vi,
+      );
+      expect(view.text).toContain("Đã trừ: 2 bài × 700đ = 1.400đ.");
+      expect(view.text).toContain("1 bài đã trả tiền trước đó");
+    });
+
+    it("says when nothing was charged", () => {
+      const view = describeJob(
+        job({ written: 2, charged: 0, unitPriceVnd: 800, chargedVnd: 0 }),
+        vi,
+      );
+      expect(view.text).toContain("Không trừ tiền.");
+    });
+
+    it("keeps the docs charged before Google access ran out", () => {
+      const view = describeJob(
+        job({
+          reauthRequired: true,
+          written: 1,
+          charged: 1,
+          unitPriceVnd: 800,
+          chargedVnd: 800,
+        }),
+        vi,
+      );
+      expect(view.text).toContain("Đã trừ: 1 bài × 800đ = 800đ.");
+    });
+
+    it("a job from before prices were reported adds no cost line", () => {
+      expect(describeJob(job(), vi).text).not.toMatch(/trừ/);
+    });
+  });
+
   it("builds the unreadable-answer list from table/question refs", () => {
     const view = describeJob(
       job({

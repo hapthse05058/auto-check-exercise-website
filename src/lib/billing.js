@@ -34,6 +34,46 @@ export function formatVnd(amountVnd) {
   return `${n < 0 ? "-" : ""}${digits}đ`;
 }
 
+/**
+ * What grading `docCount` docs at `unitPriceVnd` each can cost: every doc a
+ * run writes feedback into is charged once, so docs × price is the most it
+ * takes. A run starts only when the balance covers every doc it is about to
+ * write (backend canAfford), hence `affordableDocs`.
+ *
+ * `balanceVnd` null/undefined (an admin grading a class with no payer) leaves
+ * the balance fields null.
+ *
+ * @returns {{docs: number, unitPriceVnd: number, totalVnd: number,
+ *   balanceVnd: number|null, enough: boolean|null,
+ *   affordableDocs: number|null, afterVnd: number|null}}
+ */
+export function gradingCostEstimate({ docCount, unitPriceVnd, balanceVnd }) {
+  const docs = Math.max(0, Math.floor(Number(docCount) || 0));
+  const price = Math.max(0, Math.round(Number(unitPriceVnd) || 0));
+  const totalVnd = docs * price;
+  if (!Number.isFinite(balanceVnd)) {
+    return {
+      docs,
+      unitPriceVnd: price,
+      totalVnd,
+      balanceVnd: null,
+      enough: null,
+      affordableDocs: null,
+      afterVnd: null,
+    };
+  }
+  const affordable = price ? Math.floor(Math.max(0, balanceVnd) / price) : docs;
+  return {
+    docs,
+    unitPriceVnd: price,
+    totalVnd,
+    balanceVnd,
+    enough: balanceVnd >= totalVnd,
+    affordableDocs: Math.min(docs, affordable),
+    afterVnd: balanceVnd - totalVnd,
+  };
+}
+
 /** Clamps a top-up to a valid multiple of the step, within [step, max]. */
 export function clampTopUp(amountVnd) {
   const steps = Math.round((Number(amountVnd) || 0) / TOPUP_STEP_VND);

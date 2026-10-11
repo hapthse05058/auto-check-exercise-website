@@ -1493,6 +1493,53 @@ textarea {
   color: var(--color-text-secondary);
   margin: 0 0 0.75rem;
 }
+/* Grading screen: docs × price = total, before the grade button
+   (components/GradeCostNote.jsx). Same tint as .auto-grade-price; a balance
+   that cannot cover it turns the box to the danger tint. */
+.grade-cost {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  padding: 10px 12px;
+  margin: 0 0 0.75rem;
+  border-radius: var(--border-radius-md, 8px);
+  background: var(--color-primary-tint);
+  border: 1px solid var(--color-primary-tint-border);
+  color: var(--color-text-primary);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.grade-cost > i {
+  font-size: 18px;
+  margin-top: 1px;
+  color: var(--color-primary-dark);
+}
+.grade-cost p {
+  margin: 0;
+}
+.grade-cost p + p {
+  margin-top: 2px;
+}
+.grade-cost-title {
+  font-weight: 600;
+  color: var(--color-primary-dark);
+}
+.grade-cost-formula {
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+.grade-cost-auto {
+  color: var(--color-text-secondary);
+}
+.grade-cost[data-state="short"] {
+  background: var(--color-danger-tint);
+  border-color: var(--color-danger-tint-border);
+}
+.grade-cost[data-state="short"] > i,
+.grade-cost[data-state="short"] .grade-cost-title,
+.grade-cost-short {
+  color: var(--color-danger-text);
+}
 /* A load failure with a way out (components/ErrorNotice.jsx). Same danger
    language as .auto-grade-alert. */
 .error-notice {

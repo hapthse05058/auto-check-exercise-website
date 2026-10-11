@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   clampTopUp,
   formatVnd,
+  gradingCostEstimate,
   maskMoney,
   PRICE_AUTO_VND,
   PRICE_MANUAL_VND,
@@ -14,6 +15,60 @@ describe("prices", () => {
   it("800đ by hand, 700đ auto", () => {
     expect(PRICE_MANUAL_VND).toBe(800);
     expect(PRICE_AUTO_VND).toBe(700);
+  });
+});
+
+describe("gradingCostEstimate", () => {
+  it("is docs × price, against the balance", () => {
+    expect(
+      gradingCostEstimate({
+        docCount: 25,
+        unitPriceVnd: 800,
+        balanceVnd: 50000,
+      }),
+    ).toEqual({
+      docs: 25,
+      unitPriceVnd: 800,
+      totalVnd: 20000,
+      balanceVnd: 50000,
+      enough: true,
+      affordableDocs: 25,
+      afterVnd: 30000,
+    });
+  });
+
+  it("a balance short of it says how many docs it covers", () => {
+    const cost = gradingCostEstimate({
+      docCount: 25,
+      unitPriceVnd: 800,
+      balanceVnd: 5000,
+    });
+    expect(cost.enough).toBe(false);
+    expect(cost.affordableDocs).toBe(6);
+    // Exactly enough is enough.
+    expect(
+      gradingCostEstimate({ docCount: 2, unitPriceVnd: 700, balanceVnd: 1400 })
+        .enough,
+    ).toBe(true);
+    // A negative balance covers nothing.
+    expect(
+      gradingCostEstimate({ docCount: 2, unitPriceVnd: 700, balanceVnd: -100 })
+        .affordableDocs,
+    ).toBe(0);
+  });
+
+  it("no balance (admin, no payer) leaves the balance fields null", () => {
+    const cost = gradingCostEstimate({ docCount: 3, unitPriceVnd: 700 });
+    expect(cost.totalVnd).toBe(2100);
+    expect(cost.enough).toBeNull();
+    expect(cost.affordableDocs).toBeNull();
+    expect(cost.afterVnd).toBeNull();
+  });
+
+  it("bad counts read as 0 docs", () => {
+    expect(
+      gradingCostEstimate({ docCount: undefined, unitPriceVnd: 800 }).totalVnd,
+    ).toBe(0);
   });
 });
 

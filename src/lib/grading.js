@@ -85,6 +85,39 @@ function translateWarning({ code, params = {} }, t) {
   return t(`grading.${code}`, params);
 }
 
+/** What one doc of this job costs (older jobs: the total over the docs). */
+function unitPriceOf(job) {
+  if (Number.isFinite(job.unitPriceVnd)) return job.unitPriceVnd;
+  const params = job.errorParams || {};
+  return params.need ? Math.round(params.needVnd / params.need) : 0;
+}
+
+/**
+ * What a finished run cost, spelled out: "Đã trừ: 25 bài × 800đ = 20.000đ."
+ * Docs paid for by an earlier receipt are named too, so a total lower than
+ * the docs written never looks like a mistake. Empty for a job from before
+ * the backend reported its price.
+ */
+function chargeText(job, t) {
+  if (!Number.isFinite(job.unitPriceVnd)) return "";
+  const charged = job.charged || 0;
+  const lines = [];
+  if (charged > 0) {
+    lines.push(
+      t("grading.chargedLine", {
+        n: charged,
+        price: formatVnd(job.unitPriceVnd),
+        total: formatVnd(job.chargedVnd ?? charged * job.unitPriceVnd),
+      }),
+    );
+  }
+  if (job.alreadyPaid > 0) {
+    lines.push(t("grading.alreadyPaidLine", { n: job.alreadyPaid }));
+  }
+  if (!lines.length) lines.push(t("grading.notChargedLine"));
+  return lines.join(" ");
+}
+
 /** Why a job failed, in words — keyed on the backend's error code. */
 function describeError(job, t) {
   const params = job.errorParams || {};
@@ -92,6 +125,7 @@ function describeError(job, t) {
     case "not_enough_points":
       return t("grading.notEnough", {
         ...params,
+        price: formatVnd(unitPriceOf(job)),
         needVnd: formatVnd(params.needVnd),
         haveVnd: formatVnd(params.haveVnd),
       });
@@ -139,19 +173,24 @@ export function describeJob(job, t, { showWarnings = true } = {}) {
     return { phase: "error", text: describeError(job, t), warnings };
   }
   if (job.reauthRequired) {
+    // The docs written before it stopped were charged.
+    const cost = job.charged > 0 ? chargeText(job, t) : "";
     return {
       phase: "error",
-      text: t("grading.reauthRequired", {
-        written: job.written,
-        total: job.total,
-      }),
+      text:
+        t("grading.reauthRequired", {
+          written: job.written,
+          total: job.total,
+        }) + (cost ? `\n${cost}` : ""),
       warnings,
     };
   }
   if (job.written > 0) {
+    const cost = chargeText(job, t);
     return {
       phase: "done",
-      text: t("grading.doneCount", { n: job.written }),
+      text:
+        t("grading.doneCount", { n: job.written }) + (cost ? `\n${cost}` : ""),
       warnings,
     };
   }
