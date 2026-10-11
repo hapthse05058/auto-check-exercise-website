@@ -111,14 +111,22 @@
   .faq h4 { margin: 11px 0 3px; font-size: 10.6pt; color: var(--green-d); }
   .faq p { margin: 0; }
 
-  /* On screen (in the tool's iframe or a phone): one readable column. */
+  .gbar { display: none; }
+  /* On screen (its own tab, or a phone): one readable column. */
   @media screen {
     body { max-width: 880px; margin: 0 auto; padding: 24px 20px 48px; background: #fff; }
     section { margin-top: 34px; padding-top: 26px; border-top: 1px solid var(--line); }
     .cover { padding-top: 6px; }
+    .gbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; position: sticky; top: 0; z-index: 10;
+      margin: -24px -20px 18px; padding: 10px 20px; background: rgba(255,255,255,.96); border-bottom: 1px solid var(--line); backdrop-filter: blur(6px); }
+    .gbar-title { font-weight: 600; color: var(--green-d); font-size: 14px; }
+    .gbar-btn { flex: none; background: var(--green); color: #fff; text-decoration: none; font-weight: 600; font-size: 14px; padding: 8px 16px; border-radius: 8px; }
+    .gbar-btn:hover { background: var(--green-d); }
   }
   @media screen and (max-width: 720px) {
     body { padding: 16px 16px 40px; font-size: 15px; }
+    .gbar { margin: -16px -16px 14px; padding: 10px 16px; }
+    .gbar-title { font-size: 13px; }
     .cover h1 { font-size: 28px; }
     .split, .split.wide, .toc { grid-template-columns: 1fr; }
     .toc { grid-auto-flow: row; grid-template-rows: none; }
@@ -130,6 +138,10 @@
 </style>
 </head>
 <body>
+<header class="gbar">
+  <span class="gbar-title">Hướng dẫn sử dụng · Công cụ chấm bài AI</span>
+  <a class="gbar-btn" href="Huong-dan-cham-bai.pdf" download>⤓ Tải PDF</a>
+</header>
 
 <!-- ================= COVER ================= -->
 <div class="page cover">
@@ -166,7 +178,7 @@
     <figure><img src="shots/menu.png" alt=""><figcaption>Menu ☰ có 3 nhóm.</figcaption></figure>
     <ul class="legend">
       <li><span class="c">1</span><span>Bấm nút <b>☰</b> để mở menu.</span></li>
-      <li><span class="c">2</span><span><b>Chấm bài</b>: màn chấm bài chính (mục 4), và <b>Hướng dẫn sử dụng</b>: tài liệu này, xem ngay hoặc tải PDF.</span></li>
+      <li><span class="c">2</span><span><b>Chấm bài</b>: màn chấm bài chính (mục 4), và <b>Hướng dẫn sử dụng</b>: mở tài liệu này ở tab mới (có nút Tải PDF).</span></li>
       <li><span class="c">3</span><span><b>Lớp &amp; học sinh</b>: tạo lớp, thêm học sinh, quản lý lớp/học sinh (mục 2, 3, 8).</span></li>
       <li><span class="c">4</span><span><b>Cài đặt</b>: <span class="ui">Chấm tự động</span> (mục 6) và <span class="ui">Cập nhật template</span> cho lớp IELTS (mục 7).</span></li>
     </ul>

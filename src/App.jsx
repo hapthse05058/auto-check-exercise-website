@@ -14,7 +14,6 @@ import ClassStudentsPage from "./pages/ClassStudentsPage.jsx";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage.jsx";
 import GradePage from "./pages/GradePage.jsx";
 import GradingCachePage from "./pages/GradingCachePage.jsx";
-import GuidePage from "./pages/GuidePage.jsx";
 import IeltsWritingPage from "./pages/IeltsWritingPage.jsx";
 import LandingPagePersonal from "./pages/LandingPagePersonal.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
@@ -41,7 +40,6 @@ export default function App() {
 
         <Route element={<ProtectedRoute />}>
           <Route path="/grade" element={<GradePage />} />
-          <Route path="/guide" element={<GuidePage />} />
           <Route path="/ielts-writing" element={<IeltsWritingPage />} />
           <Route path="/classes/new" element={<NewClassPage />} />
           <Route path="/students/add" element={<AddStudentsPage />} />

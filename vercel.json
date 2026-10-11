@@ -1,3 +1,6 @@
 {
+  "redirects": [
+    { "source": "/huong-dan", "destination": "/huong-dan/", "permanent": false }
+  ],
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
 }

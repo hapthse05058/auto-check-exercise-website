@@ -129,7 +129,13 @@ const NAV_GROUPS = [
         icon: "ti-microphone",
         admin: true,
       },
-      { path: "/guide", label: "nav.guide", icon: "ti-book" },
+      // A static page (public/huong-dan/), opened in a new tab.
+      {
+        path: "/huong-dan/",
+        label: "nav.guide",
+        icon: "ti-book",
+        newTab: true,
+      },
     ],
   },
   {
@@ -216,9 +222,10 @@ function NavMenu() {
     return () => document.removeEventListener("click", onClick);
   }, []);
 
-  const go = (path) => {
+  const go = (item) => {
     setOpen(false);
-    navigate(path);
+    if (item.newTab) window.open(item.path, "_blank", "noopener");
+    else navigate(item.path);
   };
 
   const isAdmin = isAdminEmail(teacherInfo?.gmail);
@@ -256,7 +263,7 @@ function NavMenu() {
                     key={item.path}
                     className={`menu-option nav-item${active ? " active" : ""}`}
                     aria-current={active ? "page" : undefined}
-                    onClick={() => go(item.path)}
+                    onClick={() => go(item)}
                   >
                     <i className={`ti ${item.icon}`} aria-hidden="true" />
                     {t(item.label)}

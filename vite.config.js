@@ -17,10 +17,11 @@ export default defineConfig({
       // must not precache it, or the Workbox SW would serve a stale cached copy
       // of a file the browser is meant to re-fetch on every update check.
       workbox: {
-        globIgnores: ["**/firebase-messaging-sw.js"],
-        // The guide (public/huong-dan/) is a static page shown in an iframe,
-        // not a route of the app — never answer it with the SPA shell.
-        navigateFallbackDenylist: [/^\/huong-dan\//],
+        // The guide (public/huong-dan/) is a static page opened in its own
+        // tab, not a route of the app: never cached here, and never answered
+        // with the SPA shell, so teachers always get the latest guide.
+        globIgnores: ["**/firebase-messaging-sw.js", "huong-dan/**"],
+        navigateFallbackDenylist: [/^\/huong-dan(\/|$)/],
       },
       manifest: {
         name: "AI Exercise Checker",

@@ -154,11 +154,6 @@ export const translations = {
           "Class {className} · Lesson {lessonName} · {totalPoints} exercise(s) graded.",
       },
     },
-    guide: {
-      title: "User guide",
-      downloadPdf: "Download PDF",
-      openNewTab: "Open in new tab",
-    },
     speaking: {
       title: "Speaking grading",
       openNewTab: "Open in new tab",
@@ -1281,11 +1276,6 @@ export const translations = {
         gradingDoneByAdminBody:
           "Lớp {className} · Buổi {lessonName} · {totalPoints} bài đã được chấm.",
       },
-    },
-    guide: {
-      title: "Hướng dẫn sử dụng",
-      downloadPdf: "Tải PDF",
-      openNewTab: "Mở trong tab mới",
     },
     speaking: {
       title: "Chấm speaking",
