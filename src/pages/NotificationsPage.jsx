@@ -14,6 +14,7 @@ import {
   relativeTime,
   renderNotification,
 } from "../lib/notificationView.js";
+import { formatDateTimeVn } from "../lib/scheduleTime.js";
 
 const PAGE_SIZE = 20;
 
@@ -47,7 +48,7 @@ function sinceOf(range) {
  * bookmarked and Back restores it.
  */
 export default function NotificationsPage() {
-  const { t, lang } = useLanguage();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [items, setItems] = useState([]);
@@ -134,7 +135,7 @@ export default function NotificationsPage() {
   const totalPages = Math.max(1, Math.ceil(items.length / PAGE_SIZE));
   const visible = items.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
   const absolute = (iso) =>
-    iso ? new Date(iso).toLocaleString(lang === "vi" ? "vi-VN" : "en-GB") : "";
+    iso ? formatDateTimeVn(iso, { seconds: true }) : "";
 
   return (
     <div className="page-wide">

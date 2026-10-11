@@ -12,6 +12,7 @@ import {
   saveGradingSchedule,
 } from "../api/backend.js";
 import { useAuth } from "../auth/AuthContext.jsx";
+import AutoGradePriceNote from "../components/AutoGradePriceNote.jsx";
 import AutoGradeScheduleFields from "../components/AutoGradeScheduleFields.jsx";
 import { isAdminEmail } from "../config.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
@@ -322,6 +323,7 @@ export default function NewClassPage() {
             />
             <span>{t("autoGrade.newClassToggle")}</span>
           </label>
+          <AutoGradePriceNote enabled={autoGrade} />
         </div>
         {autoGrade && (
           <div className="form-field">

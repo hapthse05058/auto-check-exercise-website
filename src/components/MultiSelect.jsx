@@ -1,4 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+
+import { removeAccents } from "../lib/text.js";
 
 /**
  * Dropdown chọn NHIỀU mục bằng checkbox (SearchableSelect chỉ chọn 1).
@@ -15,9 +17,31 @@ export default function MultiSelect({
   renderLabel,
   disabled = false,
   className = "",
+  searchPlaceholder = "",
+  noResultsText = "",
 }) {
   const labelOf = (option) => renderLabel?.(option) ?? option;
   const [isOpen, setIsOpen] = useState(false);
+  const [search, setSearch] = useState("");
+
+  // Như SearchableSelect: không phân biệt dấu/hoa thường, khớp cả nhãn đã
+  // dịch lẫn mã gốc (gõ "so du" hay "balance" đều ra "Số dư AI…").
+  const filtered = useMemo(() => {
+    const needle = removeAccents(search);
+    if (!needle) return options;
+    return options.filter(
+      (option) =>
+        removeAccents(String(labelOf(option))).includes(needle) ||
+        removeAccents(String(option)).includes(needle),
+    );
+    // labelOf đổi theo renderLabel (ngôn ngữ) — options + search là đủ.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search, options, renderLabel]);
+
+  // Mở lại thì bắt đầu từ danh sách đầy đủ.
+  useEffect(() => {
+    if (!isOpen) setSearch("");
+  }, [isOpen]);
   const containerRef = useRef(null);
 
   // Đóng khi click ra ngoài (cùng cách với SearchableSelect).
@@ -49,7 +73,10 @@ export default function MultiSelect({
         : (summaryText?.(value.length) ?? `${value.length}`);
 
   return (
-    <div ref={containerRef} className={`searchable-select ${className}`.trim()}>
+    <div
+      ref={containerRef}
+      className={`searchable-select multi-select ${className}`.trim()}
+    >
       <button
         type="button"
         className="searchable-select-trigger"
@@ -66,12 +93,27 @@ export default function MultiSelect({
 
       {isOpen && !disabled && (
         <div className="searchable-select-dropdown">
+          <input
+            type="text"
+            className="searchable-select-input"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Escape") setIsOpen(false);
+            }}
+            placeholder={searchPlaceholder}
+            aria-label={searchPlaceholder}
+            autoFocus
+          />
           <ul
             className="searchable-select-list"
             role="listbox"
             aria-multiselectable="true"
           >
-            {options.map((option) => (
+            {filtered.length === 0 && (
+              <li className="searchable-select-no-results">{noResultsText}</li>
+            )}
+            {filtered.map((option) => (
               <li
                 key={option}
                 role="option"

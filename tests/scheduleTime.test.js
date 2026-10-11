@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  formatDateTimeVn,
   formatVn,
   fromVnDate,
   fromVnInput,
@@ -27,7 +28,7 @@ describe("schedule time (Vietnam wall clock, whatever the browser zone)", () => 
 
   it("weekday and display text", () => {
     expect(vnWeekTime(T0)).toEqual({ weekday: 2, time: "20:00" });
-    expect(formatVn(T0)).toBe("20:00 29/09");
+    expect(formatVn(T0)).toBe("29/09/2026 20:00");
   });
 
   it("rejects empty or malformed input", () => {
@@ -43,5 +44,27 @@ describe("schedule time (Vietnam wall clock, whatever the browser zone)", () => 
     expect(vnDayStart(T0)).toBe(fromVnDate("2026-09-29"));
     expect(Number.isNaN(fromVnDate("2026-09-31"))).toBe(true);
     expect(Number.isNaN(fromVnDate(""))).toBe(true);
+  });
+});
+
+describe("formatDateTimeVn", () => {
+  it("is day/month/year in Vietnam time, whatever the input form", () => {
+    expect(formatDateTimeVn("2026-10-02T10:39:40.000Z")).toBe(
+      "02/10/2026 17:39",
+    );
+    expect(formatDateTimeVn(Date.UTC(2026, 9, 2, 10, 39, 40))).toBe(
+      "02/10/2026 17:39",
+    );
+    expect(
+      formatDateTimeVn("2026-10-02T10:39:40.000Z", { seconds: true }),
+    ).toBe("02/10/2026 17:39:40");
+  });
+  it("crosses midnight in Vietnam time, not UTC", () => {
+    expect(formatDateTimeVn("2026-12-31T17:05:00Z")).toBe("01/01/2027 00:05");
+  });
+  it("— when empty; the raw value when unparsable", () => {
+    expect(formatDateTimeVn(null)).toBe("—");
+    expect(formatDateTimeVn("")).toBe("—");
+    expect(formatDateTimeVn("not a date")).toBe("not a date");
   });
 });

@@ -3,13 +3,14 @@ import { useNavigate } from "react-router-dom";
 
 import {
   fetchAllClasses,
-  fetchMyPoint,
+  fetchMyBalance,
   gradeIeltsWriting,
 } from "../api/backend.js";
 import { useAuth } from "../auth/AuthContext.jsx";
 import SearchableSelect from "../components/SearchableSelect.jsx";
 import { isAdminEmail } from "../config.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
+import { PRICE_MANUAL_VND, formatVnd } from "../lib/billing.js";
 import {
   MAX_IMAGES,
   MIN_WORDS,
@@ -22,7 +23,7 @@ import {
   feedbackToPlain,
   ieltsErrorText,
 } from "../lib/ieltsWriting.js";
-import { announcePoints } from "../lib/pointEvents.js";
+import { announceBalance } from "../lib/pointEvents.js";
 
 /** One feedback text block: keeps line breaks, turns **x** into bold. */
 function FeedbackText({ text }) {
@@ -160,7 +161,7 @@ export default function IeltsWritingPage() {
       });
       setOutcome(data);
       try {
-        announcePoints(await fetchMyPoint());
+        announceBalance(await fetchMyBalance());
       } catch {
         // the badge refreshes on its own later
       }
@@ -203,7 +204,7 @@ export default function IeltsWritingPage() {
         <div className="topbar">
           <div className="topbar-left">
             <h2>{t("ielts.title")}</h2>
-            <p>{t("ielts.subtitle")}</p>
+            <p>{t("ielts.subtitle", { price: formatVnd(PRICE_MANUAL_VND) })}</p>
           </div>
         </div>
 
@@ -368,7 +369,7 @@ export default function IeltsWritingPage() {
             <p className="field-note">
               {t("ielts.meta", {
                 words: result.wordCount,
-                charged: outcome.charged,
+                charged: formatVnd(outcome.chargedVnd),
                 payer: outcome.payerName,
               })}
               {outcome.cached ? ` · ${t("ielts.fromCache")}` : ""}

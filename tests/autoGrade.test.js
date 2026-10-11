@@ -124,8 +124,8 @@ describe("wording", () => {
     })[key] ?? key;
 
   it("run keys read as time and day", () => {
-    expect(runLabel("2026-09-26-2231")).toBe("22:31 26/09");
-    expect(runLabel("2026-09-26")).toBe("26/09");
+    expect(runLabel("2026-09-26-2231")).toBe("26/09/2026 22:31");
+    expect(runLabel("2026-09-26")).toBe("26/09/2026");
   });
 
   it("slot errors name the day, same-weekday errors name both", () => {

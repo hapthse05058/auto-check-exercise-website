@@ -93,7 +93,7 @@ describe("dataUrlBytes", () => {
 
 describe("ieltsErrorText", () => {
   const dict = {
-    "ielts.error.insufficient_points": "hết point ({point})",
+    "ielts.error.insufficient_points": "hết số dư ({balance})",
     "ielts.error.ielts_grade_failed": "lỗi chung",
   };
   const t = (key, params = {}) =>
@@ -103,8 +103,8 @@ describe("ieltsErrorText", () => {
 
   it("uses the backend code and its params", () => {
     const error = new Error("insufficient_points");
-    error.params = { point: 0 };
-    expect(ieltsErrorText(error, t)).toBe("hết point (0)");
+    error.params = { balanceVnd: 500 };
+    expect(ieltsErrorText(error, t)).toBe("hết số dư (500đ)");
   });
   it("falls back to the generic text for an unknown code", () => {
     expect(ieltsErrorText(new Error("weird"), t)).toBe("lỗi chung");

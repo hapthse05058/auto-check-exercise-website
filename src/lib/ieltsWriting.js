@@ -6,6 +6,7 @@
  * screen and into HTML for the clipboard, so pasting into Google Docs keeps
  * the bold. Pure, except `compressImage` (browser canvas).
  */
+import { formatVnd } from "./billing.js";
 
 export const TASKS = ["task1", "task2", "paragraph"];
 /** IELTS minimum length; a paragraph has none. */
@@ -109,7 +110,7 @@ export function ieltsErrorText(error, t) {
   const params = error?.params || {};
   const key = `ielts.error.${code}`;
   const text = t(key, {
-    point: params.point ?? 0,
+    balance: formatVnd(params.balanceVnd),
     max: params.max ?? "",
   });
   return text === key ? t("ielts.error.ielts_grade_failed") : text;

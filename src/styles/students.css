@@ -719,11 +719,20 @@
   flex: 0 0 auto;
   pointer-events: none;
 }
+/* Wrapped, never clipped: an option is read in full (long action names). */
 .multiselect-row-label {
   flex: 1 1 auto;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.35;
+}
+/* Phones: the multiselect takes its own row, so its list is screen-wide. */
+@media (max-width: 600px) {
+  .cache-search .searchable-select.multi-select {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
 }
 
 /* audit log screen — severity badge + the actor's secondary email line */
@@ -763,6 +772,46 @@
 .audit-actor-email {
   font-size: 11px;
   color: var(--color-text-tertiary, #8a948f);
+}
+
+/* ExpandableText: one clipped line + a toggle that shows the whole text. */
+.expandable-text {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  min-width: 0;
+}
+.expandable-text-body {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.expandable-text.is-expanded .expandable-text-body {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.cache-table td:has(.expandable-text.is-expanded) {
+  max-width: 320px;
+}
+.expandable-text-toggle {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  margin: -3px -4px -3px 0;
+  padding: 0;
+  border: 1px solid var(--color-border-tertiary);
+  border-radius: 6px;
+  background: var(--color-background-secondary);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+.expandable-text-toggle:hover {
+  color: var(--color-text-primary);
 }
 
 /* teacher-points billing panel */
@@ -923,4 +972,52 @@
   padding: 8px;
   border: 1px solid var(--color-border-tertiary, #dfe5e2);
   border-radius: var(--border-radius-md, 8px);
+}
+
+/* Top-up amount: a stepper (multiples of 70.000đ) + presets, no free typing. */
+.topup-stepper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.topup-stepper .btn-icon {
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--color-border-secondary, #c9d4d0);
+  border-radius: var(--border-radius-md, 6px);
+}
+.topup-amount {
+  flex: 1 1 auto;
+  min-width: 0;
+  text-align: center;
+  font-size: 22px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-primary-dark, #0f6e56);
+}
+.topup-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+.topup-presets button {
+  padding: 4px 10px;
+  border: 1px solid var(--color-border-tertiary, #dfe7e4);
+  border-radius: 999px;
+  background: var(--color-background-primary, #fff);
+  color: var(--color-text-secondary, #51615c);
+  font: inherit;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+.topup-presets button:hover:not(:disabled) {
+  background: var(--color-surface-hover, #f0f7f4);
+}
+.topup-presets button.active {
+  border-color: var(--color-primary, #00846b);
+  background: var(--color-primary-tint, #e1f5ee);
+  color: var(--color-primary-dark, #0f6e56);
+  font-weight: 600;
 }

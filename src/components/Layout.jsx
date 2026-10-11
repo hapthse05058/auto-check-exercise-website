@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 
-import { fetchMyPoint } from "../api/backend.js";
+import { fetchMyBalance } from "../api/backend.js";
 import { useAuth } from "../auth/AuthContext.jsx";
 import { SUPPORT_EMAIL, isAdminEmail } from "../config.js";
 import NotificationBell from "./NotificationBell.jsx";
 import { usePushNotifications } from "../hooks/usePushNotifications.js";
 import { usePwaInstall } from "../hooks/usePwaInstall.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
+import { formatVnd } from "../lib/billing.js";
 import { POINTS_CHANGED } from "../lib/pointEvents.js";
 import { refreshPushToken, startForegroundPushListener } from "../lib/push.js";
 import { useSyncedTheme } from "../theme/useSyncedTheme.js";
@@ -40,9 +41,11 @@ function LanguageSwitcher() {
   );
 }
 
-/** Light / dark toggle: shows the theme it switches TO. */
-function ThemeToggle() {
-  const { theme, toggleTheme } = useSyncedTheme();
+/**
+ * Light / dark toggle: shows the theme it switches TO. Signed out only — the
+ * signed-in header keeps it in the ☰ menu's settings (ThemeSwitch).
+ */
+function ThemeToggle({ theme, toggleTheme }) {
   const { t } = useLanguage();
   const label = theme === "dark" ? t("theme.toLight") : t("theme.toDark");
   return (
@@ -60,30 +63,56 @@ function ThemeToggle() {
   );
 }
 
+/** Light | Dark, segmented like the language switch (☰ menu settings). */
+function ThemeSwitch({ theme, toggleTheme }) {
+  const { t } = useLanguage();
+  const choose = (next) => next !== theme && toggleTheme();
+  return (
+    <div className="lang-switch" role="group" aria-label={t("theme.label")}>
+      {["light", "dark"].map((value) => (
+        <button
+          key={value}
+          className={`lang-option ${theme === value ? "active" : ""}`}
+          aria-pressed={theme === value}
+          onClick={() => choose(value)}
+        >
+          <i
+            className={`ti ${value === "dark" ? "ti-moon" : "ti-sun"}`}
+            aria-hidden="true"
+          />{" "}
+          {t(`theme.${value}`)}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 const POINT_REFRESH_MS = 60 * 1000;
 
 /**
- * The signed-in teacher's point balance, always in the header. Re-read on
+ * The signed-in teacher's balance (VND), always in the header. Re-read on
  * every page change, when the tab regains focus and once a minute (scheduled
- * grading spends points in the background); screens that read a fresh
+ * grading spends it in the background); screens that read a fresh
  * balance themselves announce it (lib/pointEvents.js).
  */
 function PointBadge() {
   const { t } = useLanguage();
   const location = useLocation();
-  const [point, setPoint] = useState(null);
+  const [balance, setBalance] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
     const load = () =>
-      fetchMyPoint()
-        .then((value) => !cancelled && setPoint(value))
+      fetchMyBalance()
+        .then((value) => !cancelled && setBalance(value))
         .catch(() => {});
     load();
     const timer = setInterval(load, POINT_REFRESH_MS);
     const onFocus = () => load();
     const onAnnounce = (event) => {
-      if (Number.isFinite(event.detail?.point)) setPoint(event.detail.point);
+      if (Number.isFinite(event.detail?.balanceVnd)) {
+        setBalance(event.detail.balanceVnd);
+      }
     };
     window.addEventListener("focus", onFocus);
     window.addEventListener(POINTS_CHANGED, onAnnounce);
@@ -95,14 +124,14 @@ function PointBadge() {
     };
   }, [location.pathname]);
 
-  if (point === null) return null;
+  if (balance === null) return null;
   return (
     <span
-      className={`point-badge ${point <= 0 ? "empty" : ""}`}
+      className={`point-badge ${balance <= 0 ? "empty" : ""}`}
       title={t("nav.pointsTitle")}
     >
       <i className="ti ti-coins" aria-hidden="true" />
-      {t("nav.points", { n: point.toLocaleString("vi-VN") })}
+      {formatVnd(balance)}
     </span>
   );
 }
@@ -203,8 +232,11 @@ const NAV_GROUPS = [
   },
 ];
 
-/** ☰ menu with navigation shortcuts (replaces the extension popup menu). */
-function NavMenu() {
+/**
+ * ☰ menu with navigation shortcuts (replaces the extension popup menu), and
+ * the theme + language settings, kept out of the header so it fits a phone.
+ */
+function NavMenu({ theme, toggleTheme }) {
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef(null);
   const navigate = useNavigate();
@@ -270,6 +302,19 @@ function NavMenu() {
                   </button>
                 );
               })}
+              {/* Theme and language sit under the Settings group's links. */}
+              {group.key === "settings" && (
+                <>
+                  <div className="nav-setting">
+                    <span>{t("theme.label")}</span>
+                    <ThemeSwitch theme={theme} toggleTheme={toggleTheme} />
+                  </div>
+                  <div className="nav-setting">
+                    <span>{t("lang.label")}</span>
+                    <LanguageSwitcher />
+                  </div>
+                </>
+              )}
             </div>
           ))}
         </nav>
@@ -417,6 +462,9 @@ export default function Layout() {
   const { isAuthenticated, teacherInfo, logout } = useAuth();
   const { t } = useLanguage();
   const navigate = useNavigate();
+  // Here, always mounted: the hook syncs the theme with the account, so it
+  // must not live in the ☰ menu, which only renders while open.
+  const themeControl = useSyncedTheme();
   // On app start, re-assert this browser's FCM token (tokens rotate; saveDevice
   // is an idempotent merge and push.js rate-limits it to once a day) and start
   // the foreground listener so a push arriving on a focused tab updates the bell
@@ -442,14 +490,15 @@ export default function Layout() {
           <h3 className="m-0">{t("common.appTitle")}</h3>
         </Link>
         <div className="header-right">
-          <ThemeToggle />
-          <LanguageSwitcher />
+          {/* Signed in, both live in the ☰ menu (it is not there signed out). */}
+          {!isAuthenticated && <ThemeToggle {...themeControl} />}
+          {!isAuthenticated && <LanguageSwitcher />}
           {/* Admins grade on the class teacher's points (the grading screen
               shows that balance), so their own would only mislead. */}
           {isAuthenticated &&
             teacherInfo &&
             !isAdminEmail(teacherInfo.gmail) && <PointBadge />}
-          {isAuthenticated && <NavMenu />}
+          {isAuthenticated && <NavMenu {...themeControl} />}
           {isAuthenticated && <NotificationBell />}
           {isAuthenticated && <ProfileMenu teacherInfo={teacherInfo} />}
           {isAuthenticated && (
