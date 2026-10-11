@@ -129,6 +129,7 @@ const NAV_GROUPS = [
         icon: "ti-microphone",
         admin: true,
       },
+      { path: "/guide", label: "nav.guide", icon: "ti-book" },
     ],
   },
   {

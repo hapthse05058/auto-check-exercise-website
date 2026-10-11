@@ -18,6 +18,9 @@ export default defineConfig({
       // of a file the browser is meant to re-fetch on every update check.
       workbox: {
         globIgnores: ["**/firebase-messaging-sw.js"],
+        // The guide (public/huong-dan/) is a static page shown in an iframe,
+        // not a route of the app — never answer it with the SPA shell.
+        navigateFallbackDenylist: [/^\/huong-dan\//],
       },
       manifest: {
         name: "AI Exercise Checker",

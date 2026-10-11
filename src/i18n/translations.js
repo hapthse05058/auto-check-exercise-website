@@ -36,6 +36,7 @@ export const translations = {
       points: "{n} points",
       pointsTitle: "Your point balance",
       gradeSpeaking: "Grade speaking",
+      guide: "User guide",
       ieltsWriting: "Grade IELTS Writing",
       auditLog: "Audit log",
       contactSupport: "Contact support",
@@ -152,6 +153,11 @@ export const translations = {
         gradingDoneByAdminBody:
           "Class {className} · Lesson {lessonName} · {totalPoints} exercise(s) graded.",
       },
+    },
+    guide: {
+      title: "User guide",
+      downloadPdf: "Download PDF",
+      openNewTab: "Open in new tab",
     },
     speaking: {
       title: "Speaking grading",
@@ -1159,6 +1165,7 @@ export const translations = {
       points: "{n} point",
       pointsTitle: "Số point hiện có",
       gradeSpeaking: "Chấm speaking",
+      guide: "Hướng dẫn sử dụng",
       ieltsWriting: "Chấm IELTS Writing",
       auditLog: "Nhật ký hoạt động",
       contactSupport: "Liên hệ hỗ trợ",
@@ -1274,6 +1281,11 @@ export const translations = {
         gradingDoneByAdminBody:
           "Lớp {className} · Buổi {lessonName} · {totalPoints} bài đã được chấm.",
       },
+    },
+    guide: {
+      title: "Hướng dẫn sử dụng",
+      downloadPdf: "Tải PDF",
+      openNewTab: "Mở trong tab mới",
     },
     speaking: {
       title: "Chấm speaking",

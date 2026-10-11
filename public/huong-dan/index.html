@@ -1,0 +1,428 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Hướng dẫn chấm bài bằng công cụ AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #0b7d5d; --green-d: #075c44; --green-l: #e7f4ef; --green-b: #b9dfd0;
+    --pink: #e0245e; --ink: #1d2a26; --muted: #5d6b66; --line: #dfe6e3;
+    --amber: #b45309; --amber-l: #fff6e6; --amber-b: #f3d29a;
+    --red: #b42318; --red-l: #fdeeee; --red-b: #f2b8b5;
+  }
+  @page { size: A4; margin: 16mm 17mm 18mm; }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { margin: 0; font: 10.6pt/1.55 Inter, "Segoe UI", Arial, sans-serif; color: var(--ink); background: #fff; }
+  h1, h2, h3 { line-height: 1.25; margin: 0; }
+  p { margin: 0 0 7px; }
+  ul, ol { margin: 0 0 8px; padding-left: 20px; }
+  li { margin: 2px 0; }
+  b, strong { font-weight: 700; }
+  .page { break-after: page; }
+  .page:last-child { break-after: auto; }
+  section { break-before: page; }
+  .keep { break-inside: avoid; }
+
+  /* cover */
+  .cover { padding-top: 30px; }
+  .tag { display: inline-block; background: var(--green-l); color: var(--green); font-weight: 700; font-size: 8.6pt; letter-spacing: .08em; padding: 5px 12px; border-radius: 999px; }
+  .cover h1 { font-size: 30pt; font-weight: 800; margin: 16px 0 12px; letter-spacing: -.01em; }
+  .cover h1 span { color: var(--green); }
+  .lead { font-size: 12.3pt; color: #3b4a45; line-height: 1.6; max-width: 155mm; }
+  .cover-shot { margin: 22px 0 0; border-radius: 10px; box-shadow: 0 6px 26px rgba(0,0,0,.16); width: 100%; border: 1px solid var(--line); }
+  .cover-foot { display: flex; justify-content: space-between; border-top: 1px solid var(--line); margin-top: 26px; padding-top: 10px; font-size: 9.5pt; color: #3b4a45; }
+
+  /* section heading */
+  .h2 { display: flex; align-items: center; gap: 10px; margin: 0 0 10px; }
+  .num { flex: none; width: 30px; height: 30px; border-radius: 7px; background: var(--green); color: #fff; font-weight: 700; font-size: 13pt; display: grid; place-items: center; }
+  .h2 h2 { font-size: 17pt; font-weight: 700; }
+  h3 { font-size: 12.2pt; font-weight: 700; margin: 16px 0 6px; }
+  .ui { display: inline-block; background: var(--green-l); color: var(--green-d); font-weight: 600; padding: 0 6px; border-radius: 4px; border: 1px solid var(--green-b); white-space: nowrap; font-size: 9.6pt; line-height: 1.5; }
+  .q { font-style: italic; color: #33433e; }
+  .c { display: inline-grid; place-items: center; width: 17px; height: 17px; border-radius: 50%; background: var(--pink); color: #fff; font-weight: 700; font-size: 8.4pt; line-height: 1; vertical-align: 1px; margin: 0 2px; }
+
+  /* figures */
+  figure { margin: 8px 0 12px; break-inside: avoid; }
+  figure img { display: block; width: 100%; border-radius: 8px; border: 1px solid var(--line); box-shadow: 0 3px 14px rgba(0,0,0,.10); }
+  figcaption { text-align: center; font-size: 8.8pt; color: var(--muted); margin-top: 6px; }
+  .w60 img { width: 60%; margin: 0 auto; }
+  .w70 img { width: 70%; margin: 0 auto; }
+  .w80 img { width: 80%; margin: 0 auto; }
+
+  /* side-by-side figure + legend */
+  .split { display: grid; grid-template-columns: 1.15fr 1fr;}
+  .split.wide { grid-template-columns: 1.5fr 1fr; }
+  .split { gap: 16px; align-items: start; break-inside: avoid; margin: 8px 0 12px; }
+  .split figure { margin: 0; }
+  .legend { list-style: none; padding: 0; margin: 0; }
+  .legend li { display: grid; grid-template-columns: 22px 1fr; gap: 6px; margin: 0 0 8px; }
+  .legend li .c { margin-top: 3px; }
+
+  /* cards */
+  .cards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 10px 0 12px; }
+  .card { border: 1px solid var(--line); border-radius: 9px; padding: 10px 12px; break-inside: avoid; }
+  .card .ico { width: 24px; height: 24px; border-radius: 6px; background: var(--green-l); color: var(--green); display: grid; place-items: center; font-weight: 700; margin-bottom: 6px; font-size: 10pt; }
+  .card h4 { margin: 0 0 3px; font-size: 10.6pt; }
+  .card p { margin: 0; color: var(--muted); font-size: 9.6pt; }
+
+  /* callouts */
+  .box { border-radius: 9px; padding: 10px 14px; margin: 10px 0 12px; break-inside: avoid; border: 1px solid; }
+  .box > :last-child { margin-bottom: 0; }
+  .box .t { font-weight: 700; margin-bottom: 4px; display: block; }
+  .tip { background: var(--green-l); border-color: var(--green-b); }
+  .tip .t { color: var(--green-d); }
+  .warn { background: var(--amber-l); border-color: var(--amber-b); }
+  .warn .t { color: var(--amber); }
+  .stop { background: var(--red-l); border-color: var(--red-b); }
+  .stop .t { color: var(--red); }
+
+  /* tables */
+  table { width: 100%; border-collapse: collapse; margin: 8px 0 12px; font-size: 9.5pt; }
+  th { text-align: left; background: var(--green-l); color: var(--green-d); font-weight: 700; padding: 6px 8px; border-bottom: 1px solid var(--green-b); }
+  td { padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  tr { break-inside: avoid; }
+
+  /* toc */
+  .toc { display: grid; grid-template-columns: 1fr 1fr 1fr; grid-auto-flow: column; grid-template-rows: repeat(4, auto); column-gap: 20px; margin-top: 6px; }
+  .toc div { border-bottom: 1px solid var(--line); padding: 5px 0; font-size: 10.2pt; }
+  .toc b { color: var(--green); display: inline-block; width: 22px; }
+
+  /* steps */
+  .steps { counter-reset: s; list-style: none; padding: 0; }
+  .steps > li { counter-increment: s; position: relative; padding-left: 32px; margin: 0 0 9px; break-inside: avoid; }
+  .steps > li::before { content: counter(s); position: absolute; left: 0; top: 0; width: 22px; height: 22px; border-radius: 50%; background: var(--green); color: #fff; font-weight: 700; font-size: 9.5pt; display: grid; place-items: center; }
+
+  /* doc result samples */
+  .doc { border: 1px solid #c9d1ce; border-radius: 6px; font: 9.6pt/1.5 "Times New Roman", serif; overflow: hidden; break-inside: avoid; margin: 6px 0 10px; }
+  .doc .row { display: grid; grid-template-columns: 1fr 1fr; }
+  .doc .row > div { padding: 6px 9px; border-right: 1px solid #c9d1ce; border-bottom: 1px solid #c9d1ce; }
+  .doc .row > div:last-child { border-right: 0; }
+  .doc .hd { background: #f2f4f3; font-weight: 700; font-family: Inter, Arial, sans-serif; font-size: 8.8pt; }
+  .red { color: #d01717; }
+  .muted { color: var(--muted); }
+  .small { font-size: 9.2pt; }
+
+  .summary { background: var(--green); color: #fff; border-radius: 10px; padding: 14px 18px; break-inside: avoid; margin-top: 14px; }
+  .summary h3 { margin: 0 0 8px; color: #fff; }
+  .summary ol { margin: 0; padding-left: 20px; }
+  .summary .ui { background: rgba(255,255,255,.18); color: #fff; border-color: rgba(255,255,255,.35); }
+  .faq h4 { margin: 11px 0 3px; font-size: 10.6pt; color: var(--green-d); }
+  .faq p { margin: 0; }
+
+  /* On screen (in the tool's iframe or a phone): one readable column. */
+  @media screen {
+    body { max-width: 880px; margin: 0 auto; padding: 24px 20px 48px; background: #fff; }
+    section { margin-top: 34px; padding-top: 26px; border-top: 1px solid var(--line); }
+    .cover { padding-top: 6px; }
+  }
+  @media screen and (max-width: 720px) {
+    body { padding: 16px 16px 40px; font-size: 15px; }
+    .cover h1 { font-size: 28px; }
+    .split, .split.wide, .toc { grid-template-columns: 1fr; }
+    .toc { grid-auto-flow: row; grid-template-rows: none; }
+    .cards { grid-template-columns: 1fr 1fr; }
+    .h2 h2 { font-size: 20px; }
+    table { font-size: 13px; }
+    .ui { white-space: normal; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= COVER ================= -->
+<div class="page cover">
+  <span class="tag">HƯỚNG DẪN CHO GIÁO VIÊN</span>
+  <h1>Chấm bài bằng <span>công cụ AI</span></h1>
+  <p class="lead">Tạo lớp, thêm học sinh, rồi chỉ cần chọn lớp và buổi là AI chấm bài tập về nhà và ghi nhận xét thẳng vào Google Doc của từng học sinh. Muốn khỏi phải bấm mỗi tuần thì hẹn giờ để hệ thống tự chấm.</p>
+  <img class="cover-shot" src="shots/cover.png" alt="">
+  <div class="cover-foot"><span>Công cụ chấm bài AI · bản đang chạy (production)</span><span>Phiên bản 11/10/2026</span></div>
+</div>
+
+<!-- ================= 1 ================= -->
+<section>
+  <div class="h2"><span class="num">1</span><h2>Công cụ này làm gì?</h2></div>
+  <p>Học sinh làm bài tập về nhà trong Google Doc của mình (mỗi buổi một tab, ví dụ <b>BUỔI 05</b>). Thầy cô chọn lớp và buổi, bấm <span class="ui">Chấm tất cả tài liệu</span>. Máy chủ đọc bài, cho AI chấm, rồi ghi nhận xét vào đúng chỗ trong Doc của từng em.</p>
+  <div class="cards">
+    <div class="card"><div class="ico">✓</div><h4>Chấm tay: bấm là chấm</h4><p>Chọn lớp và buổi, bấm một nút. Máy chủ chấm cả lớp, thầy cô đóng tab cũng được.</p></div>
+    <div class="card"><div class="ico">↻</div><h4>Chấm tự động hằng tuần</h4><p>Hẹn ngày và buổi (sáng, chiều, tối) một lần. Mỗi tuần hệ thống tự chấm rồi chuyển lớp sang buổi kế tiếp.</p></div>
+    <div class="card"><div class="ico">!</div><h4>Có thông báo</h4><p>Chuông thông báo báo khi chấm xong, báo trước 30 phút khi sắp chấm tự động. Bật được cả trên điện thoại.</p></div>
+    <div class="card"><div class="ico">P</div><h4>1 bài = 1 point</h4><p>Mỗi bài được chấm trừ 1 point. Bài đã có nhận xét được bỏ qua, không trừ thêm.</p></div>
+  </div>
+
+  <h3>Đăng nhập</h3>
+  <p>Mở trang công cụ chấm bài (link admin gửi) và đăng nhập bằng <b>Tài khoản/Mật khẩu</b> admin cấp hoặc bằng <b>Gmail</b> (tab <span class="ui">Đăng nhập Google</span>). Quên mật khẩu thì liên hệ admin.</p>
+  <div class="split">
+    <figure><img src="shots/header.png" alt=""><figcaption>Góc trên bên phải màn hình.</figcaption></figure>
+    <ul class="legend">
+      <li><span class="c">1</span><span><b>Số point</b> hiện có. Mỗi bài chấm trừ 1 point (mục 9).</span></li>
+      <li><span class="c">2</span><span><b>Menu ☰</b>: mở mọi màn hình của công cụ.</span></li>
+      <li><span class="c">3</span><span><b>Chuông thông báo</b>, số đỏ là số thông báo chưa đọc (mục 10).</span></li>
+    </ul>
+  </div>
+
+  <div class="split">
+    <figure><img src="shots/menu.png" alt=""><figcaption>Menu ☰ có 3 nhóm.</figcaption></figure>
+    <ul class="legend">
+      <li><span class="c">1</span><span>Bấm nút <b>☰</b> để mở menu.</span></li>
+      <li><span class="c">2</span><span><b>Chấm bài</b>: màn chấm bài chính (mục 4), và <b>Hướng dẫn sử dụng</b>: tài liệu này, xem ngay hoặc tải PDF.</span></li>
+      <li><span class="c">3</span><span><b>Lớp &amp; học sinh</b>: tạo lớp, thêm học sinh, quản lý lớp/học sinh (mục 2, 3, 8).</span></li>
+      <li><span class="c">4</span><span><b>Cài đặt</b>: <span class="ui">Chấm tự động</span> (mục 6) và <span class="ui">Cập nhật template</span> cho lớp IELTS (mục 7).</span></li>
+    </ul>
+  </div>
+
+  <h3>Mục lục</h3>
+  <div class="toc">
+    <div><b>1</b>Công cụ này làm gì?</div>
+    <div><b>2</b>Tạo lớp học</div>
+    <div><b>3</b>Thêm học sinh vào lớp</div>
+    <div><b>4</b>Chấm bài (chấm tay)</div>
+    <div><b>5</b>Theo dõi và xem kết quả</div>
+    <div><b>6</b>Chấm tự động hằng tuần</div>
+    <div><b>7</b>Cập nhật template IELTS</div>
+    <div><b>8</b>Quản lý lớp và học sinh</div>
+    <div><b>9</b>Point: tính thế nào?</div>
+    <div><b>10</b>Thông báo</div>
+    <div><b>11</b>Thông báo lỗi và cách xử lý</div>
+    <div><b>12</b>Câu hỏi thường gặp</div>
+  </div>
+</section>
+
+<!-- ================= 2 ================= -->
+<section>
+  <div class="h2"><span class="num">2</span><h2>Tạo lớp học</h2></div>
+  <p>Mỗi lớp chỉ cần tạo một lần. Vào menu ☰ → <span class="ui">Thêm lớp học mới</span>.</p>
+  <div class="split">
+    <figure><img src="shots/newclass.png" alt=""><figcaption>Màn Tạo lớp học mới.</figcaption></figure>
+    <ul class="legend">
+      <li><span class="c">1</span><span><b>Tên lớp.</b> Không được trùng với lớp khác trong hệ thống. Nên ghi kèm lịch học, ví dụ <i>BASIC-21 (T3-T5-T7)</i>.</span></li>
+      <li><span class="c">2</span><span><b>Khóa</b>: Basic, IELTS Writing hoặc HS. Khóa quyết định <b>kiểu chấm</b>. Chưa có khóa nào thì nhờ admin thêm.</span></li>
+      <li><span class="c">3</span><span><b>Mẫu bài tập</b>: mẫu Google Doc mà học sinh của lớp đang dùng. Chọn sai mẫu thì AI không nhận ra bảng bài tập.</span></li>
+      <li><span class="c">4</span><span><b>Buổi học hiện tại</b>: buổi sẽ chấm lần tới.</span></li>
+      <li><span class="c">5</span><span>Tích <b>Hẹn giờ chấm bài tự động</b> nếu muốn đặt lịch luôn (mục 6). Có thể làm sau.</span></li>
+      <li><span class="c">6</span><span>Bấm <span class="ui">Lưu lớp</span>.</span></li>
+    </ul>
+  </div>
+  <div class="box tip"><span class="t">Đã tạo lớp, muốn sửa?</span>Đổi tên, đổi khóa, đổi mẫu bài tập hoặc buổi hiện tại ở menu ☰ → <span class="ui">Quản lý lớp học</span> → biểu tượng bút chì (mục 8).</div>
+
+</section>
+
+<!-- ================= 3 ================= -->
+<section>
+  <div class="h2"><span class="num">3</span><h2>Thêm học sinh vào lớp</h2></div>
+  <p>Hệ thống chỉ chấm những học sinh đã có link Google Doc trong lớp. Vào menu ☰ → <span class="ui">Thêm học sinh vào lớp</span>.</p>
+  <h3>Cách 1: Thêm từng em</h3>
+  <div class="split">
+    <figure><img src="shots/student-modal.png" alt=""><figcaption>Bảng Thêm học sinh mới.</figcaption></figure>
+    <div>
+      <p>Chọn lớp ở ô <b>Tên lớp</b>, bấm <span class="ui">+ Thêm học sinh</span>, rồi điền:</p>
+      <ul class="legend">
+        <li><span class="c">1</span><span><b>Link Google Doc</b> của học sinh (link đầy đủ, dạng <i>https://docs.google.com/document/d/…</i>).</span></li>
+        <li><span class="c">2</span><span><b>Họ và tên</b>. Hệ thống thường tự lấy tên từ tiêu đề Doc. Nếu tên sai hoặc trống, gõ lại.</span></li>
+        <li><span class="c">3</span><span>Bấm <b>+</b> để thêm dòng cho em tiếp theo.</span></li>
+        <li><span class="c">4</span><span>Bấm <span class="ui">Lưu học sinh</span>. Danh sách hiện ra bên dưới.</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Cách 2: Import từ file Excel</h3>
+  <p>Bấm <span class="ui">Import danh sách học sinh</span> và chọn file Excel có 2 cột: <b>tên học sinh</b> và <b>link Google Doc</b>. Dòng đầu nên là tiêu đề, ví dụ “Họ tên” và “Link doc”. Không có tiêu đề thì cột A được hiểu là tên, cột B là link. Dòng không hợp lệ bị bỏ qua, và màn hình báo số dòng đã bỏ qua.</p>
+
+  <h3>Bước cuối: lưu danh sách</h3>
+  <figure><img src="shots/students.png" alt=""><figcaption>Kiểm tra lớp <span class="c">1</span>, thêm bằng <span class="c">2</span> hoặc <span class="c">3</span>, rồi bấm <span class="c">4</span> Lưu danh sách học sinh.</figcaption></figure>
+  <div class="box stop"><span class="t">Phải bấm “Lưu danh sách học sinh”</span>Các em mới chỉ được lưu vào lớp khi thầy cô bấm nút <span class="ui">Lưu danh sách học sinh</span> ở cuối trang. Nếu hai học sinh dùng chung một Google Doc (hoặc Doc đã có trong lớp), hệ thống báo <span class="q">“Trùng link Google Doc”</span> và chưa thêm em nào. Sửa link bị trùng rồi lưu lại.</div>
+</section>
+
+<!-- ================= 4 ================= -->
+<section>
+  <div class="h2"><span class="num">4</span><h2>Chấm bài (chấm tay)</h2></div>
+  <p>Menu ☰ → <span class="ui">Chấm bài</span> (đây cũng là màn hình mở ra sau khi đăng nhập).</p>
+  <figure><img src="shots/grade.png" alt=""><figcaption>Màn Chấm bài sau khi chọn lớp.</figcaption></figure>
+  <ol class="steps">
+    <li><b>Chọn lớp</b> <span class="c">1</span>. Gõ vài chữ của tên lớp để tìm nhanh.</li>
+    <li><b>Kiểm tra buổi</b> <span class="c">2</span>. Ô này tự hiện <b>buổi hiện tại</b> của lớp. Nếu đổi sang buổi khác, hệ thống hỏi <span class="q">“Cập nhật buổi học hiện tại là BUỔI X?”</span>. Bấm OK thì buổi đó trở thành buổi hiện tại của lớp, và lịch chấm tự động cũng sẽ chấm từ buổi đó.</li>
+    <li><b>Chọn ai được chấm</b> <span class="c">3</span>.
+      <ul>
+        <li><b>Để trống</b>: chấm <b>tất cả học sinh đã lưu trong lớp</b>. Đây là cách thường dùng.</li>
+        <li><b>Dán link Google Doc</b>, mỗi dòng một link: chỉ chấm những Doc này, ví dụ một em nộp muộn.</li>
+      </ul></li>
+    <li>Bấm <span class="ui">Chấm tất cả tài liệu</span> <span class="c">4</span>. Dòng chữ nhỏ <span class="c">5</span> cho biết lớp đã được hẹn giờ chấm tự động hay chưa.</li>
+  </ol>
+  <div class="box tip"><span class="t">Trước khi bấm chấm, kiểm tra nhanh</span>
+    <ul>
+      <li>Doc của học sinh có <b>tab đúng tên buổi</b>, ví dụ <b>BUỔI 05</b>. Doc thiếu tab buổi đó sẽ bị bỏ qua.</li>
+      <li>Học sinh làm bài <b>trong bảng bài tập của mẫu</b>, không xoá hay đổi đề bài.</li>
+      <li>Đủ point cho số bài cần chấm (góc trên bên phải).</li>
+    </ul></div>
+</section>
+
+<!-- ================= 5 ================= -->
+<section>
+  <div class="h2"><span class="num">5</span><h2>Theo dõi và xem kết quả</h2></div>
+  <h3>Trong lúc chấm</h3>
+  <p>Nút chuyển thành <b>Đang xử lý…</b> và khung trạng thái báo tiến độ. Việc chấm chạy trên máy chủ, nên <b>thầy cô có thể đóng tab hoặc tắt máy</b>. Chấm xong sẽ có thông báo ở chuông.</p>
+  <figure><img src="shots/job-running.png" alt=""><figcaption>Đang ghi nhận xét vào Doc: đã xử lý 7/18 tài liệu.</figcaption></figure>
+  <h3>Khi chấm xong</h3>
+  <figure><img src="shots/job-done.png" alt=""><figcaption>Mở lại màn Chấm bài với cùng lớp và buổi sẽ thấy kết quả lần chấm gần nhất.</figcaption></figure>
+  <p>Con số trong thông báo là số Doc đã được ghi nhận xét (và số point đã trừ). Học sinh chưa làm bài, hoặc đã được chấm từ trước, không tính.</p>
+
+  <h3>Nhận xét nằm ở đâu trong Google Doc?</h3>
+  <table>
+    <tr><th style="width:24%">Khóa</th><th>AI ghi nhận xét vào</th></tr>
+    <tr><td><b>Basic</b></td><td>Cột <b>Chữa bài</b> của từng bảng bài tập, đúng dòng của câu đó. Câu sai được sửa và giải thích ngắn. Đoạn văn đúng hết thì ghi <span class="q">“Các câu đúng hết rồi nha! ^^”</span>.</td></tr>
+    <tr><td><b>IELTS Writing</b></td><td>Bài viết: bảng <b>“Bài chữa | Bài cải thiện”</b>, bên dưới có hai dòng <b>Nhận xét chung</b> và <b>Lời khuyên cải thiện</b>. Lỗi ghi dạng <b>sai</b> → sửa, kèm giải thích in nghiêng.<br>Bài viết câu: cột <b>GV chữa/nhận xét</b>. Câu đúng ghi ✅, câu sai được sửa ngay trong câu.</td></tr>
+    <tr><td><b>HS (cấp 1–2)</b></td><td>Chữ <span class="red">màu đỏ</span> ngay sau từng câu trả lời: ✅ nếu đúng, nếu sai thì có đáp án đúng và giải thích ngắn.</td></tr>
+  </table>
+  <div class="box warn"><span class="t">Thầy cô vẫn sửa được nhận xét</span>Nhận xét AI chỉ là chữ trong Doc, nên thầy cô sửa hoặc thêm trực tiếp như bình thường. Bài <b>đã có nhận xét</b> sẽ được bỏ qua ở các lần chấm sau và không trừ point thêm. Muốn chấm lại từ đầu thì nhờ <b>admin xoá nhận xét</b> của buổi đó trước.</div>
+</section>
+
+<!-- ================= 6 ================= -->
+<section>
+  <div class="h2"><span class="num">6</span><h2>Chấm tự động hằng tuần</h2></div>
+  <p>Thay vì bấm chấm mỗi buổi, thầy cô chọn <b>ngày chấm</b> và <b>buổi</b> (Sáng, Chiều hoặc Tối) một lần. Từ đó mỗi tuần hệ thống tự làm phần còn lại:</p>
+  <ol class="steps">
+    <li><b>30 phút trước giờ chấm</b>: hệ thống đếm số học sinh đã làm bài và gửi thông báo <span class="q">“Sắp chấm bài tự động”</span>.</li>
+    <li><b>Đến giờ</b>: chấm <b>buổi hiện tại</b> của lớp, giống hệt khi bấm chấm tay. Mỗi bài tính 1 point.</li>
+    <li><b>Chấm xong</b>: thông báo <span class="q">“Đã chấm xong (tự động)”</span>, và lớp được <b>chuyển sang buổi kế tiếp</b>.</li>
+  </ol>
+  <h3>Bật chấm tự động</h3>
+  <div class="split wide">
+    <figure><img src="shots/auto.png" alt=""><figcaption>Menu ☰ → Cài đặt → Chấm tự động.</figcaption></figure>
+    <ul class="legend">
+      <li><span class="c">1</span><span>Chọn lớp.</span></li>
+      <li><span class="c">2</span><span>Dòng trạng thái: <span class="q">“Chưa hẹn giờ chấm tự động”</span>, hoặc giờ chấm lần tới nếu đã hẹn.</span></li>
+      <li><span class="c">3</span><span>Bấm <span class="ui">Chấm bài tự động</span> để mở bảng hẹn giờ.</span></li>
+    </ul>
+  </div>
+  <p>Trong bảng <b>“Chấm bài tự động · tên lớp”</b>:</p>
+  <ol class="steps">
+    <li><b>Ngày chấm</b>: chọn ngày chấm gần nhất sắp tới, ví dụ Thứ 2 12/10. Hệ thống chỉ lấy <b>thứ trong tuần</b> để lặp lại.</li>
+    <li><b>Buổi</b>: bấm <span class="ui">Sáng</span>, <span class="ui">Chiều</span> hoặc <span class="ui">Tối</span>. Giờ cụ thể của từng buổi do admin đặt, ngoài giờ cao điểm.</li>
+    <li>Lớp học nhiều buổi/tuần: bấm <span class="ui">+ Thêm ngày chấm</span>, mỗi buổi học một ngày (tối đa 7, mỗi thứ chỉ một lần).</li>
+    <li>Đọc lại dòng <span class="q">“Hằng tuần: chấm vào Tối Thứ 2.”</span> và <span class="q">“Lần chấm đầu: …”</span>, rồi bấm <span class="ui">Bật chấm tự động</span>.</li>
+  </ol>
+  <p>Mở lại bảng để <span class="ui">Lưu lịch</span> sau khi sửa ngày/buổi, hoặc <span class="ui">Tắt chấm tự động</span>. Cũng mở được bảng này từ biểu tượng đồng hồ ở <b>Quản lý lớp học</b>, hoặc tích ô hẹn giờ ngay khi <b>tạo lớp mới</b>.</p>
+  <div class="box stop"><span class="t">Lượt bị huỷ thì lớp KHÔNG tự chuyển buổi</span>Nếu chưa học sinh nào làm bài, không đủ point, hoặc cần đăng nhập lại Google, lượt đó bị huỷ, không trừ point, và thầy cô nhận thông báo. Khi đó hãy <b>chấm tay</b> buổi đó (nếu cần), rồi đổi <b>buổi hiện tại</b> sang buổi tiếp theo ở ô chọn buổi của màn Chấm bài.</div>
+  <div class="box tip"><span class="t">Đăng nhập bằng Google?</span>Hệ thống cần quyền để chấm thay khi thầy cô không mở web. Nếu gặp <span class="q">“Cần đăng nhập lại bằng Google…”</span>, bấm <b>Đăng xuất</b>, đăng nhập lại bằng Google rồi lưu lịch lại.</div>
+</section>
+
+<!-- ================= 7 ================= -->
+<section>
+  <div class="h2"><span class="num">7</span><h2>Cập nhật template IELTS <span class="muted" style="font-weight:500;font-size:11pt">(chỉ lớp IELTS)</span></h2></div>
+  <p>Doc của học viên IELTS cần đúng <b>template hiện tại</b> thì AI mới có chỗ ghi nhận xét: mỗi bài viết một bảng <b>“Bài chữa | Bài cải thiện”</b> kèm <b>Nhận xét chung / Lời khuyên cải thiện</b>, và cột nhận xét ở bảng viết câu. Doc đang ở template cũ sẽ <b>không được chấm</b> cho tới khi cập nhật.</p>
+  <figure><img src="shots/template.png" alt=""><figcaption>Menu ☰ → Cài đặt → Cập nhật template.</figcaption></figure>
+  <ol class="steps">
+    <li>Chọn lớp IELTS <span class="c">1</span>.</li>
+    <li>Chọn <b>Từ buổi</b> và <b>Đến buổi</b> <span class="c">2</span>. Mặc định là buổi hiện tại. Có thể chọn nhiều buổi một lần.</li>
+    <li>Bấm <span class="ui">Cập nhật template</span> <span class="c">3</span> và xác nhận.</li>
+    <li>Đọc kết quả <span class="c">4</span>, ví dụ <span class="q">“Đã cập nhật template cho 8/9 tài liệu (19 bảng). 1 tài liệu đã đúng template sẵn.”</span></li>
+  </ol>
+  <div class="box tip"><span class="t">Nên làm trước khi học viên làm bài</span>Cập nhật template <b>không trừ point</b> và giữ nguyên bài đã chấm. Không cập nhật được khi buổi đó đang được chấm: đợi chấm xong rồi làm lại. Nếu báo có tài liệu <i>“không cập nhật được”</i> thì bấm lại lần nữa.</div>
+  <p>Khi chấm mà gặp <span class="q">“… tài liệu vẫn đang ở template IELTS cũ nên chưa chấm được”</span>: cập nhật template cho buổi đó, rồi bấm chấm lại.</p>
+</section>
+
+<!-- ================= 8 ================= -->
+<section>
+  <div class="h2"><span class="num">8</span><h2>Quản lý lớp và học sinh</h2></div>
+  <h3>Quản lý lớp học</h3>
+  <figure><img src="shots/manage.png" alt=""><figcaption>Menu ☰ → Quản lý lớp học.</figcaption></figure>
+  <ul class="legend">
+    <li><span class="c">1</span><span><b>Sửa</b>: đổi tên lớp, khóa, mẫu bài tập hoặc <b>buổi hiện tại</b>.</span></li>
+    <li><span class="c">2</span><span><b>Đồng hồ</b>: mở bảng hẹn giờ chấm tự động của lớp (mục 6).</span></li>
+    <li><span class="c">3</span><span><b>Đóng lớp</b> khi lớp đã học xong. <b>Không mở lại được</b>, và lịch chấm tự động của lớp cũng dừng.</span></li>
+    <li><span class="c">4</span><span><b>Cột hiển thị</b>: bật thêm cột, ví dụ cột <b>Chấm tự động</b> để xem lịch của mọi lớp cùng lúc.</span></li>
+  </ul>
+  <h3>Quản lý học sinh</h3>
+  <p>Menu ☰ → <span class="ui">Quản lý học sinh</span>: chọn lớp (có thể chọn thêm buổi) rồi bấm <b>Tìm kiếm</b>. Bảng cho biết từng em, link bài tập, em nào <b>đã chấm</b>. Từ đây có thể <b>Mở bài tập</b> hoặc <b>Xóa khỏi lớp</b> (một em hoặc nhiều em đã chọn).</p>
+
+  <!-- ================= 9 ================= -->
+  <div class="h2" style="margin-top:22px"><span class="num">9</span><h2>Point: tính thế nào?</h2></div>
+  <ul>
+    <li>Mỗi Doc được AI ghi nhận xét trừ <b>1 point</b>, cả chấm tay lẫn chấm tự động.</li>
+    <li><b>Không trừ</b> với Doc chưa làm bài, Doc đã có nhận xét từ trước, Doc bị bỏ qua (thiếu tab buổi, chưa đúng template…), và với <b>Cập nhật template</b>.</li>
+    <li>Số point hiện ở góc trên bên phải và cập nhật ngay sau khi chấm.</li>
+    <li>Hết point giữa chừng thì hệ thống dừng ở bài đang chấm và báo <span class="q">“Hết point — dừng chấm các bài còn lại…”</span>. Các bài đã chấm vẫn giữ nhận xét.</li>
+    <li>Muốn nạp thêm point: liên hệ admin.</li>
+  </ul>
+</section>
+
+<!-- ================= 10 ================= -->
+<section>
+  <div class="h2"><span class="num">10</span><h2>Thông báo</h2></div>
+  <div class="split">
+    <figure><img src="shots/bell.png" alt=""><figcaption>Bấm chuông để xem thông báo.</figcaption></figure>
+    <div>
+      <ul>
+        <li>Bấm vào một thông báo để mở thẳng màn Chấm bài với <b>đúng lớp và buổi</b> đó.</li>
+        <li><span class="ui">Bật thông báo đẩy</span> (dòng đầu danh sách, khi trình duyệt cho phép) để nhận thông báo cả khi không mở web. Rất nên bật trên điện thoại. Trên iPhone/iPad, cần thêm trang vào Màn hình chính trước.</li>
+        <li>Biểu tượng loa: bật/tắt tiếng chuông khi có thông báo mới.</li>
+        <li><span class="ui">Xem tất cả thông báo</span>: danh sách đầy đủ, lọc theo trạng thái, loại, mức độ, thời gian.</li>
+      </ul>
+    </div>
+  </div>
+  <table>
+    <tr><th style="width:30%">Thông báo</th><th style="width:35%">Ý nghĩa</th><th>Thầy cô cần làm</th></tr>
+    <tr><td><b>Đã chấm xong</b></td><td>Lượt chấm tay đã xong, kèm số tài liệu đã ghi.</td><td>Mở vài Doc kiểm tra nếu muốn.</td></tr>
+    <tr><td><b>Sắp chấm bài tự động</b></td><td>30 phút nữa sẽ chấm, kèm số em đã làm bài.</td><td>Không cần làm gì. Có thể nhắc em chưa làm nộp nhanh.</td></tr>
+    <tr><td><b>Đã chấm xong (tự động)</b></td><td>Đã chấm và chuyển lớp sang buổi kế tiếp.</td><td>Không cần làm gì.</td></tr>
+    <tr><td><b>Huỷ chấm tự động: không có học sinh nào làm bài</b></td><td>Không chấm, không trừ point.</td><td>Lớp nghỉ thì thôi. Buổi học bù thì chấm tay.</td></tr>
+    <tr><td><b>Huỷ chấm tự động: không đủ point</b></td><td>Không đủ point cho số bài cần chấm.</td><td>Nạp point, chấm tay, đổi buổi hiện tại.</td></tr>
+    <tr><td><b>Huỷ chấm tự động: cần đăng nhập lại Google</b></td><td>Hệ thống mất quyền chấm thay.</td><td>Đăng xuất, đăng nhập lại bằng Google, chấm tay.</td></tr>
+    <tr><td><b>Cần đăng nhập lại Google để chấm tiếp</b></td><td>Lượt chấm tay dừng giữa chừng.</td><td>Đăng nhập lại, bấm chấm lại. Doc đã chấm được bỏ qua.</td></tr>
+    <tr><td><b>Bỏ lỡ lượt chấm tự động</b> / <b>Chấm bài … không thành công</b></td><td>Sự cố phía hệ thống (hiếm).</td><td>Chấm tay. Lặp lại nhiều lần thì báo admin.</td></tr>
+  </table>
+</section>
+
+<!-- ================= 11 ================= -->
+<section>
+  <div class="h2"><span class="num">11</span><h2>Thông báo lỗi và cách xử lý</h2></div>
+  <p>Các dòng dưới đây hiện ở khung trạng thái của màn Chấm bài.</p>
+  <table>
+    <tr><th style="width:45%">Thầy cô thấy</th><th>Cách xử lý</th></tr>
+    <tr><td>Nút <b>Chấm tất cả tài liệu</b> bị mờ, kèm <i>“Chọn lớp để bắt đầu chấm.”</i> / <i>“Chọn buổi học cần chấm.”</i></td><td>Chọn lớp, rồi chọn buổi.</td></tr>
+    <tr><td><i>“Không tìm thấy tài liệu học sinh nào cho lớp này.”</i></td><td>Lớp chưa có học sinh: thêm học sinh (mục 3). Nếu dán link, kiểm tra link đúng dạng Google Doc.</td></tr>
+    <tr><td><i>“Tất cả tài liệu đã được chấm. Không có gì để chấm.”</i></td><td>Mọi bài đã có nhận xét. Không trừ point.</td></tr>
+    <tr><td><i>“Không có bài nào được chấm.”</i></td><td>Chưa em nào làm bài ở buổi này, hoặc Doc thiếu tab buổi. Kiểm tra đúng buổi chưa.</td></tr>
+    <tr><td><i>“… tài liệu bị bỏ qua vì đã có feedback cũ, trong đó vẫn còn bài tập chưa chấm.”</i></td><td>Doc đã có nhận xét từ lần trước nên được bỏ qua. Muốn chấm phần còn lại thì nhờ admin xoá nhận xét cũ của buổi đó rồi chấm lại.</td></tr>
+    <tr><td><i>“Không đủ point: cần chấm N bài, … còn M point.”</i></td><td>Liên hệ admin nạp thêm point.</td></tr>
+    <tr><td><i>“Vui lòng đăng xuất và đăng nhập lại bằng Google…”</i> / <i>“Phiên đăng nhập Google đã hết hạn…”</i></td><td>Đăng xuất, đăng nhập lại bằng Google, bấm chấm lại. Doc đã chấm được bỏ qua.</td></tr>
+    <tr><td><i>“… vẫn đang ở template IELTS cũ nên chưa chấm được.”</i></td><td>Cập nhật template (mục 7) rồi chấm lại.</td></tr>
+    <tr><td><i>“Chấm bài không hoàn tất (…). Vui lòng thử lại.”</i></td><td>Bấm chấm lại. Doc đã chấm không bị chấm hay trừ point lần nữa. Vẫn lỗi thì báo admin kèm tên lớp và buổi.</td></tr>
+    <tr><td><i>“Tải dữ liệu giáo viên thất bại…”</i></td><td>Bấm <b>Thử lại</b>. Vẫn lỗi thì đăng xuất và đăng nhập lại.</td></tr>
+  </table>
+  <div class="box warn"><span class="t">AI chấm thiếu hoặc nhận xét chưa đúng?</span>Sửa trực tiếp trong Doc, rồi gửi admin <b>tên lớp, buổi, tên học sinh, câu bị chấm sai</b> (chụp màn hình càng tốt) để chỉnh AI cho các lần sau.</div>
+</section>
+
+<!-- ================= 12 ================= -->
+<section class="faq">
+  <div class="h2"><span class="num">12</span><h2>Câu hỏi thường gặp</h2></div>
+  <h4>Có cần mở trang web trong lúc chấm không?</h4>
+  <p>Không. Sau khi bấm chấm (hoặc khi chấm tự động chạy), máy chủ tự làm. Đóng tab, tắt máy đều được. Kết quả hiện ở chuông thông báo.</p>
+  <h4>Bấm chấm hai lần có bị trừ point hai lần không?</h4>
+  <p>Không. Lần bấm thứ hai chỉ hiện tiến độ của lượt đang chạy. Bài đã có nhận xét luôn được bỏ qua.</p>
+  <h4>Một em nộp muộn, chấm riêng em đó thế nào?</h4>
+  <p>Ở màn Chấm bài, chọn đúng lớp và buổi, dán link Doc của em vào ô lớn, rồi bấm chấm. Nếu lớp đã tự chuyển sang buổi mới, chọn lại buổi cũ trước khi chấm, chấm xong thì đổi lại buổi hiện tại.</p>
+  <h4>Muốn chấm lại một bài đã có nhận xét?</h4>
+  <p>Nhờ admin xoá nhận xét của buổi đó, rồi chấm lại. Bài chấm lại tính point như bình thường.</p>
+  <h4>Đổi “buổi hiện tại” ảnh hưởng gì?</h4>
+  <p>Lần chấm tay mặc định và lượt chấm tự động tiếp theo sẽ chấm buổi vừa chọn. Đây cũng là cách sửa khi lớp bị lệch buổi.</p>
+  <h4>Học sinh đổi Doc mới?</h4>
+  <p>Xoá em đó khỏi lớp ở <b>Quản lý học sinh</b>, rồi thêm lại với link mới ở <b>Thêm học sinh vào lớp</b>.</p>
+  <h4>Lớp nghỉ lễ một tuần có cần tắt chấm tự động?</h4>
+  <p>Không bắt buộc. Không em nào làm bài thì lượt đó tự huỷ, không trừ point, và lớp vẫn đứng ở buổi cũ. Nghỉ dài ngày thì có thể tắt rồi bật lại sau.</p>
+
+  <div class="summary">
+    <h3>Tóm tắt 30 giây</h3>
+    <ol>
+      <li>Menu ☰ → <span class="ui">Thêm lớp học mới</span> (khóa, mẫu bài tập, buổi hiện tại) → <span class="ui">Thêm học sinh vào lớp</span> → <b>Lưu danh sách học sinh</b>.</li>
+      <li>Lớp IELTS: <span class="ui">Cập nhật template</span> cho các buổi sắp làm.</li>
+      <li><span class="ui">Chấm bài</span> → chọn lớp → kiểm tra buổi → để trống ô link → <span class="ui">Chấm tất cả tài liệu</span>. Đóng tab cũng được.</li>
+      <li>Không muốn bấm mỗi tuần: <span class="ui">Cài đặt → Chấm tự động</span> → chọn ngày + buổi → <b>Bật chấm tự động</b>.</li>
+      <li>Giữ đủ point, bật thông báo. Lượt tự động bị huỷ thì chấm tay và đổi buổi hiện tại.</li>
+    </ol>
+  </div>
+</section>
+
+</body>
+</html>
