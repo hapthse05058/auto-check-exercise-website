@@ -510,6 +510,26 @@ export async function fetchGradingJob(jobId) {
   return (await response.json()).job;
 }
 
+/**
+ * What grading this lesson by hand would grade and charge right now — the
+ * backend reads every doc (no AI, no writes): `pending` docs will be graded
+ * at `unitPriceVnd` each; docs not done (`notDone`) and already graded
+ * (`alreadyGraded`) are left out, `other` cannot be graded. `docIds` are the
+ * pasted links (omit for the whole class). Throws Error(code) on refusal,
+ * e.g. "google_reauth_required".
+ *
+ * @returns {Promise<{total: number, pending: number, alreadyGraded: number,
+ *   notDone: number, other: number, unitPriceVnd: number, needVnd: number}>}
+ */
+export async function fetchGradingPreview({ classId, lessonId, docIds }) {
+  const query = new URLSearchParams({ classId, lessonId });
+  if (docIds?.length) query.set("docIds", docIds.join(","));
+  const response = await authFetch(`/grading-jobs/preview?${query}`);
+  const data = await response.json().catch(() => null);
+  if (!response.ok) throw new Error(data?.error || "grading_preview_failed");
+  return data;
+}
+
 /** The last job started for this class + lesson, or null. */
 export async function fetchLatestGradingJob(classId, lessonId) {
   const response = await authFetch(

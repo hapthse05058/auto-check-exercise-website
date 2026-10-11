@@ -1531,6 +1531,19 @@ textarea {
 .grade-cost-auto {
   color: var(--color-text-secondary);
 }
+/* "Kiểm tra lại": a text link, students may hand in more meanwhile. */
+.grade-cost-retry {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--color-primary-dark);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.grade-cost .status-loading {
+  color: var(--color-text-secondary);
+}
 .grade-cost[data-state="short"] {
   background: var(--color-danger-tint);
   border-color: var(--color-danger-tint-border);

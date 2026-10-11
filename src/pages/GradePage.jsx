@@ -9,6 +9,7 @@ import {
   fetchCourses,
   fetchCurrentLesson,
   fetchGradingJob,
+  fetchGradingPreview,
   fetchGradingSchedule,
   fetchLatestGradingJob,
   fetchMyBalance,
@@ -78,6 +79,10 @@ export default function GradePage() {
   // one per doc) — the "docs" of the cost shown before grading. null = not
   // known yet, or the lookup failed (the cost box then stays hidden).
   const [classDocCount, setClassDocCount] = useState(null);
+  // The backend's count of what a run started now would grade and charge
+  // (api fetchGradingPreview): null | {state: "loading"|"done"|"error", …}.
+  const [preview, setPreview] = useState(null);
+  const [previewTick, setPreviewTick] = useState(0);
   // Admin only: each class's course and doc template, shown on hover.
   const [classInfo, setClassInfo] = useState({ courses: [], templates: [] });
   const currentLessonRef = useRef(null);
@@ -117,9 +122,46 @@ export default function GradePage() {
   const selectedClass = classes.find((cls) => cls.id === selectedClassId);
 
   // Pasted links narrow the run to those docs (lib/grading.js pastedDocIds).
-  const pastedDocCount = docLinksText.trim()
-    ? new Set(parseDocLinks(docLinksText.trim()).map((ref) => ref.docId)).size
+  const pastedDocIds = docLinksText.trim()
+    ? [...new Set(parseDocLinks(docLinksText.trim()).map((ref) => ref.docId))]
     : null;
+  const pastedDocCount = pastedDocIds ? pastedDocIds.length : null;
+  const pastedKey = pastedDocIds ? pastedDocIds.join(",") : "";
+
+  // What a run started now would grade and charge — docs not done and docs
+  // already graded left out. Asked when the class, lesson or pasted links
+  // change (links once typing stops), after every run and on "Kiểm tra lại".
+  // Not while a run writes: its own docs would still count as to grade.
+  useEffect(() => {
+    setPreview(null);
+    if (!selectedClassId || !selectedLessonId || jobRunning) return undefined;
+    if (pastedDocIds && !pastedDocIds.length) return undefined;
+    let cancelled = false;
+    const timer = setTimeout(
+      () => {
+        setPreview({ state: "loading" });
+        fetchGradingPreview({
+          classId: selectedClassId,
+          lessonId: selectedLessonId,
+          docIds: pastedDocIds || undefined,
+        })
+          .then((data) => {
+            if (!cancelled) setPreview({ state: "done", data });
+          })
+          .catch((error) => {
+            if (cancelled || error.message === "RE-AUTH_NEEDED") return;
+            console.error("Grading preview failed:", error);
+            setPreview({ state: "error", error: error.message });
+          });
+      },
+      pastedKey ? 700 : 0,
+    );
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- pastedKey stands for pastedDocIds (a new array every render)
+  }, [selectedClassId, selectedLessonId, pastedKey, jobRunning, previewTick]);
 
   /** Admin hover text of a class: its course and doc template. */
   const classTitle = (cls) => {
@@ -636,17 +678,24 @@ export default function GradePage() {
           </span>
         </label>
       )}
-      {selectedClassId && (
+      {/* Mid-run the status line below has the numbers. */}
+      {selectedClassId && selectedLessonId && !busy && (
         <GradeCostNote
+          preview={preview}
           docCount={pastedDocCount ?? classDocCount}
           pasted={pastedDocCount !== null}
           balanceVnd={payer ? payer.balanceVnd : null}
           payerName={isAdmin ? payer?.teacherName : ""}
           autoRunAt={
-            schedule?.enabled && schedule.next && pastedDocCount === null
+            // A scheduled run grades the class's current lesson, whole.
+            schedule?.enabled &&
+            schedule.next &&
+            pastedDocCount === null &&
+            selectedLessonId === currentLessonRef.current
               ? schedule.next.runAt
               : null
           }
+          onRetry={() => setPreviewTick((n) => n + 1)}
         />
       )}
       <div className="button-row mb-1">
