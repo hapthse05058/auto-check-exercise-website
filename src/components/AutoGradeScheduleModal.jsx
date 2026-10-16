@@ -205,10 +205,16 @@ export default function AutoGradeScheduleModal({ cls, onClose, onSaved }) {
           <>
             {enabled && schedule.next && (
               <p className="auto-grade-status">
-                {t("autoGrade.nextRun", {
-                  runAt: formatVn(schedule.next.runAt),
-                  remindAt: formatVn(schedule.next.remindAt),
-                })}
+                {t(
+                  schedule.next.lessonName
+                    ? "autoGrade.nextRunLesson"
+                    : "autoGrade.nextRun",
+                  {
+                    runAt: formatVn(schedule.next.runAt),
+                    remindAt: formatVn(schedule.next.remindAt),
+                    lesson: schedule.next.lessonName,
+                  },
+                )}
               </p>
             )}
             {schedule?.lastRun && (

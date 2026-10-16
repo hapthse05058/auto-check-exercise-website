@@ -264,12 +264,15 @@ export const translations = {
         "{who} have a balance of 0đ, so every scheduled week will be cancelled. Top up before the first grading.",
       pointsYou: "you",
       nextRun: "Next run: {runAt} (notification at {remindAt}).",
+      nextRunLesson:
+        "Next run: {runAt}, grading {lesson} (notification at {remindAt}).",
       lastRun: "Last run:",
       enable: "Turn on",
       update: "Save schedule",
       disable: "Turn off",
       disableConfirm: "Turn off auto-grading for {class}?",
       summaryOn: "Auto-grading: next run {runAt}",
+      summaryOnLesson: "Auto-grading: next run {runAt}, grading {lesson}",
       summaryOff: "No auto-grading schedule",
       priceOn:
         "Auto-grading on: each exercise the system grades automatically costs {auto}. Grading by hand costs {manual} per exercise.",
@@ -418,6 +421,10 @@ export const translations = {
       noClasses:
         "No classes found for your account. Please create a class in the system first.",
       confirmLesson: "Update current lesson as {name}?",
+      confirmLessonAuto:
+        "Update current lesson as {name}?\n\nAuto-grading is on for this class and always grades the current lesson, so the next scheduled runs will grade {name}.",
+      confirmLessonAutoEarlier:
+        "Update current lesson as {name}?\n\nWarning: {name} comes before the current lesson ({current}). Auto-grading is on for this class and always grades the current lesson, so the next scheduled runs will grade {name}.\n\nIf you are only grading late homework, pick {current} again when you are done.",
       loadLessonsFailed: "Failed to load lessons.",
       processFailed: "Processing failed: {msg}",
     },
@@ -1481,12 +1488,15 @@ export const translations = {
         "{who} đang có số dư 0đ nên mọi lượt chấm tự động sẽ bị huỷ. Hãy nạp tiền trước lần chấm đầu tiên.",
       pointsYou: "bạn",
       nextRun: "Lần chấm tới: {runAt} (báo trước lúc {remindAt}).",
+      nextRunLesson:
+        "Lần chấm tới: {runAt}, chấm {lesson} (báo trước lúc {remindAt}).",
       lastRun: "Lần chấm gần nhất:",
       enable: "Bật chấm tự động",
       update: "Lưu lịch",
       disable: "Tắt chấm tự động",
       disableConfirm: "Tắt chấm tự động cho lớp {class}?",
       summaryOn: "Chấm tự động: lần tới {runAt}",
+      summaryOnLesson: "Chấm tự động: lần tới {runAt}, chấm {lesson}",
       summaryOff: "Chưa hẹn giờ chấm tự động",
       priceOn:
         "Khi bật chấm tự động: mỗi bài hệ thống tự chấm tính {auto}/bài. Chấm tay tính {manual}/bài.",
@@ -1633,6 +1643,10 @@ export const translations = {
       noClasses:
         "Không tìm thấy lớp nào cho tài khoản của bạn. Vui lòng tạo lớp trong hệ thống trước.",
       confirmLesson: "Cập nhật buổi học hiện tại là {name}?",
+      confirmLessonAuto:
+        "Cập nhật buổi học hiện tại là {name}?\n\nLớp đang bật chấm tự động. Chấm tự động luôn chấm buổi hiện tại, nên các lần chấm tự động tiếp theo sẽ chấm {name}.",
+      confirmLessonAutoEarlier:
+        "Cập nhật buổi học hiện tại là {name}?\n\nLưu ý: {name} là buổi cũ hơn buổi hiện tại ({current}). Lớp đang bật chấm tự động. Chấm tự động luôn chấm buổi hiện tại, nên các lần chấm tự động tiếp theo sẽ chấm {name}.\n\nNếu chỉ chấm bù bài nộp muộn, chấm xong nhớ chọn lại {current}.",
       loadLessonsFailed: "Tải buổi học thất bại.",
       processFailed: "Xử lý thất bại: {msg}",
     },

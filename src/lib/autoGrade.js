@@ -6,7 +6,7 @@
  * schedule back onto the form. The components live in
  * components/AutoGradeSchedule*.jsx.
  */
-import { fromVnDate, toVnDate, vnDayStart } from "./scheduleTime.js";
+import { formatVn, fromVnDate, toVnDate, vnDayStart } from "./scheduleTime.js";
 
 const HOUR = 60 * 60 * 1000;
 const DAY = 24 * HOUR;
@@ -172,6 +172,58 @@ export function scheduleSummary(schedule, t) {
   return (schedule?.slots || [])
     .map((slot) => partDay(slot.part, slot.weekday, t))
     .join(", ");
+}
+
+/**
+ * "Chấm tự động: lần tới 19/10/2026 07:14, chấm BUỔI 06" — the next run and
+ * the lesson it grades — or that the class has no schedule.
+ */
+export function nextRunSummary(schedule, t) {
+  if (!schedule?.enabled || !schedule.next) return t("autoGrade.summaryOff");
+  const runAt = formatVn(schedule.next.runAt);
+  return schedule.next.lessonName
+    ? t("autoGrade.summaryOnLesson", {
+        runAt,
+        lesson: schedule.next.lessonName,
+      })
+    : t("autoGrade.summaryOn", { runAt });
+}
+
+/** The number in a "lessonNN" id, null for any other id. */
+function lessonNumber(id) {
+  const match = /^lesson(\d+)$/.exec(String(id || ""));
+  return match ? Number(match[1]) : null;
+}
+
+/**
+ * Whether `lessonId` comes before `currentId`: by the number in their
+ * lessonNN ids (the backend's order), else by their place in `lessons`.
+ */
+export function isEarlierLesson(lessonId, currentId, lessons = []) {
+  if (!lessonId || !currentId || lessonId === currentId) return false;
+  const a = lessonNumber(lessonId);
+  const b = lessonNumber(currentId);
+  if (a !== null && b !== null) return a < b;
+  const ids = lessons.map((lesson) => lesson.id);
+  const i = ids.indexOf(lessonId);
+  const j = ids.indexOf(currentId);
+  return i >= 0 && j >= 0 && i < j;
+}
+
+/**
+ * The question before `name` becomes the class's current lesson. Auto-grading
+ * grades the current lesson, so with it on the question says so — and warns
+ * when the lesson is an earlier one: grading a late hand-in that way leaves
+ * the schedule on the old lesson until the teacher picks the newest again.
+ */
+export function lessonChangeQuestion(
+  { name, currentName, earlier, autoOn },
+  t,
+) {
+  if (!autoOn) return t("grade.confirmLesson", { name });
+  return earlier && currentName
+    ? t("grade.confirmLessonAutoEarlier", { name, current: currentName })
+    : t("grade.confirmLessonAuto", { name });
 }
 
 /** "Sáng Thứ 4" / "Wednesday morning". */

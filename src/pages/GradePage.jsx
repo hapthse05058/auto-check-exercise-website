@@ -24,6 +24,11 @@ import GradeCostNote from "../components/GradeCostNote.jsx";
 import SearchableSelect from "../components/SearchableSelect.jsx";
 import { isAdminEmail } from "../config.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
+import {
+  isEarlierLesson,
+  lessonChangeQuestion,
+  nextRunSummary,
+} from "../lib/autoGrade.js";
 import { formatVnd } from "../lib/billing.js";
 import { templateName } from "../lib/courses.js";
 import { parseDocLinks } from "../lib/docParser.js";
@@ -86,6 +91,7 @@ export default function GradePage() {
   // Admin only: each class's course and doc template, shown on hover.
   const [classInfo, setClassInfo] = useState({ courses: [], templates: [] });
   const currentLessonRef = useRef(null);
+  const scheduleReqRef = useRef(0);
   // A load that failed and can be retried from the error box. Plain data, not
   // a callback, so the retry always runs this render's handlers.
   // null | { kind: "teacher" } | { kind: "lessons", classId, preferredLessonId }
@@ -245,11 +251,15 @@ export default function GradePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- run once on mount; `t` is only used for status/error messages, adding it would re-fetch on language change
   }, [loadTeacherInfo, navigate]);
 
-  const refreshSchedule = async (classId) => {
-    setSchedule(null);
+  /** `keep`: leave the shown schedule up until the new one is in. */
+  const refreshSchedule = async (classId, { keep = false } = {}) => {
+    // Only the latest request lands (class A → B fast, or a lesson change).
+    const req = ++scheduleReqRef.current;
+    if (!keep) setSchedule(null);
     if (!classId) return;
     try {
-      setSchedule(await fetchGradingSchedule(classId));
+      const next = await fetchGradingSchedule(classId);
+      if (req === scheduleReqRef.current) setSchedule(next);
     } catch (error) {
       if (error.message !== "RE-AUTH_NEEDED")
         console.error("Grading schedule fetch failed:", error);
@@ -329,19 +339,30 @@ export default function GradePage() {
     say(t("grade.ready"));
     if (!selectedClassId || !lessonId) return;
 
-    const lessonName = lessons.find((item) => item.id === lessonId)?.name;
+    const nameOf = (id) => lessons.find((item) => item.id === id)?.name;
+    const current = currentLessonRef.current;
     const confirmed = window.confirm(
-      t("grade.confirmLesson", { name: lessonName }),
+      lessonChangeQuestion(
+        {
+          name: nameOf(lessonId),
+          currentName: nameOf(current),
+          earlier: isEarlierLesson(lessonId, current, lessons),
+          autoOn: Boolean(schedule?.enabled && schedule.next),
+        },
+        t,
+      ),
     );
     if (!confirmed) {
       // Revert to the class's saved current lesson.
-      setSelectedLessonId(currentLessonRef.current || "");
+      setSelectedLessonId(current || "");
       return;
     }
 
     const ok = await updateCurrentLessonForClass(selectedClassId, lessonId);
     if (ok) {
       currentLessonRef.current = lessonId;
+      // The next scheduled run now grades this lesson: say so.
+      if (schedule?.enabled) refreshSchedule(selectedClassId, { keep: true });
     }
   };
 
@@ -724,11 +745,7 @@ export default function GradePage() {
         </p>
       )}
       {selectedClassId && (
-        <p className="auto-grade-summary">
-          {schedule?.enabled && schedule.next
-            ? t("autoGrade.summaryOn", { runAt: formatVn(schedule.next.runAt) })
-            : t("autoGrade.summaryOff")}
-        </p>
+        <p className="auto-grade-summary">{nextRunSummary(schedule, t)}</p>
       )}
       {loadError && (
         <ErrorNotice

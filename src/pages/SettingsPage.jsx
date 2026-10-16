@@ -14,8 +14,8 @@ import AutoGradeScheduleModal from "../components/AutoGradeScheduleModal.jsx";
 import SearchableSelect from "../components/SearchableSelect.jsx";
 import { isAdminEmail } from "../config.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
+import { nextRunSummary } from "../lib/autoGrade.js";
 import { updateLessonTemplate } from "../lib/grading.js";
-import { formatVn } from "../lib/scheduleTime.js";
 import { playSuccessSound } from "../lib/sound.js";
 
 /**
@@ -228,13 +228,7 @@ export default function SettingsPage({ section }) {
 
       {!isTemplate && classId && (
         <>
-          <p className="auto-grade-summary">
-            {schedule?.enabled && schedule.next
-              ? t("autoGrade.summaryOn", {
-                  runAt: formatVn(schedule.next.runAt),
-                })
-              : t("autoGrade.summaryOff")}
-          </p>
+          <p className="auto-grade-summary">{nextRunSummary(schedule, t)}</p>
           <div className="button-row mb-1">
             <button
               className="primary-btn with-icon"

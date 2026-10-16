@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  isEarlierLesson,
+  lessonChangeQuestion,
+  nextRunSummary,
   nextSlotAfter,
   partDay,
   runLabel,
@@ -11,6 +14,7 @@ import {
   validateSlots,
   weekdayOf,
 } from "../src/lib/autoGrade.js";
+import { translations } from "../src/i18n/translations.js";
 import { fromVnDate } from "../src/lib/scheduleTime.js";
 
 const HOUR = 60 * 60 * 1000;
@@ -156,5 +160,65 @@ describe("wording", () => {
         t,
       ),
     ).toBe("Sáng Thứ 4, Tối Thứ 6");
+  });
+});
+
+describe("the lesson a scheduled run grades", () => {
+  // The real Vietnamese wording, as the app's t() fills it in.
+  const t = (key, vars = {}) => {
+    let str = key.split(".").reduce((o, k) => o?.[k], translations.vi) ?? key;
+    for (const [k, v] of Object.entries(vars))
+      str = str.split(`{${k}}`).join(String(v));
+    return str;
+  };
+  // 19/10/2026 07:14 Vietnam time.
+  const runAt = Date.UTC(2026, 9, 19, 0, 14);
+  const LESSONS = [
+    { id: "lesson04", name: "BUỔI 04" },
+    { id: "lesson05", name: "BUỔI 05" },
+    { id: "lesson06", name: "BUỔI 06" },
+  ];
+
+  it("the next run names its lesson", () => {
+    const next = { runAt, lessonId: "lesson06", lessonName: "BUỔI 06" };
+    expect(nextRunSummary({ enabled: true, next }, t)).toBe(
+      "Chấm tự động: lần tới 19/10/2026 07:14, chấm BUỔI 06",
+    );
+    // A class without a current lesson: just the time.
+    expect(
+      nextRunSummary({ enabled: true, next: { runAt, lessonName: "" } }, t),
+    ).toBe("Chấm tự động: lần tới 19/10/2026 07:14");
+    expect(nextRunSummary({ enabled: false, next }, t)).toBe(
+      "Chưa hẹn giờ chấm tự động",
+    );
+    expect(nextRunSummary(null, t)).toBe("Chưa hẹn giờ chấm tự động");
+  });
+
+  it("earlier lessons, by their number, else by their place in the list", () => {
+    expect(isEarlierLesson("lesson04", "lesson06", LESSONS)).toBe(true);
+    expect(isEarlierLesson("lesson09", "lesson10", [])).toBe(true);
+    expect(isEarlierLesson("lesson07", "lesson06", LESSONS)).toBe(false);
+    expect(isEarlierLesson("lesson06", "lesson06", LESSONS)).toBe(false);
+    expect(isEarlierLesson("lesson04", null, LESSONS)).toBe(false);
+    const odd = [{ id: "intro" }, { id: "lesson01" }];
+    expect(isEarlierLesson("intro", "lesson01", odd)).toBe(true);
+    expect(isEarlierLesson("lesson01", "intro", odd)).toBe(false);
+    expect(isEarlierLesson("intro", "lesson01", [])).toBe(false);
+  });
+
+  it("picking a lesson: plain without auto-grading, a warning going back with it", () => {
+    const ask = (autoOn, earlier) =>
+      lessonChangeQuestion(
+        { name: "BUỔI 04", currentName: "BUỔI 06", earlier, autoOn },
+        t,
+      );
+    expect(ask(false, true)).toBe("Cập nhật buổi học hiện tại là BUỔI 04?");
+    expect(ask(true, false)).toMatch(
+      /Lớp đang bật chấm tự động.*sẽ chấm BUỔI 04\.$/s,
+    );
+    const warning = ask(true, true);
+    expect(warning).toMatch(/BUỔI 04 là buổi cũ hơn buổi hiện tại \(BUỔI 06\)/);
+    expect(warning).toMatch(/chấm xong nhớ chọn lại BUỔI 06\.$/);
+    expect(warning).not.toMatch(/\{/);
   });
 });

@@ -19,10 +19,9 @@ import DataTable from "../components/DataTable.jsx";
 import { isAdminEmail } from "../config.js";
 import { useColumnVisibility } from "../hooks/useColumnVisibility.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
-import { scheduleSummary } from "../lib/autoGrade.js";
+import { nextRunSummary, scheduleSummary } from "../lib/autoGrade.js";
 import { CLASS_SEARCH_FIELDS, classFieldMatches } from "../lib/classSearch.js";
 import { templateName, templatesForCourse } from "../lib/courses.js";
-import { formatVn } from "../lib/scheduleTime.js";
 import { LESSON_OPTIONS } from "../shared/constant.js";
 
 /** "lesson05" -> "BUỔI 05" (falls back to the raw value / a dash). */
@@ -486,9 +485,7 @@ export default function ClassManagePage() {
           <>
             {scheduleSummary(schedule, t)}
             <br />
-            {t("autoGrade.summaryOn", {
-              runAt: formatVn(schedule.next.runAt),
-            })}
+            {nextRunSummary(schedule, t)}
           </>
         ) : (
           "—"
