@@ -4,18 +4,20 @@ import { useNavigate } from "react-router-dom";
 import {
   createCourse,
   fetchAllLessons,
+  fetchClassTypes,
   fetchCourses,
   updateCourse,
 } from "../api/backend.js";
 import { useAuth } from "../auth/AuthContext.jsx";
+import DataTable from "../components/DataTable.jsx";
 import { isAdminEmail } from "../config.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
-import { courseErrorText } from "../lib/courses.js";
+import { courseErrorText, groupLessonsByProfile } from "../lib/courses.js";
 
 const EMPTY_FORM = { name: "", lessonIds: [], gradingProfile: "basic" };
 
 /** How a course's classes are graded — backend lib/courses.js GRADING_PROFILES. */
-const GRADING_PROFILES = ["basic", "ielts"];
+const GRADING_PROFILES = ["basic", "ielts", "hs"];
 
 /**
  * Admin: the courses a class can follow (Basic, IELTS, …), each with its
@@ -29,6 +31,7 @@ export default function AdminCoursesPage() {
 
   const [courses, setCourses] = useState([]);
   const [lessons, setLessons] = useState([]);
+  const [templates, setTemplates] = useState([]);
   const [showHidden, setShowHidden] = useState(false);
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState(t("courses.loading"));
@@ -55,8 +58,15 @@ export default function AdminCoursesPage() {
           navigate("/grade", { replace: true });
           return;
         }
-        const [, lessonList] = await Promise.all([reload(), fetchAllLessons()]);
-        if (!cancelled) setLessons(Array.isArray(lessonList) ? lessonList : []);
+        const [, lessonList, templateList] = await Promise.all([
+          reload(),
+          fetchAllLessons(),
+          // Only groups the lesson picker; without it the picker is one list.
+          fetchClassTypes().catch(() => []),
+        ]);
+        if (cancelled) return;
+        setLessons(Array.isArray(lessonList) ? lessonList : []);
+        setTemplates(templateList);
       } catch (error) {
         if (cancelled || error.message === "RE-AUTH_NEEDED") return;
         console.error("Error loading courses:", error);
@@ -86,9 +96,24 @@ export default function AdminCoursesPage() {
 
   const shown = courses.filter((course) => showHidden || course.isActive);
 
+  const lessonGroups = useMemo(
+    () => groupLessonsByProfile(lessons, templates, form.gradingProfile),
+    [lessons, templates, form.gradingProfile],
+  );
+
   const openCreate = () => {
     setActive(null);
-    setForm({ ...EMPTY_FORM, lessonIds: lessons.map((lesson) => lesson.id) });
+    // Preselect the lessons of the default profile's templates only.
+    const groups = groupLessonsByProfile(
+      lessons,
+      templates,
+      EMPTY_FORM.gradingProfile,
+    );
+    const own = groups.find((g) => g.key === EMPTY_FORM.gradingProfile);
+    setForm({
+      ...EMPTY_FORM,
+      lessonIds: (own ? own.lessons : lessons).map((lesson) => lesson.id),
+    });
     setFormError("");
     setModal("create");
   };
@@ -109,6 +134,19 @@ export default function AdminCoursesPage() {
     setActive(null);
     setFormError("");
   };
+
+  /** Selects (or clears) every lesson of one picker group. */
+  const setGroup = (group, on) =>
+    setForm((prev) => {
+      const ids = new Set(group.lessons.map((lesson) => lesson.id));
+      const rest = prev.lessonIds.filter((id) => !ids.has(id));
+      return { ...prev, lessonIds: on ? [...rest, ...ids] : rest };
+    });
+
+  const groupTitle = (group) =>
+    group.profiles.length
+      ? group.profiles.map((p) => t(`courses.profile.${p}`)).join(" / ")
+      : t("courses.otherLessons");
 
   const toggleLesson = (id) =>
     setForm((prev) => ({
@@ -166,6 +204,51 @@ export default function AdminCoursesPage() {
     }
   };
 
+  const columns = [
+    { id: "name", header: t("courses.colName"), accessorFn: (c) => c.name },
+    {
+      id: "grading",
+      header: t("courses.colGrading"),
+      accessorFn: (c) => t(`courses.profile.${c.gradingProfile || "basic"}`),
+    },
+    {
+      id: "lessons",
+      header: t("courses.colLessons"),
+      accessorFn: (c) => c.lessonIds.length,
+      meta: { cellProps: (c) => ({ title: c.lessonIds.join(", ") }) },
+      cell: ({ getValue }) => t("courses.lessonCount", { n: getValue() }),
+    },
+    {
+      id: "status",
+      header: t("courses.colStatus"),
+      accessorFn: (c) =>
+        c.isActive ? t("courses.visible") : t("courses.hidden"),
+    },
+    {
+      id: "action",
+      header: t("courses.colAction"),
+      meta: { className: "cell-actions" },
+      cell: ({ row }) => {
+        const course = row.original;
+        return (
+          <div className="row-actions">
+            <button
+              className="btn-icon"
+              title={t("courses.edit")}
+              aria-label={t("courses.edit")}
+              onClick={() => openEdit(course)}
+            >
+              <i className="ti ti-edit" aria-hidden="true" />
+            </button>
+            <button className="btn-cancel" onClick={() => toggleHidden(course)}>
+              {course.isActive ? t("courses.hide") : t("courses.show")}
+            </button>
+          </div>
+        );
+      },
+    },
+  ];
+
   return (
     <div className="page-wide">
       <div className="wrap">
@@ -204,57 +287,7 @@ export default function AdminCoursesPage() {
             <p>{t("courses.empty")}</p>
           </div>
         ) : (
-          <div className="cache-table-wrap">
-            <table className="cache-table">
-              <thead>
-                <tr>
-                  <th>{t("courses.colName")}</th>
-                  <th>{t("courses.colGrading")}</th>
-                  <th>{t("courses.colLessons")}</th>
-                  <th>{t("courses.colStatus")}</th>
-                  <th>{t("courses.colAction")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {shown.map((course) => (
-                  <tr key={course.id}>
-                    <td>{course.name}</td>
-                    <td>
-                      {t(`courses.profile.${course.gradingProfile || "basic"}`)}
-                    </td>
-                    <td title={course.lessonIds.join(", ")}>
-                      {t("courses.lessonCount", {
-                        n: course.lessonIds.length,
-                      })}
-                    </td>
-                    <td>
-                      {course.isActive
-                        ? t("courses.visible")
-                        : t("courses.hidden")}
-                    </td>
-                    <td className="cell-actions">
-                      <button
-                        className="btn-icon"
-                        title={t("courses.edit")}
-                        aria-label={t("courses.edit")}
-                        onClick={() => openEdit(course)}
-                      >
-                        <i className="ti ti-edit" aria-hidden="true" />
-                      </button>
-                      <button
-                        className="btn-cancel"
-                        onClick={() => toggleHidden(course)}
-                      >
-                        {course.isActive
-                          ? t("courses.hide")
-                          : t("courses.show")}
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <DataTable data={shown} columns={columns} getRowId={(c) => c.id} />
         )}
 
         <div className="status-line">{status}</div>
@@ -301,39 +334,49 @@ export default function AdminCoursesPage() {
                 <label>
                   {t("courses.lessonsLabel", { n: form.lessonIds.length })}
                 </label>
-                <div className="course-lesson-actions">
-                  <button
-                    type="button"
-                    className="link-btn"
-                    onClick={() =>
-                      setForm({
-                        ...form,
-                        lessonIds: lessons.map((lesson) => lesson.id),
-                      })
-                    }
-                  >
-                    {t("courses.selectAll")}
-                  </button>
-                  <button
-                    type="button"
-                    className="link-btn"
-                    onClick={() => setForm({ ...form, lessonIds: [] })}
-                  >
-                    {t("courses.selectNone")}
-                  </button>
-                </div>
-                <div className="course-lesson-grid">
-                  {lessons.map((lesson) => (
-                    <label key={lesson.id} className="cache-toggle">
-                      <input
-                        type="checkbox"
-                        checked={form.lessonIds.includes(lesson.id)}
-                        onChange={() => toggleLesson(lesson.id)}
-                      />
-                      <span>{lessonName.get(lesson.id) || lesson.id}</span>
-                    </label>
-                  ))}
-                </div>
+                {lessonGroups.map((group) => (
+                  <div key={group.key} className="course-lesson-group">
+                    <div className="course-lesson-actions">
+                      {lessonGroups.length > 1 && (
+                        <strong className="course-lesson-group-title">
+                          {t("courses.lessonGroup", {
+                            name: groupTitle(group),
+                            n: group.lessons.filter((l) =>
+                              form.lessonIds.includes(l.id),
+                            ).length,
+                            total: group.lessons.length,
+                          })}
+                        </strong>
+                      )}
+                      <button
+                        type="button"
+                        className="link-btn"
+                        onClick={() => setGroup(group, true)}
+                      >
+                        {t("courses.selectAll")}
+                      </button>
+                      <button
+                        type="button"
+                        className="link-btn"
+                        onClick={() => setGroup(group, false)}
+                      >
+                        {t("courses.selectNone")}
+                      </button>
+                    </div>
+                    <div className="course-lesson-grid">
+                      {group.lessons.map((lesson) => (
+                        <label key={lesson.id} className="cache-toggle">
+                          <input
+                            type="checkbox"
+                            checked={form.lessonIds.includes(lesson.id)}
+                            onChange={() => toggleLesson(lesson.id)}
+                          />
+                          <span>{lessonName.get(lesson.id) || lesson.id}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                ))}
               </div>
               {formError && (
                 <div className="err" style={{ display: "block" }}>

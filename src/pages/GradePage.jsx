@@ -4,28 +4,40 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   fetchAllClasses,
   fetchClassLessons,
+  fetchClassTypes,
   fetchClasses,
   fetchCourses,
   fetchCurrentLesson,
   fetchGradingJob,
+  fetchGradingPreview,
   fetchGradingSchedule,
   fetchLatestGradingJob,
-  fetchMyPoint,
-  fetchPayerPoint,
+  fetchMyBalance,
+  fetchPayerBalance,
+  fetchStudentDocRefs,
   recordFeedbackClearSummary,
   updateCurrentLessonForClass,
 } from "../api/backend.js";
 import { useAuth } from "../auth/AuthContext.jsx";
-import AutoGradeScheduleModal from "../components/AutoGradeScheduleModal.jsx";
+import ErrorNotice from "../components/ErrorNotice.jsx";
+import GradeCostNote from "../components/GradeCostNote.jsx";
 import SearchableSelect from "../components/SearchableSelect.jsx";
 import { isAdminEmail } from "../config.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
+import {
+  isEarlierLesson,
+  lessonChangeQuestion,
+  nextRunSummary,
+} from "../lib/autoGrade.js";
+import { formatVnd } from "../lib/billing.js";
+import { templateName } from "../lib/courses.js";
+import { parseDocLinks } from "../lib/docParser.js";
 import {
   executeFeedbackClear,
   planFeedbackClear,
 } from "../lib/feedbackClear.js";
 import { describeJob, isJobFinished, startGradingJob } from "../lib/grading.js";
-import { announcePoints } from "../lib/pointEvents.js";
+import { announceBalance } from "../lib/pointEvents.js";
 import { formatVn } from "../lib/scheduleTime.js";
 import { playSuccessSound } from "../lib/sound.js";
 
@@ -43,7 +55,6 @@ export default function GradePage() {
   const [classes, setClasses] = useState([]);
   // The selected class's weekly auto-grading schedule (null = none / not loaded).
   const [schedule, setSchedule] = useState(null);
-  const [scheduleOpen, setScheduleOpen] = useState(false);
   const [lessons, setLessons] = useState([]);
   const [selectedClassId, setSelectedClassId] = useState("");
   const [selectedLessonId, setSelectedLessonId] = useState("");
@@ -67,17 +78,36 @@ export default function GradePage() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [saveCache, setSaveCache] = useState(true);
   // Who actually pays for the selected class. An admin grading someone else's
-  // class spends THAT teacher's points, so the badge must show their balance.
+  // class spends THAT teacher's balance, so the badge must show it.
   const [payer, setPayer] = useState(null);
+  // How many docs a run on the whole class opens (students with a doc link,
+  // one per doc) — the "docs" of the cost shown before grading. null = not
+  // known yet, or the lookup failed (the cost box then stays hidden).
+  const [classDocCount, setClassDocCount] = useState(null);
+  // The backend's count of what a run started now would grade and charge
+  // (api fetchGradingPreview): null | {state: "loading"|"done"|"error", …}.
+  const [preview, setPreview] = useState(null);
+  const [previewTick, setPreviewTick] = useState(0);
+  // Admin only: each class's course and doc template, shown on hover.
+  const [classInfo, setClassInfo] = useState({ courses: [], templates: [] });
   const currentLessonRef = useRef(null);
+  const scheduleReqRef = useRef(0);
+  // A load that failed and can be retried from the error box. Plain data, not
+  // a callback, so the retry always runs this render's handlers.
+  // null | { kind: "teacher" } | { kind: "lessons", classId, preferredLessonId }
+  const [loadError, setLoadError] = useState(null);
+  const [teacherLoading, setTeacherLoading] = useState(true);
+  // Tickets for in-flight loads: only the latest call may write state.
+  const initReqRef = useRef(0);
+  const lessonsReqRef = useRef(0);
 
   const refreshPoint = async () => {
     try {
       // The header badge shows it (lib/pointEvents.js).
-      announcePoints(await fetchMyPoint());
+      announceBalance(await fetchMyBalance());
     } catch (error) {
       if (error.message !== "RE-AUTH_NEEDED")
-        console.error("Point fetch failed:", error);
+        console.error("Balance fetch failed:", error);
     }
   };
 
@@ -87,62 +117,149 @@ export default function GradePage() {
       return;
     }
     try {
-      setPayer(await fetchPayerPoint(classId));
+      setPayer(await fetchPayerBalance(classId));
     } catch (error) {
       if (error.message !== "RE-AUTH_NEEDED")
-        console.error("Payer point fetch failed:", error);
+        console.error("Payer balance fetch failed:", error);
       setPayer(null);
     }
   };
 
   const selectedClass = classes.find((cls) => cls.id === selectedClassId);
 
+  // Pasted links narrow the run to those docs (lib/grading.js pastedDocIds).
+  const pastedDocIds = docLinksText.trim()
+    ? [...new Set(parseDocLinks(docLinksText.trim()).map((ref) => ref.docId))]
+    : null;
+  const pastedDocCount = pastedDocIds ? pastedDocIds.length : null;
+  const pastedKey = pastedDocIds ? pastedDocIds.join(",") : "";
+
+  // What a run started now would grade and charge — docs not done and docs
+  // already graded left out. Asked when the class, lesson or pasted links
+  // change (links once typing stops), after every run and on "Kiểm tra lại".
+  // Not while a run writes: its own docs would still count as to grade.
+  useEffect(() => {
+    setPreview(null);
+    if (!selectedClassId || !selectedLessonId || jobRunning) return undefined;
+    if (pastedDocIds && !pastedDocIds.length) return undefined;
+    let cancelled = false;
+    const timer = setTimeout(
+      () => {
+        setPreview({ state: "loading" });
+        fetchGradingPreview({
+          classId: selectedClassId,
+          lessonId: selectedLessonId,
+          docIds: pastedDocIds || undefined,
+        })
+          .then((data) => {
+            if (!cancelled) setPreview({ state: "done", data });
+          })
+          .catch((error) => {
+            if (cancelled || error.message === "RE-AUTH_NEEDED") return;
+            console.error("Grading preview failed:", error);
+            setPreview({ state: "error", error: error.message });
+          });
+      },
+      pastedKey ? 700 : 0,
+    );
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- pastedKey stands for pastedDocIds (a new array every render)
+  }, [selectedClassId, selectedLessonId, pastedKey, jobRunning, previewTick]);
+
+  /** Admin hover text of a class: its course and doc template. */
+  const classTitle = (cls) => {
+    const course = classInfo.courses.find((c) => c.id === cls.courseId);
+    return t("grade.classInfo", {
+      course: course?.name || "—",
+      template:
+        templateName(classInfo.templates, cls.classType) ||
+        t("classManage.noTemplate"),
+    });
+  };
+  const classOptions = isAdmin
+    ? classes.map((cls) => ({ ...cls, title: classTitle(cls) }))
+    : classes;
+
   /** Plain message, no spinner — page loading and setup errors. */
   const say = (text) => setStatus({ phase: "idle", text, warnings: [] });
 
+  /**
+   * Teacher info + classes: on entry, and again from the error box's retry.
+   * Each call takes a ticket from initReqRef; a response whose ticket is no
+   * longer current (unmounted, or a newer call started) is dropped.
+   */
+  const loadInitialData = async () => {
+    const req = ++initReqRef.current;
+    const stale = () => req !== initReqRef.current;
+    setLoadError(null);
+    setTeacherLoading(true);
+    try {
+      say(t("grade.loadingTeacher"));
+      const teacherInfo = await loadTeacherInfo();
+      if (stale()) return;
+      if (!teacherInfo) {
+        navigate("/missing-teacher", { replace: true });
+        return;
+      }
+      const admin = isAdminEmail(teacherInfo.gmail);
+      setIsAdmin(admin);
+      refreshPoint();
+      // Admin can grade any class, so load every class; teachers see their own.
+      const classList = admin
+        ? await fetchAllClasses()
+        : await fetchClasses(teacherInfo.id);
+      if (stale()) return;
+      const activeClasses = classList.filter((c) => c.isActive !== false);
+      setClasses(activeClasses);
+      if (admin) {
+        Promise.all([
+          fetchCourses({ includeInactive: true }),
+          fetchClassTypes(),
+        ])
+          .then(([courses, templates]) => {
+            if (!stale()) setClassInfo({ courses, templates });
+          })
+          .catch((error) => {
+            if (error.message !== "RE-AUTH_NEEDED")
+              console.error("Class info fetch failed:", error);
+          });
+      }
+      if (activeClasses.length === 0) {
+        alert(t("grade.noClasses"));
+      }
+      say(t("grade.ready"));
+    } catch (error) {
+      if (stale() || error.message === "RE-AUTH_NEEDED") return;
+      console.error("Post-login error:", error);
+      say("");
+      setLoadError({ kind: "teacher" });
+    } finally {
+      if (!stale()) setTeacherLoading(false);
+    }
+  };
+
   // Load teacher info + classes once on entry.
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        say(t("grade.loadingTeacher"));
-        const teacherInfo = await loadTeacherInfo();
-        if (cancelled) return;
-        if (!teacherInfo) {
-          navigate("/missing-teacher", { replace: true });
-          return;
-        }
-        const admin = isAdminEmail(teacherInfo.gmail);
-        setIsAdmin(admin);
-        refreshPoint();
-        // Admin can grade any class, so load every class; teachers see their own.
-        const classList = admin
-          ? await fetchAllClasses()
-          : await fetchClasses(teacherInfo.id);
-        if (cancelled) return;
-        const activeClasses = classList.filter((c) => c.isActive !== false);
-        setClasses(activeClasses);
-        if (activeClasses.length === 0) {
-          alert(t("grade.noClasses"));
-        }
-        say(t("grade.ready"));
-      } catch (error) {
-        if (cancelled || error.message === "RE-AUTH_NEEDED") return;
-        console.error("Post-login error:", error);
-        say(t("grade.loadTeacherFailed"));
-      }
-    })();
+    loadInitialData();
     return () => {
-      cancelled = true;
+      // Void the ticket of any load still in flight.
+      initReqRef.current += 1;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- run once on mount; `t` is only used for status/error messages, adding it would re-fetch on language change
   }, [loadTeacherInfo, navigate]);
 
-  const refreshSchedule = async (classId) => {
-    setSchedule(null);
+  /** `keep`: leave the shown schedule up until the new one is in. */
+  const refreshSchedule = async (classId, { keep = false } = {}) => {
+    // Only the latest request lands (class A → B fast, or a lesson change).
+    const req = ++scheduleReqRef.current;
+    if (!keep) setSchedule(null);
     if (!classId) return;
     try {
-      setSchedule(await fetchGradingSchedule(classId));
+      const next = await fetchGradingSchedule(classId);
+      if (req === scheduleReqRef.current) setSchedule(next);
     } catch (error) {
       if (error.message !== "RE-AUTH_NEEDED")
         console.error("Grading schedule fetch failed:", error);
@@ -155,31 +272,51 @@ export default function GradePage() {
    * to the next one. It is only displayed, not saved as the current lesson.
    */
   const handleClassChange = async (classId, preferredLessonId = null) => {
+    // Switching class A → B fast must not let A's late lessons land on B.
+    const req = ++lessonsReqRef.current;
+    const stale = () => req !== lessonsReqRef.current;
     setSelectedClassId(classId);
     setSelectedLessonId("");
     setLessons([]);
+    // The previous class's last run is not this class's.
+    say(t("grade.ready"));
+    setLoadError((prev) => (prev?.kind === "lessons" ? null : prev));
     currentLessonRef.current = null;
     refreshPayer(classId);
     refreshSchedule(classId);
-    if (!classId) return;
+    setClassDocCount(null);
+    if (!classId) {
+      setLessonsLoading(false);
+      return;
+    }
+    fetchStudentDocRefs(classId)
+      .then((refs) => {
+        if (!stale()) setClassDocCount(new Set(refs.map((r) => r.docId)).size);
+      })
+      .catch((error) => {
+        if (error.message !== "RE-AUTH_NEEDED")
+          console.error("Student docs fetch failed:", error);
+      });
 
     setLessonsLoading(true);
     try {
       const lessonList = await fetchClassLessons(classId);
+      if (stale()) return;
       setLessons(lessonList);
 
       const currentLesson = await fetchCurrentLesson(classId);
+      if (stale()) return;
       currentLessonRef.current = currentLesson;
       const shown = [preferredLessonId, currentLesson].find(
         (id) => id && lessonList.some((lesson) => lesson.id === id),
       );
       if (shown) setSelectedLessonId(shown);
     } catch (error) {
-      if (error.message === "RE-AUTH_NEEDED") return;
+      if (stale() || error.message === "RE-AUTH_NEEDED") return;
       console.error("Error fetching lessons:", error);
-      say(t("grade.loadLessonsFailed"));
+      setLoadError({ kind: "lessons", classId, preferredLessonId });
     } finally {
-      setLessonsLoading(false);
+      if (!stale()) setLessonsLoading(false);
     }
   };
 
@@ -198,21 +335,34 @@ export default function GradePage() {
   const handleLessonChange = async (event) => {
     const lessonId = event.target.value;
     setSelectedLessonId(lessonId);
+    // Cleared until the effect below finds this lesson's own last run.
+    say(t("grade.ready"));
     if (!selectedClassId || !lessonId) return;
 
-    const lessonName = lessons.find((item) => item.id === lessonId)?.name;
+    const nameOf = (id) => lessons.find((item) => item.id === id)?.name;
+    const current = currentLessonRef.current;
     const confirmed = window.confirm(
-      t("grade.confirmLesson", { name: lessonName }),
+      lessonChangeQuestion(
+        {
+          name: nameOf(lessonId),
+          currentName: nameOf(current),
+          earlier: isEarlierLesson(lessonId, current, lessons),
+          autoOn: Boolean(schedule?.enabled && schedule.next),
+        },
+        t,
+      ),
     );
     if (!confirmed) {
       // Revert to the class's saved current lesson.
-      setSelectedLessonId(currentLessonRef.current || "");
+      setSelectedLessonId(current || "");
       return;
     }
 
     const ok = await updateCurrentLessonForClass(selectedClassId, lessonId);
     if (ok) {
       currentLessonRef.current = lessonId;
+      // The next scheduled run now grades this lesson: say so.
+      if (schedule?.enabled) refreshSchedule(selectedClassId, { keep: true });
     }
   };
 
@@ -249,12 +399,20 @@ export default function GradePage() {
       try {
         const job = await fetchGradingJob(followed.id);
         if (cancelled) return;
-        const view = describeJob(job, t, { showWarnings: isAdmin });
         const finished = isJobFinished(job);
         const looked = !followed.live && !sawRunning;
+        // An earlier run's warnings are old news: only a run started or
+        // watched from this screen shows them.
+        const view = describeJob(job, t, {
+          showWarnings: isAdmin && !(looked && finished),
+        });
         setStatus(
           looked && finished
-            ? { ...view, text: `${t("grading.lastRun")} ${view.text}` }
+            ? {
+                ...view,
+                // Dated: a run from days ago must not read as today's.
+                text: `${t("grading.lastRun", { at: formatVn(job.finishedAt || job.createdAt) })} ${view.text}`,
+              }
             : view,
         );
         setJobRunning(!finished);
@@ -311,7 +469,11 @@ export default function GradePage() {
             ? t("grading.noDocs")
             : error.message === "ielts_not_configured"
               ? t("grading.ieltsNotConfigured")
-              : t("grade.processFailed", { msg: error.message });
+              : error.message === "hs_not_configured"
+                ? t("grading.hsNotConfigured")
+                : error.message === "unknown_grading_profile"
+                  ? t("grading.unknownGradingProfile")
+                  : t("grade.processFailed", { msg: error.message });
       setStatus({ phase: "error", text, warnings: [] });
     } finally {
       setStarting(false);
@@ -347,7 +509,18 @@ export default function GradePage() {
             })
           ).find((item) => item.id === selectedClass.courseId)
         : null;
-      const gradingProfile = course?.gradingProfile || "basic";
+      // No course (or a failed lookup): Basic, as always. A course whose
+      // profile this version does not know (null) is refused — clearing it
+      // as Basic would wipe a column that is not Basic's.
+      const gradingProfile = course ? course.gradingProfile : "basic";
+      if (!["basic", "ielts", "hs"].includes(gradingProfile)) {
+        setStatus({
+          phase: "error",
+          text: t("clearFeedback.unknownProfile"),
+          warnings: [],
+        });
+        return;
+      }
       const plan = await planFeedbackClear({
         docLinksText,
         classId: selectedClassId,
@@ -371,13 +544,19 @@ export default function GradePage() {
       }
       // The "Chữa bài" column holds hand-typed teacher notes too, and they
       // cannot be told apart from AI feedback — so show the count and ask.
+      // HS removes only the AI's own, unedited text (its named ranges).
       const confirmed = window.confirm(
-        t("clearFeedback.confirm", {
-          cells: plan.cells,
-          docs: plan.plans.length,
-          lesson: lessonName,
-          class: selectedClass?.name,
-        }),
+        t(
+          gradingProfile === "hs"
+            ? "clearFeedback.confirmHs"
+            : "clearFeedback.confirm",
+          {
+            cells: plan.cells,
+            docs: plan.plans.length,
+            lesson: lessonName,
+            class: selectedClass?.name,
+          },
+        ),
       );
       if (!confirmed) {
         say("");
@@ -433,6 +612,25 @@ export default function GradePage() {
     !starting &&
     !jobRunning &&
     !clearing;
+  // Why the grade button is off, while the fix is still up to the teacher.
+  // Mid-run the button's own label ("Processing...") already says why, and a
+  // failed load has its own error box — one message at a time.
+  const busy = starting || jobRunning || clearing;
+  const processHint =
+    busy || lessonsLoading || teacherLoading || loadError
+      ? ""
+      : !selectedClassId
+        ? t("grade.hintSelectClass")
+        : lessons.length === 0
+          ? t("grade.hintNoLessons")
+          : !selectedLessonId
+            ? t("grade.hintSelectLesson")
+            : "";
+
+  const retryLoad = () =>
+    loadError?.kind === "lessons"
+      ? handleClassChange(loadError.classId, loadError.preferredLessonId)
+      : loadInitialData();
 
   return (
     <div className="page-wide">
@@ -446,7 +644,7 @@ export default function GradePage() {
             <span className="count-badge">
               {t("grade.payerPoint", {
                 teacher: payer.teacherName,
-                point: payer.point,
+                balance: formatVnd(payer.balanceVnd),
               })}
             </span>
           ) : (
@@ -457,7 +655,7 @@ export default function GradePage() {
         className="mb-1"
         value={selectedClassId}
         onChange={handleClassChange}
-        options={classes}
+        options={classOptions}
         disabled={starting || clearing}
         placeholder={t("grade.selectClass")}
         searchPlaceholder={t("common.searchClassPlaceholder")}
@@ -501,21 +699,34 @@ export default function GradePage() {
           </span>
         </label>
       )}
+      {/* Mid-run the status line below has the numbers. */}
+      {selectedClassId && selectedLessonId && !busy && (
+        <GradeCostNote
+          preview={preview}
+          docCount={pastedDocCount ?? classDocCount}
+          pasted={pastedDocCount !== null}
+          balanceVnd={payer ? payer.balanceVnd : null}
+          payerName={isAdmin ? payer?.teacherName : ""}
+          autoRunAt={
+            // A scheduled run grades the class's current lesson, whole.
+            schedule?.enabled &&
+            schedule.next &&
+            pastedDocCount === null &&
+            selectedLessonId === currentLessonRef.current
+              ? schedule.next.runAt
+              : null
+          }
+          onRetry={() => setPreviewTick((n) => n + 1)}
+        />
+      )}
       <div className="button-row mb-1">
         <button
           className="primary-btn"
           onClick={handleProcessAllDocs}
           disabled={!canProcess}
+          aria-describedby={processHint ? "grade-process-hint" : undefined}
         >
           {starting || jobRunning ? t("grade.processing") : t("grade.process")}
-        </button>
-        <button
-          className="secondary-btn"
-          onClick={() => setScheduleOpen(true)}
-          disabled={!selectedClassId || starting || clearing}
-        >
-          <i className="ti ti-clock" aria-hidden="true" />
-          {t("autoGrade.button")}
         </button>
         {isAdmin && (
           <button
@@ -527,18 +738,23 @@ export default function GradePage() {
           </button>
         )}
       </div>
-      {selectedClassId && (
-        <p className="auto-grade-summary">
-          {schedule?.enabled && schedule.next
-            ? t("autoGrade.summaryOn", { runAt: formatVn(schedule.next.runAt) })
-            : t("autoGrade.summaryOff")}
+      {processHint && (
+        <p id="grade-process-hint" className="field-hint">
+          <i className="ti ti-info-circle" aria-hidden="true" />
+          {processHint}
         </p>
       )}
-      {scheduleOpen && selectedClass && (
-        <AutoGradeScheduleModal
-          cls={selectedClass}
-          onClose={() => setScheduleOpen(false)}
-          onSaved={() => refreshSchedule(selectedClassId)}
+      {selectedClassId && (
+        <p className="auto-grade-summary">{nextRunSummary(schedule, t)}</p>
+      )}
+      {loadError && (
+        <ErrorNotice
+          message={t(
+            loadError.kind === "lessons"
+              ? "grade.loadLessonsFailed"
+              : "grade.loadTeacherFailed",
+          )}
+          onRetry={retryLoad}
         />
       )}
       <div className="status-output">

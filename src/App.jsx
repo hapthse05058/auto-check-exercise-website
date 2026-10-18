@@ -6,6 +6,7 @@ import AddStudentsPage from "./pages/AddStudentsPage.jsx";
 import AdminCoursesPage from "./pages/AdminCoursesPage.jsx";
 import AdminTeacherPointsPage from "./pages/AdminTeacherPointsPage.jsx";
 import AdminTeachersPage from "./pages/AdminTeachersPage.jsx";
+import AdminTemplatesPage from "./pages/AdminTemplatesPage.jsx";
 import AuditLogPage from "./pages/AuditLogPage.jsx";
 import AuthCallbackPage from "./pages/AuthCallbackPage.jsx";
 import ClassManagePage from "./pages/ClassManagePage.jsx";
@@ -18,8 +19,10 @@ import LandingPagePersonal from "./pages/LandingPagePersonal.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import MissingTeacherPage from "./pages/MissingTeacherPage.jsx";
 import NewClassPage from "./pages/NewClassPage.jsx";
+import NotificationsPage from "./pages/NotificationsPage.jsx";
 import PosterMarketingPage from "./pages/PosterMarketingPage.jsx";
 import ResetPasswordPage from "./pages/ResetPasswordPage.jsx";
+import SettingsPage from "./pages/SettingsPage.jsx";
 import SignupPage from "./pages/SignupPage.jsx";
 import SpeakingPage from "./pages/SpeakingPage.jsx";
 
@@ -49,8 +52,18 @@ export default function App() {
           />
           <Route path="/admin/teachers" element={<AdminTeachersPage />} />
           <Route path="/admin/courses" element={<AdminCoursesPage />} />
+          <Route path="/admin/templates" element={<AdminTemplatesPage />} />
           <Route path="/admin/audit-logs" element={<AuditLogPage />} />
           <Route path="/speaking" element={<SpeakingPage />} />
+          <Route
+            path="/settings/auto-grade"
+            element={<SettingsPage section="autoGrade" />}
+          />
+          <Route
+            path="/settings/template"
+            element={<SettingsPage section="template" />}
+          />
+          <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/missing-teacher" element={<MissingTeacherPage />} />
           <Route path="/signup" element={<SignupPage />} />
         </Route>

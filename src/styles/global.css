@@ -1,20 +1,109 @@
-/* Design tokens. The extension CSS referenced several var(--...) tokens that
-   were never defined; they are defined here so the styles render as intended. */
+/* Design tokens. Every color the app shell uses lives here, so the dark theme
+   below only has to redefine tokens. The theme is set on <html data-theme>
+   (ThemeContext.jsx, and index.html before first paint). */
 :root {
+  color-scheme: light;
   --font-sans:
     "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
-  --color-primary: #00977b;
+  --color-primary: #00846b;
+  /* Accent TEXT on a surface (links-ish headings, selected option...). */
   --color-primary-dark: #0f6e56;
-  --color-danger: #f44336;
+  /* Background of a filled green button on hover (white text on it). */
+  --color-primary-hover: #0f6e56;
+  --color-primary-tint: #e1f5ee;
+  --color-primary-tint-border: #b9e2d6;
+  --color-danger: #d32f2f;
+  --color-danger-hover: #b52d24;
+  --color-danger-text: #a32d2d;
+  --color-danger-tint: #fcebeb;
+  --color-danger-tint-border: #f5c2bd;
+  --color-error: #d32f2f;
+  --color-success: #2e7d32;
+  --color-warning: #d97706;
+  --color-warning-dark: #b45309;
+  --color-warning-light: #fef3c7;
+  --color-warning-tint: #fff7e6;
+  --color-warning-text: #92400e;
+  --color-link: #185fa5;
   --color-text-primary: #1c2b27;
   --color-text-secondary: #51615c;
-  --color-text-tertiary: #8a948f;
+  --color-text-tertiary: #67716e;
   --color-background-primary: #ffffff;
   --color-background-secondary: #f3f6f5;
+  --color-surface-hover: #f0f7f4;
+  --color-surface-subtle: #f7faf9;
+  --color-row-selected: #eef7f3;
+  --color-row-selected-hover: #e4f2ec;
+  --color-border-input: #7f908a;
   --color-border-secondary: #c9d4d0;
   --color-border-tertiary: #dfe7e4;
+  --color-disabled-bg: #ccc;
+  --color-overlay: rgba(0, 0, 0, 0.35);
+  --focus-ring: 0 0 0 3px
+    color-mix(in srgb, var(--color-primary) 30%, transparent);
+  --shadow-card:
+    0 1px 2px rgba(16, 24, 22, 0.04), 0 1px 3px rgba(16, 24, 22, 0.06);
+  --shadow-header:
+    0 1px 0 var(--color-border-tertiary), 0 2px 8px rgba(16, 24, 22, 0.04);
+  --shadow-popover: 0 5px 15px rgba(0, 0, 0, 0.12);
+  --transition-colors:
+    background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease,
+    box-shadow 0.18s ease;
   --border-radius-md: 6px;
   --border-radius-lg: 10px;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  /* --color-primary / -hover and --color-danger / -hover are shared: white
+     text on them passes AA in both themes. */
+  --color-primary-dark: #4fd1ae;
+  --color-primary-tint: #173a32;
+  --color-primary-tint-border: #28594c;
+  --color-danger-text: #ff9b92;
+  --color-danger-tint: #3b2020;
+  --color-danger-tint-border: #6e3434;
+  --color-error: #ff8a80;
+  --color-success: #6fd88a;
+  --color-warning: #f0a33a;
+  --color-warning-dark: #fbbf24;
+  --color-warning-light: #3a2e12;
+  --color-warning-tint: #332a14;
+  --color-warning-text: #f7c873;
+  --color-link: #7cb6f7;
+  --color-text-primary: #e4ebe8;
+  --color-text-secondary: #aab6b2;
+  --color-text-tertiary: #87948f;
+  --color-background-primary: #1b2220;
+  --color-background-secondary: #121816;
+  --color-surface-hover: #243330;
+  --color-surface-subtle: #212a28;
+  --color-row-selected: #1d3530;
+  --color-row-selected-hover: #234039;
+  --color-border-input: #5e706a;
+  --color-border-secondary: #3d4a47;
+  --color-border-tertiary: #2c3634;
+  --color-disabled-bg: #3a4441;
+  --color-overlay: rgba(0, 0, 0, 0.6);
+  --focus-ring: 0 0 0 3px
+    color-mix(in srgb, var(--color-primary-dark) 35%, transparent);
+  /* Shadows barely read on dark; surfaces are told apart by the border and a
+     faint top highlight instead. */
+  --shadow-card:
+    0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-header:
+    0 1px 0 var(--color-border-tertiary), 0 2px 10px rgba(0, 0, 0, 0.35);
+  --shadow-popover: 0 8px 24px rgba(0, 0, 0, 0.55);
+}
+
+/* The marketing pages (/contact-us, /personal) carry their own fixed palette
+   and stay light whatever the app theme is. */
+:root[data-theme="dark"]:has(.pm-page) {
+  color-scheme: light;
+}
+:root[data-theme="dark"] body:has(.pm-page) {
+  background: #f3f6f5;
+  color: #1c2b27;
 }
 
 * {
@@ -27,6 +116,45 @@ body {
   font-size: 14px;
   color: var(--color-text-primary);
   background: var(--color-background-secondary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--color-primary) 30%, transparent);
+}
+::placeholder {
+  color: var(--color-text-tertiary);
+  opacity: 1;
+}
+
+/* One keyboard-focus look for every control; mouse clicks show none. */
+:focus-visible {
+  outline: 2px solid var(--color-primary-dark);
+  outline-offset: 2px;
+}
+
+/* Surfaces fade between themes instead of flashing (see ThemeContext). */
+.app-header,
+.form-panel,
+.login-panel,
+.student-card,
+.tpl-card,
+.modal,
+.menu-options,
+input,
+textarea,
+select,
+button {
+  transition: var(--transition-colors);
+}
+@media (prefers-reduced-motion: reduce) {
+  /* Transitions only: loading spinners must keep spinning. */
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+  }
 }
 
 .m-0 {
@@ -55,8 +183,15 @@ body {
   align-items: center;
   gap: 1rem;
   padding: 0.75rem 1.5rem;
-  background: var(--color-background-primary);
-  border-bottom: 1px solid var(--color-border-tertiary);
+  /* Frosted: content scrolling underneath shows through faintly. */
+  background: color-mix(
+    in srgb,
+    var(--color-background-primary) 88%,
+    transparent
+  );
+  -webkit-backdrop-filter: saturate(160%) blur(10px);
+  backdrop-filter: saturate(160%) blur(10px);
+  box-shadow: var(--shadow-header);
   position: sticky;
   top: 0;
   z-index: 20;
@@ -111,6 +246,22 @@ body {
     padding: 3px 8px;
     font-size: 12px;
   }
+  /* Header dropdowns hang from the header itself (sticky, full width), not
+     from their button: a 320px panel under a mid-header button would spill
+     off the left edge. */
+  .app-header .menu-wrapper {
+    position: static;
+  }
+  .app-header .menu-options {
+    top: 100%;
+    left: 0.75rem;
+    right: 0.75rem;
+    min-width: 0;
+    max-width: none;
+  }
+  .app-header .notif-popover {
+    max-height: calc(100dvh - 5rem);
+  }
 }
 
 /* The teacher's point balance, always visible in the header. */
@@ -124,13 +275,13 @@ body {
   font-weight: 600;
   white-space: nowrap;
   color: var(--color-primary-dark);
-  background: #e3f4ef;
-  border: 1px solid #b9e2d6;
+  background: var(--color-primary-tint);
+  border: 1px solid var(--color-primary-tint-border);
 }
 .point-badge.empty {
-  color: #b3261e;
-  background: #fdecea;
-  border-color: #f5c2bd;
+  color: var(--color-danger-text);
+  background: var(--color-danger-tint);
+  border-color: var(--color-danger-tint-border);
 }
 
 .app-main {
@@ -169,7 +320,7 @@ button {
   font-weight: 500;
 }
 .primary-btn:hover:not(:disabled) {
-  background-color: var(--color-primary-dark);
+  background-color: var(--color-primary-hover);
 }
 
 /* Destructive action sitting beside a primary one (clearing doc feedback). */
@@ -190,8 +341,26 @@ button {
   opacity: 0.6;
   cursor: not-allowed;
 }
+/* Filled buttons lift slightly and press down on click. */
+.primary-btn,
+.danger-btn,
+.logout-btn {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+}
+.primary-btn:active:not(:disabled),
+.danger-btn:active:not(:disabled),
+.logout-btn:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: none;
+}
 
 /* Page controls are block-level, so buttons need this to sit side by side. */
+/* A primary button with a leading icon (settings pages). */
+.primary-btn.with-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
 .button-row {
   display: flex;
   gap: 8px;
@@ -214,11 +383,11 @@ button {
   white-space: nowrap;
 }
 .logout-btn:hover {
-  background-color: #c93a2f;
+  background-color: var(--color-danger-hover);
 }
 
 button:disabled {
-  background-color: #ccc;
+  background-color: var(--color-disabled-bg);
   cursor: not-allowed;
 }
 
@@ -232,17 +401,31 @@ a.login-link {
   position: relative;
 }
 .menu-btn {
-  background-color: #fff;
-  border: 1px solid #ccc;
+  background-color: var(--color-background-primary);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border-input);
   padding: 6px 10px;
   cursor: pointer;
   border-radius: var(--border-radius-md);
   font-size: 16px;
   min-width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 .menu-btn:hover {
   border-color: var(--color-primary);
-  color: var(--color-primary);
+  color: var(--color-primary-dark);
+  background-color: var(--color-surface-hover);
+}
+/* Sun / moon: a small turn on hover hints that it flips. */
+.theme-toggle i {
+  font-size: 18px;
+  transition: transform 0.3s ease;
+}
+.theme-toggle:hover i {
+  transform: rotate(-25deg);
 }
 .menu-options {
   position: absolute;
@@ -254,9 +437,9 @@ a.login-link {
   min-width: 220px;
   padding: 0.75rem;
   border-radius: 8px;
-  border: 1px solid #ddd;
-  background: #fff;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.12);
+  border: 1px solid var(--color-border-tertiary);
+  background: var(--color-background-primary);
+  box-shadow: var(--shadow-popover);
   z-index: 30;
 }
 .menu-option {
@@ -273,7 +456,82 @@ a.login-link {
   word-break: break-word;
 }
 .menu-option:hover {
-  background: #f0f7f4;
+  background: var(--color-surface-hover);
+}
+
+/* --- ☰ menu, grouped (Layout NavMenu) ------------------------------------ */
+.nav-menu {
+  gap: 0.25rem;
+}
+.nav-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+/* Phones and narrow windows: one column, a rule between groups. */
+.nav-group + .nav-group {
+  margin-top: 0.35rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--color-border-tertiary);
+}
+.nav-group-title {
+  margin: 0 0 0.2rem;
+  padding: 0 0.5rem;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-text-tertiary);
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+}
+.nav-item .ti {
+  font-size: 17px;
+  color: var(--color-text-secondary);
+}
+.nav-item.active {
+  background: var(--color-primary-tint);
+  color: var(--color-primary-dark);
+  font-weight: 600;
+}
+.nav-item.active .ti {
+  color: var(--color-primary-dark);
+}
+/* Settings group: a label and its switch on one row. */
+.nav-setting {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 8px;
+  font-size: 14px;
+  color: var(--color-text-primary);
+}
+.nav-setting .lang-option .ti {
+  font-size: 13px;
+}
+
+/* Desktop: one column per group, so the admin menu is ~6 rows, not 14. */
+@media (min-width: 900px) {
+  .menu-options.nav-menu {
+    display: grid;
+    grid-template-columns: repeat(var(--nav-cols, 1), max-content);
+    gap: 0 1rem;
+  }
+  .nav-group + .nav-group {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+    padding-left: 1rem;
+    border-left: 1px solid var(--color-border-tertiary);
+  }
+  .nav-item {
+    white-space: nowrap;
+  }
 }
 
 /* --- Notification bell (admin) ------------------------------------------ */
@@ -309,11 +567,11 @@ a.login-link {
   justify-content: space-between;
   gap: 0.5rem;
   padding: 0 0.5rem 0.25rem;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--color-border-tertiary);
 }
 .notif-count {
   font-size: 12px;
-  color: var(--color-primary);
+  color: var(--color-primary-dark);
 }
 .notif-sound-toggle {
   margin-left: auto;
@@ -326,13 +584,13 @@ a.login-link {
   color: var(--color-text-secondary);
 }
 .notif-sound-toggle:hover {
-  color: var(--color-primary);
+  color: var(--color-primary-dark);
 }
 .notif-empty {
   margin: 0;
   padding: 0.75rem 0.5rem;
   font-size: 13px;
-  color: var(--color-text-secondary, #777);
+  color: var(--color-text-secondary);
   text-align: center;
 }
 .notif-item {
@@ -349,7 +607,7 @@ a.login-link {
 }
 .notif-item.unread {
   border-left-color: var(--color-primary);
-  background: #f7fbf9;
+  background: var(--color-surface-subtle);
 }
 .notif-item.unread .notif-item-title {
   font-weight: 600;
@@ -363,12 +621,181 @@ a.login-link {
 }
 .notif-item-body {
   font-size: 12px;
-  color: var(--color-text-secondary, #666);
+  color: var(--color-text-secondary);
   word-break: break-word;
 }
 .notif-time {
   font-size: 11px;
-  color: #999;
+  color: var(--color-text-tertiary);
+}
+/* "See all notifications", pinned to the bottom of the bell's panel. */
+.notif-see-all {
+  position: sticky;
+  bottom: -0.75rem;
+  margin: 0.25rem -0.75rem -0.75rem;
+  padding: 0.6rem 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: none;
+  border-top: 1px solid var(--color-border-tertiary);
+  background: var(--color-background-primary);
+  color: var(--color-primary-dark);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.notif-see-all:hover {
+  background: var(--color-surface-hover);
+}
+
+/* --- Notifications page (pages/NotificationsPage.jsx) --------------------- */
+.notif-page-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.notif-page-item {
+  padding: 0.65rem 0.8rem;
+  border: 1px solid var(--color-border-tertiary);
+  border-left-width: 3px;
+  background: var(--color-background-primary);
+}
+.notif-page-item:not(.unread) {
+  border-left-color: var(--color-border-tertiary);
+}
+.notif-page-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.notif-page-item .notif-item-title {
+  font-size: 14px;
+}
+.notif-page-item .notif-item-body {
+  font-size: 13px;
+}
+.notif-page-item .notif-time {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+}
+.notif-sev-badge {
+  flex: none;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--color-surface-subtle);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border-tertiary);
+}
+.notif-sev-badge.sev-WARN {
+  background: var(--color-warning-light);
+  color: var(--color-warning-text);
+  border-color: transparent;
+}
+.notif-sev-badge.sev-CRITICAL {
+  background: var(--color-danger-tint);
+  color: var(--color-danger-text);
+  border-color: var(--color-danger-tint-border);
+}
+.notif-link-icon {
+  font-size: 13px;
+}
+@media (max-width: 640px) {
+  .cache-search.notif-filters select {
+    flex: 1 1 calc(50% - 4px);
+    min-width: 0;
+  }
+}
+
+/* New notifications arriving while the page is open (NotificationBell). */
+.notif-toasts {
+  position: fixed;
+  right: 16px;
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: min(360px, calc(100vw - 24px));
+  /* The empty stack must not swallow clicks on the page under it. */
+  pointer-events: none;
+}
+.notif-toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 8px 10px 12px;
+  border: 1px solid var(--color-border-tertiary);
+  border-left: 3px solid var(--color-primary);
+  border-radius: var(--border-radius-md, 8px);
+  background: var(--color-background-primary);
+  box-shadow: var(--shadow-popover);
+  animation: notif-toast-in 0.2s ease-out;
+}
+.notif-toast.sev-CRITICAL {
+  border-left-color: #d64545;
+}
+.notif-toast-icon {
+  font-size: 18px;
+  color: var(--color-primary-dark);
+  margin-top: 1px;
+}
+.notif-toast.sev-CRITICAL .notif-toast-icon {
+  color: var(--color-danger-text);
+}
+.notif-toast-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.notif-toast-content .notif-item-title {
+  font-weight: 600;
+}
+.notif-toast.clickable .notif-toast-content {
+  cursor: pointer;
+}
+.notif-toast-close {
+  border: none;
+  background: transparent;
+  color: var(--color-text-tertiary);
+  padding: 2px 4px;
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
+  line-height: 1;
+}
+.notif-toast-close:hover {
+  color: var(--color-text-primary);
+  background: var(--color-surface-hover);
+}
+@keyframes notif-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .notif-toast {
+    animation: none;
+  }
+}
+@media (max-width: 640px) {
+  .notif-toasts {
+    left: 12px;
+    right: 12px;
+    width: auto;
+  }
 }
 
 .profile-btn {
@@ -376,7 +803,7 @@ a.login-link {
   height: 36px;
   border-radius: 50%;
   border: 1px solid var(--color-border-secondary);
-  background: #e1f5ee;
+  background: var(--color-primary-tint);
   color: var(--color-primary-dark);
   font-weight: 600;
   cursor: pointer;
@@ -400,13 +827,22 @@ a.login-link {
   color: var(--color-text-secondary);
   word-break: break-all;
 }
+/* The support address, under "Contact support" in the avatar menu. */
+.profile-support-email {
+  margin: 0 0 0 calc(0.5rem + 1.5em);
+  font-size: 12px;
+  color: var(--color-text-tertiary);
+  /* One line: .profile-detail's break-all would split the address. */
+  word-break: normal;
+  white-space: nowrap;
+}
 .install-option {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   margin-top: 0.35rem;
   padding-top: 0.6rem;
-  border-top: 1px solid #eee;
+  border-top: 1px solid var(--color-border-tertiary);
   color: var(--color-primary-dark);
   font-weight: 600;
 }
@@ -422,7 +858,7 @@ a.login-link {
   padding: 1.5rem;
   border-radius: var(--border-radius-lg);
   background: var(--color-background-primary);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-card);
 }
 
 .form-field {
@@ -442,19 +878,21 @@ select {
   font-size: 14px;
   padding: 0.5rem;
   border-radius: var(--border-radius-md);
-  border: 1px solid #ccc;
+  border: 1px solid var(--color-border-input);
   width: 100%;
-  background: #fff;
+  color: var(--color-text-primary);
+  background: var(--color-background-primary);
 }
 input:focus,
 textarea:focus,
 select:focus {
-  outline: 2px solid rgba(0, 151, 123, 0.35);
+  outline: none;
+  box-shadow: var(--focus-ring);
   border-color: var(--color-primary);
 }
 input[readonly] {
-  background: #f3f4f6;
-  color: #6b7280;
+  background: var(--color-background-secondary);
+  color: var(--color-text-secondary);
   cursor: not-allowed;
 }
 
@@ -474,8 +912,8 @@ input[readonly] {
   font-size: 14px;
   text-align: left;
   color: var(--color-text-primary);
-  background: #fff;
-  border: 1px solid #ccc;
+  background: var(--color-background-primary);
+  border: 1px solid var(--color-border-input);
   border-radius: var(--border-radius-md);
   cursor: pointer;
 }
@@ -483,7 +921,8 @@ input[readonly] {
   border-color: var(--color-border-secondary);
 }
 .searchable-select-trigger:focus {
-  outline: 2px solid rgba(0, 151, 123, 0.35);
+  outline: none;
+  box-shadow: var(--focus-ring);
   border-color: var(--color-primary);
 }
 .searchable-select-trigger:disabled {
@@ -509,10 +948,10 @@ input[readonly] {
   top: calc(100% + 2px);
   left: 0;
   width: 100%;
-  background: #fff;
+  background: var(--color-background-primary);
   border: 1px solid var(--color-border-secondary);
   border-radius: var(--border-radius-md);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--shadow-popover);
   overflow: hidden;
 }
 .searchable-select-input {
@@ -540,7 +979,7 @@ input[readonly] {
   cursor: pointer;
 }
 .searchable-select-option.highlighted {
-  background: rgba(0, 151, 123, 0.1);
+  background: color-mix(in srgb, var(--color-primary) 14%, transparent);
 }
 .searchable-select-option.selected {
   color: var(--color-primary-dark);
@@ -569,27 +1008,30 @@ textarea {
 }
 
 .required-star {
-  color: #d00;
+  color: var(--color-error);
   margin-left: 0.2rem;
 }
 .field-note {
   font-size: 12px;
-  color: #666;
+  color: var(--color-text-secondary);
 }
 .error-text {
-  color: #d32f2f;
+  color: var(--color-error);
   margin-top: 0.25rem;
+}
+.warning-text {
+  color: var(--color-warning-text);
 }
 
 .missing-teacher-box {
-  border: 1px solid #ddd;
+  border: 1px solid var(--color-border-tertiary);
   padding: 1.5rem;
   border-radius: var(--border-radius-lg);
-  background: #fff7e6;
+  background: var(--color-warning-tint);
 }
 .warning-text {
   margin: 0 0 1rem 0;
-  color: #5f370e;
+  color: var(--color-warning-text);
 }
 
 /* ----- Login ----------------------------------------------------------- */
@@ -597,21 +1039,21 @@ textarea {
   display: flex;
   gap: 0.5rem;
   margin-bottom: 1rem;
-  border-bottom: 2px solid #eee;
+  border-bottom: 2px solid var(--color-border-tertiary);
 }
 .method-tab {
   padding: 0.75rem 1rem;
   cursor: pointer;
   border-bottom: 3px solid transparent;
   font-weight: 500;
-  color: #666;
+  color: var(--color-text-secondary);
   transition: all 0.3s ease;
 }
 .method-tab:hover {
-  color: var(--color-primary);
+  color: var(--color-primary-dark);
 }
 .method-tab.active {
-  color: var(--color-primary);
+  color: var(--color-primary-dark);
   border-bottom-color: var(--color-primary);
 }
 .login-form {
@@ -619,14 +1061,14 @@ textarea {
 }
 .login-form p {
   margin: 0 0 1rem 0;
-  color: #666;
+  color: var(--color-text-secondary);
 }
 .forgot-password-link {
   margin-top: 1rem;
   text-align: center;
 }
 .forgot-password-link a {
-  color: var(--color-primary);
+  color: var(--color-primary-dark);
   text-decoration: none;
   font-size: 13px;
 }
@@ -634,8 +1076,8 @@ textarea {
   text-decoration: underline;
 }
 .session-message {
-  color: #b26a00;
-  background: #fff7e6;
+  color: var(--color-warning-text);
+  background: var(--color-warning-tint);
   padding: 0.5rem 0.75rem;
   border-radius: var(--border-radius-md);
 }
@@ -650,9 +1092,9 @@ textarea {
 /* Highlighted, bold style for validation warnings (e.g. "Please select a class."). */
 .status-line.status-warning {
   font-weight: bold;
-  color: var(--color-warning-dark, #d97706);
-  background-color: var(--color-warning-light, #fef3c7);
-  border-left: 4px solid #d97706;
+  color: var(--color-warning-dark);
+  background-color: var(--color-warning-light);
+  border-left: 4px solid var(--color-warning);
   border-radius: var(--border-radius-md);
   padding: 0.5rem 0.75rem;
 }
@@ -670,9 +1112,9 @@ textarea {
   list-style: none;
 }
 .status-warnings li {
-  border-left: 3px solid #d97706;
-  background-color: #fef3c7;
-  color: #92400e;
+  border-left: 3px solid var(--color-warning);
+  background-color: var(--color-warning-light);
+  color: var(--color-warning-text);
   border-radius: var(--border-radius-md);
   padding: 0.35rem 0.6rem;
   margin-top: 0.35rem;
@@ -694,6 +1136,24 @@ textarea {
   margin: -0.5rem 0 1rem;
   line-height: 1.5;
 }
+/* The price of grading next to the auto-grading switch (AutoGradePriceNote). */
+.auto-grade-price {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  padding: 8px 12px;
+  margin: 0 0 0.75rem;
+  border-radius: var(--border-radius-md, 8px);
+  background: var(--color-primary-tint);
+  border: 1px solid var(--color-primary-tint-border);
+  color: var(--color-primary-dark);
+  font-size: 13px;
+  line-height: 1.45;
+}
+.auto-grade-price i {
+  font-size: 16px;
+  margin-top: 1px;
+}
 .auto-grade-alert {
   display: flex;
   gap: 10px;
@@ -701,9 +1161,9 @@ textarea {
   padding: 10px 12px;
   margin-bottom: 0.75rem;
   border-radius: var(--border-radius-md, 8px);
-  background: #fdecea;
-  border: 1px solid #f5c2bd;
-  color: #8c1d18;
+  background: var(--color-danger-tint);
+  border: 1px solid var(--color-danger-tint-border);
+  color: var(--color-danger-text);
   font-size: 13px;
   line-height: 1.45;
 }
@@ -744,6 +1204,271 @@ textarea {
 .auto-grade-slot .field-note {
   margin: 0;
 }
+.auto-grade-slot .field-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 5px;
+}
+/* Settings → IELTS template: "from lesson" and "to lesson" side by side. */
+.template-range {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0 0.75rem;
+}
+.template-range select {
+  width: 100%;
+}
+.auto-grade-slot input[type="date"],
+.auto-grade-slot .date-vn > input[type="text"] {
+  min-height: 38px;
+}
+
+/* Morning / afternoon / evening: one segmented control per grading day. */
+.part-toggle {
+  display: flex;
+  gap: 3px;
+  padding: 3px;
+  border-radius: 10px;
+  background: var(--color-background-secondary);
+  border: 1px solid var(--color-border-tertiary);
+}
+.part-toggle button {
+  flex: 1 1 0;
+  min-width: 0;
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0 5px;
+  padding: 6px 4px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--color-text-secondary);
+  font: inherit;
+  font-size: 13px;
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    box-shadow 0.15s;
+}
+.part-toggle button i {
+  font-size: 16px;
+}
+.part-toggle button:hover:not(:disabled):not(.active) {
+  background: var(--color-surface-hover);
+  color: var(--color-text-primary);
+}
+.part-toggle button.active {
+  background: var(--color-background-primary);
+  color: var(--color-primary-dark);
+  font-weight: 600;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.08),
+    0 0 0 1px var(--color-primary-tint-border);
+}
+.part-toggle button:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 1px;
+}
+.part-toggle button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+/* The admin's time sits on its own line under the part. */
+.part-toggle-time {
+  flex-basis: 100%;
+  text-align: center;
+  line-height: 1.2;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+.part-toggle button.active .part-toggle-time {
+  color: var(--color-primary);
+}
+/* Each part's icon keeps its own hue once picked (and in the admin table). */
+.part-toggle button.active[data-part="morning"] i,
+.auto-grade-admin-part i[data-part="morning"] {
+  color: var(--color-warning);
+}
+.part-toggle button.active[data-part="afternoon"] i,
+.auto-grade-admin-part i[data-part="afternoon"] {
+  color: var(--color-warning-dark);
+}
+.part-toggle button.active[data-part="evening"] i,
+.auto-grade-admin-part i[data-part="evening"] {
+  color: var(--color-primary);
+}
+@media (max-width: 420px) {
+  .part-toggle-time {
+    display: none;
+  }
+}
+
+.auto-grade-legacy {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin: 0 0 0.75rem;
+  padding: 8px 10px;
+  border-radius: var(--border-radius-md, 8px);
+  background: var(--color-warning-tint);
+  color: var(--color-warning-text);
+  font-size: 13px;
+  line-height: 1.45;
+}
+.auto-grade-legacy i {
+  font-size: 16px;
+  margin-top: 1px;
+}
+
+/* Admin: the actual hour of each part of the day. */
+.auto-grade-admin {
+  margin: 0.25rem 0 0.75rem;
+  padding: 0.75rem 0.85rem 0.6rem;
+  border-radius: var(--border-radius-md, 8px);
+  border: 1px solid var(--color-primary-tint-border);
+  background: var(--color-primary-tint);
+}
+.auto-grade-admin-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 0.6rem;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-primary-dark);
+}
+.auto-grade-admin-head i {
+  font-size: 18px;
+}
+.auto-grade-admin-badge {
+  margin-left: auto;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: var(--color-background-primary);
+  border: 1px solid var(--color-primary-tint-border);
+}
+.auto-grade-admin-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-radius: 8px;
+  background: var(--color-background-primary);
+  border: 1px solid var(--color-border-tertiary);
+  padding: 4px;
+}
+.auto-grade-admin-row {
+  display: grid;
+  grid-template-columns: minmax(88px, 1fr) minmax(0, 1fr) minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+  padding: 4px 6px;
+  border-radius: 6px;
+}
+.auto-grade-admin-row.is-head {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-tertiary);
+}
+.auto-grade-admin-row.is-used {
+  background: var(--color-surface-subtle);
+}
+.time-select {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-variant-numeric: tabular-nums;
+}
+.time-select select {
+  flex: 1 1 0;
+  min-width: 0;
+  width: auto;
+  margin: 0;
+  padding: 0.4rem 0.35rem;
+  font-variant-numeric: tabular-nums;
+}
+.auto-grade-admin-peak-note {
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+  margin: 0 0 0.6rem;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--color-text-secondary);
+}
+.auto-grade-admin-peak-note i {
+  margin-top: 2px;
+  color: var(--color-primary-dark);
+}
+/* Phones: the part's name on a line of its own, its two times below. */
+@media (max-width: 480px) {
+  .auto-grade-admin-row {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    row-gap: 4px;
+  }
+  .auto-grade-admin-part {
+    grid-column: 1 / -1;
+  }
+  .auto-grade-admin-row.is-head > :first-child {
+    display: none;
+  }
+}
+.auto-grade-admin .auto-grade-admin-peak-warn {
+  color: var(--color-warning-text);
+  font-weight: 500;
+}
+.auto-grade-admin-part {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+.auto-grade-admin-part i {
+  font-size: 18px;
+}
+.auto-grade-admin-part small {
+  display: block;
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--color-text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+.auto-grade-admin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0.6rem 0 0.4rem;
+}
+.auto-grade-admin-actions .secondary-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.auto-grade-admin .field-note {
+  margin: 0.2rem 0 0;
+  line-height: 1.45;
+}
+.auto-grade-admin-ok {
+  color: var(--color-primary-dark);
+  font-weight: 500;
+}
 .auto-grade-add {
   margin: 0 0 0.75rem;
 }
@@ -767,6 +1492,101 @@ textarea {
   font-size: 13px;
   color: var(--color-text-secondary);
   margin: 0 0 0.75rem;
+}
+/* Grading screen: docs × price = total, before the grade button
+   (components/GradeCostNote.jsx). Same tint as .auto-grade-price; a balance
+   that cannot cover it turns the box to the danger tint. */
+.grade-cost {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  padding: 10px 12px;
+  margin: 0 0 0.75rem;
+  border-radius: var(--border-radius-md, 8px);
+  background: var(--color-primary-tint);
+  border: 1px solid var(--color-primary-tint-border);
+  color: var(--color-text-primary);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.grade-cost > i {
+  font-size: 18px;
+  margin-top: 1px;
+  color: var(--color-primary-dark);
+}
+.grade-cost p {
+  margin: 0;
+}
+.grade-cost p + p {
+  margin-top: 2px;
+}
+.grade-cost-title {
+  font-weight: 600;
+  color: var(--color-primary-dark);
+}
+.grade-cost-formula {
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+.grade-cost-auto {
+  color: var(--color-text-secondary);
+}
+/* "Kiểm tra lại": a text link, students may hand in more meanwhile. */
+.grade-cost-retry {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--color-primary-dark);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.grade-cost .status-loading {
+  color: var(--color-text-secondary);
+}
+.grade-cost[data-state="short"] {
+  background: var(--color-danger-tint);
+  border-color: var(--color-danger-tint-border);
+}
+.grade-cost[data-state="short"] > i,
+.grade-cost[data-state="short"] .grade-cost-title,
+.grade-cost-short {
+  color: var(--color-danger-text);
+}
+/* A load failure with a way out (components/ErrorNotice.jsx). Same danger
+   language as .auto-grade-alert. */
+.error-notice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+  padding: 10px 12px;
+  margin: 0.5rem 0;
+  border-radius: var(--border-radius-md, 8px);
+  background: var(--color-danger-tint);
+  border: 1px solid var(--color-danger-tint-border);
+  color: var(--color-danger-text);
+  font-size: 13px;
+  line-height: 1.45;
+}
+.error-notice > .ti {
+  font-size: 18px;
+}
+.error-notice-text {
+  flex: 1 1 12rem;
+}
+.error-notice .secondary-btn {
+  padding: 5px 12px;
+  background: var(--color-background-primary);
+}
+/* What a disabled button is waiting for, just under it. */
+.field-hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin: 0 0 0.5rem;
 }
 .secondary-btn {
   background: none;
@@ -826,7 +1646,7 @@ textarea {
 }
 .ielts-task.active {
   border-color: var(--color-primary);
-  background: rgba(0, 151, 123, 0.08);
+  background: color-mix(in srgb, var(--color-primary) 12%, transparent);
   color: var(--color-primary-dark);
   font-weight: 600;
 }
@@ -876,7 +1696,7 @@ textarea {
   font-size: 24px;
 }
 .ielts-short {
-  color: #b45309;
+  color: var(--color-warning-dark);
 }
 .ielts-chart {
   margin: 0.75rem 0 0;
@@ -944,4 +1764,65 @@ textarea {
 }
 .ielts-criteria li {
   margin-bottom: 0.35rem;
+}
+
+/* DateInputVn: dd/mm/yyyy shown, the native date input only for its calendar. */
+.date-vn {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+/* readonly only so it cannot be typed into — it is a live field, not the
+   locked look of input[readonly]. */
+.date-vn > input[type="text"] {
+  width: 100%;
+  padding-right: 2rem;
+  background: var(--color-background-primary);
+  color: var(--color-text-primary);
+  cursor: pointer;
+}
+.date-vn > input[type="text"]:disabled {
+  background: var(--color-background-secondary);
+  color: var(--color-text-secondary);
+  cursor: not-allowed;
+}
+.date-vn-icon {
+  position: absolute;
+  right: 0.6rem;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: var(--color-text-secondary);
+}
+.date-vn-native {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 0;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+/* iOS Safari opens no picker from showPicker() or focus() on a hidden date
+   input, so on touch screens the (still invisible) native input covers the
+   field and takes the tap itself. 16px keeps iOS from zooming in on focus. */
+@media (pointer: coarse) {
+  .date-vn > input.date-vn-native[type="date"] {
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    z-index: 1;
+    display: block;
+    -webkit-appearance: none;
+    appearance: none;
+    font-size: 16px;
+    pointer-events: auto;
+  }
+  .date-vn > input.date-vn-native[type="date"]:disabled {
+    pointer-events: none;
+  }
 }

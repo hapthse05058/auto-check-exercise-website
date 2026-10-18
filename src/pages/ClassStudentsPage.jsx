@@ -14,6 +14,7 @@ import {
 import { getTabContent } from "../api/googleDocs.js";
 import { useAuth } from "../auth/AuthContext.jsx";
 import { ensureValidGoogleToken } from "../auth/tokens.js";
+import DataTable from "../components/DataTable.jsx";
 import SearchableSelect from "../components/SearchableSelect.jsx";
 import { isAdminEmail } from "../config.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
@@ -273,6 +274,79 @@ export default function ClassStudentsPage() {
     }
   };
 
+  const columns = [
+    {
+      id: "select",
+      header: () => (
+        <input
+          type="checkbox"
+          checked={allSelected}
+          ref={(el) => {
+            // Half-ticked box when only some rows are selected.
+            if (el) el.indeterminate = selectedIds.size > 0 && !allSelected;
+          }}
+          onChange={toggleSelectAll}
+          aria-label={t("classStudents.selectAll")}
+        />
+      ),
+      meta: { className: "cell-check", headerClassName: "cell-check" },
+      cell: ({ row }) => (
+        <input
+          type="checkbox"
+          checked={selectedIds.has(row.original.id)}
+          onChange={() => toggleSelected(row.original.id)}
+          aria-label={row.original.name}
+        />
+      ),
+    },
+    {
+      id: "name",
+      header: t("classStudents.colName"),
+      accessorFn: (s) => s.name || undefined,
+    },
+    {
+      id: "doc",
+      header: t("classStudents.colDoc"),
+      // Students with a doc first when sorted ascending.
+      accessorFn: (s) => (s.ggDocLink ? 0 : 1),
+      cell: ({ row }) =>
+        row.original.ggDocLink ? (
+          <a
+            href={row.original.ggDocLink}
+            target="_blank"
+            rel="noreferrer"
+            onClick={(e) => openDoc(e, row.original.ggDocLink)}
+          >
+            {t("classStudents.openDoc")}
+          </a>
+        ) : (
+          "—"
+        ),
+    },
+    {
+      id: "graded",
+      header: t("classStudents.colGraded"),
+      cell: () => gradedLabel(currentLesson),
+    },
+    {
+      id: "action",
+      header: t("classStudents.colActions"),
+      meta: { className: "cell-actions" },
+      cell: ({ row }) => (
+        <div className="row-actions">
+          <button
+            className="btn-icon danger"
+            aria-label={t("classStudents.remove")}
+            onClick={() => setRemoveTarget(row.original)}
+            disabled={removing}
+          >
+            <i className="ti ti-trash" aria-hidden="true" />
+          </button>
+        </div>
+      ),
+    },
+  ];
+
   return (
     <div className="page-wide">
       <div className="wrap">
@@ -361,77 +435,14 @@ export default function ClassStudentsPage() {
             <p>{t("classStudents.noStudents")}</p>
           </div>
         ) : (
-          <div className="cache-table-wrap">
-            <table className="cache-table">
-              <thead>
-                <tr>
-                  <th className="cell-check">
-                    <input
-                      type="checkbox"
-                      checked={allSelected}
-                      ref={(el) => {
-                        // Half-ticked box when only some rows are selected.
-                        if (el)
-                          el.indeterminate =
-                            selectedIds.size > 0 && !allSelected;
-                      }}
-                      onChange={toggleSelectAll}
-                      aria-label={t("classStudents.selectAll")}
-                    />
-                  </th>
-                  <th>{t("classStudents.colName")}</th>
-                  <th>{t("classStudents.colDoc")}</th>
-                  <th>{t("classStudents.colGraded")}</th>
-                  <th>{t("classStudents.colActions")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {students.map((s) => (
-                  <tr
-                    key={s.id}
-                    className={
-                      selectedIds.has(s.id) ? "row-selected" : undefined
-                    }
-                  >
-                    <td className="cell-check">
-                      <input
-                        type="checkbox"
-                        checked={selectedIds.has(s.id)}
-                        onChange={() => toggleSelected(s.id)}
-                        aria-label={s.name}
-                      />
-                    </td>
-                    <td>{s.name}</td>
-                    <td>
-                      {s.ggDocLink ? (
-                        <a
-                          href={s.ggDocLink}
-                          target="_blank"
-                          rel="noreferrer"
-                          onClick={(e) => openDoc(e, s.ggDocLink)}
-                        >
-                          {t("classStudents.openDoc")}
-                        </a>
-                      ) : (
-                        "—"
-                      )}
-                    </td>
-                    <td>{gradedLabel(currentLesson)}</td>
-                    <td className="cell-actions">
-                      <button
-                        className="btn-icon danger"
-                        aria-label={t("classStudents.remove")}
-                        onClick={() => setRemoveTarget(s)}
-                        disabled={removing}
-                      >
-                        <i className="ti ti-trash" aria-hidden="true" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <DataTable
+            data={students}
+            columns={columns}
+            getRowId={(s) => s.id}
+            rowClassName={(s) =>
+              selectedIds.has(s.id) ? "row-selected" : undefined
+            }
+          />
         )}
 
         {removeTarget && (

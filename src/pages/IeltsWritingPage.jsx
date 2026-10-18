@@ -3,13 +3,14 @@ import { useNavigate } from "react-router-dom";
 
 import {
   fetchAllClasses,
-  fetchMyPoint,
+  fetchMyBalance,
   gradeIeltsWriting,
 } from "../api/backend.js";
 import { useAuth } from "../auth/AuthContext.jsx";
 import SearchableSelect from "../components/SearchableSelect.jsx";
 import { isAdminEmail } from "../config.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
+import { PRICE_MANUAL_VND, formatVnd } from "../lib/billing.js";
 import {
   MAX_IMAGES,
   MIN_WORDS,
@@ -22,7 +23,7 @@ import {
   feedbackToPlain,
   ieltsErrorText,
 } from "../lib/ieltsWriting.js";
-import { announcePoints } from "../lib/pointEvents.js";
+import { announceBalance } from "../lib/pointEvents.js";
 
 /** One feedback text block: keeps line breaks, turns **x** into bold. */
 function FeedbackText({ text }) {
@@ -79,13 +80,16 @@ export default function IeltsWritingPage() {
           navigate("/missing-teacher", { replace: true });
           return;
         }
-        const admin = isAdminEmail(teacherInfo.gmail);
-        setIsAdmin(admin);
-        // Only an admin picks a class: it bills that class's teacher.
-        if (admin) {
-          const list = await fetchAllClasses();
-          if (!cancelled) setClasses(Array.isArray(list) ? list : []);
+        // Admin only — the route is reachable by URL even though the menu
+        // item is hidden. Teachers grade IELTS classes from /grade.
+        if (!isAdminEmail(teacherInfo.gmail)) {
+          navigate("/grade", { replace: true });
+          return;
         }
+        setIsAdmin(true);
+        // The admin may pick a class: it bills that class's teacher.
+        const list = await fetchAllClasses();
+        if (!cancelled) setClasses(Array.isArray(list) ? list : []);
       } catch (err) {
         if (err.message !== "RE-AUTH_NEEDED")
           console.error("IELTS page load failed:", err);
@@ -157,7 +161,7 @@ export default function IeltsWritingPage() {
       });
       setOutcome(data);
       try {
-        announcePoints(await fetchMyPoint());
+        announceBalance(await fetchMyBalance());
       } catch {
         // the badge refreshes on its own later
       }
@@ -192,13 +196,15 @@ export default function IeltsWritingPage() {
 
   const result = outcome?.result;
 
+  if (!isAdmin) return null; // admin not confirmed yet → render nothing
+
   return (
     <div className="page-wide">
       <div className="wrap ielts-page">
         <div className="topbar">
           <div className="topbar-left">
             <h2>{t("ielts.title")}</h2>
-            <p>{t("ielts.subtitle")}</p>
+            <p>{t("ielts.subtitle", { price: formatVnd(PRICE_MANUAL_VND) })}</p>
           </div>
         </div>
 
@@ -363,7 +369,7 @@ export default function IeltsWritingPage() {
             <p className="field-note">
               {t("ielts.meta", {
                 words: result.wordCount,
-                charged: outcome.charged,
+                charged: formatVnd(outcome.chargedVnd),
                 payer: outcome.payerName,
               })}
               {outcome.cached ? ` · ${t("ielts.fromCache")}` : ""}

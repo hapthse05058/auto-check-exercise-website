@@ -3,9 +3,15 @@ import { useNavigate } from "react-router-dom";
 
 import { fetchAuditFilterOptions, fetchAuditLogs } from "../api/backend.js";
 import { useAuth } from "../auth/AuthContext.jsx";
+import ColumnPicker from "../components/ColumnPicker.jsx";
+import DataTable from "../components/DataTable.jsx";
+import DateInputVn from "../components/DateInputVn.jsx";
+import ExpandableText from "../components/ExpandableText.jsx";
 import MultiSelect from "../components/MultiSelect.jsx";
 import { isAdminEmail } from "../config.js";
+import { useColumnVisibility } from "../hooks/useColumnVisibility.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
+import { formatDateTimeVn } from "../lib/scheduleTime.js";
 
 const PAGE_SIZE = 50;
 // Same debounce as the teacher management screen, so typing does not spam the API.
@@ -33,20 +39,16 @@ const FILTER_FIELDS = [
 
 const DEFAULT_WINDOW_DAYS = 7;
 
+// Every column starts shown; the admin hides what they do not need.
+const DEFAULT_COLUMNS = {};
+
 /** YYYY-MM-DD in local time, for the native date inputs. */
 function toDateInput(date) {
   const offset = date.getTimezoneOffset() * 60000;
   return new Date(date.getTime() - offset).toISOString().slice(0, 10);
 }
 
-function formatDate(iso) {
-  if (!iso) return "—";
-  try {
-    return new Date(iso).toLocaleString();
-  } catch {
-    return iso;
-  }
-}
+const formatDate = (iso) => formatDateTimeVn(iso, { seconds: true });
 
 /**
  * Read-only audit trail (admin only). Entries are written server-side by the
@@ -81,6 +83,9 @@ export default function AuditLogPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
 
+  const [columnVisibility, setColumnVisibility, resetColumns] =
+    useColumnVisibility("auditLogCols", DEFAULT_COLUMNS);
+
   const fieldType =
     FILTER_FIELDS.find((f) => f.value === field)?.type ?? "text";
 
@@ -93,6 +98,19 @@ export default function AuditLogPage() {
     const key = `audit.action.${String(action).replace(/\./g, "_")}`;
     const label = t(key);
     return label === key ? action : label;
+  };
+
+  /** Same fallback idea for the other enum filters (type, result). */
+  const enumLabel = (group) => (value) => {
+    const key = `audit.${group}.${value}`;
+    const label = t(key);
+    return label === key ? value : label;
+  };
+  const resourceTypeLabel = enumLabel("resourceType");
+  const OPTION_LABELS = {
+    action: actionLabel,
+    resourceType: resourceTypeLabel,
+    success: enumLabel("success"),
   };
 
   useEffect(() => {
@@ -188,6 +206,113 @@ export default function AuditLogPage() {
 
   if (checking) return null;
 
+  // Server-paginated: sorting would only reorder the page on screen.
+  const columns = [
+    {
+      id: "time",
+      header: t("audit.colTime"),
+      meta: { className: "cell-date" },
+      cell: ({ row }) => formatDate(row.original.createdAt),
+    },
+    {
+      id: "actor",
+      header: t("audit.colActor"),
+      meta: {
+        className: "cell-clip",
+        cellProps: (r) => ({ title: r.actorEmail }),
+      },
+      cell: ({ row }) => {
+        const r = row.original;
+        return (
+          <>
+            {r.actorName || r.actorEmail || "—"}
+            {r.actorName && r.actorEmail ? (
+              <div className="audit-actor-email">{r.actorEmail}</div>
+            ) : null}
+          </>
+        );
+      },
+    },
+    {
+      id: "action",
+      header: t("audit.colAction"),
+      meta: { cellProps: (r) => ({ title: r.action }) },
+      cell: ({ row }) => actionLabel(row.original.action),
+    },
+    {
+      id: "detail",
+      header: t("audit.colDetail"),
+      meta: {
+        className: "cell-clip",
+        cellProps: (r) => ({ title: r.detail }),
+      },
+      cell: ({ row }) =>
+        row.original.detail ? (
+          <ExpandableText text={row.original.detail} />
+        ) : (
+          "—"
+        ),
+    },
+    {
+      id: "resource",
+      header: t("audit.colResource"),
+      cell: ({ row }) => resourceTypeLabel(row.original.resourceType),
+    },
+    {
+      id: "severity",
+      header: t("audit.colSeverity"),
+      cell: ({ row }) => (
+        <span
+          className={`audit-severity audit-severity-${row.original.severity.toLowerCase()}`}
+        >
+          {row.original.severity}
+        </span>
+      ),
+    },
+    {
+      id: "entity",
+      header: t("audit.colEntity"),
+      meta: {
+        className: "cell-clip",
+        cellProps: (r) => ({ title: r.entityId }),
+      },
+      cell: ({ row }) => row.original.entityId || "—",
+    },
+    {
+      id: "result",
+      header: t("audit.colResult"),
+      meta: { cellProps: (r) => ({ title: `HTTP ${r.statusCode ?? "?"}` }) },
+      cell: ({ row }) =>
+        `${row.original.success ? "✓" : "✗"} ${row.original.statusCode ?? ""}`,
+    },
+    {
+      id: "duration",
+      header: t("audit.colDuration"),
+      cell: ({ row }) => {
+        const ms = row.original.durationMs;
+        return ms === null || ms === undefined ? "—" : `${ms}ms`;
+      },
+    },
+    {
+      id: "ip",
+      header: t("audit.colIp"),
+      cell: ({ row }) => row.original.ip || "—",
+    },
+    {
+      id: "requestId",
+      header: t("audit.colRequestId"),
+      meta: {
+        className: "cell-clip",
+        cellProps: (r) => ({
+          title: t("audit.copyRequestId", { id: r.requestId }),
+          onClick: () => navigator.clipboard?.writeText(r.requestId || ""),
+        }),
+      },
+      cell: ({ row }) =>
+        row.original.requestId ? row.original.requestId.slice(0, 8) : "—",
+    },
+  ];
+
   return (
     <div className="page-wide">
       <div className="wrap">
@@ -220,7 +345,9 @@ export default function AuditLogPage() {
               options={options[field] || []}
               placeholder={t("audit.allValues")}
               summaryText={(n) => t("audit.selectedCount", { n })}
-              renderLabel={field === "action" ? actionLabel : undefined}
+              searchPlaceholder={t("audit.searchValues")}
+              noResultsText={t("audit.noValues")}
+              renderLabel={OPTION_LABELS[field]}
             />
           ) : (
             <input
@@ -233,8 +360,7 @@ export default function AuditLogPage() {
 
           <label className="audit-date">
             {t("audit.from")}
-            <input
-              type="date"
+            <DateInputVn
               value={from}
               max={to}
               onChange={(e) => setFrom(e.target.value)}
@@ -242,13 +368,21 @@ export default function AuditLogPage() {
           </label>
           <label className="audit-date">
             {t("audit.to")}
-            <input
-              type="date"
+            <DateInputVn
               value={to}
               min={from}
               onChange={(e) => setTo(e.target.value)}
             />
           </label>
+        </div>
+
+        <div className="table-toolbar">
+          <ColumnPicker
+            columns={columns}
+            visibility={columnVisibility}
+            onChange={setColumnVisibility}
+            onReset={resetColumns}
+          />
         </div>
 
         {loading ? (
@@ -262,73 +396,14 @@ export default function AuditLogPage() {
             <p>{t("audit.empty")}</p>
           </div>
         ) : (
-          <div className="cache-table-wrap">
-            <table className="cache-table">
-              <thead>
-                <tr>
-                  <th>{t("audit.colTime")}</th>
-                  <th>{t("audit.colActor")}</th>
-                  <th>{t("audit.colAction")}</th>
-                  <th>{t("audit.colResource")}</th>
-                  <th>{t("audit.colSeverity")}</th>
-                  <th>{t("audit.colEntity")}</th>
-                  <th>{t("audit.colResult")}</th>
-                  <th>{t("audit.colDuration")}</th>
-                  <th>{t("audit.colDetail")}</th>
-                  <th>{t("audit.colIp")}</th>
-                  <th>{t("audit.colRequestId")}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((row) => (
-                  <tr key={row.id}>
-                    <td className="cell-date">{formatDate(row.createdAt)}</td>
-                    <td className="cell-clip" title={row.actorEmail}>
-                      {row.actorName || row.actorEmail || "—"}
-                      {row.actorName && row.actorEmail ? (
-                        <div className="audit-actor-email">
-                          {row.actorEmail}
-                        </div>
-                      ) : null}
-                    </td>
-                    <td title={row.action}>{actionLabel(row.action)}</td>
-                    <td>{row.resourceType}</td>
-                    <td>
-                      <span
-                        className={`audit-severity audit-severity-${row.severity.toLowerCase()}`}
-                      >
-                        {row.severity}
-                      </span>
-                    </td>
-                    <td className="cell-clip" title={row.entityId}>
-                      {row.entityId || "—"}
-                    </td>
-                    <td title={`HTTP ${row.statusCode ?? "?"}`}>
-                      {row.success ? "✓" : "✗"} {row.statusCode ?? ""}
-                    </td>
-                    <td>
-                      {row.durationMs === null || row.durationMs === undefined
-                        ? "—"
-                        : `${row.durationMs}ms`}
-                    </td>
-                    <td className="cell-clip" title={row.detail}>
-                      {row.detail || "—"}
-                    </td>
-                    <td>{row.ip || "—"}</td>
-                    <td
-                      className="cell-clip"
-                      title={t("audit.copyRequestId", { id: row.requestId })}
-                      onClick={() =>
-                        navigator.clipboard?.writeText(row.requestId || "")
-                      }
-                    >
-                      {row.requestId ? row.requestId.slice(0, 8) : "—"}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <DataTable
+            data={rows}
+            columns={columns}
+            getRowId={(r) => r.id}
+            enableSorting={false}
+            columnVisibility={columnVisibility}
+            onColumnVisibilityChange={setColumnVisibility}
+          />
         )}
 
         {!loading && totalPages > 1 && (

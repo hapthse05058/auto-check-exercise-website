@@ -50,6 +50,14 @@ describe("describeJob", () => {
           }),
           t,
         ),
+        describeJob(
+          job({
+            written: 0,
+            notice: "allIeltsTemplateOutdated",
+            noticeParams: { count: 2 },
+          }),
+          t,
+        ),
         describeJob(job({ written: 0 }), t),
         describeJob(job({ reauthRequired: true }), t),
         ...[
@@ -74,6 +82,10 @@ describe("describeJob", () => {
               {
                 code: "skippedHasOldFeedback",
                 params: { docId: "d1", count: 1 },
+              },
+              {
+                code: "ieltsTemplateOutdated",
+                params: { docId: "d1", count: 2 },
               },
               { code: "noMatch", params: { docId: "d1" } },
               { code: "failedDoc", params: { docId: "d1", msg: "403" } },
@@ -141,6 +153,78 @@ describe("describeJob", () => {
     expect(view.text).toContain("Cô Hà");
   });
 
+  it("spells a shortfall out as docs × price", () => {
+    const view = describeJob(
+      job({
+        status: "failed",
+        error: "not_enough_points",
+        unitPriceVnd: 800,
+        errorParams: {
+          need: 25,
+          needVnd: 20000,
+          haveVnd: 5000,
+          teacher: "Cô Hà",
+        },
+      }),
+      makeT("vi"),
+    );
+    expect(view.text).toContain("25 bài × 800đ = 20.000đ");
+    expect(view.text).toContain("Cô Hà còn 5.000đ");
+  });
+
+  describe("what a finished run charged", () => {
+    const vi = makeT("vi");
+
+    it("docs × price = total", () => {
+      const view = describeJob(
+        job({ written: 25, charged: 25, unitPriceVnd: 800, chargedVnd: 20000 }),
+        vi,
+      );
+      expect(view.text).toContain("Đã trừ: 25 bài × 800đ = 20.000đ.");
+    });
+
+    it("names docs paid for before, so a lower total is explained", () => {
+      const view = describeJob(
+        job({
+          written: 3,
+          charged: 2,
+          alreadyPaid: 1,
+          unitPriceVnd: 700,
+          chargedVnd: 1400,
+        }),
+        vi,
+      );
+      expect(view.text).toContain("Đã trừ: 2 bài × 700đ = 1.400đ.");
+      expect(view.text).toContain("1 bài đã trả tiền trước đó");
+    });
+
+    it("says when nothing was charged", () => {
+      const view = describeJob(
+        job({ written: 2, charged: 0, unitPriceVnd: 800, chargedVnd: 0 }),
+        vi,
+      );
+      expect(view.text).toContain("Không trừ tiền.");
+    });
+
+    it("keeps the docs charged before Google access ran out", () => {
+      const view = describeJob(
+        job({
+          reauthRequired: true,
+          written: 1,
+          charged: 1,
+          unitPriceVnd: 800,
+          chargedVnd: 800,
+        }),
+        vi,
+      );
+      expect(view.text).toContain("Đã trừ: 1 bài × 800đ = 800đ.");
+    });
+
+    it("a job from before prices were reported adds no cost line", () => {
+      expect(describeJob(job(), vi).text).not.toMatch(/trừ/);
+    });
+  });
+
   it("builds the unreadable-answer list from table/question refs", () => {
     const view = describeJob(
       job({
@@ -189,4 +273,36 @@ describe("isJobFinished", () => {
       expect(isJobFinished({ status })).toBe(false);
     }
   });
+});
+
+describe("template update messages", () => {
+  for (const lang of ["en", "vi"]) {
+    const t = makeT(lang);
+    it(`[${lang}] every line the update button can show exists and is filled in`, () => {
+      const lines = [
+        t("grade.updateTemplate"),
+        t("grade.updatingTemplate"),
+        t("grade.confirmUpdateTemplate", { lesson: "BUỔI 06", class: "A" }),
+        t("grade.templateUpdated", { updated: 3, total: 4, tables: 9 }),
+        t("grade.templateUnchanged", { n: 1 }),
+        t("grade.templateNotUpdated", { n: 1 }),
+        t("grade.templateNoTable", { n: 2 }),
+        t("grade.templateJobRunning"),
+        t("grade.templateUpdateFailed", { msg: "boom" }),
+        t("settings.autoGradeTitle"),
+        t("settings.autoGradeIntro"),
+        t("settings.templateTitle"),
+        t("settings.templateIntro"),
+        t("settings.templateIeltsOnly"),
+        t("settings.loadFailed"),
+        t("nav.groupSettings"),
+        t("nav.autoGrade"),
+        t("nav.updateTemplate"),
+      ];
+      for (const line of lines) {
+        expect(line, line).not.toMatch(/^(grade|settings|nav)\./);
+        expect(line, line).not.toMatch(/\{[a-zA-Z]\w*\}/);
+      }
+    });
+  }
 });

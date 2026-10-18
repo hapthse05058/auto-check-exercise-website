@@ -14,7 +14,9 @@
     "prettier": "prettier --check .",
     "format": "eslint . --fix && prettier --write .",
     "validate": "eslint . && prettier --check .",
-    "prepare": "husky"
+    "prepare": "husky",
+    "build:hs-template": "node scripts/buildHsTemplate.mjs",
+    "check:hs-template": "node scripts/buildHsTemplate.mjs --check"
   },
   "lint-staged": {
     "*.{js,jsx}": [
@@ -26,6 +28,7 @@
     ]
   },
   "dependencies": {
+    "@tanstack/react-table": "^8.21.3",
     "firebase": "^10.14.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

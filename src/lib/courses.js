@@ -3,6 +3,53 @@
  * course, which decides its lessons; admins manage the courses.
  */
 
+/**
+ * The doc templates a class on `course` may use: those of the course's
+ * grading profile (a course without one is Basic, as in the backend).
+ */
+export function templatesForCourse(templates, course) {
+  if (!course) return [];
+  const profile = course.gradingProfile || "basic";
+  return (templates || []).filter(
+    (template) => (template.gradingProfile || "basic") === profile,
+  );
+}
+
+/** The template's name for a class's `classType` code, or the code itself. */
+export function templateName(templates, code) {
+  if (!code) return "";
+  return (templates || []).find((t) => t.code === code)?.name || code;
+}
+
+/**
+ * The course editor's lesson picker, grouped by the grading profile of each
+ * lesson's doc templates (`lesson.classType` codes) — Basic's "BUỔI 01" and
+ * HS's "Buổi 01" look alike, so they must not share one list. Each group:
+ * `{key, profiles, lessons}` (lessons keep their order); `key` is the joined
+ * profiles, "" when no template of the lesson is known. `profile` — the
+ * course's own — comes first; the rest keep their first-seen order.
+ */
+export function groupLessonsByProfile(lessons, templates, profile) {
+  const profileOf = new Map(
+    (templates || []).map((t) => [t.code, t.gradingProfile || "basic"]),
+  );
+  const groups = new Map();
+  for (const lesson of lessons || []) {
+    const codes = Array.isArray(lesson.classType)
+      ? lesson.classType
+      : [lesson.classType].filter(Boolean);
+    const profiles = [
+      ...new Set(codes.map((c) => profileOf.get(c)).filter(Boolean)),
+    ].sort();
+    const key = profiles.join("+");
+    if (!groups.has(key)) groups.set(key, { key, profiles, lessons: [] });
+    groups.get(key).lessons.push(lesson);
+  }
+  return [...groups.values()].sort(
+    (a, b) => (b.key === profile) - (a.key === profile),
+  );
+}
+
 /** Text for an Error thrown by the course API helpers. */
 export function courseErrorText(error, t) {
   const code = error?.message || "course_failed";
@@ -13,4 +60,29 @@ export function courseErrorText(error, t) {
     lessons: (params.lessons || []).join(", "),
   });
   return text === key ? t("courses.error.course_failed") : text;
+}
+
+/**
+ * A template code suggested from its name: "Mẫu tháng 10/2026" →
+ * "mau_thang_10_2026" (lowercase ASCII, digits, "_"; backend TEMPLATE_CODE_RE).
+ */
+export function templateCodeFromName(name) {
+  return String(name || "")
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/đ/gi, "d")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .slice(0, 64);
+}
+
+/** Text for an Error thrown by the template API helpers. */
+export function templateErrorText(error, t) {
+  const code = error?.message || "template_failed";
+  const key = `templates.error.${code}`;
+  const text = t(key, {
+    classes: (error?.params?.classes || []).join(", "),
+  });
+  return text === key ? t("templates.error.template_failed") : text;
 }

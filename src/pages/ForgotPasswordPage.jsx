@@ -10,18 +10,27 @@ export default function ForgotPasswordPage() {
   const { t } = useLanguage();
   const navigate = useNavigate();
   const [identifier, setIdentifier] = useState("");
-  const [status, setStatus] = useState({ text: "", color: "black" });
+  const [status, setStatus] = useState({
+    text: "",
+    color: "var(--color-text-primary)",
+  });
   const [submitting, setSubmitting] = useState(false);
 
   const handleForgotPassword = async () => {
     if (submitting) return;
     const trimmed = identifier.trim();
     if (!trimmed) {
-      setStatus({ text: t("forgot.needIdentifier"), color: "red" });
+      setStatus({
+        text: t("forgot.needIdentifier"),
+        color: "var(--color-error)",
+      });
       return;
     }
 
-    setStatus({ text: t("forgot.sending"), color: "black" });
+    setStatus({
+      text: t("forgot.sending"),
+      color: "var(--color-text-primary)",
+    });
     setSubmitting(true);
 
     try {
@@ -37,14 +46,14 @@ export default function ForgotPasswordPage() {
 
         setStatus({
           text: t("forgot.sent"),
-          color: "green",
+          color: "var(--color-success)",
         });
         await sleep(1000);
         navigate("/reset-password");
       } else {
         setStatus({
           text: data.message || t("forgot.processed"),
-          color: "green",
+          color: "var(--color-success)",
         });
         await sleep(2000);
         navigate("/login");
@@ -53,7 +62,7 @@ export default function ForgotPasswordPage() {
       console.error("Forgot password error:", error);
       setStatus({
         text: error.message || t("forgot.serverError"),
-        color: "red",
+        color: "var(--color-error)",
       });
     } finally {
       setSubmitting(false);

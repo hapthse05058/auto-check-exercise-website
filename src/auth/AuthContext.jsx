@@ -113,6 +113,16 @@ export function AuthProvider({ children }) {
     return loadTeacherInfo();
   }, [loadTeacherInfo]);
 
+  /** Merges a change the client just saved into the cached teacher record. */
+  const updateTeacherInfo = useCallback((patch) => {
+    setTeacherInfo((prev) => {
+      if (!prev) return prev;
+      const next = { ...prev, ...patch };
+      setTeacherInfoToSessionStorage(next);
+      return next;
+    });
+  }, []);
+
   const value = useMemo(
     () => ({
       isAuthenticated,
@@ -121,6 +131,7 @@ export function AuthProvider({ children }) {
       onLoggedIn,
       loadTeacherInfo,
       refreshTeacherInfo,
+      updateTeacherInfo,
       logout,
     }),
     [
@@ -130,6 +141,7 @@ export function AuthProvider({ children }) {
       onLoggedIn,
       loadTeacherInfo,
       refreshTeacherInfo,
+      updateTeacherInfo,
       logout,
     ],
   );

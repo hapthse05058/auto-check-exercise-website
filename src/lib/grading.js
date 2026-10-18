@@ -7,8 +7,13 @@
  * This module only starts that job and turns what the backend reports into
  * what the grading screen shows.
  */
+import { formatVnd } from "./billing.js";
 import { parseDocLinks } from "./docParser.js";
-import { createGradingJob, fetchStudentDocRefs } from "../api/backend.js";
+import {
+  createGradingJob,
+  fetchStudentDocRefs,
+  updateIeltsTemplates,
+} from "../api/backend.js";
 
 /**
  * Which docs an action applies to: the pasted links when the textarea has any,
@@ -18,6 +23,18 @@ import { createGradingJob, fetchStudentDocRefs } from "../api/backend.js";
 export async function resolveDocRefs(docLinksText, classId) {
   const trimmed = (docLinksText || "").trim();
   return trimmed ? parseDocLinks(trimmed) : fetchStudentDocRefs(classId);
+}
+
+/**
+ * The doc ids of the pasted links, or undefined (the whole class) when the
+ * textarea is empty. Throws "no_docs" when it holds no doc link at all.
+ */
+function pastedDocIds(docLinksText) {
+  const trimmed = (docLinksText || "").trim();
+  if (!trimmed) return undefined;
+  const docIds = [...new Set(parseDocLinks(trimmed).map((ref) => ref.docId))];
+  if (!docIds.length) throw new Error("no_docs");
+  return docIds;
 }
 
 /**
@@ -32,12 +49,22 @@ export async function startGradingJob({
   lessonId,
   useCache = true,
 }) {
-  const trimmed = (docLinksText || "").trim();
-  const docIds = trimmed
-    ? [...new Set(parseDocLinks(trimmed).map((ref) => ref.docId))]
-    : undefined;
-  if (trimmed && !docIds.length) throw new Error("no_docs");
+  const docIds = pastedDocIds(docLinksText);
   return createGradingJob({ classId, lessonId, docIds, useCache });
+}
+
+/**
+ * IELTS: brings `lessonIds` (Buổi X to Buổi Y) of the class's docs (or the
+ * pasted ones) to the current template. Resolves with the backend's summary
+ * once every doc is done.
+ */
+export async function updateLessonTemplate({
+  docLinksText,
+  classId,
+  lessonIds,
+}) {
+  const docIds = pastedDocIds(docLinksText);
+  return updateIeltsTemplates({ classId, lessonIds, docIds });
 }
 
 /** True once the backend will not touch this job again. */
@@ -58,12 +85,50 @@ function translateWarning({ code, params = {} }, t) {
   return t(`grading.${code}`, params);
 }
 
+/** What one doc of this job costs (older jobs: the total over the docs). */
+function unitPriceOf(job) {
+  if (Number.isFinite(job.unitPriceVnd)) return job.unitPriceVnd;
+  const params = job.errorParams || {};
+  return params.need ? Math.round(params.needVnd / params.need) : 0;
+}
+
+/**
+ * What a finished run cost, spelled out: "Đã trừ: 25 bài × 800đ = 20.000đ."
+ * Docs paid for by an earlier receipt are named too, so a total lower than
+ * the docs written never looks like a mistake. Empty for a job from before
+ * the backend reported its price.
+ */
+function chargeText(job, t) {
+  if (!Number.isFinite(job.unitPriceVnd)) return "";
+  const charged = job.charged || 0;
+  const lines = [];
+  if (charged > 0) {
+    lines.push(
+      t("grading.chargedLine", {
+        n: charged,
+        price: formatVnd(job.unitPriceVnd),
+        total: formatVnd(job.chargedVnd ?? charged * job.unitPriceVnd),
+      }),
+    );
+  }
+  if (job.alreadyPaid > 0) {
+    lines.push(t("grading.alreadyPaidLine", { n: job.alreadyPaid }));
+  }
+  if (!lines.length) lines.push(t("grading.notChargedLine"));
+  return lines.join(" ");
+}
+
 /** Why a job failed, in words — keyed on the backend's error code. */
 function describeError(job, t) {
   const params = job.errorParams || {};
   switch (job.error) {
     case "not_enough_points":
-      return t("grading.notEnough", params);
+      return t("grading.notEnough", {
+        ...params,
+        price: formatVnd(unitPriceOf(job)),
+        needVnd: formatVnd(params.needVnd),
+        haveVnd: formatVnd(params.haveVnd),
+      });
     case "google_reauth_required":
       return t("grading.reauthRequired", {
         written: job.written,
@@ -73,6 +138,8 @@ function describeError(job, t) {
       return t("grading.gradingFailed", { msg: params.msg || "" });
     case "abandoned":
       return t("grading.jobAbandoned");
+    case "unknown_grading_profile":
+      return t("grading.unknownGradingProfile");
     default:
       return t("grading.jobFailed", { code: job.error });
   }
@@ -106,19 +173,24 @@ export function describeJob(job, t, { showWarnings = true } = {}) {
     return { phase: "error", text: describeError(job, t), warnings };
   }
   if (job.reauthRequired) {
+    // The docs written before it stopped were charged.
+    const cost = job.charged > 0 ? chargeText(job, t) : "";
     return {
       phase: "error",
-      text: t("grading.reauthRequired", {
-        written: job.written,
-        total: job.total,
-      }),
+      text:
+        t("grading.reauthRequired", {
+          written: job.written,
+          total: job.total,
+        }) + (cost ? `\n${cost}` : ""),
       warnings,
     };
   }
   if (job.written > 0) {
+    const cost = chargeText(job, t);
     return {
       phase: "done",
-      text: t("grading.doneCount", { n: job.written }),
+      text:
+        t("grading.doneCount", { n: job.written }) + (cost ? `\n${cost}` : ""),
       warnings,
     };
   }

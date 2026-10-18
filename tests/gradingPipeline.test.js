@@ -143,7 +143,7 @@ describe("one lesson tab, end to end", () => {
       );
       expect(written.get(entry.fbCell.content[0].startIndex)).toBe(`sửa-${i}`);
     }
-    expect([...written.values()].join(" ")).toMatch(/Cô đã chữa bài rồi/);
+    expect([...written.values()].join(" ")).toMatch(/Hãy rút kinh nghiệm/);
   });
 
   it("tells a doc that only holds OLD feedback apart from a fully graded one", () => {

@@ -56,7 +56,7 @@ describe("generateOverallFeedback", () => {
       { aiFeedback: "sai rồi" },
       { aiFeedback: "chưa đúng" },
     ]);
-    expect(feedback).toContain("Cô đã chữa bài rồi");
+    expect(feedback).toContain("Hãy rút kinh nghiệm");
   });
 
   it("mixes praise and encouragement otherwise", () => {

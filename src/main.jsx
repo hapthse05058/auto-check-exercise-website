@@ -5,6 +5,7 @@ import { BrowserRouter } from "react-router-dom";
 import App from "./App.jsx";
 import { AuthProvider } from "./auth/AuthContext.jsx";
 import { LanguageProvider } from "./i18n/LanguageContext.jsx";
+import { ThemeProvider } from "./theme/ThemeContext.jsx";
 import "./styles/global.css";
 import "./styles/students.css";
 
@@ -24,11 +25,13 @@ window.addEventListener("appinstalled", () => {
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <BrowserRouter>
-      <LanguageProvider>
-        <AuthProvider>
-          <App />
-        </AuthProvider>
-      </LanguageProvider>
+      <ThemeProvider>
+        <LanguageProvider>
+          <AuthProvider>
+            <App />
+          </AuthProvider>
+        </LanguageProvider>
+      </ThemeProvider>
     </BrowserRouter>
   </React.StrictMode>,
 );

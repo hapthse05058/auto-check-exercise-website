@@ -1,15 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 
-import { fetchMyPoint } from "../api/backend.js";
+import { fetchMyBalance } from "../api/backend.js";
 import { useAuth } from "../auth/AuthContext.jsx";
 import { SUPPORT_EMAIL, isAdminEmail } from "../config.js";
 import NotificationBell from "./NotificationBell.jsx";
 import { usePushNotifications } from "../hooks/usePushNotifications.js";
 import { usePwaInstall } from "../hooks/usePwaInstall.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
+import { formatVnd } from "../lib/billing.js";
 import { POINTS_CHANGED } from "../lib/pointEvents.js";
 import { refreshPushToken, startForegroundPushListener } from "../lib/push.js";
+import { useSyncedTheme } from "../theme/useSyncedTheme.js";
 
 function initials(name) {
   if (!name) return "?";
@@ -39,30 +41,78 @@ function LanguageSwitcher() {
   );
 }
 
+/**
+ * Light / dark toggle: shows the theme it switches TO. Signed out only — the
+ * signed-in header keeps it in the ☰ menu's settings (ThemeSwitch).
+ */
+function ThemeToggle({ theme, toggleTheme }) {
+  const { t } = useLanguage();
+  const label = theme === "dark" ? t("theme.toLight") : t("theme.toDark");
+  return (
+    <button
+      className="menu-btn theme-toggle"
+      onClick={toggleTheme}
+      title={label}
+      aria-label={label}
+    >
+      <i
+        className={`ti ${theme === "dark" ? "ti-sun" : "ti-moon"}`}
+        aria-hidden="true"
+      />
+    </button>
+  );
+}
+
+/** Light | Dark, segmented like the language switch (☰ menu settings). */
+function ThemeSwitch({ theme, toggleTheme }) {
+  const { t } = useLanguage();
+  const choose = (next) => next !== theme && toggleTheme();
+  return (
+    <div className="lang-switch" role="group" aria-label={t("theme.label")}>
+      {["light", "dark"].map((value) => (
+        <button
+          key={value}
+          className={`lang-option ${theme === value ? "active" : ""}`}
+          aria-pressed={theme === value}
+          onClick={() => choose(value)}
+        >
+          <i
+            className={`ti ${value === "dark" ? "ti-moon" : "ti-sun"}`}
+            aria-hidden="true"
+          />{" "}
+          {t(`theme.${value}`)}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 const POINT_REFRESH_MS = 60 * 1000;
 
 /**
- * The signed-in teacher's point balance, always in the header. Re-read on
+ * The signed-in teacher's balance (VND), always in the header. Re-read on
  * every page change, when the tab regains focus and once a minute (scheduled
- * grading spends points in the background); screens that read a fresh
+ * grading spends it in the background); screens that read a fresh
  * balance themselves announce it (lib/pointEvents.js).
  */
 function PointBadge() {
   const { t } = useLanguage();
   const location = useLocation();
-  const [point, setPoint] = useState(null);
+  const [balance, setBalance] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
     const load = () =>
-      fetchMyPoint()
-        .then((value) => !cancelled && setPoint(value))
+      fetchMyBalance()
+        .then((value) => !cancelled && setBalance(value))
         .catch(() => {});
     load();
     const timer = setInterval(load, POINT_REFRESH_MS);
     const onFocus = () => load();
     const onAnnounce = (event) => {
-      if (Number.isFinite(event.detail?.point)) setPoint(event.detail.point);
+      if (Number.isFinite(event.detail?.balanceVnd)) {
+        setBalance(event.detail.balanceVnd);
+      }
     };
     window.addEventListener("focus", onFocus);
     window.addEventListener(POINTS_CHANGED, onAnnounce);
@@ -74,23 +124,123 @@ function PointBadge() {
     };
   }, [location.pathname]);
 
-  if (point === null) return null;
+  if (balance === null) return null;
   return (
     <span
-      className={`point-badge ${point <= 0 ? "empty" : ""}`}
+      className={`point-badge ${balance <= 0 ? "empty" : ""}`}
       title={t("nav.pointsTitle")}
     >
       <i className="ti ti-coins" aria-hidden="true" />
-      {t("nav.points", { n: point.toLocaleString("vi-VN") })}
+      {formatVnd(balance)}
     </span>
   );
 }
 
-/** ☰ menu with navigation shortcuts (replaces the extension popup menu). */
-function NavMenu() {
+/**
+ * The ☰ menu, grouped. Items and groups marked `admin` are hidden from
+ * teachers. On desktop each group is a column (styles: .nav-menu).
+ */
+const NAV_GROUPS = [
+  {
+    key: "grading",
+    title: "nav.groupGrading",
+    items: [
+      { path: "/grade", label: "nav.grade", icon: "ti-checklist" },
+      {
+        path: "/ielts-writing",
+        label: "nav.ieltsWriting",
+        icon: "ti-writing",
+        admin: true,
+      },
+      {
+        path: "/speaking",
+        label: "nav.gradeSpeaking",
+        icon: "ti-microphone",
+        admin: true,
+      },
+      // A static page (public/huong-dan/), opened in a new tab.
+      {
+        path: "/huong-dan/",
+        label: "nav.guide",
+        icon: "ti-book",
+        newTab: true,
+      },
+    ],
+  },
+  {
+    key: "classes",
+    title: "nav.groupClasses",
+    items: [
+      { path: "/classes/new", label: "nav.addClass", icon: "ti-circle-plus" },
+      {
+        path: "/classes/manage",
+        label: "nav.manageClasses",
+        icon: "ti-school",
+      },
+      { path: "/students/add", label: "nav.addStudents", icon: "ti-user-plus" },
+      {
+        path: "/students/manage",
+        label: "nav.manageStudents",
+        icon: "ti-users",
+      },
+    ],
+  },
+  {
+    key: "settings",
+    title: "nav.groupSettings",
+    items: [
+      {
+        path: "/settings/auto-grade",
+        label: "nav.autoGrade",
+        icon: "ti-clock",
+      },
+      {
+        path: "/settings/template",
+        label: "nav.updateTemplate",
+        icon: "ti-layout-rows",
+      },
+    ],
+  },
+  {
+    key: "admin",
+    title: "nav.groupAdmin",
+    admin: true,
+    items: [
+      {
+        path: "/admin/teachers",
+        label: "nav.manageTeachers",
+        icon: "ti-id-badge-2",
+      },
+      {
+        path: "/admin/teacher-points",
+        label: "nav.managePoints",
+        icon: "ti-coins",
+      },
+      { path: "/admin/courses", label: "nav.manageCourses", icon: "ti-books" },
+      {
+        path: "/admin/templates",
+        label: "nav.manageTemplates",
+        icon: "ti-template",
+      },
+      {
+        path: "/admin/grading-cache",
+        label: "nav.manageCache",
+        icon: "ti-database",
+      },
+      { path: "/admin/audit-logs", label: "nav.auditLog", icon: "ti-history" },
+    ],
+  },
+];
+
+/**
+ * ☰ menu with navigation shortcuts (replaces the extension popup menu), and
+ * the theme + language settings, kept out of the header so it fits a phone.
+ */
+function NavMenu({ theme, toggleTheme }) {
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef(null);
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const { teacherInfo } = useAuth();
   const { t } = useLanguage();
 
@@ -104,94 +254,70 @@ function NavMenu() {
     return () => document.removeEventListener("click", onClick);
   }, []);
 
-  const go = (path) => {
+  const go = (item) => {
     setOpen(false);
-    navigate(path);
+    if (item.newTab) window.open(item.path, "_blank", "noopener");
+    else navigate(item.path);
   };
 
   const isAdmin = isAdminEmail(teacherInfo?.gmail);
+  const groups = NAV_GROUPS.filter((group) => isAdmin || !group.admin)
+    .map((group) => ({
+      ...group,
+      items: group.items.filter((item) => isAdmin || !item.admin),
+    }))
+    .filter((group) => group.items.length > 0);
 
   return (
     <div className="menu-wrapper" ref={wrapperRef}>
       <button
         className="menu-btn"
         title="Menu"
+        aria-label="Menu"
+        aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
       >
         ☰
       </button>
       {open && (
-        <div className="menu-options">
-          <button className="menu-option" onClick={() => go("/grade")}>
-            {t("nav.grade")}
-          </button>
-          <button className="menu-option" onClick={() => go("/ielts-writing")}>
-            {t("nav.ieltsWriting")}
-          </button>
-          <button className="menu-option" onClick={() => go("/classes/new")}>
-            {t("nav.addClass")}
-          </button>
-          <button className="menu-option" onClick={() => go("/students/add")}>
-            {t("nav.addStudents")}
-          </button>
-          <button
-            className="menu-option"
-            onClick={() => go("/students/manage")}
-          >
-            {t("nav.manageStudents")}
-          </button>
-          <button className="menu-option" onClick={() => go("/classes/manage")}>
-            {t("nav.manageClasses")}
-          </button>
-          {isAdmin && (
-            <button
-              className="menu-option"
-              onClick={() => go("/admin/grading-cache")}
-            >
-              {t("nav.manageCache")}
-            </button>
-          )}
-          {isAdmin && (
-            <button
-              className="menu-option"
-              onClick={() => go("/admin/teacher-points")}
-            >
-              {t("nav.managePoints")}
-            </button>
-          )}
-          {isAdmin && (
-            <button
-              className="menu-option"
-              onClick={() => go("/admin/teachers")}
-            >
-              {t("nav.manageTeachers")}
-            </button>
-          )}
-          {isAdmin && (
-            <button
-              className="menu-option"
-              onClick={() => go("/admin/courses")}
-            >
-              {t("nav.manageCourses")}
-            </button>
-          )}
-          {isAdmin && (
-            <button className="menu-option" onClick={() => go("/speaking")}>
-              {t("nav.gradeSpeaking")}
-            </button>
-          )}
-          {isAdmin && (
-            <button
-              className="menu-option"
-              onClick={() => go("/admin/audit-logs")}
-            >
-              {t("nav.auditLog")}
-            </button>
-          )}
-          <a className="menu-option" href={`mailto:${SUPPORT_EMAIL}`}>
-            {t("nav.support", { email: SUPPORT_EMAIL })}
-          </a>
-        </div>
+        <nav
+          className="menu-options nav-menu"
+          aria-label="Menu"
+          style={{ "--nav-cols": groups.length }}
+        >
+          {groups.map((group) => (
+            <div className="nav-group" key={group.key}>
+              <p className="nav-group-title">{t(group.title)}</p>
+              {group.items.map((item) => {
+                const active = pathname === item.path;
+                return (
+                  <button
+                    key={item.path}
+                    className={`menu-option nav-item${active ? " active" : ""}`}
+                    aria-current={active ? "page" : undefined}
+                    onClick={() => go(item)}
+                  >
+                    <i className={`ti ${item.icon}`} aria-hidden="true" />
+                    {t(item.label)}
+                  </button>
+                );
+              })}
+              {/* Theme and language sit under the Settings group's links. */}
+              {group.key === "settings" && (
+                <>
+                  <div className="nav-setting">
+                    <span>{t("theme.label")}</span>
+                    <ThemeSwitch theme={theme} toggleTheme={toggleTheme} />
+                  </div>
+                  <div className="nav-setting">
+                    <span>{t("lang.label")}</span>
+                    <LanguageSwitcher />
+                  </div>
+                </>
+              )}
+            </div>
+          ))}
+        </nav>
       )}
     </div>
   );
@@ -314,6 +440,18 @@ function ProfileMenu({ teacherInfo }) {
               {t("notif.pushIosHint")}
             </p>
           )}
+          {/* Moved out of the ☰ menu: it is not a page, and its long label
+              (it carries the address) widened every column there. */}
+          <a
+            className="menu-option install-option"
+            href={`mailto:${SUPPORT_EMAIL}`}
+          >
+            <i className="ti ti-help-circle" aria-hidden="true" />
+            {t("nav.contactSupport")}
+          </a>
+          <p className="profile-detail profile-support-email">
+            {SUPPORT_EMAIL}
+          </p>
         </div>
       )}
     </div>
@@ -324,6 +462,9 @@ export default function Layout() {
   const { isAuthenticated, teacherInfo, logout } = useAuth();
   const { t } = useLanguage();
   const navigate = useNavigate();
+  // Here, always mounted: the hook syncs the theme with the account, so it
+  // must not live in the ☰ menu, which only renders while open.
+  const themeControl = useSyncedTheme();
   // On app start, re-assert this browser's FCM token (tokens rotate; saveDevice
   // is an idempotent merge and push.js rate-limits it to once a day) and start
   // the foreground listener so a push arriving on a focused tab updates the bell
@@ -349,13 +490,15 @@ export default function Layout() {
           <h3 className="m-0">{t("common.appTitle")}</h3>
         </Link>
         <div className="header-right">
-          <LanguageSwitcher />
+          {/* Signed in, both live in the ☰ menu (it is not there signed out). */}
+          {!isAuthenticated && <ThemeToggle {...themeControl} />}
+          {!isAuthenticated && <LanguageSwitcher />}
           {/* Admins grade on the class teacher's points (the grading screen
               shows that balance), so their own would only mislead. */}
           {isAuthenticated &&
             teacherInfo &&
             !isAdminEmail(teacherInfo.gmail) && <PointBadge />}
-          {isAuthenticated && <NavMenu />}
+          {isAuthenticated && <NavMenu {...themeControl} />}
           {isAuthenticated && <NotificationBell />}
           {isAuthenticated && <ProfileMenu teacherInfo={teacherInfo} />}
           {isAuthenticated && (

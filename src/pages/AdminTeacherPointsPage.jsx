@@ -9,24 +9,27 @@ import {
   updateTeacherPoint,
 } from "../api/backend.js";
 import { useAuth } from "../auth/AuthContext.jsx";
+import DataTable from "../components/DataTable.jsx";
 import { isAdminEmail } from "../config.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
-import { maskMoney } from "../lib/billing.js";
+import {
+  PRICE_AUTO_VND,
+  PRICE_MANUAL_VND,
+  TOPUP_MAX_VND,
+  TOPUP_MIN_VND,
+  TOPUP_PRESETS,
+  TOPUP_STEP_VND,
+  formatVndDigits,
+  formatVnd as vnd,
+  isValidTopUp,
+  maskMoney,
+  parseVndInput,
+  revenueOfTopUp,
+  stepTopUp,
+} from "../lib/billing.js";
+import { formatDateTimeVn } from "../lib/scheduleTime.js";
 
-const TOPUP_STEP = 60000;
-const TOPUP_MIN = 60000;
-const TOPUP_MAX = 6000000;
-const VND_PER_POINT = 600;
-
-const vnd = (n) => (Number(n) || 0).toLocaleString("vi-VN") + "đ";
-const formatDate = (iso) => {
-  if (!iso) return "—";
-  try {
-    return new Date(iso).toLocaleString();
-  } catch {
-    return iso;
-  }
-};
+const formatDate = (iso) => formatDateTimeVn(iso);
 
 export default function AdminTeacherPointsPage() {
   const { loadTeacherInfo } = useAuth();
@@ -120,13 +123,13 @@ export default function AdminTeacherPointsPage() {
 
   const openEdit = (rec) => {
     setActive(rec);
-    setForm({ point: rec.point });
+    setForm({ balanceVnd: rec.balanceVnd });
     setFormError("");
     setModal("edit");
   };
   const openTopUp = (rec) => {
     setActive(rec);
-    setForm({ amountVnd: TOPUP_MIN });
+    setForm({ amountVnd: 100000 });
     setFormError("");
     setModal("topup");
   };
@@ -136,15 +139,18 @@ export default function AdminTeacherPointsPage() {
   };
 
   const handleEdit = async () => {
-    if (!Number.isFinite(Number(form.point))) {
+    const balanceVnd = Number(form.balanceVnd);
+    if (
+      form.balanceVnd === "" ||
+      !Number.isInteger(balanceVnd) ||
+      balanceVnd < 0
+    ) {
       setFormError(t("points.pointNumberErr"));
       return;
     }
     setSaving(true);
     try {
-      const res = await updateTeacherPoint(active.id, {
-        point: Number(form.point),
-      });
+      const res = await updateTeacherPoint(active.id, { balanceVnd });
       if (!res.ok) {
         setFormError(t("points.updateFailed"));
         return;
@@ -160,18 +166,13 @@ export default function AdminTeacherPointsPage() {
   };
 
   const handleTopUp = async () => {
-    const amount = Number(form.amountVnd);
-    if (
-      !Number.isInteger(amount) ||
-      amount < TOPUP_MIN ||
-      amount > TOPUP_MAX ||
-      amount % TOPUP_STEP !== 0
-    ) {
+    // Typed freely, so checked here as the backend will (isValidTopUp).
+    const amount = form.amountVnd;
+    if (!isValidTopUp(amount)) {
       setFormError(
         t("points.amountErr", {
-          step: vnd(TOPUP_STEP),
-          min: vnd(TOPUP_MIN),
-          max: vnd(TOPUP_MAX),
+          min: vnd(TOPUP_MIN_VND),
+          max: vnd(TOPUP_MAX_VND),
         }),
       );
       return;
@@ -187,8 +188,8 @@ export default function AdminTeacherPointsPage() {
       closeModal();
       setStatus(
         t("points.toppedUp", {
+          who: active.name || active.gmail,
           amount: vnd(amount),
-          points: amount / VND_PER_POINT,
         }),
       );
       await reload();
@@ -218,6 +219,118 @@ export default function AdminTeacherPointsPage() {
   };
 
   const topupAmount = Number(form.amountVnd) || 0;
+  /** − / +: to the next round 50.000đ (lib/billing.js stepTopUp). */
+  const moveTopUp = (direction) => {
+    setFormError("");
+    setForm((f) => ({ ...f, amountVnd: stepTopUp(f.amountVnd, direction) }));
+  };
+  const typeTopUp = (text) => {
+    setFormError("");
+    setForm((f) => ({ ...f, amountVnd: parseVndInput(text) }));
+  };
+
+  const columns = [
+    {
+      id: "teacher",
+      header: t("points.colTeacher"),
+      accessorFn: (r) => r.name || r.gmail,
+      cell: ({ row }) => (
+        <>
+          <div className="student-name">{row.original.name || "—"}</div>
+          <div className="cell-date">{row.original.gmail}</div>
+        </>
+      ),
+    },
+    {
+      id: "balance",
+      header: t("points.colPoint"),
+      accessorFn: (r) => Number(r.balanceVnd) || 0,
+      cell: ({ getValue }) => vnd(getValue()),
+    },
+    {
+      id: "topUpCount",
+      header: t("points.colTopUpCount"),
+      accessorFn: (r) => Number(r.topUpCount) || 0,
+    },
+    {
+      id: "lastTopUp",
+      header: t("points.colLastTopUp"),
+      accessorFn: (r) => r.lastTopUpAt || undefined,
+      meta: { className: "cell-date" },
+      cell: ({ row }) => formatDate(row.original.lastTopUpAt),
+    },
+    {
+      id: "action",
+      header: "",
+      meta: { className: "cell-actions" },
+      cell: ({ row }) => {
+        const r = row.original;
+        return (
+          <div className="row-actions">
+            <button
+              className="btn-icon"
+              title={t("points.topUp")}
+              aria-label={t("points.topUp")}
+              onClick={() => openTopUp(r)}
+            >
+              <i className="ti ti-coin" aria-hidden="true" />
+            </button>
+            <button
+              className="btn-icon"
+              title={t("points.editPoint")}
+              aria-label={t("points.editPoint")}
+              onClick={() => openEdit(r)}
+            >
+              <i className="ti ti-edit" aria-hidden="true" />
+            </button>
+            <button
+              className="btn-icon"
+              title={t("points.history")}
+              aria-label={t("points.history")}
+              onClick={() => openHistory(r)}
+            >
+              <i className="ti ti-history" aria-hidden="true" />
+            </button>
+            <button
+              className="btn-icon danger"
+              title={t("common.delete")}
+              aria-label={t("common.delete")}
+              onClick={() => handleDelete(r)}
+            >
+              <i className="ti ti-trash" aria-hidden="true" />
+            </button>
+          </div>
+        );
+      },
+    },
+  ];
+
+  // Top-up history (modal), newest first.
+  const historyColumns = [
+    {
+      id: "time",
+      header: t("points.hTime"),
+      accessorFn: (h) => h.topUpAt || undefined,
+      meta: { className: "cell-date" },
+      cell: ({ row }) => formatDate(row.original.topUpAt),
+    },
+    {
+      id: "credit",
+      header: t("points.hAmount"),
+      accessorFn: (h) => Number(h.creditVnd) || 0,
+      cell: ({ row, getValue }) =>
+        // Before VND a top-up bought points: say how many, too.
+        row.original.points
+          ? `${vnd(getValue())} (${t("points.hLegacyPoints", { n: row.original.points })})`
+          : vnd(getValue()),
+    },
+    {
+      id: "revenue",
+      header: t("points.hRevenue"),
+      accessorFn: (h) => Number(h.revenueVnd) || 0,
+      cell: ({ getValue }) => vnd(getValue()),
+    },
+  ];
 
   return (
     <div className="page-wide">
@@ -228,7 +341,12 @@ export default function AdminTeacherPointsPage() {
               {t("points.title")}{" "}
               <span className="count-badge">{records.length}</span>
             </h2>
-            <p>{t("points.subtitle")}</p>
+            <p>
+              {t("points.subtitle", {
+                manual: vnd(PRICE_MANUAL_VND),
+                auto: vnd(PRICE_AUTO_VND),
+              })}
+            </p>
           </div>
         </div>
 
@@ -292,66 +410,7 @@ export default function AdminTeacherPointsPage() {
             <p>{t("points.empty")}</p>
           </div>
         ) : (
-          <div className="cache-table-wrap">
-            <table className="cache-table">
-              <thead>
-                <tr>
-                  <th>{t("points.colTeacher")}</th>
-                  <th>{t("points.colPoint")}</th>
-                  <th>{t("points.colTopUpCount")}</th>
-                  <th>{t("points.colLastTopUp")}</th>
-                  <th />
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((r) => (
-                  <tr key={r.id}>
-                    <td>
-                      <div className="student-name">{r.name || "—"}</div>
-                      <div className="cell-date">{r.gmail}</div>
-                    </td>
-                    <td>{r.point}</td>
-                    <td>{r.topUpCount}</td>
-                    <td className="cell-date">{formatDate(r.lastTopUpAt)}</td>
-                    <td className="cell-actions">
-                      <button
-                        className="btn-icon"
-                        title={t("points.topUp")}
-                        aria-label={t("points.topUp")}
-                        onClick={() => openTopUp(r)}
-                      >
-                        <i className="ti ti-coin" aria-hidden="true" />
-                      </button>
-                      <button
-                        className="btn-icon"
-                        title={t("points.editPoint")}
-                        aria-label={t("points.editPoint")}
-                        onClick={() => openEdit(r)}
-                      >
-                        <i className="ti ti-edit" aria-hidden="true" />
-                      </button>
-                      <button
-                        className="btn-icon"
-                        title={t("points.history")}
-                        aria-label={t("points.history")}
-                        onClick={() => openHistory(r)}
-                      >
-                        <i className="ti ti-history" aria-hidden="true" />
-                      </button>
-                      <button
-                        className="btn-icon danger"
-                        title={t("common.delete")}
-                        aria-label={t("common.delete")}
-                        onClick={() => handleDelete(r)}
-                      >
-                        <i className="ti ti-trash" aria-hidden="true" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <DataTable data={filtered} columns={columns} getRowId={(r) => r.id} />
         )}
 
         <div className="status-line">{status}</div>
@@ -366,14 +425,24 @@ export default function AdminTeacherPointsPage() {
                 </h3>
               </div>
               <div className="field-group">
-                <label>{t("points.pointLabel")}</label>
+                <label htmlFor="balanceVnd">{t("points.pointLabel")}</label>
                 <input
+                  id="balanceVnd"
                   type="number"
-                  value={form.point}
-                  onChange={(e) => setForm({ ...form, point: e.target.value })}
+                  min={0}
+                  step={100}
+                  value={form.balanceVnd}
+                  onChange={(e) =>
+                    setForm({ ...form, balanceVnd: e.target.value })
+                  }
                   autoFocus
                 />
               </div>
+              <p className="field-note">
+                {t("points.balancePreview", {
+                  balance: vnd(form.balanceVnd),
+                })}
+              </p>
               {formError && (
                 <div className="err" style={{ display: "block" }}>
                   {formError}
@@ -408,26 +477,81 @@ export default function AdminTeacherPointsPage() {
                   {t("points.topUpTitle", { who: active.name || active.gmail })}
                 </h3>
               </div>
+              {/* Any amount can be typed (what the teacher paid); − / + and
+                  the presets are round shortcuts. */}
               <div className="field-group">
-                <label>
-                  {t("points.amountLabel", { step: vnd(TOPUP_STEP) })}
+                <label className="field-label" htmlFor="topup-amount">
+                  {t("points.amountLabel")}
                 </label>
-                <input
-                  type="number"
-                  min={TOPUP_MIN}
-                  max={TOPUP_MAX}
-                  step={TOPUP_STEP}
-                  value={form.amountVnd}
-                  onChange={(e) =>
-                    setForm({ ...form, amountVnd: e.target.value })
-                  }
-                  autoFocus
-                />
+                <div
+                  className="topup-stepper"
+                  role="group"
+                  aria-label={t("points.amountGroup")}
+                >
+                  <button
+                    type="button"
+                    className="btn-icon"
+                    onClick={() => moveTopUp(-1)}
+                    disabled={saving || topupAmount <= TOPUP_STEP_VND}
+                    aria-label={t("points.stepDown", {
+                      step: vnd(TOPUP_STEP_VND),
+                    })}
+                    title={t("points.stepDown", { step: vnd(TOPUP_STEP_VND) })}
+                  >
+                    <i className="ti ti-minus" aria-hidden="true" />
+                  </button>
+                  <div className="topup-amount">
+                    <input
+                      id="topup-amount"
+                      type="text"
+                      inputMode="numeric"
+                      autoComplete="off"
+                      value={formatVndDigits(form.amountVnd)}
+                      onChange={(e) => typeTopUp(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && handleTopUp()}
+                      placeholder="0"
+                      disabled={saving}
+                      aria-invalid={Boolean(formError)}
+                      autoFocus
+                    />
+                    <span aria-hidden="true">đ</span>
+                  </div>
+                  <button
+                    type="button"
+                    className="btn-icon"
+                    onClick={() => moveTopUp(1)}
+                    disabled={saving || topupAmount >= TOPUP_MAX_VND}
+                    aria-label={t("points.stepUp", {
+                      step: vnd(TOPUP_STEP_VND),
+                    })}
+                    title={t("points.stepUp", { step: vnd(TOPUP_STEP_VND) })}
+                  >
+                    <i className="ti ti-plus" aria-hidden="true" />
+                  </button>
+                </div>
+                <div className="topup-presets">
+                  {TOPUP_PRESETS.map((amount) => (
+                    <button
+                      key={amount}
+                      type="button"
+                      className={amount === topupAmount ? "active" : ""}
+                      aria-pressed={amount === topupAmount}
+                      onClick={() => {
+                        setFormError("");
+                        setForm({ ...form, amountVnd: amount });
+                      }}
+                      disabled={saving}
+                    >
+                      {vnd(amount)}
+                    </button>
+                  ))}
+                </div>
               </div>
               <p className="field-note">
                 {t("points.amountHint", {
-                  points: topupAmount / VND_PER_POINT || 0,
-                  commission: vnd((topupAmount / VND_PER_POINT) * 100),
+                  after: vnd((Number(active.balanceVnd) || 0) + topupAmount),
+                  revenue: vnd(revenueOfTopUp(topupAmount)),
+                  commission: vnd(topupAmount - revenueOfTopUp(topupAmount)),
                 })}
               </p>
               {formError && (
@@ -469,27 +593,10 @@ export default function AdminTeacherPointsPage() {
               {active.topUpHistory.length === 0 ? (
                 <p className="field-note">{t("points.noHistory")}</p>
               ) : (
-                <div className="cache-table-wrap">
-                  <table className="cache-table">
-                    <thead>
-                      <tr>
-                        <th>{t("points.hTime")}</th>
-                        <th>{t("points.hAmount")}</th>
-                        <th>{t("points.hPoints")}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {[...active.topUpHistory].reverse().map((h, i) => (
-                        // eslint-disable-next-line react/no-array-index-key -- no stable id; list is display-only and never reordered
-                        <tr key={i}>
-                          <td className="cell-date">{formatDate(h.topUpAt)}</td>
-                          <td>{vnd(h.amountVnd)}</td>
-                          <td>{h.points}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                <DataTable
+                  data={[...active.topUpHistory].reverse()}
+                  columns={historyColumns}
+                />
               )}
               <div className="modal-footer">
                 <button className="btn-cancel" onClick={closeModal}>

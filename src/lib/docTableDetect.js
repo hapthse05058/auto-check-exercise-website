@@ -20,10 +20,13 @@
 import {
   KIND_PARAGRAPH,
   OVERALL_FEEDBACK_LABEL,
+  getCellLines,
   getCellText,
   getQuesAndAnsFromRows,
   normalizeText,
   resolveRowCells,
+  startsWithArrow,
+  startsWithNumberDot,
 } from "./docParser.js";
 import { TABLE_OVERRIDES } from "./docTables.js";
 
@@ -65,6 +68,14 @@ const FORMULA_HEADER = /th[aà]nh\s*l[aậ]p\s*c[oô]ng\s*th[uứ]c/i;
  * cho cả 24 học viên).
  */
 const OPTIONAL_HEADER = /b[aà]i\s*l[aà]m\s*c[uủ]a\s*h[oọ]c\s*vi[eê]n/i;
+/**
+ * Mốc mở đầu phần BÀI TẬP TỰ CHỌN: một bảng (hay đoạn) chỉ ghi đúng dòng đó,
+ * đứng ngay sau "Nhận xét chung của Giáo viên" ở mọi template. Mọi bảng SAU mốc
+ * là bài tự chọn. Cần mốc này vì không phải bảng tự chọn nào cũng có header
+ * "Bài làm của học viên": bảng sắp xếp từ của buổi 02/03 mở đầu luôn bằng câu
+ * 1, và bị cảnh báo nhầm "không nhận ra được là bảng bài tập".
+ */
+const OPTIONAL_SECTION = /^b[aà]i\s*t[aậ]p\s*t[uự]\s*ch[oọ]n:?$/i;
 
 /**
  * Bảng "Bài tập viết đoạn văn" (mọi buổi 02 → 23 cùng một bố cục 3×3):
@@ -81,6 +92,51 @@ const PARAGRAPH_SAMPLE_LABEL = /^\s*đo[aạ]n\s*v[aă]n\s*m[aẫ]u\s*:?\s*$/i;
 const PARAGRAPH_STUDENT_LABEL = /^\s*h[oọ]c\s*vi[eê]n\s*vi[eế]t\s*:?\s*$/i;
 /** Gạch chân dạng ký tự tổ hợp ("H̲e̲y̲") có trong đoạn mẫu buổi 03. */
 const COMBINING_LOW_LINE = /̲/g;
+
+/** "Ví dụ:" — dòng ví dụ của đề, không phải tiêu đề nhóm câu. */
+const EXAMPLE_LINE = /^\s*v[íi]\s*d[ụu](?![\p{L}])/iu;
+/** Dài hơn thế này thì là lý thuyết hay đoạn văn, không phải tiêu đề nhóm câu. */
+const MAX_SECTION_LENGTH = 160;
+
+function asSection(text) {
+  const clean = normalizeText(text);
+  if (!clean || clean.length > MAX_SECTION_LENGTH) return null;
+  if (EXAMPLE_LINE.test(clean) || startsWithNumberDot(clean)) return null;
+  if (FEEDBACK_HEADER.test(clean) || FORMULA_HEADER.test(clean)) return null;
+  if (clean.includes(OVERALL_FEEDBACK_LABEL)) return null;
+  return clean;
+}
+
+/**
+ * Chữ của một dòng TIÊU ĐỀ NHÓM CÂU trong bảng bài tập ("Be going to: Tương
+ * lai gần có dự định trước", "DC adv chỉ sự nhượng bộ (Although/ though…)"),
+ * hay null. Tiêu đề quyết định câu nào là đúng — "I will play football" sai
+ * dưới tiêu đề "Be going to" — nên nó được gửi cho AI cùng các câu bên dưới.
+ *
+ * Nhận ra theo bố cục: ô "Chữa bài" (ô cuối) để trống, tiêu đề là ô có chữ
+ * ĐẦU TIÊN, và chữ đó không phải câu hỏi, dòng "Ví dụ:", header hay dòng công
+ * thức. Ô "Gợi ý" của dòng tiêu đề có thể có chữ: GV hay để sót gợi ý của câu
+ * trên ("Be going to: …" | "Dùng TLHT BĐ: will have been + PII" | "") — dòng
+ * đó vẫn là tiêu đề. Chỉ xét những dòng mà `resolveRowCells` đã bỏ qua.
+ */
+export function sectionHeadingOf(row) {
+  const cells = row?.tableCells || [];
+  const filled = cells
+    .map((cell, i) => ({ i, text: normalizeText(getCellText(cell)) }))
+    .filter(({ text }) => text);
+  if (!filled.length) return null;
+  if (cells.length > 1 && filled.some(({ i }) => i === cells.length - 1)) {
+    return null;
+  }
+  // A cell holding a numbered question or an answer is not a heading, even
+  // when resolveRowCells skipped the row.
+  const holdsItem = ({ i }) =>
+    getCellLines(cells[i]).some(
+      (line) => startsWithNumberDot(line) || startsWithArrow(line),
+    );
+  if (filled.some(holdsItem)) return null;
+  return asSection(filled[0].text);
+}
 
 /** Mọi bảng trong tab, kèm chỉ số theo đúng thứ tự tài liệu. */
 function listTables(tab) {
@@ -261,6 +317,32 @@ function resolveParagraphTable(table) {
   return { studentRowIdx, qCell, fbCell, promptText };
 }
 
+/**
+ * Chỉ số của bảng đầu tiên thuộc phần BÀI TẬP TỰ CHỌN (bảng mốc, hoặc bảng
+ * ngay sau đoạn mốc), hoặc Infinity nếu tab không có phần đó.
+ */
+function optionalSectionStart(tab) {
+  let tableIdx = 0;
+  for (const block of tab?.documentTab?.body?.content || []) {
+    if (block.table) {
+      const cells = (block.table.tableRows || []).flatMap(
+        (row) => row.tableCells || [],
+      );
+      const text = normalizeText(cells.map(getCellText).join(" "));
+      if (OPTIONAL_SECTION.test(text)) return tableIdx;
+      tableIdx += 1;
+    } else if (block.paragraph) {
+      const text = normalizeText(
+        (block.paragraph.elements || [])
+          .map((el) => el.textRun?.content || "")
+          .join(""),
+      );
+      if (OPTIONAL_SECTION.test(text)) return tableIdx;
+    }
+  }
+  return Infinity;
+}
+
 /** Chỉ số bảng do TABLE_OVERRIDES ép cho tab này, hoặc null. */
 function overrideFor(tabName, classType) {
   const found = (TABLE_OVERRIDES || []).find(
@@ -331,6 +413,7 @@ export function detectTables(tab, classType) {
 
   const tables = [];
   const unclassifiedWithQuestions = [];
+  const optionalFrom = optionalSectionStart(tab);
   let previousKind = null;
   let previousColumns = 0;
 
@@ -357,9 +440,9 @@ export function detectTables(tab, classType) {
     // tập sẽ rơi mất mà không ai biết.
     // Bảng TỰ CHỌN có header riêng nên không thể là mảnh bị ngắt trang, và
     // tuyệt đối không được chấm — kể cả khi nó cùng số cột với bảng trước.
-    const optional = headerCellTexts(table).some((text) =>
-      OPTIONAL_HEADER.test(text),
-    );
+    const optional =
+      tableIdx >= optionalFrom ||
+      headerCellTexts(table).some((text) => OPTIONAL_HEADER.test(text));
     const questions = countQuestionRows(table);
     if (
       questions &&
@@ -414,8 +497,12 @@ export function collectExerciseRows(tab, classType) {
     classType,
   );
   const rows = [];
+  // Tiêu đề nhóm câu đang có hiệu lực. Mảnh bảng bị ngắt trang
+  // (`continuation`) giữ tiêu đề của mảnh trước; bảng mới thì bắt đầu lại.
+  let section = null;
 
-  for (const { tableIdx, table, kind, paragraph } of tables) {
+  for (const { tableIdx, table, kind, paragraph, continuation } of tables) {
+    if (!continuation) section = null;
     // Cả bảng đoạn văn là MỘT dòng bài tập: dòng "Học viên viết".
     if (kind === KIND_PARAGRAPH) {
       rows.push({
@@ -434,7 +521,10 @@ export function collectExerciseRows(tab, classType) {
     }
     (table.tableRows || []).forEach((row, rowIdx) => {
       const cells = resolveRowCells(row);
-      if (!cells) return;
+      if (!cells) {
+        section = sectionHeadingOf(row) ?? section;
+        return;
+      }
       rows.push({
         tableIdx,
         rowIdx,
@@ -443,6 +533,7 @@ export function collectExerciseRows(tab, classType) {
         qCell: cells.qCell,
         fbCell: cells.fbCell,
         numberCell: cells.numberCell,
+        ...(section ? { section } : {}),
         isOverall: false,
         overallCell: null,
       });

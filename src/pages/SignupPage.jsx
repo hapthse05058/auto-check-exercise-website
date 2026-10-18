@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import { signupTeacher } from "../api/backend.js";
 import { useAuth } from "../auth/AuthContext.jsx";
+import DateInputVn from "../components/DateInputVn.jsx";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
 
 const INITIAL_FORM = {
@@ -187,12 +188,7 @@ export default function SignupPage() {
           <label htmlFor="dob">
             {t("signup.dob")} <span className="required-star">*</span>
           </label>
-          <input
-            id="dob"
-            type="date"
-            value={form.dob}
-            onChange={update("dob")}
-          />
+          <DateInputVn id="dob" value={form.dob} onChange={update("dob")} />
         </div>
         <div className="form-field">
           <label htmlFor="address">{t("signup.address")}</label>

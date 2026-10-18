@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
 
 import {
@@ -7,68 +8,84 @@ import {
 } from "../api/backend.js";
 import { usePushNotifications } from "../hooks/usePushNotifications.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
+import {
+  NOTIFICATIONS_CHANGED,
+  isShownInBell,
+  pathOf,
+  relativeTime,
+  renderNotification,
+} from "../lib/notificationView.js";
 import { PUSH_EVENT } from "../lib/push.js";
 import {
   notificationSoundEnabled,
   playNotificationSound,
+  playSuccessSound,
   setNotificationSoundEnabled,
   unlockAudioOnFirstGesture,
 } from "../lib/sound.js";
 
+/** A run finished: these chime like the grading screen does, not the bell. */
+const GRADING_DONE_TYPES = new Set([
+  "grading.jobDone",
+  "grading.autoDone",
+  "grading.doneByAdmin",
+]);
+
 /** Poll cadence, matched to AuthContext's proactiveTokenRefresh interval. */
 const POLL_MS = 60_000;
-
-/** "deepseek.lowBalance" -> "deepseekLowBalance" (the i18n key segment). */
-function typeKey(type) {
-  return String(type || "")
-    .split(".")
-    .map((part, i) => (i === 0 ? part : part[0].toUpperCase() + part.slice(1)))
-    .join("");
-}
-
-function relativeTime(iso, t) {
-  if (!iso) return "";
-  const minutes = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);
-  if (minutes < 1) return t("notif.justNow");
-  if (minutes < 60) return t("notif.minutesAgo", { n: minutes });
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return t("notif.hoursAgo", { n: hours });
-  return t("notif.daysAgo", { n: Math.floor(hours / 24) });
-}
+/** How long a toast stays up (paused while hovered), and how many at once. */
+const TOAST_MS = 6000;
+const MAX_TOASTS = 3;
 
 /**
- * Renders a notification through i18n when we have strings for its type, so it
- * follows the viewer's language. Falls back to the server-rendered title/body
- * otherwise — that way a notification type added on the backend still displays
- * correctly without a frontend release.
+ * One toast. Dismisses itself after TOAST_MS; hovering (or focusing) it holds
+ * the timer so a long body can be read.
  */
-function renderNotification(item, t) {
-  const key = `notif.type.${typeKey(item.type)}`;
-  const title = t(key);
-  if (title === key) return { title: item.title, body: item.body };
+function NotificationToast({ item, t, linked, onOpen, onDismiss }) {
+  const [held, setHeld] = useState(false);
+  useEffect(() => {
+    if (held) return undefined;
+    const timer = setTimeout(() => onDismiss(item.id), TOAST_MS);
+    return () => clearTimeout(timer);
+  }, [held, item.id, onDismiss]);
 
-  const bodyKey = `${key}Body`;
-  // Two decimals, matching the server-rendered body, so the same alert reads
-  // identically whether it comes through i18n here or straight from Firestore.
-  const amount = (v) =>
-    v === null || v === undefined || v === "" ? "" : Number(v).toFixed(2);
-  // Every field of `data` is available as a placeholder, so a new notification
-  // type only needs its i18n strings — no change here. The balance-specific
-  // aliases below are extra names on top, not a replacement for the raw fields.
-  const vars = {
-    ...(item.data || {}),
-    balance: amount(item.data?.totalBalance),
-    currency: item.data?.currency ?? "",
-    threshold: amount(item.data?.threshold),
-  };
-  const body = t(bodyKey, vars);
-  // A body still carrying {placeholders} means the i18n string expects a field
-  // this notification does not have — fall back to what the server rendered
-  // rather than showing the user raw braces.
-  if (body === bodyKey || /\{[a-zA-Z]\w*\}/.test(body)) {
-    return { title, body: item.body };
-  }
-  return { title, body };
+  const { title, body } = renderNotification(item, t);
+  return (
+    <div
+      className={`notif-toast sev-${item.severity}${linked ? " clickable" : ""}`}
+      onMouseEnter={() => setHeld(true)}
+      onMouseLeave={() => setHeld(false)}
+      onFocus={() => setHeld(true)}
+      onBlur={() => setHeld(false)}
+    >
+      <i className="ti ti-bell-ringing notif-toast-icon" aria-hidden="true" />
+      <div
+        className="notif-toast-content"
+        role={linked ? "link" : undefined}
+        tabIndex={linked ? 0 : undefined}
+        onClick={linked ? () => onOpen(item) : undefined}
+        onKeyDown={
+          linked
+            ? (event) => {
+                if (event.key === "Enter") onOpen(item);
+              }
+            : undefined
+        }
+      >
+        <span className="notif-item-title">{title}</span>
+        <span className="notif-item-body">{body}</span>
+      </div>
+      <button
+        type="button"
+        className="notif-toast-close"
+        onClick={() => onDismiss(item.id)}
+        title={t("common.close")}
+        aria-label={t("common.close")}
+      >
+        <i className="ti ti-x" aria-hidden="true" />
+      </button>
+    </div>
+  );
 }
 
 /**
@@ -93,26 +110,28 @@ export default function NotificationBell() {
   // Ids already known to be unread; null until the first load, which only
   // takes note — the chime is for notifications arriving while the page is open.
   const seenUnreadRef = useRef(null);
+  // Notifications that arrived while the page was open, newest first. Raw
+  // items, rendered at display time so they follow the current language.
+  const [toasts, setToasts] = useState([]);
   const [soundOn, setSoundOn] = useState(notificationSoundEnabled);
   const { t } = useLanguage();
   const push = usePushNotifications();
   const navigate = useNavigate();
 
-  /** Only in-app paths are followed ("/grade?classId=…"), never a full URL. */
-  const pathOf = (item) => {
-    const path = item.data?.path;
-    return typeof path === "string" &&
-      path.startsWith("/") &&
-      !path.startsWith("//")
-      ? path
-      : null;
-  };
   const openItem = (item) => {
     const path = pathOf(item);
     if (!path) return;
     setOpen(false);
     justReadRef.current = new Set();
     navigate(path);
+  };
+  const dismissToast = useCallback(
+    (id) => setToasts((prev) => prev.filter((n) => n.id !== id)),
+    [],
+  );
+  const openToast = (item) => {
+    dismissToast(item.id);
+    openItem(item);
   };
 
   const load = useCallback(async () => {
@@ -125,7 +144,18 @@ export default function NotificationBell() {
       } else {
         const fresh = unreadIds.filter((id) => !seenUnreadRef.current.has(id));
         fresh.forEach((id) => seenUnreadRef.current.add(id));
-        if (fresh.length > 0) playNotificationSound();
+        if (fresh.length > 0) {
+          const arrived = results.filter((n) => fresh.includes(n.id));
+          if (
+            notificationSoundEnabled() &&
+            arrived.some((n) => GRADING_DONE_TYPES.has(n.type))
+          ) {
+            playSuccessSound();
+          } else {
+            playNotificationSound();
+          }
+          setToasts((prev) => [...arrived, ...prev].slice(0, MAX_TOASTS));
+        }
       }
       setItems(results);
       setUnread(data.unreadCount || 0);
@@ -179,7 +209,12 @@ export default function NotificationBell() {
   useEffect(() => {
     const onPush = () => load();
     window.addEventListener(PUSH_EVENT, onPush);
-    return () => window.removeEventListener(PUSH_EVENT, onPush);
+    // The notifications page marked something read: refresh the badge.
+    window.addEventListener(NOTIFICATIONS_CHANGED, onPush);
+    return () => {
+      window.removeEventListener(PUSH_EVENT, onPush);
+      window.removeEventListener(NOTIFICATIONS_CHANGED, onPush);
+    };
   }, [load]);
 
   useEffect(() => {
@@ -214,6 +249,8 @@ export default function NotificationBell() {
       }
       const stillUnread = items.filter((n) => !n.read).map((n) => n.id);
       justReadRef.current = new Set(stillUnread);
+      // The panel now shows them all; the toasts would only repeat it.
+      setToasts([]);
       if (stillUnread.length > 0) {
         setItems((prev) => prev.map((n) => ({ ...n, read: true })));
         setUnread(0);
@@ -221,6 +258,17 @@ export default function NotificationBell() {
       }
       return true;
     });
+  };
+
+  // Old read notifications leave the dropdown; the notifications page keeps
+  // them. The ones this very opening marked read stay until it closes.
+  const shown = items.filter(
+    (item) => justReadRef.current.has(item.id) || isShownInBell(item),
+  );
+  const openAll = () => {
+    setOpen(false);
+    justReadRef.current = new Set();
+    navigate("/notifications");
   };
 
   return (
@@ -273,11 +321,11 @@ export default function NotificationBell() {
           )}
 
           {failed && <p className="notif-empty">{t("notif.loadFailed")}</p>}
-          {!failed && items.length === 0 && (
-            <p className="notif-empty">{t("notif.empty")}</p>
+          {!failed && shown.length === 0 && (
+            <p className="notif-empty">{t("notif.emptyRecent")}</p>
           )}
 
-          {items.map((item) => {
+          {shown.map((item) => {
             const { title, body } = renderNotification(item, t);
             const isNew = !item.read || justReadRef.current.has(item.id);
             const linked = Boolean(pathOf(item));
@@ -304,7 +352,30 @@ export default function NotificationBell() {
               </div>
             );
           })}
+
+          <button type="button" className="notif-see-all" onClick={openAll}>
+            {t("notif.seeAll")}
+            <i className="ti ti-arrow-right" aria-hidden="true" />
+          </button>
         </div>
+      )}
+
+      {/* Portalled to <body>: the header's backdrop-filter would otherwise
+          pin a position:fixed child to the header instead of the viewport. */}
+      {createPortal(
+        <div className="notif-toasts" role="status" aria-live="polite">
+          {toasts.map((item) => (
+            <NotificationToast
+              key={item.id}
+              item={item}
+              t={t}
+              linked={Boolean(pathOf(item))}
+              onOpen={openToast}
+              onDismiss={dismissToast}
+            />
+          ))}
+        </div>,
+        document.body,
       )}
     </div>
   );

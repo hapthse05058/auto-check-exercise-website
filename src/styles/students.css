@@ -26,7 +26,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  background: #1d9e75;
+  background: var(--color-primary);
   border: none;
   border-radius: var(--border-radius-md);
   padding: 9px 16px;
@@ -38,7 +38,7 @@
   white-space: nowrap;
 }
 .btn-add:hover:not(:disabled) {
-  background: #0f6e56;
+  background: var(--color-primary-hover);
 }
 .empty-state {
   text-align: center;
@@ -66,18 +66,22 @@
   border-radius: var(--border-radius-lg);
   padding: 14px 16px;
   margin-bottom: 10px;
+  box-shadow: var(--shadow-card);
+}
+.student-card:hover {
+  border-color: var(--color-border-secondary);
 }
 .avatar {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: #e1f5ee;
+  background: var(--color-primary-tint);
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 500;
   font-size: 14px;
-  color: #0f6e56;
+  color: var(--color-primary-dark);
   flex-shrink: 0;
 }
 .student-info {
@@ -118,7 +122,7 @@
   max-width: 160px;
 }
 .meta-item a {
-  color: #185fa5;
+  color: var(--color-link);
   text-decoration: none;
   font-size: 13px;
   white-space: nowrap;
@@ -155,14 +159,16 @@
   color: var(--color-text-primary);
 }
 .btn-icon.danger:hover {
-  background: #fcebeb;
-  color: #a32d2d;
-  border-color: #f7c1c1;
+  background: var(--color-danger-tint);
+  color: var(--color-danger-text);
+  border-color: var(--color-danger-tint-border);
 }
 .modal-bg {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.35);
+  background: var(--color-overlay);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
   align-items: center;
   justify-content: center;
   padding: 2rem;
@@ -176,6 +182,7 @@
   background: var(--color-background-primary);
   border-radius: var(--border-radius-lg);
   border: 1px solid var(--color-border-secondary);
+  box-shadow: var(--shadow-popover);
   padding: 1.5rem;
   width: 100%;
   /* Wider than the old single-field modal so a 2-column row + delete button
@@ -214,7 +221,7 @@
 }
 /* Required-field asterisk in modal labels. */
 .required-mark {
-  color: #d33;
+  color: var(--color-error);
   font-weight: 700;
   margin-left: 2px;
 }
@@ -222,7 +229,7 @@
 .field-group input.input-error,
 .field-group select.input-error,
 .field-group textarea.input-error {
-  border: 1px solid #d33;
+  border: 1px solid var(--color-error);
   box-shadow: 0 0 0 2px rgba(211, 51, 51, 0.18);
   outline: none;
 }
@@ -267,7 +274,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: var(--color-primary, #00977b);
+  color: var(--color-primary-dark);
   font-size: 16px;
 }
 .btn-add-row:hover {
@@ -353,7 +360,7 @@
   margin: 0;
 }
 .notice-text.notice-error {
-  color: var(--color-warning-dark, #d97706);
+  color: var(--color-warning-dark);
 }
 /* Sequence-number badge shown before each student card's avatar. */
 .student-index {
@@ -385,15 +392,15 @@
 }
 /* Destructive text button (e.g. "Delete account"). */
 .btn-text-danger {
-  color: #a32d2d;
-  border-color: #f0c2c2;
+  color: var(--color-danger-text);
+  border-color: var(--color-danger-tint-border);
 }
 .btn-text-danger:hover {
-  background: #fcebeb;
-  border-color: #e7a9a9;
+  background: var(--color-danger-tint);
+  border-color: var(--color-danger-text);
 }
 .btn-confirm {
-  background: #1d9e75;
+  background: var(--color-primary);
   border: none;
   border-radius: var(--border-radius-md);
   padding: 8px 18px;
@@ -404,7 +411,11 @@
   font-family: var(--font-sans);
 }
 .btn-confirm:hover {
-  background: #0f6e56;
+  background: var(--color-primary-hover);
+}
+.btn-add:active:not(:disabled),
+.btn-confirm:active:not(:disabled) {
+  transform: translateY(1px);
 }
 .btn-confirm:disabled {
   opacity: 0.45;
@@ -412,14 +423,14 @@
 }
 .err {
   font-size: 12px;
-  color: #a32d2d;
+  color: var(--color-danger-text);
   margin-top: 4px;
   display: none;
 }
 .count-badge {
   display: inline-block;
-  background: #e1f5ee;
-  color: #0f6e56;
+  background: var(--color-primary-tint);
+  color: var(--color-primary-dark);
   font-size: 12px;
   font-weight: 500;
   padding: 2px 9px;
@@ -484,17 +495,115 @@
   white-space: nowrap;
   color: var(--color-text-tertiary, #8a948f);
 }
+/* The td stays a table cell (display:flex on it broke the row's borders);
+   the buttons line up in an inner .row-actions. */
 .cache-table .cell-actions {
   white-space: nowrap;
+  width: 1%;
+}
+.row-actions {
   display: flex;
+  align-items: center;
   gap: 4px;
+}
+
+/* DataTable (TanStack Table) additions on top of .cache-table. */
+.data-table td {
+  vertical-align: middle;
+}
+.data-table tbody tr:last-child td {
+  border-bottom: none;
+}
+.data-table tbody tr:hover td {
+  background: var(--color-surface-subtle);
+}
+.data-table tbody tr.row-selected:hover td {
+  background: var(--color-row-selected-hover);
+}
+.data-table th.is-sorted {
+  color: var(--color-primary-dark);
+}
+.th-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.th-sort-icon {
+  font-size: 14px;
+  opacity: 0.35;
+}
+.th-sort:hover .th-sort-icon,
+.is-sorted .th-sort-icon {
+  opacity: 1;
+}
+
+/* Template names are long; the open list still shows them in full. */
+.cache-search select.template-filter {
+  max-width: 240px;
+}
+
+/* Row above a table holding its column chooser, left-aligned. */
+.table-toolbar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 0.5rem;
+}
+.table-toolbar .column-picker-menu {
+  left: 0;
+  right: auto;
+}
+
+/* Column chooser next to a table's search row. */
+.column-picker {
+  flex: 0 0 auto;
+}
+.column-picker-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 100%;
+  font-size: 14px;
+  white-space: nowrap;
+}
+.column-picker-count {
+  font-size: 12px;
+  color: var(--color-text-tertiary);
+}
+.column-picker-menu {
+  gap: 0.4rem;
+  min-width: 230px;
+}
+.column-picker-menu .cache-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+.column-picker-reset {
+  margin-top: 0.25rem;
+  padding-top: 0.5rem;
+  border: none;
+  border-top: 1px solid var(--color-border-tertiary);
+  background: none;
+  text-align: left;
+  font: inherit;
+  font-size: 13px;
+  color: var(--color-primary-dark);
+  cursor: pointer;
 }
 .cache-table .cell-check {
   width: 36px;
   text-align: center;
 }
 .cache-table tr.row-selected td {
-  background: #eef7f3;
+  background: var(--color-row-selected);
 }
 .cache-bulkbar {
   display: flex;
@@ -610,11 +719,20 @@
   flex: 0 0 auto;
   pointer-events: none;
 }
+/* Wrapped, never clipped: an option is read in full (long action names). */
 .multiselect-row-label {
   flex: 1 1 auto;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.35;
+}
+/* Phones: the multiselect takes its own row, so its list is screen-wide. */
+@media (max-width: 600px) {
+  .cache-search .searchable-select.multi-select {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
 }
 
 /* audit log screen — severity badge + the actor's secondary email line */
@@ -640,20 +758,60 @@
   letter-spacing: 0.02em;
 }
 .audit-severity-info {
-  background: #eef2f1;
-  color: #51615c;
+  background: var(--color-background-secondary);
+  color: var(--color-text-secondary);
 }
 .audit-severity-warn {
-  background: #fdf1dc;
-  color: #8a6116;
+  background: var(--color-warning-tint);
+  color: var(--color-warning-text);
 }
 .audit-severity-critical {
-  background: #fbe4e4;
-  color: #a32020;
+  background: var(--color-danger-tint);
+  color: var(--color-danger-text);
 }
 .audit-actor-email {
   font-size: 11px;
   color: var(--color-text-tertiary, #8a948f);
+}
+
+/* ExpandableText: one clipped line + a toggle that shows the whole text. */
+.expandable-text {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  min-width: 0;
+}
+.expandable-text-body {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.expandable-text.is-expanded .expandable-text-body {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.cache-table td:has(.expandable-text.is-expanded) {
+  max-width: 320px;
+}
+.expandable-text-toggle {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  margin: -3px -4px -3px 0;
+  padding: 0;
+  border: 1px solid var(--color-border-tertiary);
+  border-radius: 6px;
+  background: var(--color-background-secondary);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+.expandable-text-toggle:hover {
+  color: var(--color-text-primary);
 }
 
 /* teacher-points billing panel */
@@ -707,6 +865,7 @@
 /* language switcher */
 .lang-switch {
   display: inline-flex;
+  height: 34px;
   border: 1px solid var(--color-border-secondary, #c9d4d0);
   border-radius: var(--border-radius-md, 6px);
   overflow: hidden;
@@ -746,6 +905,9 @@
   flex-wrap: wrap;
   gap: 0.5rem;
   margin-bottom: 0.75rem;
+}
+.speaking-bar a {
+  text-decoration: none;
 }
 .speaking-bar h2 {
   font-size: 18px;
@@ -794,6 +956,13 @@
   text-decoration: underline;
   cursor: pointer;
 }
+.course-lesson-group + .course-lesson-group {
+  margin-top: 12px;
+}
+.course-lesson-actions .course-lesson-group-title {
+  margin-right: auto;
+  font-size: 13px;
+}
 .course-lesson-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
@@ -803,4 +972,82 @@
   padding: 8px;
   border: 1px solid var(--color-border-tertiary, #dfe5e2);
   border-radius: var(--border-radius-md, 8px);
+}
+
+/* Top-up amount: a stepper (multiples of 70.000đ) + presets, no free typing. */
+.topup-stepper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.topup-stepper .btn-icon {
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--color-border-secondary, #c9d4d0);
+  border-radius: var(--border-radius-md, 6px);
+}
+/* The typed amount: big digits with a fixed "đ" after them. */
+.topup-amount {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 10px;
+  height: 44px;
+  border: 1px solid var(--color-border-secondary, #c9d4d0);
+  border-radius: var(--border-radius-md, 6px);
+  background: var(--color-background-primary, #fff);
+  font-size: 22px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-primary-dark, #0f6e56);
+}
+.topup-amount:focus-within {
+  border-color: var(--color-primary, #00846b);
+  box-shadow: 0 0 0 3px var(--color-primary-tint, #e1f5ee);
+}
+.topup-amount input {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  text-align: right;
+}
+/* The box draws the focus ring (:focus-within), not the bare input. */
+.topup-amount input:focus {
+  border: 0;
+  box-shadow: none;
+}
+.topup-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+.topup-presets button {
+  padding: 4px 10px;
+  border: 1px solid var(--color-border-tertiary, #dfe7e4);
+  border-radius: 999px;
+  background: var(--color-background-primary, #fff);
+  color: var(--color-text-secondary, #51615c);
+  font: inherit;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+.topup-presets button:hover:not(:disabled) {
+  background: var(--color-surface-hover, #f0f7f4);
+}
+.topup-presets button.active {
+  border-color: var(--color-primary, #00846b);
+  background: var(--color-primary-tint, #e1f5ee);
+  color: var(--color-primary-dark, #0f6e56);
+  font-weight: 600;
 }

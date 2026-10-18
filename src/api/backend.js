@@ -162,6 +162,21 @@ export async function fetchTeacherInfo() {
   return response.json();
 }
 
+/**
+ * Saves the teacher's own UI preferences (e.g. { theme: "dark" }) so they
+ * follow the account to other devices. Resolves to the stored preferences.
+ */
+export async function saveTeacherPreferences(preferences) {
+  const response = await authFetch("/teacher-info/preferences", {
+    method: "PATCH",
+    body: preferences,
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to save preferences (HTTP ${response.status})`);
+  }
+  return (await response.json()).preferences;
+}
+
 export async function signupTeacher(payload) {
   return authFetch("/teacher-signup", { method: "POST", body: payload });
 }
@@ -202,6 +217,50 @@ async function courseResult(response, key) {
     throw error;
   }
   return key ? data?.[key] : data;
+}
+
+/**
+ * The student-doc templates (`{id, code, name, gradingProfile}`); a class
+ * picks one of its course's (lib/courses.js templatesForCourse).
+ */
+export async function fetchClassTypes() {
+  const response = await authFetch("/class-types");
+  if (!response.ok) throw new Error("Failed to fetch class types");
+  const list = await response.json();
+  return Array.isArray(list) ? list : [];
+}
+
+/** Admin: the templates, each with `classCount`, `activeClassCount`, `lessonCount`. */
+export async function fetchTemplateUsage() {
+  return courseResult(await authFetch("/class-types/usage"), "templates");
+}
+
+/** Admin: `{code, name, gradingProfile}`; the code is fixed afterwards. */
+export async function createTemplate(body) {
+  return courseResult(
+    await authFetch("/class-types", { method: "POST", body }),
+    "template",
+  );
+}
+
+/** Admin: `{name?, gradingProfile?}`. */
+export async function updateTemplate(templateId, body) {
+  return courseResult(
+    await authFetch(`/class-types/${encodeURIComponent(templateId)}`, {
+      method: "PATCH",
+      body,
+    }),
+    "template",
+  );
+}
+
+export async function deleteTemplate(templateId) {
+  return courseResult(
+    await authFetch(`/class-types/${encodeURIComponent(templateId)}`, {
+      method: "DELETE",
+    }),
+    "template",
+  );
 }
 
 /** The courses; hidden ones only when asked. */
@@ -292,9 +351,14 @@ export async function createClass({
   });
 }
 
-/** Admin: list ALL classes (every teacher) with teacher names joined. */
-export async function fetchAllClasses() {
-  const response = await authFetch("/classes/all");
+/**
+ * Admin: list ALL classes (every teacher) with teacher names joined. Only the
+ * active ones unless `includeInactive` (the class-management screen).
+ */
+export async function fetchAllClasses({ includeInactive } = {}) {
+  const response = await authFetch(
+    `/classes/all${includeInactive ? "?includeInactive=1" : ""}`,
+  );
   if (!response.ok) throw new Error("Failed to fetch all classes");
   return response.json();
 }
@@ -394,13 +458,38 @@ export async function createGradingJob({
 }
 
 /**
+ * IELTS classes: brings the lessons `lessonIds` of every student's doc (or of
+ * `docIds`) to the current feedback template. Nothing is graded or charged.
+ *
+ * @returns {Promise<{lessons: number, total: number, updated: number,
+ *   unchanged: number, skipped: number, failed: number, tables: number,
+ *   noTable: number}>}
+ * @throws {Error} "GOOGLE_REAUTH_REQUIRED", or the backend's error code
+ *   (`job_in_progress` while one of the lessons is being graded,
+ *   `too_many_lessons`).
+ */
+export async function updateIeltsTemplates({ classId, lessonIds, docIds }) {
+  const response = await authFetch("/ielts-template-updates", {
+    method: "POST",
+    body: { classId, lessonIds, docIds },
+  });
+  const data = await response.json().catch(() => null);
+  if (response.ok) return data;
+  if (data?.error === "google_reauth_required") {
+    throw new Error("GOOGLE_REAUTH_REQUIRED");
+  }
+  throw new Error(data?.error || "template_update_failed");
+}
+
+/**
  * Grades one pasted IELTS Writing submission (backend lib/ieltsWriting.js).
  * `images` are data URLs of the chart(s) — Task 1, or a paragraph about a chart.
  *
  * @returns {Promise<{result, feedback: string, cached: boolean,
- *   charged: number, point: number, payerName: string}>}
+ *   charged: number, chargedVnd: number, balanceVnd: number,
+ *   payerName: string}>}
  * @throws {Error} the backend's error code as the message, with `.params`
- *   (e.g. `insufficient_points` + {point, need}).
+ *   (e.g. `insufficient_points` + {balanceVnd, needVnd}).
  */
 export async function gradeIeltsWriting({
   task,
@@ -432,6 +521,26 @@ export async function fetchGradingJob(jobId) {
   );
   if (!response.ok) throw new Error("Failed to fetch grading job");
   return (await response.json()).job;
+}
+
+/**
+ * What grading this lesson by hand would grade and charge right now — the
+ * backend reads every doc (no AI, no writes): `pending` docs will be graded
+ * at `unitPriceVnd` each; docs not done (`notDone`) and already graded
+ * (`alreadyGraded`) are left out, `other` cannot be graded. `docIds` are the
+ * pasted links (omit for the whole class). Throws Error(code) on refusal,
+ * e.g. "google_reauth_required".
+ *
+ * @returns {Promise<{total: number, pending: number, alreadyGraded: number,
+ *   notDone: number, other: number, unitPriceVnd: number, needVnd: number}>}
+ */
+export async function fetchGradingPreview({ classId, lessonId, docIds }) {
+  const query = new URLSearchParams({ classId, lessonId });
+  if (docIds?.length) query.set("docIds", docIds.join(","));
+  const response = await authFetch(`/grading-jobs/preview?${query}`);
+  const data = await response.json().catch(() => null);
+  if (!response.ok) throw new Error(data?.error || "grading_preview_failed");
+  return data;
 }
 
 /** The last job started for this class + lesson, or null. */
@@ -473,19 +582,43 @@ export async function fetchGradingSchedules() {
 }
 
 /**
- * What saving these weekly slots ({slots: [{studentDeadlineAt,
- * graderDeadlineAt}]}, first occurrences in epoch ms) would schedule. Free of
- * side effects on the backend, so it can be called on every edit.
+ * What saving these weekly slots ({slots: [{date: "YYYY-MM-DD", part}]}, the
+ * first grading days) would schedule. Free of side effects on the backend,
+ * so it can be called on every edit.
  */
 export async function previewGradingSchedule(classId, { slots }) {
   const query = new URLSearchParams({
     classId,
-    slots: slots
-      .map((slot) => `${slot.studentDeadlineAt}-${slot.graderDeadlineAt}`)
-      .join(","),
+    days: slots.map((slot) => `${slot.date}.${slot.part}`).join(","),
   });
   const response = await authFetch(`/grading-schedules/preview?${query}`);
   return scheduleResult(response, "preview");
+}
+
+/**
+ * Admin: the default grading time of each part of the day,
+ * `{runTimes: {morning, afternoon, evening}, parts: {part: {from, to}}}`.
+ */
+export async function fetchGradingSettings() {
+  return scheduleResult(await authFetch("/grading-schedules/settings"));
+}
+
+/** Admin: new default times ({part: "HH:mm"}); returns {runTimes, classes}. */
+export async function saveGradingSettings(runTimes) {
+  const response = await authFetch("/grading-schedules/settings", {
+    method: "PUT",
+    body: { runTimes },
+  });
+  return scheduleResult(response);
+}
+
+/** Admin: one class's own times ({part: "HH:mm"}; a part left out: default). */
+export async function saveClassRunTimes(classId, runTimes) {
+  const response = await authFetch(
+    `/grading-schedules/${encodeURIComponent(classId)}/run-time`,
+    { method: "PUT", body: { runTimes } },
+  );
+  return scheduleResult(response, "schedule");
 }
 
 export async function saveGradingSchedule(classId, { slots }) {
@@ -506,7 +639,8 @@ export async function deleteGradingSchedule(classId) {
 
 /**
  * The most the payer's scheduled classes can cost next time, against the
- * balance: `{point, needMax, classes, teacherName}`. With a classId, the payer
+ * balance: `{balanceVnd, priceVnd, needMax, needMaxVnd, classes, teacherName}`
+ * (needMax counts docs, needMaxVnd prices them at the auto price). With a classId, the payer
  * is that class's (for an admin: its teacher).
  */
 export async function fetchScheduleEstimate(classId) {
@@ -579,29 +713,29 @@ export async function bulkDeleteGradingCache(ids) {
 }
 
 // ---------------------------------------------------------------------------
-// Teacher points
+// Teacher balance (VND; the routes keep their old "teacher-points" names)
 // ---------------------------------------------------------------------------
 
-/** Current point balance of the logged-in teacher (0 when no record). */
-export async function fetchMyPoint() {
+/** Current balance (VND) of the logged-in teacher (0 when no record). */
+export async function fetchMyBalance() {
   const response = await authFetch("/teacher-points/me");
-  if (!response.ok) throw new Error("Failed to fetch point balance");
+  if (!response.ok) throw new Error("Failed to fetch balance");
   const data = await response.json();
-  return data.point ?? 0;
+  return data.balanceVnd ?? 0;
 }
 
 /**
  * Balance of whoever pays for this class — the class's teacher when an admin is
  * grading, the caller otherwise. Resolved server-side from the class record.
  */
-export async function fetchPayerPoint(classId) {
+export async function fetchPayerBalance(classId) {
   const response = await authFetch(
     `/teacher-points/payer?classId=${encodeURIComponent(classId || "")}`,
   );
-  if (!response.ok) throw new Error("Failed to fetch payer point balance");
+  if (!response.ok) throw new Error("Failed to fetch payer balance");
   const data = await response.json();
   return {
-    point: data.point ?? 0,
+    balanceVnd: data.balanceVnd ?? 0,
     teacherId: data.teacherId || "",
     teacherName: data.teacherName || "",
   };
@@ -687,7 +821,7 @@ export async function deleteTeacher(
   });
 }
 
-/** All TeacherPoint records. */
+/** One balance row per teacher: `{balanceVnd, topUpHistory, …}`. */
 export async function fetchTeacherPoints() {
   const response = await authFetch("/teacher-points");
   if (!response.ok) throw new Error("Failed to fetch teacher points");
@@ -712,7 +846,7 @@ export async function deleteTeacherPoint(id) {
   });
 }
 
-/** Tops up a teacher's points from a VND amount. */
+/** Tops up a teacher's balance by any whole VND amount (1.000đ–10.000.000đ). */
 export async function topUpTeacherPoint(id, amountVnd) {
   return authFetch(`/teacher-points/${encodeURIComponent(id)}/topup`, {
     method: "POST",
@@ -720,7 +854,7 @@ export async function topUpTeacherPoint(id, amountVnd) {
   });
 }
 
-/** Admin billing summary `{ totalTopUpVnd, totalCommissionVnd }`. */
+/** Admin billing summary `{ totalTopUpVnd (= revenue), totalCommissionVnd }`. */
 export async function fetchBilling() {
   const response = await authFetch("/teacher-points/billing");
   if (!response.ok) throw new Error("Failed to fetch billing");
@@ -794,6 +928,25 @@ export async function fetchNotifications({ status = "all", limit = 50 } = {}) {
   const params = new URLSearchParams({ status, limit: String(limit) });
   const response = await authFetch(`/notifications?${params}`);
   if (!response.ok) throw new Error("Failed to fetch notifications");
+  return response.json();
+}
+
+/**
+ * The notifications page: everything addressed to the viewer, filtered.
+ * `status` all|unread|read, `category` all|grading|system, `severity`
+ * all|INFO|WARN|CRITICAL, `since` an ISO timestamp or "". Returns
+ * `{ results, truncated }`.
+ */
+export async function searchNotifications({
+  status = "all",
+  category = "all",
+  severity = "all",
+  since = "",
+} = {}) {
+  const params = new URLSearchParams({ status, category, severity });
+  if (since) params.set("since", since);
+  const response = await authFetch(`/notifications/search?${params}`);
+  if (!response.ok) throw new Error("Failed to search notifications");
   return response.json();
 }
 

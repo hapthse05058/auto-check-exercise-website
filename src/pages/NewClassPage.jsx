@@ -5,12 +5,14 @@ import {
   checkClassNameExists,
   createClass,
   fetchAllClasses,
+  fetchClassTypes,
   fetchClasses,
   fetchCourseLessons,
   fetchCourses,
   saveGradingSchedule,
 } from "../api/backend.js";
 import { useAuth } from "../auth/AuthContext.jsx";
+import AutoGradePriceNote from "../components/AutoGradePriceNote.jsx";
 import AutoGradeScheduleFields from "../components/AutoGradeScheduleFields.jsx";
 import { isAdminEmail } from "../config.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
@@ -21,6 +23,7 @@ import {
   slotsToBody,
   validateSlots,
 } from "../lib/autoGrade.js";
+import { templatesForCourse } from "../lib/courses.js";
 
 export default function NewClassPage() {
   const { loadTeacherInfo } = useAuth();
@@ -32,6 +35,9 @@ export default function NewClassPage() {
   const [courses, setCourses] = useState([]);
   const [coursesLoading, setCoursesLoading] = useState(true);
   const [courseId, setCourseId] = useState("");
+  // The student-doc templates; the class picks one of its course's.
+  const [templates, setTemplates] = useState([]);
+  const [template, setTemplate] = useState("");
   const [lessons, setLessons] = useState([]);
   const [lessonsLoading, setLessonsLoading] = useState(false);
   const [lesson, setLesson] = useState("");
@@ -54,9 +60,13 @@ export default function NewClassPage() {
           navigate("/missing-teacher", { replace: true });
           return;
         }
-        const courseList = await fetchCourses();
+        const [courseList, templateList] = await Promise.all([
+          fetchCourses(),
+          fetchClassTypes(),
+        ]);
         if (cancelled) return;
         setCourses(Array.isArray(courseList) ? courseList : []);
+        setTemplates(templateList);
         // A single course: nothing to choose.
         if (courseList?.length === 1) setCourseId(courseList[0].id);
         // Admin's duplicate-name check spans all classes, not just their own.
@@ -98,6 +108,19 @@ export default function NewClassPage() {
       cancelled = true;
     };
   }, [courseId]);
+
+  const courseTemplates = templatesForCourse(
+    templates,
+    courses.find((course) => course.id === courseId),
+  );
+  // Another course: its own templates — the only one, preselected.
+  useEffect(() => {
+    const list = templatesForCourse(
+      templates,
+      courses.find((course) => course.id === courseId),
+    );
+    setTemplate(list.length === 1 ? list[0].code : "");
+  }, [courseId, templates, courses]);
 
   /** Local + backend duplicate check; returns true when the name is usable. */
   const verifyClassName = async () => {
@@ -155,6 +178,7 @@ export default function NewClassPage() {
       const response = await createClass({
         name: trimmed,
         courseId,
+        classType: template || undefined,
         currentLesson: lesson.trim(),
         teacherId: teacherInfo?.id,
       });
@@ -195,7 +219,14 @@ export default function NewClassPage() {
     }
   };
 
-  const canSave = !!(name.trim() && courseId && lesson) && !saving;
+  // A course with templates needs one picked; one without has nothing to pick.
+  const canSave =
+    !!(
+      name.trim() &&
+      courseId &&
+      lesson &&
+      (template || courseTemplates.length === 0)
+    ) && !saving;
 
   return (
     <div className="page-narrow">
@@ -242,6 +273,25 @@ export default function NewClassPage() {
             ))}
           </select>
         </div>
+        {courseTemplates.length > 0 && (
+          <div className="form-field">
+            <label htmlFor="newClassTemplate">
+              {t("newClass.template")} <span className="required-star">*</span>
+            </label>
+            <select
+              id="newClassTemplate"
+              value={template}
+              onChange={(e) => setTemplate(e.target.value)}
+            >
+              <option value="">{t("newClass.selectTemplate")}</option>
+              {courseTemplates.map((item) => (
+                <option key={item.code} value={item.code}>
+                  {item.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
         <div className="form-field">
           <label htmlFor="newClassLesson">{t("newClass.currentLesson")}</label>
           <select
@@ -273,6 +323,7 @@ export default function NewClassPage() {
             />
             <span>{t("autoGrade.newClassToggle")}</span>
           </label>
+          <AutoGradePriceNote enabled={autoGrade} />
         </div>
         {autoGrade && (
           <div className="form-field">

@@ -32,20 +32,52 @@ export async function ensureValidToken() {
     return await refreshSilentToken();
   } catch (err) {
     console.warn("Silent refresh failed:", err);
+    if (!err.sessionGone) {
+      // A network blip or a backend hiccup is not a logout: keep the session,
+      // use the current token while it still works, and retry next call.
+      if (result.access_token && result.expiry_date - now > 0) {
+        return result.access_token;
+      }
+      throw new Error("REFRESH_UNAVAILABLE");
+    }
     clearAuthStorage();
     emitAuthExpired("Session expired. Please login to continue.");
     throw new Error("RE-AUTH_NEEDED");
   }
 }
 
-async function refreshSilentToken() {
+/** The refresh token itself was refused or is gone: only a login helps. */
+function sessionGoneError(message) {
+  const err = new Error(message);
+  err.sessionGone = true;
+  return err;
+}
+
+// One refresh at a time: requests that need a token while one is running
+// wait for it instead of each refreshing on its own.
+let refreshing = null;
+
+function refreshSilentToken() {
+  if (!refreshing) {
+    refreshing = doRefreshSilentToken().finally(() => {
+      refreshing = null;
+    });
+  }
+  return refreshing;
+}
+
+async function doRefreshSilentToken() {
   const result = storageGet(["refresh_token", "refresh_token_expires_date"]);
 
+  // An unknown expiry (null — Google usually does not say) is not "expired".
+  const expires = result.refresh_token_expires_date;
   if (
     !result.refresh_token ||
-    result.refresh_token_expires_date - Date.now() <= 0
+    (typeof expires === "number" &&
+      Number.isFinite(expires) &&
+      expires - Date.now() <= 0)
   ) {
-    throw new Error("No refresh token available. Please login again.");
+    throw sessionGoneError("No refresh token available. Please login again.");
   }
 
   const response = await fetch(`${DOMAIN_BE}/auth/refresh`, {
@@ -55,7 +87,13 @@ async function refreshSilentToken() {
   });
 
   if (!response.ok) {
-    throw new Error("Failed to refresh token");
+    // 400/401/403: the refresh token was refused (expired, revoked, account
+    // closed). Anything else (5xx, a proxy error) may pass on a retry.
+    const message = `Failed to refresh token (HTTP ${response.status})`;
+    if ([400, 401, 403].includes(response.status)) {
+      throw sessionGoneError(message);
+    }
+    throw new Error(message);
   }
 
   const data = await response.json();
@@ -65,8 +103,9 @@ async function refreshSilentToken() {
     access_token: data.access_token,
     expiry_date: data.expiry_date,
     access_token_issued_at: now,
-    refresh_token: data.refresh_token,
-    refresh_token_expires_date: data.refresh_token_expires_date,
+    // Google does not always hand back a refresh token: keep the one we have.
+    refresh_token: data.refresh_token || result.refresh_token,
+    refresh_token_expires_date: data.refresh_token_expires_date ?? null,
     // Refresh the Google Docs token too (present for username/password login).
     ...(data.google_access_token
       ? {
