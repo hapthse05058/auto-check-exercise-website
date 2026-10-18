@@ -3,7 +3,11 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
 import { loginWithGoogleCode } from "../api/backend.js";
 import { useAuth } from "../auth/AuthContext.jsx";
-import { getGoogleRedirectUri } from "../auth/googleOAuth.js";
+import {
+  CONSENT_STATE,
+  getGoogleRedirectUri,
+  startGoogleLogin,
+} from "../auth/googleOAuth.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
 
 /**
@@ -33,8 +37,14 @@ export default function AuthCallbackPage() {
     if (exchanged.current) return;
     exchanged.current = true;
 
-    loginWithGoogleCode(code, getGoogleRedirectUri())
-      .then(() => {
+    loginWithGoogleCode(code, getGoogleRedirectUri(), {
+      consented: searchParams.get("state") === CONSENT_STATE,
+    })
+      .then((tokens) => {
+        if (tokens?.needs_consent) {
+          startGoogleLogin({ forceConsent: true, loginHint: tokens.email });
+          return;
+        }
         onLoggedIn();
         navigate("/grade", { replace: true });
       })
