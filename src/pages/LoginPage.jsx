@@ -86,7 +86,7 @@ export default function LoginPage() {
         {method === "google" ? (
           <div className="login-form">
             <p>{t("login.googleHint")}</p>
-            <button className="primary-btn" onClick={startGoogleLogin}>
+            <button className="primary-btn" onClick={() => startGoogleLogin()}>
               {t("login.googleBtn")}
             </button>
           </div>

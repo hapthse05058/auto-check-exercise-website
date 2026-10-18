@@ -69,8 +69,18 @@ export async function loginWithUsernamePassword(username, password) {
   return { ok: true };
 }
 
-/** Exchanges a Google OAuth authorization code for backend tokens. */
-export async function loginWithGoogleCode(code, redirectUri) {
+/**
+ * Exchanges a Google OAuth authorization code for backend tokens.
+ *
+ * Resolves `{ needs_consent: true, email }` without signing in when the login skipped
+ * consent and the backend has no refresh token to reuse; the caller sends the
+ * user through consent. After consent (`consented`) it signs in regardless.
+ */
+export async function loginWithGoogleCode(
+  code,
+  redirectUri,
+  { consented = false } = {},
+) {
   const response = await fetch(`${DOMAIN_BE}/auth/google`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -81,6 +91,9 @@ export async function loginWithGoogleCode(code, redirectUri) {
     throw new Error(data?.error || "Google login failed.");
   }
   const tokens = await response.json();
+  if (tokens.needs_consent && !consented) {
+    return { needs_consent: true, email: tokens.email || "" };
+  }
   storageSet({
     access_token: tokens.access_token,
     expiry_date: tokens.expiry_date,

@@ -10,7 +10,6 @@ export const PROJECT_NUMBER = "159733287448";
 export const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 export const GOOGLE_OAUTH_SCOPES = [
   "https://www.googleapis.com/auth/documents",
-  "https://www.googleapis.com/auth/spreadsheets.readonly",
   "openid",
   "email",
   "profile",
