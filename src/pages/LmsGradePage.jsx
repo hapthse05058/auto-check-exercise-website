@@ -104,7 +104,7 @@ function QuestionTable({ block, t }) {
               </td>
               <td className="lms-q-answer">{q.answer || "—"}</td>
               <td className="lms-q-review">
-                {q.review !== undefined ? (
+                {q.review !== undefined && !q.blank ? (
                   <>
                     <span
                       className={`lms-verdict ${q.isCorrect ? "ok" : "bad"}`}

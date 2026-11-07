@@ -67,7 +67,7 @@ export const translations = {
         "{graded} previewed · {saved} drafts saved · {other} skipped / not graded",
       scoreLine: "{correct}/{counted} correct · {score}/5",
       counts:
-        "{supported} graded · {blank} blank (wrong) · {excluded} formula rows (not graded) · {uncertain} unclear (not graded)",
+        "{supported} graded · {blank} blank (skipped) · {excluded} formula rows (not graded) · {uncertain} unclear (not graded)",
       selectAll: "Select all savable",
       saveDrafts: "Save {n} drafts to the LMS",
       confirmSave:
@@ -85,7 +85,7 @@ export const translations = {
       showNotSubmitted: "Show {n} students who have not submitted",
       hideNotSubmitted: "Hide {n} students who have not submitted",
       cls: {
-        blank: "blank",
+        blank: "blank – skipped",
         excluded: "not graded (formula)",
         uncertain: "unclear – not graded",
       },
@@ -1408,7 +1408,7 @@ export const translations = {
         "{graded} bài đã chấm thử · {saved} đã lưu nháp · {other} bỏ qua / không chấm",
       scoreLine: "{correct}/{counted} câu đúng · {score}/5 điểm",
       counts:
-        "{supported} câu có bài làm · {blank} bỏ trống (tính sai) · {excluded} câu công thức (không chấm) · {uncertain} chưa xác định (không chấm)",
+        "{supported} câu có bài làm · {blank} bỏ trống (bỏ qua, không tính điểm) · {excluded} câu công thức (không chấm) · {uncertain} chưa xác định (không chấm)",
       selectAll: "Chọn tất cả bài có thể lưu",
       saveDrafts: "Lưu nháp {n} học viên lên LMS",
       confirmSave:
@@ -1426,7 +1426,7 @@ export const translations = {
       showNotSubmitted: "Hiện {n} học viên chưa nộp",
       hideNotSubmitted: "Ẩn {n} học viên chưa nộp",
       cls: {
-        blank: "bỏ trống",
+        blank: "bỏ trống – bỏ qua",
         excluded: "không chấm (công thức)",
         uncertain: "chưa xác định – không chấm",
       },
