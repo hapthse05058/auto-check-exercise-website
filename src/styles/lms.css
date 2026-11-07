@@ -1,0 +1,224 @@
+/* SEC LMS screens (LmsGradePage, LmsAccountPage). Theme tokens only, so
+   dark mode follows global.css. */
+
+.lms-page .status-output.error {
+  color: var(--color-danger-text);
+  background: var(--color-danger-tint);
+  border-color: var(--color-danger-tint-border);
+}
+
+.lms-pickers {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.lms-preview {
+  border: 1px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-lg);
+  background: var(--color-surface-subtle);
+  padding: 12px 16px;
+  margin-bottom: 12px;
+}
+.lms-preview p {
+  margin: 0 0 6px;
+}
+
+.lms-summary {
+  font-weight: 600;
+  margin: 8px 0 4px;
+}
+
+.lms-banner {
+  border-radius: var(--border-radius-md);
+  padding: 8px 12px;
+  margin: 8px 0;
+}
+.lms-banner.warn {
+  background: var(--color-warning-tint);
+  color: var(--color-warning-text);
+  border: 1px solid var(--color-warning-light);
+}
+
+.lms-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 12px 0;
+}
+.lms-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.lms-students {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.lms-student {
+  border: 1px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-lg);
+  background: var(--color-background-primary);
+  box-shadow: var(--shadow-card);
+}
+.lms-student-head {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+}
+.lms-student-main p {
+  margin: 0;
+}
+.lms-student-name {
+  font-weight: 600;
+}
+.lms-student-score {
+  color: var(--color-text-secondary);
+}
+.lms-student-links {
+  display: flex;
+  gap: 6px;
+}
+.lms-student-links .secondary-btn {
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.lms-badge {
+  font-size: 0.85rem;
+  border-radius: 999px;
+  padding: 3px 10px;
+  border: 1px solid var(--color-border-secondary);
+  color: var(--color-text-secondary);
+  background: var(--color-background-secondary);
+  max-width: 280px;
+}
+.lms-badge.ok {
+  color: var(--color-primary-dark);
+  background: var(--color-primary-tint);
+  border-color: var(--color-primary-tint-border);
+}
+.lms-badge.info {
+  color: var(--color-link);
+  border-color: var(--color-border-secondary);
+  background: var(--color-surface-subtle);
+}
+.lms-badge.warn {
+  color: var(--color-warning-text);
+  background: var(--color-warning-tint);
+  border-color: var(--color-warning-light);
+}
+
+.lms-detail {
+  border-top: 1px solid var(--color-border-tertiary);
+  padding: 10px 14px 14px;
+}
+.lms-overall {
+  margin: 0 0 8px;
+}
+.lms-table-wrap {
+  overflow-x: auto;
+}
+.lms-table td {
+  vertical-align: top;
+}
+.lms-q-no {
+  width: 2.5em;
+  color: var(--color-text-tertiary);
+}
+.lms-q-section {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--color-text-tertiary);
+}
+.lms-q.excluded,
+.lms-q.uncertain {
+  color: var(--color-text-tertiary);
+}
+.lms-q-skip {
+  font-style: italic;
+}
+.lms-review-line {
+  display: block;
+}
+.lms-verdict {
+  float: left;
+  margin-right: 6px;
+  font-weight: 700;
+}
+.lms-verdict.ok {
+  color: var(--color-success);
+}
+.lms-verdict.bad {
+  color: var(--color-danger);
+}
+
+.lms-account-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px 12px;
+  align-items: start;
+  border: 1px solid var(--color-primary-tint-border);
+  background: var(--color-primary-tint);
+  border-radius: var(--border-radius-lg);
+  padding: 12px 16px;
+  margin-bottom: 12px;
+}
+.lms-account-card > .ti {
+  font-size: 1.4rem;
+  color: var(--color-primary);
+}
+.lms-account-card.warn {
+  border-color: var(--color-warning-light);
+  background: var(--color-warning-tint);
+}
+.lms-account-card.warn > .ti {
+  color: var(--color-warning-dark);
+}
+.lms-account-card p {
+  margin: 0;
+}
+.lms-account-name {
+  font-weight: 600;
+}
+.lms-account-card .button-row {
+  grid-column: 1 / -1;
+}
+.lms-account-form {
+  max-width: 420px;
+}
+
+@media (max-width: 640px) {
+  .lms-student-head {
+    grid-template-columns: auto 1fr;
+  }
+  .lms-badge,
+  .lms-student-links {
+    grid-column: 2;
+  }
+}
+
+.lms-fold {
+  margin-top: 10px;
+}
+
+.lms-assignment-name {
+  font-weight: 600;
+  margin: 12px 0 4px;
+  color: var(--color-primary-dark);
+}
+.lms-reused {
+  font-weight: 400;
+  color: var(--color-text-tertiary);
+}

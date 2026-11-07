@@ -9,6 +9,7 @@ import { usePushNotifications } from "../hooks/usePushNotifications.js";
 import { usePwaInstall } from "../hooks/usePwaInstall.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
 import { formatVnd } from "../lib/billing.js";
+import { useLmsConfig } from "../lib/lmsConfig.js";
 import { POINTS_CHANGED } from "../lib/pointEvents.js";
 import { refreshPushToken, startForegroundPushListener } from "../lib/push.js";
 import { useSyncedTheme } from "../theme/useSyncedTheme.js";
@@ -146,6 +147,13 @@ const NAV_GROUPS = [
     title: "nav.groupGrading",
     items: [
       { path: "/grade", label: "nav.grade", icon: "ti-checklist" },
+      // SEC LMS (KTN): shown only when /lms/config enables it for this teacher.
+      {
+        path: "/lms",
+        label: "nav.lmsGrade",
+        icon: "ti-cloud-upload",
+        lms: true,
+      },
       {
         path: "/ielts-writing",
         label: "nav.ieltsWriting",
@@ -198,6 +206,12 @@ const NAV_GROUPS = [
         path: "/settings/template",
         label: "nav.updateTemplate",
         icon: "ti-layout-rows",
+      },
+      {
+        path: "/settings/lms",
+        label: "nav.lmsAccount",
+        icon: "ti-plug-connected",
+        lms: true,
       },
     ],
   },
@@ -261,10 +275,14 @@ function NavMenu({ theme, toggleTheme }) {
   };
 
   const isAdmin = isAdminEmail(teacherInfo?.gmail);
+  const lmsConfig = useLmsConfig(Boolean(teacherInfo));
+  const lmsEnabled = Boolean(lmsConfig?.enabled);
   const groups = NAV_GROUPS.filter((group) => isAdmin || !group.admin)
     .map((group) => ({
       ...group,
-      items: group.items.filter((item) => isAdmin || !item.admin),
+      items: group.items.filter(
+        (item) => (isAdmin || !item.admin) && (!item.lms || lmsEnabled),
+      ),
     }))
     .filter((group) => group.items.length > 0);
 

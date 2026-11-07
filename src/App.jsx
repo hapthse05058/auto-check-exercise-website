@@ -16,6 +16,8 @@ import GradePage from "./pages/GradePage.jsx";
 import GradingCachePage from "./pages/GradingCachePage.jsx";
 import IeltsWritingPage from "./pages/IeltsWritingPage.jsx";
 import LandingPagePersonal from "./pages/LandingPagePersonal.jsx";
+import LmsAccountPage from "./pages/LmsAccountPage.jsx";
+import LmsGradePage from "./pages/LmsGradePage.jsx";
 import LoginPage from "./pages/LoginPage.jsx";
 import MissingTeacherPage from "./pages/MissingTeacherPage.jsx";
 import NewClassPage from "./pages/NewClassPage.jsx";
@@ -63,6 +65,8 @@ export default function App() {
             path="/settings/template"
             element={<SettingsPage section="template" />}
           />
+          <Route path="/settings/lms" element={<LmsAccountPage />} />
+          <Route path="/lms" element={<LmsGradePage />} />
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/missing-teacher" element={<MissingTeacherPage />} />
           <Route path="/signup" element={<SignupPage />} />

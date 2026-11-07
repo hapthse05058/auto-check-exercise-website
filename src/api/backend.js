@@ -554,6 +554,90 @@ export async function fetchLatestGradingJob(classId, lessonId) {
 }
 
 // ---------------------------------------------------------------------------
+// SEC LMS grading (backend/lib/lmsGradingJobs.js) — KTN, drafts only
+// ---------------------------------------------------------------------------
+
+/** GET/PUT/POST an /lms route; throws Error(backend error code). */
+async function lmsCall(path, options) {
+  const response = await authFetch(path, options);
+  const data = await response.json().catch(() => null);
+  if (!response.ok) {
+    const error = new Error(data?.error || "lms_failed");
+    error.params = data || {};
+    throw error;
+  }
+  return data;
+}
+
+/** {enabled, writeEnabled, unitPriceVnd} — whether to show the LMS screens. */
+export async function fetchLmsConfig() {
+  try {
+    return await lmsCall("/lms/config");
+  } catch {
+    return { enabled: false, writeEnabled: false };
+  }
+}
+
+/** {linked, phone?, lmsName?, status?} — never the password. */
+export const fetchLmsAccount = () => lmsCall("/lms/account");
+
+/** Logs in to the LMS once to check, then stores the login encrypted. */
+export const linkLmsAccount = (phone, password) =>
+  lmsCall("/lms/account", { method: "PUT", body: { phone, password } });
+
+export const unlinkLmsAccount = () =>
+  lmsCall("/lms/account", { method: "DELETE" });
+
+/** The teacher's KTN classes on the LMS. */
+export const fetchLmsClasses = async () =>
+  (await lmsCall("/lms/classes")).classes;
+
+export const fetchLmsSessions = async (classId) =>
+  (await lmsCall(`/lms/classes/${encodeURIComponent(classId)}/sessions`))
+    .sessions;
+
+/** {counts: {total, candidate, notSubmitted, …}, unitPriceVnd, estimatedVnd} */
+export const fetchLmsPreview = (classId, sessionId) =>
+  lmsCall(
+    `/lms/classes/${encodeURIComponent(classId)}/sessions/` +
+      `${encodeURIComponent(sessionId)}/preview`,
+  );
+
+/** Starts grading (no LMS write). A running job is returned, not refused. */
+export async function createLmsGradingJob(classId, sessionId) {
+  try {
+    const data = await lmsCall("/lms/grading-jobs", {
+      method: "POST",
+      body: { classId: String(classId), sessionId: String(sessionId) },
+    });
+    return { jobId: data.jobId, joined: false };
+  } catch (err) {
+    if (err.message === "job_in_progress" && err.params?.jobId) {
+      return { jobId: err.params.jobId, joined: true };
+    }
+    throw err;
+  }
+}
+
+/** {job, students} */
+export const fetchLmsGradingJob = (jobId) =>
+  lmsCall(`/lms/grading-jobs/${encodeURIComponent(jobId)}`);
+
+/** {job, students} of the last job for this session, or {job: null}. */
+export const fetchLatestLmsGradingJob = (classId, sessionId) =>
+  lmsCall(
+    `/lms/grading-jobs/latest?classId=${encodeURIComponent(classId)}` +
+      `&sessionId=${encodeURIComponent(sessionId)}`,
+  );
+
+/** "Lưu nháp lên LMS" for the selected students → {round, queued}. */
+export const writeLmsDrafts = (jobId, studentIds) =>
+  lmsCall(`/lms/grading-jobs/${encodeURIComponent(jobId)}/write`, {
+    method: "POST",
+    body: { studentIds },
+  });
+
+// ---------------------------------------------------------------------------
 // Scheduled grading (backend/lib/gradingSchedules.js)
 // ---------------------------------------------------------------------------
 
