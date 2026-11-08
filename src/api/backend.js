@@ -596,6 +596,29 @@ export const fetchLmsSessions = async (classId) =>
   (await lmsCall(`/lms/classes/${encodeURIComponent(classId)}/sessions`))
     .sessions;
 
+/**
+ * Read-only: every held session × student of the class.
+ * {classInfo, sessions[{id, name, startTime, checkDeadline}],
+ *  students[{studentId, fullName}],
+ *  cells{[sessionId]: {[studentId]: {assignments[{assignmentId, name, kind,
+ *        mcq, status, score}], toolDraft?}}}}
+ */
+export const fetchLmsOverview = (classId) =>
+  lmsCall(`/lms/classes/${encodeURIComponent(classId)}/overview`);
+
+/**
+ * Read-only: one student's work in one session.
+ * {session, studentId, fullName, toolDraft, lmsUrl, assignments[{assignmentId,
+ *  name, kind, status, score, review, questions[{serialNumber, section,
+ *  question, hasMedia, answer, review, isCorrect}]}]}
+ */
+export const fetchLmsStudentWork = (classId, sessionId, studentId) =>
+  lmsCall(
+    `/lms/classes/${encodeURIComponent(classId)}/sessions/` +
+      `${encodeURIComponent(sessionId)}/students/` +
+      `${encodeURIComponent(studentId)}/work`,
+  );
+
 /** {counts: {total, candidate, notSubmitted, …}, unitPriceVnd, estimatedVnd} */
 export const fetchLmsPreview = (classId, sessionId) =>
   lmsCall(

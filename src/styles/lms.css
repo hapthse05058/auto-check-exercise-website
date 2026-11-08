@@ -222,3 +222,180 @@
   font-weight: 400;
   color: var(--color-text-tertiary);
 }
+
+/* Tabs: grade one session / class overview */
+.lms-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  border-bottom: 1px solid var(--color-border-tertiary);
+  margin: 12px 0 16px;
+}
+.lms-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: var(--color-text-secondary);
+  padding: 8px 12px;
+  font: inherit;
+  cursor: pointer;
+}
+.lms-tab.active {
+  color: var(--color-primary-dark);
+  border-bottom-color: var(--color-primary-dark);
+  font-weight: 600;
+}
+
+/* Class overview: students × sessions */
+.lms-overview-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  margin-bottom: 10px;
+}
+.lms-legend {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  padding: 0;
+  margin: 0;
+  font-size: 0.85rem;
+}
+.lms-legend .lms-cell {
+  min-width: 0;
+  cursor: default;
+}
+.lms-overview-scroll {
+  position: relative; /* keeps the cells' .sr-only text inside the scroller */
+  overflow-x: auto;
+  border: 1px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-lg);
+  max-width: 100%;
+}
+.lms-overview-table {
+  border-collapse: separate;
+  border-spacing: 0;
+  min-width: 100%;
+  font-size: 0.9rem;
+}
+.lms-overview-table th,
+.lms-overview-table td {
+  padding: 4px 6px;
+  text-align: center;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--color-border-tertiary);
+}
+.lms-overview-table thead th {
+  position: sticky;
+  top: 0;
+  background: var(--color-surface-subtle);
+  z-index: 1;
+}
+.lms-overview-table .lms-ov-name {
+  position: sticky;
+  left: 0;
+  text-align: left;
+  background: var(--color-background-primary);
+  z-index: 2;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 500;
+}
+.lms-overview-table thead .lms-ov-name {
+  background: var(--color-surface-subtle);
+  z-index: 3;
+}
+.lms-ov-total {
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+.lms-cell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-width: 44px;
+  padding: 3px 6px;
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--color-border-tertiary);
+  background: var(--color-background-secondary);
+  color: var(--color-text-secondary);
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+button.lms-cell:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+.lms-cell.pending {
+  color: var(--color-warning-text);
+  background: var(--color-warning-tint);
+  border-color: var(--color-warning-light);
+}
+.lms-cell.draft {
+  color: var(--color-link);
+  background: var(--color-surface-subtle);
+  border-color: var(--color-border-secondary);
+}
+.lms-cell.graded {
+  color: var(--color-primary-dark);
+  background: var(--color-primary-tint);
+  border-color: var(--color-primary-tint-border);
+  font-weight: 600;
+}
+button.lms-cell:not(:disabled):hover {
+  filter: brightness(0.96);
+}
+.lms-page .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* One student's work in one session */
+.modal.lms-work-modal {
+  max-width: 980px;
+  max-height: 88vh;
+  overflow-y: auto;
+}
+.lms-work-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.lms-work-report {
+  margin: 0 0 12px;
+  padding-left: 18px;
+}
+.lms-work-assignment .lms-assignment-name {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.lms-work-count {
+  font-weight: 400;
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+@media (max-width: 640px) {
+  .modal-bg.open:has(.lms-work-modal) {
+    padding: 8px;
+  }
+  .modal.lms-work-modal {
+    padding: 1rem;
+    max-height: 94vh;
+  }
+}

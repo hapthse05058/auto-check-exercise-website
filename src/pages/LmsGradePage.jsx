@@ -1,4 +1,4 @@
-import { Fragment, useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import {
@@ -12,6 +12,8 @@ import {
   fetchMyBalance,
   writeLmsDrafts,
 } from "../api/backend.js";
+import LmsClassOverview from "../components/LmsClassOverview.jsx";
+import LmsReview from "../components/LmsReview.jsx";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
 import { formatVnd } from "../lib/billing.js";
 import { loadLmsConfig, useLmsConfig } from "../lib/lmsConfig.js";
@@ -39,26 +41,6 @@ const STATUS_ORDER = {
   skipped: 6,
 };
 const BUSY = new Set(["queued", "preparing", "writing"]);
-
-/** "I **am** fine.\n(lý do)" → lines with the bold spans bold. */
-function Review({ text }) {
-  // Keys from position + content: the text never reorders.
-  return String(text || "")
-    .split("\n")
-    .map((line, lineNo) => (
-      // eslint-disable-next-line react/no-array-index-key -- static text, never reordered
-      <span className="lms-review-line" key={`${lineNo}:${line}`}>
-        {line.split(/(\*\*.+?\*\*)/g).map((part, partNo) => {
-          const key = `${partNo}:${part}`;
-          return /^\*\*.+\*\*$/.test(part) ? (
-            <strong key={key}>{part.slice(2, -2)}</strong>
-          ) : (
-            <Fragment key={key}>{part}</Fragment>
-          );
-        })}
-      </span>
-    ));
-}
 
 function StudentDetail({ student, t }) {
   // One block per assignment (VIẾT CÂU, SẮP XẾP TỪ, CHÍNH TẢ), in LMS order.
@@ -118,7 +100,7 @@ function QuestionTable({ block, t }) {
                         aria-hidden="true"
                       />
                     </span>
-                    <Review text={q.review} />
+                    <LmsReview text={q.review} />
                   </>
                 ) : (
                   <span className="lms-q-skip">{t(`lms.cls.${q.cls}`)}</span>
@@ -153,6 +135,8 @@ export default function LmsGradePage() {
   const [expanded, setExpanded] = useState(null);
   const [showNotSubmitted, setShowNotSubmitted] = useState(false);
   const [busy, setBusy] = useState(false);
+  // "grade": grade one session · "overview": every session × student.
+  const [tab, setTab] = useState("grade");
   const [message, setMessage] = useState({ tone: "", text: "" });
   const [balanceVnd, setBalanceVnd] = useState(null);
   const [sessionsLoading, setSessionsLoading] = useState(false);
@@ -391,6 +375,25 @@ export default function LmsGradePage() {
         {t("lms.gradeIntro")}
       </p>
 
+      <div className="lms-tabs" role="tablist">
+        {[
+          ["grade", "ti-checklist"],
+          ["overview", "ti-table"],
+        ].map(([id, icon]) => (
+          <button
+            key={id}
+            type="button"
+            role="tab"
+            aria-selected={tab === id}
+            className={`lms-tab${tab === id ? " active" : ""}`}
+            onClick={() => setTab(id)}
+          >
+            <i className={`ti ${icon}`} aria-hidden="true" />
+            {t(`lms.tabs.${id}`)}
+          </button>
+        ))}
+      </div>
+
       <div className="lms-pickers">
         <div className="field-group">
           <label htmlFor="lms-class">{t("lms.selectClass")}</label>
@@ -410,209 +413,221 @@ export default function LmsGradePage() {
             ))}
           </select>
         </div>
-        <div className="field-group">
-          <label htmlFor="lms-session">{t("lms.selectSession")}</label>
-          <select
-            id="lms-session"
-            value={sessionId}
-            onChange={(e) => setSessionId(e.target.value)}
-            disabled={!sessions.length || busy}
-          >
-            <option value="">{t("lms.selectSession")}</option>
-            {sessions.map((s) => (
-              <option key={s.id} value={s.id} disabled={!s.started}>
-                {s.name} {s.started ? "" : t("lms.sessionNotStarted")}
-              </option>
-            ))}
-          </select>
-        </div>
+        {tab === "grade" && (
+          <div className="field-group">
+            <label htmlFor="lms-session">{t("lms.selectSession")}</label>
+            <select
+              id="lms-session"
+              value={sessionId}
+              onChange={(e) => setSessionId(e.target.value)}
+              disabled={!sessions.length || busy}
+            >
+              <option value="">{t("lms.selectSession")}</option>
+              {sessions.map((s) => (
+                <option key={s.id} value={s.id} disabled={!s.started}>
+                  {s.name} {s.started ? "" : t("lms.sessionNotStarted")}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
       {classes && classes.length === 0 && (
         <p className="field-hint">{t("lms.noClasses")}</p>
       )}
-      {(!account ||
-        !classes ||
-        sessionsLoading ||
-        (classId && sessionId && !preview && !message.text)) && (
-        <p className="status-loading">
-          <span className="spinner" aria-hidden="true" />
-          <span>{t("lms.loading")}</span>
-        </p>
+      {tab === "overview" && classId && (
+        <LmsClassOverview classId={classId} t={t} />
       )}
-
-      {preview && (
-        <div className="lms-preview">
-          <p>{t("lms.preview", preview.counts)}</p>
-          <p className="field-note">
-            {t("lms.estimate", {
-              n: preview.counts.candidate,
-              price: formatVnd(preview.unitPriceVnd),
-              total: formatVnd(preview.estimatedVnd),
-            })}
-          </p>
-          {balanceVnd !== null && (
-            <p className="field-note lms-balance">
-              <i className="ti ti-wallet" aria-hidden="true" />{" "}
-              {t("lms.balance", { balance: formatVnd(balanceVnd) })}
+      {tab === "grade" && (
+        <>
+          {(!account ||
+            !classes ||
+            sessionsLoading ||
+            (classId && sessionId && !preview && !message.text)) && (
+            <p className="status-loading">
+              <span className="spinner" aria-hidden="true" />
+              <span>{t("lms.loading")}</span>
             </p>
           )}
-          <div className="button-row">
-            <button
-              className="primary-btn with-icon"
-              onClick={handleStart}
-              disabled={busy || jobBusy || !preview.counts.candidate}
-            >
-              <i className="ti ti-player-play" aria-hidden="true" />
-              {busy && !job
-                ? t("lms.starting")
-                : job
-                  ? t("lms.regrade")
-                  : t("lms.start")}
-            </button>
-          </div>
-        </div>
-      )}
 
-      {jobBusy && (
-        <p className="status-loading">
-          <span className="spinner" aria-hidden="true" />
-          <span>
-            {job.status === "writing" ? t("lms.writing") : t("lms.grading")}
-          </span>
-        </p>
-      )}
-      {job?.status === "failed" && (
-        <div className="status-output error">
-          {lmsErrorText(new Error(job.error), t)}
-        </div>
-      )}
-
-      {students.length > 0 && (
-        <section className="lms-results">
-          <p className="lms-summary">
-            {t("lms.summary", {
-              graded,
-              saved,
-              other: students.length - graded - saved,
-            })}
-          </p>
-          <p className="field-note">
-            <i className="ti ti-shield-check" aria-hidden="true" />{" "}
-            {t("lms.draftNote")}
-          </p>
-          {!writeEnabled && (
-            <p className="lms-banner warn">
-              <i className="ti ti-lock" aria-hidden="true" />{" "}
-              {t("lms.writeDisabled")}
-            </p>
-          )}
-          {writeEnabled && writable.length > 0 && (
-            <div className="lms-actions">
-              <label className="lms-check">
-                <input
-                  type="checkbox"
-                  checked={allSelected}
-                  onChange={() =>
-                    setSelected(
-                      allSelected
-                        ? new Set()
-                        : new Set(writable.map((s) => s.studentId)),
-                    )
-                  }
-                  disabled={busy || jobBusy}
-                />
-                {t("lms.selectAll")}
-              </label>
-              <button
-                className="primary-btn with-icon"
-                onClick={handleSave}
-                disabled={busy || jobBusy || selected.size === 0}
-              >
-                <i className="ti ti-cloud-upload" aria-hidden="true" />
-                {t("lms.saveDrafts", { n: selected.size })}
-              </button>
+          {preview && (
+            <div className="lms-preview">
+              <p>{t("lms.preview", preview.counts)}</p>
+              <p className="field-note">
+                {t("lms.estimate", {
+                  n: preview.counts.candidate,
+                  price: formatVnd(preview.unitPriceVnd),
+                  total: formatVnd(preview.estimatedVnd),
+                })}
+              </p>
+              {balanceVnd !== null && (
+                <p className="field-note lms-balance">
+                  <i className="ti ti-wallet" aria-hidden="true" />{" "}
+                  {t("lms.balance", { balance: formatVnd(balanceVnd) })}
+                </p>
+              )}
+              <div className="button-row">
+                <button
+                  className="primary-btn with-icon"
+                  onClick={handleStart}
+                  disabled={busy || jobBusy || !preview.counts.candidate}
+                >
+                  <i className="ti ti-player-play" aria-hidden="true" />
+                  {busy && !job
+                    ? t("lms.starting")
+                    : job
+                      ? t("lms.regrade")
+                      : t("lms.start")}
+                </button>
+              </div>
             </div>
           )}
 
-          <ul className="lms-students">
-            {shown.map((s) => {
-              const canSelect =
-                writeEnabled && LMS_WRITABLE.has(s.status) && !jobBusy;
-              const open = expanded === s.studentId;
-              return (
-                <li key={s.studentId} className="lms-student">
-                  <div className="lms-student-head">
+          {jobBusy && (
+            <p className="status-loading">
+              <span className="spinner" aria-hidden="true" />
+              <span>
+                {job.status === "writing" ? t("lms.writing") : t("lms.grading")}
+              </span>
+            </p>
+          )}
+          {job?.status === "failed" && (
+            <div className="status-output error">
+              {lmsErrorText(new Error(job.error), t)}
+            </div>
+          )}
+
+          {students.length > 0 && (
+            <section className="lms-results">
+              <p className="lms-summary">
+                {t("lms.summary", {
+                  graded,
+                  saved,
+                  other: students.length - graded - saved,
+                })}
+              </p>
+              <p className="field-note">
+                <i className="ti ti-shield-check" aria-hidden="true" />{" "}
+                {t("lms.draftNote")}
+              </p>
+              {!writeEnabled && (
+                <p className="lms-banner warn">
+                  <i className="ti ti-lock" aria-hidden="true" />{" "}
+                  {t("lms.writeDisabled")}
+                </p>
+              )}
+              {writeEnabled && writable.length > 0 && (
+                <div className="lms-actions">
+                  <label className="lms-check">
                     <input
                       type="checkbox"
-                      aria-label={s.fullName}
-                      checked={selected.has(s.studentId)}
-                      onChange={() => toggle(s.studentId)}
-                      disabled={!canSelect || busy}
+                      checked={allSelected}
+                      onChange={() =>
+                        setSelected(
+                          allSelected
+                            ? new Set()
+                            : new Set(writable.map((s) => s.studentId)),
+                        )
+                      }
+                      disabled={busy || jobBusy}
                     />
-                    <div className="lms-student-main">
-                      <p className="lms-student-name">{s.fullName}</p>
-                      {s.counted ? (
-                        <p className="lms-student-score">
-                          {t("lms.scoreLine", {
-                            correct: s.correct,
-                            counted: s.counted,
-                            score: s.score,
-                          })}
-                        </p>
-                      ) : null}
-                      {s.counts && (
-                        <p className="field-note">
-                          {t("lms.counts", s.counts)}
-                        </p>
-                      )}
-                    </div>
-                    <span className={`lms-badge ${lmsStatusTone(s.status)}`}>
-                      {lmsStatusText(s, t)}
-                    </span>
-                    <div className="lms-student-links">
-                      {s.questions && (
-                        <button
-                          className="secondary-btn"
-                          onClick={() => setExpanded(open ? null : s.studentId)}
-                          aria-expanded={open}
-                        >
-                          {open ? t("lms.hideDetail") : t("lms.showDetail")}
-                        </button>
-                      )}
-                      <a
-                        className="secondary-btn"
-                        href={s.lmsUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        {t("lms.openLms")}
-                      </a>
-                    </div>
-                  </div>
-                  {open && <StudentDetail student={s} t={t} />}
-                </li>
-              );
-            })}
-          </ul>
-          {notSubmitted.length > 0 && (
-            <button
-              className="secondary-btn lms-fold"
-              onClick={() => setShowNotSubmitted((v) => !v)}
-              aria-expanded={showNotSubmitted}
-            >
-              {t(
-                showNotSubmitted
-                  ? "lms.hideNotSubmitted"
-                  : "lms.showNotSubmitted",
-                {
-                  n: notSubmitted.length,
-                },
+                    {t("lms.selectAll")}
+                  </label>
+                  <button
+                    className="primary-btn with-icon"
+                    onClick={handleSave}
+                    disabled={busy || jobBusy || selected.size === 0}
+                  >
+                    <i className="ti ti-cloud-upload" aria-hidden="true" />
+                    {t("lms.saveDrafts", { n: selected.size })}
+                  </button>
+                </div>
               )}
-            </button>
-          )}
-        </section>
-      )}
 
+              <ul className="lms-students">
+                {shown.map((s) => {
+                  const canSelect =
+                    writeEnabled && LMS_WRITABLE.has(s.status) && !jobBusy;
+                  const open = expanded === s.studentId;
+                  return (
+                    <li key={s.studentId} className="lms-student">
+                      <div className="lms-student-head">
+                        <input
+                          type="checkbox"
+                          aria-label={s.fullName}
+                          checked={selected.has(s.studentId)}
+                          onChange={() => toggle(s.studentId)}
+                          disabled={!canSelect || busy}
+                        />
+                        <div className="lms-student-main">
+                          <p className="lms-student-name">{s.fullName}</p>
+                          {s.counted ? (
+                            <p className="lms-student-score">
+                              {t("lms.scoreLine", {
+                                correct: s.correct,
+                                counted: s.counted,
+                                score: s.score,
+                              })}
+                            </p>
+                          ) : null}
+                          {s.counts && (
+                            <p className="field-note">
+                              {t("lms.counts", s.counts)}
+                            </p>
+                          )}
+                        </div>
+                        <span
+                          className={`lms-badge ${lmsStatusTone(s.status)}`}
+                        >
+                          {lmsStatusText(s, t)}
+                        </span>
+                        <div className="lms-student-links">
+                          {s.questions && (
+                            <button
+                              className="secondary-btn"
+                              onClick={() =>
+                                setExpanded(open ? null : s.studentId)
+                              }
+                              aria-expanded={open}
+                            >
+                              {open ? t("lms.hideDetail") : t("lms.showDetail")}
+                            </button>
+                          )}
+                          <a
+                            className="secondary-btn"
+                            href={s.lmsUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            {t("lms.openLms")}
+                          </a>
+                        </div>
+                      </div>
+                      {open && <StudentDetail student={s} t={t} />}
+                    </li>
+                  );
+                })}
+              </ul>
+              {notSubmitted.length > 0 && (
+                <button
+                  className="secondary-btn lms-fold"
+                  onClick={() => setShowNotSubmitted((v) => !v)}
+                  aria-expanded={showNotSubmitted}
+                >
+                  {t(
+                    showNotSubmitted
+                      ? "lms.hideNotSubmitted"
+                      : "lms.showNotSubmitted",
+                    {
+                      n: notSubmitted.length,
+                    },
+                  )}
+                </button>
+              )}
+            </section>
+          )}
+        </>
+      )}
       {message.text && (
         <div
           className={`status-output${message.tone === "error" ? " error" : ""}`}
