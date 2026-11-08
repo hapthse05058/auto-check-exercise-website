@@ -619,6 +619,29 @@ export const fetchLmsStudentWork = (classId, sessionId, studentId) =>
       `${encodeURIComponent(studentId)}/work`,
   );
 
+/**
+ * A teacher's own review of one student, saved from the tool.
+ * body: {action: "draft" | "submit", answerHash, reviewHash,
+ *        edits[{key, review, isCorrect}], score, overall}
+ * "submit" is the LMS's "Lưu & Chấm bài": the student sees it at once.
+ */
+export const saveLmsReview = (classId, sessionId, studentId, body) =>
+  lmsCall(
+    `/lms/classes/${encodeURIComponent(classId)}/sessions/` +
+      `${encodeURIComponent(sessionId)}/students/` +
+      `${encodeURIComponent(studentId)}/review`,
+    { method: "PUT", body },
+  );
+
+/** "Chấm xong" on a draft the tool saved, unchanged. */
+export const finalizeLmsDraft = (classId, sessionId, studentId) =>
+  lmsCall(
+    `/lms/classes/${encodeURIComponent(classId)}/sessions/` +
+      `${encodeURIComponent(sessionId)}/students/` +
+      `${encodeURIComponent(studentId)}/finalize`,
+    { method: "POST" },
+  );
+
 /** {counts: {total, candidate, notSubmitted, …}, unitPriceVnd, estimatedVnd} */
 export const fetchLmsPreview = (classId, sessionId) =>
   lmsCall(

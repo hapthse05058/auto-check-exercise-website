@@ -65,3 +65,20 @@ export function lmsCellState(cell) {
     score: marked ? marked.score : null,
   };
 }
+
+/**
+ * The 1-5 score the grading rule gives (100% → 5, ≥80% → 4, ≥60% → 3,
+ * ≥40% → 2, else 1) for the counted questions' marks, or null without any.
+ */
+export function lmsSuggestedScore(marks) {
+  const counted = marks.length;
+  if (!counted) return null;
+  const correct = marks.filter((m) => m.isCorrect === true).length;
+  const ratio = correct / counted;
+  let score = 1;
+  if (ratio >= 1) score = 5;
+  else if (ratio >= 0.8) score = 4;
+  else if (ratio >= 0.6) score = 3;
+  else if (ratio >= 0.4) score = 2;
+  return { score, correct, counted };
+}

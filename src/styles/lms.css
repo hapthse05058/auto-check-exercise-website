@@ -424,3 +424,90 @@ button.lms-cell:not(:disabled):hover {
     max-height: 94vh;
   }
 }
+
+/* Editing one student's grading (LmsStudentWork) */
+.lms-banner.info {
+  background: var(--color-surface-subtle);
+  color: var(--color-link);
+  border: 1px solid var(--color-border-secondary);
+}
+.lms-edit-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 220px;
+}
+.lms-toggle {
+  display: inline-flex;
+  gap: 4px;
+}
+.lms-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border-secondary);
+  background: var(--color-background-primary);
+  color: var(--color-text-secondary);
+  font: inherit;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.lms-toggle-btn.ok.active {
+  color: var(--color-primary-dark);
+  background: var(--color-primary-tint);
+  border-color: var(--color-primary-tint-border);
+  font-weight: 600;
+}
+.lms-toggle-btn.bad.active {
+  color: var(--color-danger-text);
+  background: var(--color-danger-tint);
+  border-color: var(--color-danger-tint-border);
+  font-weight: 600;
+}
+.lms-edit-review {
+  width: 100%;
+  box-sizing: border-box;
+  font: inherit;
+  font-size: 0.9rem;
+  padding: 6px 8px;
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--color-border-secondary);
+  background: var(--color-background-primary);
+  color: var(--color-text-primary);
+  resize: vertical;
+}
+.lms-edit-summary {
+  display: grid;
+  grid-template-columns: minmax(160px, 220px) 1fr;
+  gap: 12px 16px;
+  margin-top: 12px;
+}
+.lms-edit-actions {
+  position: sticky;
+  bottom: -1.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 0;
+  background: var(--color-background-primary);
+  border-top: 1px solid var(--color-border-tertiary);
+}
+.lms-spin {
+  animation: lms-spin 0.9s linear infinite;
+}
+@keyframes lms-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (max-width: 640px) {
+  .lms-edit-summary {
+    grid-template-columns: 1fr;
+  }
+  .lms-edit-cell {
+    min-width: 160px;
+  }
+}

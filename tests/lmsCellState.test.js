@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import { lmsCellState } from "../src/lib/lmsText.js";
+import { lmsCellState, lmsSuggestedScore } from "../src/lib/lmsText.js";
 
 const a = (status, extra = {}) => ({
   assignmentId: Math.random(),
@@ -60,4 +60,21 @@ test("only multiple choice handed in: its own state, nothing for the teacher to 
     ],
   });
   expect(c).toMatchObject({ state: "mcqOnly", handedIn: 1, total: 2 });
+});
+
+describe("lmsSuggestedScore", () => {
+  const marks = (right, total) =>
+    Array.from({ length: total }, (_, i) => ({ isCorrect: i < right }));
+  test("the grading thresholds", () => {
+    expect(lmsSuggestedScore(marks(5, 5)).score).toBe(5);
+    expect(lmsSuggestedScore(marks(4, 5)).score).toBe(4);
+    expect(lmsSuggestedScore(marks(3, 5)).score).toBe(3);
+    expect(lmsSuggestedScore(marks(2, 5)).score).toBe(2);
+    expect(lmsSuggestedScore(marks(1, 5))).toEqual({
+      score: 1,
+      correct: 1,
+      counted: 5,
+    });
+    expect(lmsSuggestedScore([])).toBeNull();
+  });
 });

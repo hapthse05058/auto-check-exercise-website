@@ -46,7 +46,7 @@ export const translations = {
         "The LMS refused to log in again (wrong password or captcha). Enter the password again.",
       gradeTitle: "Grade on SEC LMS",
       gradeIntro:
-        'KTN classes · grades BÀI TẬP VIẾT CÂU, SẮP XẾP TỪ THÀNH CÂU and CHÍNH TẢ (whichever the student submitted). Preview the grading, pick students, then save drafts to the LMS. Students see nothing until you press "Lưu & Chấm bài" on the LMS.',
+        "KTN classes · grades BÀI TẬP VIẾT CÂU, SẮP XẾP TỪ THÀNH CÂU and CHÍNH TẢ (whichever the student submitted). Grade with the AI, open View & edit to correct each student, then save a draft or finish grading right here, without the LMS.",
       notLinked: "Your LMS account is not linked yet.",
       goLink: "Link LMS",
       selectClass: "Choose an LMS class",
@@ -59,13 +59,13 @@ export const translations = {
       balance: "Your balance: {balance}",
       estimate:
         "Up to {n} × {price} = {total}. Charged only when a draft is saved.",
-      start: "Preview grading",
-      regrade: "Preview again",
+      start: "Grade",
+      regrade: "Grade again",
       starting: "Starting…",
       grading: "Grading… (nothing is written to the LMS)",
       writing: "Saving drafts to the LMS…",
       summary:
-        "Previewed: {graded} · Drafts saved: {saved} · Skipped / not graded: {other}",
+        "Graded: {graded} · Drafts saved: {saved} · Skipped / not graded: {other}",
       scoreLine: "{correct}/{counted} correct · {score}/5",
       counts:
         "{supported} graded · {blank} blank (skipped) · {excluded} formula rows (not graded) · {uncertain} unclear (not graded)",
@@ -84,6 +84,31 @@ export const translations = {
       hideDetail: "Hide details",
       reused: "the draft saved earlier is kept as is",
       tabs: { grade: "Grade a session", overview: "Class overview" },
+      edit: {
+        open: "View & edit",
+        mark: "Right or wrong",
+        right: "Right",
+        wrong: "Wrong",
+        reviewPlaceholder: "Feedback for the student",
+        score: "Score (1–5)",
+        pickScore: "Pick a score",
+        suggested: "Suggested: {score} ({correct}/{counted} right)",
+        useSuggested: "Use it",
+        boldHint: "Put **two stars** around a word to make it bold on the LMS.",
+        proposal:
+          "Showing the AI's grading, not on the LMS yet. Edit it, then save: {price} per student, charged once.",
+        saveDraft: "Save draft",
+        submit: "Grading done",
+        saving: "Saving…",
+        needScore: "Pick a score from 1 to 5 first.",
+        confirmSubmit:
+          "Finish grading with score {score}?\nThe student sees the result right away, and it can no longer be changed from the tool.",
+        confirmFinalize:
+          "Finish grading {name} with the saved draft?\nThe student sees the result right away.",
+        finalized: "{name}: grading finished on the LMS.",
+        submitOff:
+          '"Grading done" is switched off for now: save a draft, then press "Lưu & Chấm bài" on the LMS.',
+      },
       table: {
         no: "No.",
         question: "Question",
@@ -155,6 +180,23 @@ export const translations = {
         not_enough_points: "balance too low",
       },
       error: {
+        lms_submit_disabled: "Finishing grading from the tool is switched off.",
+        lms_answers_changed:
+          "The student changed their work since you opened it. Close and open it again.",
+        lms_reviews_changed:
+          "Someone changed this on the LMS since you opened it. Close and open it again.",
+        lms_already_graded: "This work is already marked on the LMS.",
+        lms_no_tool_draft: "There is no draft from the tool to finish.",
+        lms_nothing_to_grade: "There is nothing to grade for this student.",
+        lms_write_uncertain:
+          "The LMS did not answer. Open the work again to see whether it was saved.",
+        lms_verify_mismatch:
+          "The LMS saved something different. Open the work again and check.",
+        lms_submit_unconfirmed:
+          "The LMS has not confirmed the marking yet. Open the work again to check.",
+        invalid_score: "Pick a score from 1 to 5.",
+        invalid_review:
+          "This review cannot be saved (unknown question or too long).",
         lms_bad_credentials: "Wrong LMS phone number or password.",
         lms_captcha_required:
           "The LMS asks for a captcha. Log in to the LMS in your browser once, then try again.",
@@ -791,6 +833,8 @@ export const translations = {
         lms_accountUnlink: "Unlink SEC LMS account",
         lms_jobStart: "Grade on SEC LMS (preview)",
         lms_draftWrite: "Save drafts to SEC LMS",
+        lms_teacherReview: "Edit grading on SEC LMS",
+        lms_teacherFinalize: "Finish grading on SEC LMS",
         lms_draftSaved: "Draft saved on SEC LMS",
         lms_roundSummary: "SEC LMS drafts: summary",
       },
@@ -1424,7 +1468,7 @@ export const translations = {
         "LMS không cho đăng nhập lại (sai mật khẩu hoặc cần captcha). Hãy nhập lại mật khẩu.",
       gradeTitle: "Chấm bài trên LMS",
       gradeIntro:
-        'Lớp KTN · chấm BÀI TẬP VIẾT CÂU, SẮP XẾP TỪ THÀNH CÂU và CHÍNH TẢ (bài nào học viên đã nộp). Bấm Chấm thử để xem kết quả, chọn học viên rồi Lưu nháp lên LMS. Học viên chỉ thấy kết quả sau khi bạn bấm "Lưu & Chấm bài" trên LMS.',
+        "Lớp KTN · chấm BÀI TẬP VIẾT CÂU, SẮP XẾP TỪ THÀNH CÂU và CHÍNH TẢ (bài nào học viên đã nộp). Bấm Chấm bài để AI chấm, bấm Xem & sửa để sửa từng bài, rồi Lưu nháp hoặc Chấm xong ngay tại đây, không cần vào LMS.",
       notLinked: "Bạn chưa kết nối tài khoản LMS.",
       goLink: "Kết nối LMS",
       selectClass: "Chọn lớp trên LMS",
@@ -1437,13 +1481,13 @@ export const translations = {
       balance: "Số dư của bạn: {balance}",
       estimate:
         "Dự kiến tối đa {n} bài × {price} = {total}. Chỉ trừ tiền khi lưu nháp thành công.",
-      start: "Chấm thử",
-      regrade: "Chấm thử lại",
+      start: "Chấm bài",
+      regrade: "Chấm lại",
       starting: "Đang bắt đầu…",
-      grading: "Đang chấm thử… (chưa ghi gì lên LMS)",
+      grading: "Đang chấm bài… (chưa ghi gì lên LMS)",
       writing: "Đang lưu nháp lên LMS…",
       summary:
-        "Đã chấm thử: {graded} bài · Đã lưu nháp: {saved} bài · Bỏ qua / không chấm: {other} bài",
+        "Đã chấm: {graded} bài · Đã lưu nháp: {saved} bài · Bỏ qua / không chấm: {other} bài",
       scoreLine: "{correct}/{counted} câu đúng · {score}/5 điểm",
       counts:
         "{supported} câu có bài làm · {blank} bỏ trống (bỏ qua, không tính điểm) · {excluded} câu công thức (không chấm) · {uncertain} chưa xác định (không chấm)",
@@ -1453,7 +1497,7 @@ export const translations = {
         'Lưu nháp {n} học viên lên LMS?\nMỗi bài {price}, tổng {total}.\nSau đó bạn mở LMS kiểm tra và tự bấm "Lưu & Chấm bài".',
       writeQueued: "Đã gửi {n} học viên, đang lưu nháp…",
       writeDisabled:
-        "Lưu nháp lên LMS đang tạm tắt — bạn vẫn xem được kết quả chấm thử.",
+        "Lưu nháp lên LMS đang tạm tắt — bạn vẫn xem được kết quả chấm.",
       draftNote:
         'Tool chỉ lưu nháp. Học viên chưa thấy kết quả cho đến khi bạn bấm "Lưu & Chấm bài" trên LMS.',
       openLms: "Mở trên LMS",
@@ -1462,6 +1506,31 @@ export const translations = {
       hideDetail: "Ẩn chi tiết",
       reused: "giữ nguyên bản nháp đã lưu trước đó",
       tabs: { grade: "Chấm bài theo buổi", overview: "Tổng hợp lớp" },
+      edit: {
+        open: "Xem & sửa",
+        mark: "Đúng hoặc sai",
+        right: "Đúng",
+        wrong: "Sai",
+        reviewPlaceholder: "Nhận xét cho học viên",
+        score: "Điểm (1–5)",
+        pickScore: "Chọn điểm",
+        suggested: "Gợi ý: {score} điểm ({correct}/{counted} câu đúng)",
+        useSuggested: "Dùng điểm này",
+        boldHint: "Bọc chữ trong **hai dấu sao** để in đậm trên LMS.",
+        proposal:
+          "Đang hiện kết quả AI chấm, chưa có trên LMS. Sửa nếu cần rồi lưu: {price}/học viên, chỉ trừ một lần.",
+        saveDraft: "Lưu nháp",
+        submit: "Chấm xong",
+        saving: "Đang lưu…",
+        needScore: "Hãy chọn điểm từ 1 đến 5 trước.",
+        confirmSubmit:
+          "Chấm xong với điểm {score}?\nHọc viên sẽ thấy kết quả ngay và không sửa được từ tool nữa.",
+        confirmFinalize:
+          "Chấm xong {name} theo bản nháp đã lưu?\nHọc viên sẽ thấy kết quả ngay.",
+        finalized: "{name}: đã chấm xong trên LMS.",
+        submitOff:
+          'Nút "Chấm xong" đang tạm tắt: hãy lưu nháp rồi bấm "Lưu & Chấm bài" trên LMS.',
+      },
       table: {
         no: "STT",
         question: "Đề bài",
@@ -1520,10 +1589,10 @@ export const translations = {
         partial: "nộp chưa đủ",
         teacherStarted: "giáo viên đã bắt đầu chấm trên LMS",
         nothingToGrade: "không có câu để chấm",
-        noFeedback: "AI chưa trả lời đủ – chấm thử lại",
+        noFeedback: "AI chưa trả lời đủ – chấm lại",
         readFailed: "không đọc được bài trên LMS",
         noWritingAssignment: "buổi này không có bài viết câu",
-        answersChanged: "bài làm đổi sau khi chấm – chấm thử lại",
+        answersChanged: "bài làm đổi sau khi chấm – chấm lại",
         reviewsChanged: "nhận xét trên LMS đã bị sửa – không ghi đè",
         superseded: "đã có lần chấm mới hơn",
         writeDisabled: "lưu nháp đang tắt",
@@ -1533,6 +1602,23 @@ export const translations = {
         not_enough_points: "không đủ số dư",
       },
       error: {
+        lms_submit_disabled: "Chấm xong từ tool đang tạm tắt.",
+        lms_answers_changed:
+          "Học viên đã sửa bài từ lúc bạn mở. Hãy đóng và mở lại bài.",
+        lms_reviews_changed:
+          "Bài đã bị sửa trên LMS từ lúc bạn mở. Hãy đóng và mở lại bài.",
+        lms_already_graded: "Bài này đã được chấm xong trên LMS.",
+        lms_no_tool_draft: "Không có bản nháp của tool để chấm xong.",
+        lms_nothing_to_grade: "Học viên này không có bài để chấm.",
+        lms_write_uncertain:
+          "LMS không phản hồi. Hãy mở lại bài để xem đã lưu chưa.",
+        lms_verify_mismatch:
+          "LMS lưu khác với bạn gửi. Hãy mở lại bài để kiểm tra.",
+        lms_submit_unconfirmed:
+          "LMS chưa xác nhận đã chấm xong. Hãy mở lại bài để kiểm tra.",
+        invalid_score: "Hãy chọn điểm từ 1 đến 5.",
+        invalid_review:
+          "Không lưu được nhận xét này (câu không tồn tại hoặc quá dài).",
         lms_bad_credentials: "Sai số điện thoại hoặc mật khẩu LMS.",
         lms_captcha_required:
           "LMS đang yêu cầu captcha. Hãy đăng nhập LMS trên trình duyệt một lần rồi thử lại.",
@@ -1544,7 +1630,7 @@ export const translations = {
         lms_lms_unavailable: "LMS đang không phản hồi, thử lại sau.",
         lms_session_not_started: "Buổi học này chưa diễn ra.",
         job_superseded:
-          "Đã có lần chấm thử mới hơn cho buổi này — trang đã tải lại.",
+          "Đã có lần chấm mới hơn cho buổi này — trang đã tải lại.",
         lms_write_disabled: "Lưu nháp lên LMS đang tạm tắt.",
         not_enough_points: "Không đủ số dư để chấm các bài này.",
         nothing_to_write: "Không có học viên nào có thể lưu nháp.",
@@ -2162,8 +2248,10 @@ export const translations = {
         ai_balanceCheckFailed: "Không đọc được số dư AI",
         lms_accountLink: "Kết nối tài khoản SEC LMS",
         lms_accountUnlink: "Ngắt kết nối SEC LMS",
-        lms_jobStart: "Chấm thử trên SEC LMS",
+        lms_jobStart: "Chấm bài trên SEC LMS",
         lms_draftWrite: "Lưu nháp lên SEC LMS",
+        lms_teacherReview: "Sửa bài chấm trên SEC LMS",
+        lms_teacherFinalize: "Chấm xong trên SEC LMS",
         lms_draftSaved: "Đã lưu nháp lên SEC LMS",
         lms_roundSummary: "Tổng kết lưu nháp SEC LMS",
       },

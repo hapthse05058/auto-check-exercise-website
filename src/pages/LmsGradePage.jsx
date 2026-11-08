@@ -10,11 +10,13 @@ import {
   fetchLmsPreview,
   fetchLmsSessions,
   fetchMyBalance,
+  finalizeLmsDraft,
   writeLmsDrafts,
 } from "../api/backend.js";
 import LmsClassOverview from "../components/LmsClassOverview.jsx";
 import LmsQuestionTable from "../components/LmsQuestionTable.jsx";
 import LmsReview from "../components/LmsReview.jsx";
+import LmsStudentWork from "../components/LmsStudentWork.jsx";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
 import { formatVnd } from "../lib/billing.js";
 import { loadLmsConfig, useLmsConfig } from "../lib/lmsConfig.js";
@@ -130,6 +132,8 @@ export default function LmsGradePage() {
   const [tab, setTab] = useState("grade");
   const [message, setMessage] = useState({ tone: "", text: "" });
   const [balanceVnd, setBalanceVnd] = useState(null);
+  const [editing, setEditing] = useState(null); // a student of the list
+  const [finalizing, setFinalizing] = useState("");
   const [sessionsLoading, setSessionsLoading] = useState(false);
   const sessionReq = useRef(0);
   const pollRef = useRef(null);
@@ -319,6 +323,27 @@ export default function LmsGradePage() {
       if (err.message === "job_superseded") loadSession();
     } finally {
       setBusy(false);
+    }
+  };
+
+  // "Chấm xong" on a draft the tool saved, as it is on the LMS.
+  const handleFinalize = async (s) => {
+    if (finalizing) return;
+    if (!window.confirm(t("lms.edit.confirmFinalize", { name: s.fullName }))) {
+      return;
+    }
+    setFinalizing(s.studentId);
+    try {
+      await finalizeLmsDraft(classId, sessionId, s.studentId);
+      setMessage({
+        tone: "info",
+        text: t("lms.edit.finalized", { name: s.fullName }),
+      });
+      await loadSession();
+    } catch (err) {
+      showError(err);
+    } finally {
+      setFinalizing("");
     }
   };
 
@@ -584,6 +609,32 @@ export default function LmsGradePage() {
                           {lmsStatusText(s, t)}
                         </span>
                         <div className="lms-student-links">
+                          {s.status !== "skipped" && (
+                            <button
+                              className="primary-btn with-icon"
+                              onClick={() => setEditing(s)}
+                              disabled={jobBusy}
+                            >
+                              <i className="ti ti-pencil" aria-hidden="true" />
+                              {t("lms.edit.open")}
+                            </button>
+                          )}
+                          {s.status === "draft_saved" &&
+                            config?.submitEnabled && (
+                              <button
+                                className="secondary-btn with-icon"
+                                onClick={() => handleFinalize(s)}
+                                disabled={jobBusy || Boolean(finalizing)}
+                              >
+                                <i
+                                  className="ti ti-circle-check"
+                                  aria-hidden="true"
+                                />
+                                {finalizing === s.studentId
+                                  ? t("lms.edit.saving")
+                                  : t("lms.edit.submit")}
+                              </button>
+                            )}
                           {s.questions && (
                             <button
                               className="secondary-btn"
@@ -636,6 +687,25 @@ export default function LmsGradePage() {
         >
           {message.text}
         </div>
+      )}
+      {editing && (
+        <LmsStudentWork
+          classId={classId}
+          session={
+            sessions.find((x) => String(x.id) === String(sessionId)) || {
+              id: sessionId,
+              name: "",
+            }
+          }
+          student={editing}
+          config={config}
+          t={t}
+          onClose={() => setEditing(null)}
+          onSaved={() => {
+            loadSession();
+            refreshBalance();
+          }}
+        />
       )}
     </div>
   );
