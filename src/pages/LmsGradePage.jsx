@@ -13,6 +13,7 @@ import {
   writeLmsDrafts,
 } from "../api/backend.js";
 import LmsClassOverview from "../components/LmsClassOverview.jsx";
+import LmsQuestionTable from "../components/LmsQuestionTable.jsx";
 import LmsReview from "../components/LmsReview.jsx";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
 import { formatVnd } from "../lib/billing.js";
@@ -76,40 +77,30 @@ function QuestionTable({ block, t }) {
           {reused && <span className="lms-reused"> · {t("lms.reused")}</span>}
         </p>
       )}
-      <table className="data-table lms-table">
-        <tbody>
-          {block.questions.map((q) => (
-            <tr key={q.key} className={`lms-q ${q.cls}`}>
-              <td className="lms-q-no">{q.serialNumber}</td>
-              <td className="lms-q-text">
-                {q.section && (
-                  <span className="lms-q-section">{q.section}</span>
-                )}
-                {q.question}
-              </td>
-              <td className="lms-q-answer">{q.answer || "—"}</td>
-              <td className="lms-q-review">
-                {q.review !== undefined && !q.blank ? (
-                  <>
-                    <span
-                      className={`lms-verdict ${q.isCorrect ? "ok" : "bad"}`}
-                      aria-label={q.isCorrect ? "Đúng" : "Sai"}
-                    >
-                      <i
-                        className={`ti ${q.isCorrect ? "ti-check" : "ti-x"}`}
-                        aria-hidden="true"
-                      />
-                    </span>
-                    <LmsReview text={q.review} />
-                  </>
-                ) : (
-                  <span className="lms-q-skip">{t(`lms.cls.${q.cls}`)}</span>
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <LmsQuestionTable
+        questions={block.questions}
+        rowKey={(q) => q.key}
+        rowClass={(q) => q.cls}
+        t={t}
+        review={(q) =>
+          q.review !== undefined && !q.blank ? (
+            <>
+              <span
+                className={`lms-verdict ${q.isCorrect ? "ok" : "bad"}`}
+                aria-label={q.isCorrect ? "Đúng" : "Sai"}
+              >
+                <i
+                  className={`ti ${q.isCorrect ? "ti-check" : "ti-x"}`}
+                  aria-hidden="true"
+                />
+              </span>
+              <LmsReview text={q.review} />
+            </>
+          ) : (
+            <span className="lms-q-skip">{t(`lms.cls.${q.cls}`)}</span>
+          )
+        }
+      />
     </div>
   );
 }
@@ -261,7 +252,14 @@ export default function LmsGradePage() {
     if (!job || !BUSY.has(job.status)) return undefined;
     pollRef.current = setTimeout(async () => {
       try {
-        applyJob(await fetchLmsGradingJob(job.id));
+        const data = await fetchLmsGradingJob(job.id);
+        // A run that failed gave the previous results back: show those.
+        if (data?.job?.status === "failed" && data.job.restoredJobId) {
+          applyJob(await fetchLmsGradingJob(data.job.restoredJobId));
+          showError(new Error(data.job.error));
+          return;
+        }
+        applyJob(data);
       } catch (err) {
         showError(err);
       }
@@ -470,7 +468,11 @@ export default function LmsGradePage() {
                 <button
                   className="primary-btn with-icon"
                   onClick={handleStart}
-                  disabled={busy || jobBusy || !preview.counts.candidate}
+                  disabled={
+                    busy ||
+                    jobBusy ||
+                    !(preview.counts.candidate || preview.counts.toolDraft)
+                  }
                 >
                   <i className="ti ti-player-play" aria-hidden="true" />
                   {busy && !job

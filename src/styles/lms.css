@@ -130,16 +130,41 @@
 .lms-table-wrap {
   overflow-x: auto;
 }
+.lms-table {
+  /* Tints of the text colour, so they read in light and dark themes alike. */
+  --lms-row-alt: color-mix(in srgb, var(--color-text-primary) 6%, transparent);
+  --lms-row-hover: color-mix(
+    in srgb,
+    var(--color-text-primary) 11%,
+    transparent
+  );
+  width: 100%;
+}
 .lms-table td {
   vertical-align: top;
 }
+.lms-table thead th {
+  text-align: left;
+  white-space: nowrap;
+}
+.lms-table .lms-q.alt td {
+  background: var(--lms-row-alt);
+}
+.lms-table tbody tr.lms-q:hover td {
+  background: var(--lms-row-hover);
+}
+.lms-table .lms-q-group th,
+.lms-table tbody tr.lms-q-group:hover th {
+  padding: 8px 10px;
+  text-align: left;
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: normal;
+  color: var(--color-primary-dark);
+  background: var(--color-primary-tint);
+}
 .lms-q-no {
   width: 2.5em;
-  color: var(--color-text-tertiary);
-}
-.lms-q-section {
-  display: block;
-  font-size: 0.8rem;
   color: var(--color-text-tertiary);
 }
 .lms-q.excluded,

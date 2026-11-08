@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 
+import LmsQuestionTable from "./LmsQuestionTable.jsx";
 import LmsReview from "./LmsReview.jsx";
 import { fetchLmsOverview, fetchLmsStudentWork } from "../api/backend.js";
 import { lmsCellState as cellState, lmsErrorText } from "../lib/lmsText.js";
@@ -310,42 +311,36 @@ function WorkAssignment({ a, t }) {
       {a.questions.length === 0 && (
         <p className="field-note">{t("lms.overview.noQuestions")}</p>
       )}
-      <table className="data-table lms-table">
-        <tbody>
-          {a.questions.map((q) => (
-            <tr key={q.id}>
-              <td className="lms-q-no">{q.serialNumber}</td>
-              <td className="lms-q-text">
-                {q.section && (
-                  <span className="lms-q-section">{q.section}</span>
-                )}
-                {q.question || (q.hasMedia ? t("lms.overview.media") : "")}
-              </td>
-              <td className="lms-q-answer">{q.answer || "—"}</td>
-              <td className="lms-q-review">
-                {q.isCorrect !== null && (q.review || q.graded) && (
-                  <span
-                    className={`lms-verdict ${q.isCorrect ? "ok" : "bad"}`}
-                    aria-label={q.isCorrect ? "Đúng" : "Sai"}
-                  >
-                    <i
-                      className={`ti ${q.isCorrect ? "ti-check" : "ti-x"}`}
-                      aria-hidden="true"
-                    />
-                  </span>
-                )}
-                {q.review ? (
-                  <LmsReview text={q.review} />
-                ) : (
-                  <span className="lms-q-skip">
-                    {t("lms.overview.noReview")}
-                  </span>
-                )}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      {a.questions.length > 0 && (
+        <LmsQuestionTable
+          questions={a.questions}
+          rowKey={(q) => q.id}
+          t={t}
+          prompt={(q) =>
+            q.question || (q.hasMedia ? t("lms.overview.media") : "")
+          }
+          review={(q) => (
+            <>
+              {q.isCorrect !== null && (q.review || q.graded) && (
+                <span
+                  className={`lms-verdict ${q.isCorrect ? "ok" : "bad"}`}
+                  aria-label={q.isCorrect ? "Đúng" : "Sai"}
+                >
+                  <i
+                    className={`ti ${q.isCorrect ? "ti-check" : "ti-x"}`}
+                    aria-hidden="true"
+                  />
+                </span>
+              )}
+              {q.review ? (
+                <LmsReview text={q.review} />
+              ) : (
+                <span className="lms-q-skip">{t("lms.overview.noReview")}</span>
+              )}
+            </>
+          )}
+        />
+      )}
     </div>
   );
 }

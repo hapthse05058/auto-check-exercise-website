@@ -55,7 +55,7 @@ export const translations = {
       noClasses: "This LMS account has no KTN class.",
       sessionNotStarted: "(not held yet)",
       preview:
-        "To grade: {candidate} · Not submitted: {notSubmitted} · Graded by the teacher: {teacherGraded}",
+        "To grade: {candidate} · Tool drafts saved: {toolDraft} · Not submitted: {notSubmitted} · Graded by the teacher: {teacherGraded}",
       balance: "Your balance: {balance}",
       estimate:
         "Up to {n} × {price} = {total}. Charged only when a draft is saved.",
@@ -84,6 +84,12 @@ export const translations = {
       hideDetail: "Hide details",
       reused: "the draft saved earlier is kept as is",
       tabs: { grade: "Grade a session", overview: "Class overview" },
+      table: {
+        no: "No.",
+        question: "Question",
+        answer: "Answer",
+        review: "Feedback",
+      },
       work: {
         notSubmitted: "not submitted",
         submitted: "submitted, not marked",
@@ -1427,7 +1433,7 @@ export const translations = {
       noClasses: "Tài khoản LMS này không có lớp KTN nào.",
       sessionNotStarted: "(chưa học)",
       preview:
-        "Chờ chấm: {candidate} bài · Chưa nộp: {notSubmitted} bài · Giáo viên đã chấm: {teacherGraded} bài",
+        "Chờ chấm: {candidate} bài · Tool đã lưu nháp: {toolDraft} bài · Chưa nộp: {notSubmitted} bài · Giáo viên đã chấm: {teacherGraded} bài",
       balance: "Số dư của bạn: {balance}",
       estimate:
         "Dự kiến tối đa {n} bài × {price} = {total}. Chỉ trừ tiền khi lưu nháp thành công.",
@@ -1456,6 +1462,12 @@ export const translations = {
       hideDetail: "Ẩn chi tiết",
       reused: "giữ nguyên bản nháp đã lưu trước đó",
       tabs: { grade: "Chấm bài theo buổi", overview: "Tổng hợp lớp" },
+      table: {
+        no: "STT",
+        question: "Đề bài",
+        answer: "Bài làm",
+        review: "Nhận xét",
+      },
       work: {
         notSubmitted: "chưa nộp",
         submitted: "đã nộp, chưa chấm",
