@@ -33,7 +33,7 @@ export const translations = {
     lms: {
       accountTitle: "Link SEC LMS",
       accountIntro:
-        "Use your teacher account on lms.anhngusec.edu.vn. The password is stored encrypted; the tool only reads work and saves grading drafts — it never presses Submit.",
+        'Use your teacher account on lms.anhngusec.edu.vn. The password is stored encrypted; the tool only reads work and saves grading drafts — it never presses "Lưu & Chấm bài".',
       phone: "LMS login phone number",
       password: "LMS password",
       link: "Link",
@@ -46,7 +46,7 @@ export const translations = {
         "The LMS refused to log in again (wrong password or captcha). Enter the password again.",
       gradeTitle: "Grade on SEC LMS",
       gradeIntro:
-        "KTN classes · grades BÀI TẬP VIẾT CÂU, SẮP XẾP TỪ THÀNH CÂU and CHÍNH TẢ (whichever the student submitted). Preview the grading, pick students, then save drafts to the LMS. Students see nothing until you press Submit on the LMS.",
+        'KTN classes · grades BÀI TẬP VIẾT CÂU, SẮP XẾP TỪ THÀNH CÂU and CHÍNH TẢ (whichever the student submitted). Preview the grading, pick students, then save drafts to the LMS. Students see nothing until you press "Lưu & Chấm bài" on the LMS.',
       notLinked: "Your LMS account is not linked yet.",
       goLink: "Link LMS",
       selectClass: "Choose an LMS class",
@@ -55,7 +55,8 @@ export const translations = {
       noClasses: "This LMS account has no KTN class.",
       sessionNotStarted: "(not held yet)",
       preview:
-        "{candidate} to grade · {notSubmitted} not submitted · {teacherGraded} graded by the teacher",
+        "To grade: {candidate} · Not submitted: {notSubmitted} · Graded by the teacher: {teacherGraded}",
+      balance: "Your balance: {balance}",
       estimate:
         "Up to {n} × {price} = {total}. Charged only when a draft is saved.",
       start: "Preview grading",
@@ -64,19 +65,19 @@ export const translations = {
       grading: "Grading… (nothing is written to the LMS)",
       writing: "Saving drafts to the LMS…",
       summary:
-        "{graded} previewed · {saved} drafts saved · {other} skipped / not graded",
+        "Previewed: {graded} · Drafts saved: {saved} · Skipped / not graded: {other}",
       scoreLine: "{correct}/{counted} correct · {score}/5",
       counts:
         "{supported} graded · {blank} blank (skipped) · {excluded} formula rows (not graded) · {uncertain} unclear (not graded)",
       selectAll: "Select all savable",
       saveDrafts: "Save {n} drafts to the LMS",
       confirmSave:
-        "Save {n} drafts to the LMS?\n{price} each, {total} in total.\nThen check them on the LMS and press Submit yourself.",
+        'Save {n} drafts to the LMS?\n{price} each, {total} in total.\nThen check them on the LMS and press "Lưu & Chấm bài" yourself.',
       writeQueued: "{n} students sent, saving drafts…",
       writeDisabled:
         "Saving drafts to the LMS is switched off for now — the preview stays available.",
       draftNote:
-        "The tool only saves drafts. Students see nothing until you press Submit on the LMS.",
+        'The tool only saves drafts. Students see nothing until you press "Lưu & Chấm bài" on the LMS.',
       openLms: "Open on LMS",
       overall: "Overall comment",
       showDetail: "Show details",
@@ -1374,7 +1375,7 @@ export const translations = {
     lms: {
       accountTitle: "Kết nối SEC LMS",
       accountIntro:
-        "Dùng tài khoản giáo viên của bạn trên lms.anhngusec.edu.vn. Mật khẩu được mã hoá; tool chỉ đọc bài và lưu nháp kết quả chấm — không bao giờ tự bấm Nộp.",
+        'Dùng tài khoản giáo viên của bạn trên lms.anhngusec.edu.vn. Mật khẩu được mã hoá; tool chỉ đọc bài và lưu nháp kết quả chấm — không bao giờ tự bấm "Lưu & Chấm bài".',
       phone: "Số điện thoại đăng nhập LMS",
       password: "Mật khẩu LMS",
       link: "Kết nối",
@@ -1387,7 +1388,7 @@ export const translations = {
         "LMS không cho đăng nhập lại (sai mật khẩu hoặc cần captcha). Hãy nhập lại mật khẩu.",
       gradeTitle: "Chấm bài trên LMS",
       gradeIntro:
-        "Lớp KTN · chấm BÀI TẬP VIẾT CÂU, SẮP XẾP TỪ THÀNH CÂU và CHÍNH TẢ (bài nào học viên đã nộp). Bấm Chấm thử để xem kết quả, chọn học viên rồi Lưu nháp lên LMS. Học viên chỉ thấy kết quả sau khi bạn bấm Nộp trên LMS.",
+        'Lớp KTN · chấm BÀI TẬP VIẾT CÂU, SẮP XẾP TỪ THÀNH CÂU và CHÍNH TẢ (bài nào học viên đã nộp). Bấm Chấm thử để xem kết quả, chọn học viên rồi Lưu nháp lên LMS. Học viên chỉ thấy kết quả sau khi bạn bấm "Lưu & Chấm bài" trên LMS.',
       notLinked: "Bạn chưa kết nối tài khoản LMS.",
       goLink: "Kết nối LMS",
       selectClass: "Chọn lớp trên LMS",
@@ -1396,7 +1397,8 @@ export const translations = {
       noClasses: "Tài khoản LMS này không có lớp KTN nào.",
       sessionNotStarted: "(chưa học)",
       preview:
-        "{candidate} bài chờ chấm · {notSubmitted} chưa nộp · {teacherGraded} giáo viên đã chấm",
+        "Chờ chấm: {candidate} bài · Chưa nộp: {notSubmitted} bài · Giáo viên đã chấm: {teacherGraded} bài",
+      balance: "Số dư của bạn: {balance}",
       estimate:
         "Dự kiến tối đa {n} bài × {price} = {total}. Chỉ trừ tiền khi lưu nháp thành công.",
       start: "Chấm thử",
@@ -1405,19 +1407,19 @@ export const translations = {
       grading: "Đang chấm thử… (chưa ghi gì lên LMS)",
       writing: "Đang lưu nháp lên LMS…",
       summary:
-        "{graded} bài đã chấm thử · {saved} đã lưu nháp · {other} bỏ qua / không chấm",
+        "Đã chấm thử: {graded} bài · Đã lưu nháp: {saved} bài · Bỏ qua / không chấm: {other} bài",
       scoreLine: "{correct}/{counted} câu đúng · {score}/5 điểm",
       counts:
         "{supported} câu có bài làm · {blank} bỏ trống (bỏ qua, không tính điểm) · {excluded} câu công thức (không chấm) · {uncertain} chưa xác định (không chấm)",
       selectAll: "Chọn tất cả bài có thể lưu",
       saveDrafts: "Lưu nháp {n} học viên lên LMS",
       confirmSave:
-        "Lưu nháp {n} học viên lên LMS?\nMỗi bài {price}, tổng {total}.\nSau đó bạn mở LMS kiểm tra và tự bấm Nộp.",
+        'Lưu nháp {n} học viên lên LMS?\nMỗi bài {price}, tổng {total}.\nSau đó bạn mở LMS kiểm tra và tự bấm "Lưu & Chấm bài".',
       writeQueued: "Đã gửi {n} học viên, đang lưu nháp…",
       writeDisabled:
         "Lưu nháp lên LMS đang tạm tắt — bạn vẫn xem được kết quả chấm thử.",
       draftNote:
-        "Tool chỉ lưu nháp. Học viên chưa thấy kết quả cho đến khi bạn bấm Nộp trên LMS.",
+        'Tool chỉ lưu nháp. Học viên chưa thấy kết quả cho đến khi bạn bấm "Lưu & Chấm bài" trên LMS.',
       openLms: "Mở trên LMS",
       overall: "Nhận xét chung",
       showDetail: "Xem chi tiết",

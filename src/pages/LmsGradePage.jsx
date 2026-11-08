@@ -9,6 +9,7 @@ import {
   fetchLmsGradingJob,
   fetchLmsPreview,
   fetchLmsSessions,
+  fetchMyBalance,
   writeLmsDrafts,
 } from "../api/backend.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
@@ -20,6 +21,8 @@ import {
   lmsStatusText,
   lmsStatusTone,
 } from "../lib/lmsText.js";
+import { announceBalance } from "../lib/pointEvents.js";
+import { playSuccessSound } from "../lib/sound.js";
 import "../styles/lms.css";
 
 const POLL_MS = 4000;
@@ -151,8 +154,26 @@ export default function LmsGradePage() {
   const [showNotSubmitted, setShowNotSubmitted] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState({ tone: "", text: "" });
+  const [balanceVnd, setBalanceVnd] = useState(null);
+  const [sessionsLoading, setSessionsLoading] = useState(false);
   const sessionReq = useRef(0);
   const pollRef = useRef(null);
+  const lastStatusRef = useRef(null);
+
+  // The teacher's balance, here and in the header badge.
+  const refreshBalance = useCallback(async () => {
+    try {
+      const vnd = await fetchMyBalance();
+      setBalanceVnd(vnd);
+      announceBalance(vnd);
+    } catch {
+      // The page works without it; the header keeps its own copy.
+    }
+  }, []);
+
+  useEffect(() => {
+    refreshBalance();
+  }, [refreshBalance]);
 
   const showError = useCallback(
     (err) => setMessage({ tone: "error", text: lmsErrorText(err, t) }),
@@ -195,6 +216,7 @@ export default function LmsGradePage() {
     let cancelled = false;
     setSessions([]);
     setSessionId("");
+    setSessionsLoading(true);
     fetchLmsSessions(classId)
       .then((list) => {
         if (cancelled) return;
@@ -202,7 +224,8 @@ export default function LmsGradePage() {
         const held = list.filter((s) => s.started);
         if (held.length) setSessionId(String(held.at(-1).id));
       })
-      .catch((err) => !cancelled && showError(err));
+      .catch((err) => !cancelled && showError(err))
+      .finally(() => !cancelled && setSessionsLoading(false));
     return () => {
       cancelled = true;
     };
@@ -233,6 +256,20 @@ export default function LmsGradePage() {
   useEffect(() => {
     loadSession();
   }, [loadSession]);
+
+  // A run that just finished (grading or saving drafts) chimes, and saving
+  // drafts changes the balance. A job already done when the page opened is
+  // not a finish.
+  useEffect(() => {
+    const prev = lastStatusRef.current;
+    lastStatusRef.current = job ? `${job.id}:${job.status}` : null;
+    if (!job || !prev || !prev.startsWith(`${job.id}:`)) return;
+    const wasBusy = BUSY.has(prev.slice(job.id.length + 1));
+    if (wasBusy && !BUSY.has(job.status)) {
+      if (job.status !== "failed") playSuccessSound();
+      refreshBalance();
+    }
+  }, [job, refreshBalance]);
 
   // Poll while the job is busy.
   useEffect(() => {
@@ -393,6 +430,15 @@ export default function LmsGradePage() {
       {classes && classes.length === 0 && (
         <p className="field-hint">{t("lms.noClasses")}</p>
       )}
+      {(!account ||
+        !classes ||
+        sessionsLoading ||
+        (classId && sessionId && !preview && !message.text)) && (
+        <p className="status-loading">
+          <span className="spinner" aria-hidden="true" />
+          <span>{t("lms.loading")}</span>
+        </p>
+      )}
 
       {preview && (
         <div className="lms-preview">
@@ -404,6 +450,12 @@ export default function LmsGradePage() {
               total: formatVnd(preview.estimatedVnd),
             })}
           </p>
+          {balanceVnd !== null && (
+            <p className="field-note lms-balance">
+              <i className="ti ti-wallet" aria-hidden="true" />{" "}
+              {t("lms.balance", { balance: formatVnd(balanceVnd) })}
+            </p>
+          )}
           <div className="button-row">
             <button
               className="primary-btn with-icon"
