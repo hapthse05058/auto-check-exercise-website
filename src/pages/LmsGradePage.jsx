@@ -14,8 +14,6 @@ import {
   writeLmsDrafts,
 } from "../api/backend.js";
 import LmsClassOverview from "../components/LmsClassOverview.jsx";
-import LmsQuestionTable from "../components/LmsQuestionTable.jsx";
-import LmsReview from "../components/LmsReview.jsx";
 import LmsStudentWork from "../components/LmsStudentWork.jsx";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
 import { formatVnd } from "../lib/billing.js";
@@ -45,68 +43,6 @@ const STATUS_ORDER = {
 };
 const BUSY = new Set(["queued", "preparing", "writing"]);
 
-function StudentDetail({ student, t }) {
-  // One block per assignment (VIẾT CÂU, SẮP XẾP TỪ, CHÍNH TẢ), in LMS order.
-  const blocks = [];
-  for (const q of student.questions || []) {
-    const name = q.assignmentName || "";
-    if (!blocks.length || blocks.at(-1).name !== name) {
-      blocks.push({ name, questions: [] });
-    }
-    blocks.at(-1).questions.push(q);
-  }
-  return (
-    <div className="lms-detail">
-      {student.overall && (
-        <p className="lms-overall">
-          <strong>{t("lms.overall")}:</strong> {student.overall}
-        </p>
-      )}
-      {blocks.map((block) => (
-        <QuestionTable key={block.name} block={block} t={t} />
-      ))}
-    </div>
-  );
-}
-
-function QuestionTable({ block, t }) {
-  const reused = block.questions.some((q) => q.reused);
-  return (
-    <div className="lms-table-wrap">
-      {block.name && (
-        <p className="lms-assignment-name">
-          {block.name}
-          {reused && <span className="lms-reused"> · {t("lms.reused")}</span>}
-        </p>
-      )}
-      <LmsQuestionTable
-        questions={block.questions}
-        rowKey={(q) => q.key}
-        rowClass={(q) => q.cls}
-        t={t}
-        review={(q) =>
-          q.review !== undefined && !q.blank ? (
-            <>
-              <span
-                className={`lms-verdict ${q.isCorrect ? "ok" : "bad"}`}
-                aria-label={q.isCorrect ? "Đúng" : "Sai"}
-              >
-                <i
-                  className={`ti ${q.isCorrect ? "ti-check" : "ti-x"}`}
-                  aria-hidden="true"
-                />
-              </span>
-              <LmsReview text={q.review} />
-            </>
-          ) : (
-            <span className="lms-q-skip">{t(`lms.cls.${q.cls}`)}</span>
-          )
-        }
-      />
-    </div>
-  );
-}
-
 /**
  * Grading a KTN session on the SEC LMS (backend lib/lmsGradingJobs.js):
  * preview the AI grading of "BÀI TẬP VIẾT CÂU", pick students, save drafts.
@@ -125,7 +61,6 @@ export default function LmsGradePage() {
   const [job, setJob] = useState(null);
   const [students, setStudents] = useState([]);
   const [selected, setSelected] = useState(() => new Set());
-  const [expanded, setExpanded] = useState(null);
   const [showNotSubmitted, setShowNotSubmitted] = useState(false);
   const [busy, setBusy] = useState(false);
   // "grade": grade one session · "overview": every session × student.
@@ -216,7 +151,6 @@ export default function LmsGradePage() {
     setPreview(null);
     applyJob(null);
     setSelected(new Set());
-    setExpanded(null);
     setMessage({ tone: "", text: "" });
     if (!classId || !sessionId) return;
     try {
@@ -575,7 +509,6 @@ export default function LmsGradePage() {
                 {shown.map((s) => {
                   const canSelect =
                     writeEnabled && LMS_WRITABLE.has(s.status) && !jobBusy;
-                  const open = expanded === s.studentId;
                   return (
                     <li key={s.studentId} className="lms-student">
                       <div className="lms-student-head">
@@ -635,17 +568,6 @@ export default function LmsGradePage() {
                                   : t("lms.edit.submit")}
                               </button>
                             )}
-                          {s.questions && (
-                            <button
-                              className="secondary-btn"
-                              onClick={() =>
-                                setExpanded(open ? null : s.studentId)
-                              }
-                              aria-expanded={open}
-                            >
-                              {open ? t("lms.hideDetail") : t("lms.showDetail")}
-                            </button>
-                          )}
                           <a
                             className="secondary-btn"
                             href={s.lmsUrl}
@@ -656,7 +578,6 @@ export default function LmsGradePage() {
                           </a>
                         </div>
                       </div>
-                      {open && <StudentDetail student={s} t={t} />}
                     </li>
                   );
                 })}
