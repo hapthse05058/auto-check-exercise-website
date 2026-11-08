@@ -55,6 +55,12 @@
   gap: 8px;
   cursor: pointer;
 }
+/* The global input width must not stretch this checkbox across the row. */
+.lms-check input[type="checkbox"] {
+  width: auto;
+  flex: none;
+  margin: 0;
+}
 
 .lms-students {
   list-style: none;
@@ -224,13 +230,38 @@
   max-width: 420px;
 }
 
-@media (max-width: 640px) {
+.lms-student-main {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Phones and tablets: name and counts on top, then the state, then the
+   buttons, which wrap and share the row instead of squeezing it. */
+@media (max-width: 900px) {
   .lms-student-head {
-    grid-template-columns: auto 1fr;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+    gap: 8px 12px;
   }
-  .lms-badge,
+  .lms-student-head > input[type="checkbox"] {
+    margin-top: 4px;
+  }
+  .lms-student-head .lms-badge,
   .lms-student-links {
     grid-column: 2;
+  }
+  .lms-student-head .lms-badge {
+    justify-self: start;
+    max-width: 100%;
+  }
+  .lms-student-links {
+    flex-wrap: wrap;
+    min-width: 0;
+  }
+  .lms-student-links > * {
+    flex: 1 1 auto;
+    justify-content: center;
+    text-align: center;
   }
 }
 
@@ -509,5 +540,16 @@ button.lms-cell:not(:disabled):hover {
   }
   .lms-edit-cell {
     min-width: 160px;
+  }
+}
+
+/* Phones: "select all" and the save button each take the full row. */
+@media (max-width: 640px) {
+  .lms-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .lms-actions .primary-btn {
+    justify-content: center;
   }
 }

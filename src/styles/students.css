@@ -1051,3 +1051,20 @@
   color: var(--color-primary-dark, #0f6e56);
   font-weight: 600;
 }
+
+/* Phones: the page title and its action buttons wrap instead of running off
+   the screen (Thêm học viên has three buttons). */
+@media (max-width: 640px) {
+  .topbar {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .topbar-actions {
+    flex-wrap: wrap;
+    width: 100%;
+  }
+  .topbar-actions > * {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+}
