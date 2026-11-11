@@ -41,6 +41,7 @@ describe("describeJob", () => {
         describeJob(job({ status: "queued" }), t),
         describeJob(job({ status: "writing", written: 1 }), t),
         describeJob(job(), t),
+        describeJob(job({ incompleteDocs: 3 }), t),
         describeJob(job({ written: 0, notice: "allChecked" }), t),
         describeJob(
           job({
@@ -88,6 +89,7 @@ describe("describeJob", () => {
                 params: { docId: "d1", count: 2 },
               },
               { code: "noMatch", params: { docId: "d1" } },
+              { code: "aiSkippedItems", params: { docId: "d1", count: 2 } },
               { code: "failedDoc", params: { docId: "d1", msg: "403" } },
               { code: "failedWrite", params: { docId: "d1", msg: "400" } },
               { code: "ownershipUnclear", params: { docId: "d1" } },
@@ -125,6 +127,25 @@ describe("describeJob", () => {
       phase: "done",
       text: expect.stringContaining("2 student(s)"),
     });
+  });
+
+  it("tells every teacher when docs were written with answers left ungraded", () => {
+    // Warnings are hidden from non-admins, so it has to be in the summary.
+    const view = describeJob(job({ incompleteDocs: 3 }), t, {
+      showWarnings: false,
+    });
+    expect(view.phase).toBe("done");
+    expect(view.text).toContain("2 student(s)");
+    expect(view.text).toContain(t("grading.incompleteDocs", { n: 3 }));
+    expect(view.warnings).toEqual([]);
+  });
+
+  it("says nothing about ungraded answers when there are none", () => {
+    for (const incompleteDocs of [0, undefined]) {
+      expect(describeJob(job({ incompleteDocs }), t).text).not.toMatch(
+        /could not grade/,
+      );
+    }
   });
 
   it("says why nothing was written instead of '0 students'", () => {

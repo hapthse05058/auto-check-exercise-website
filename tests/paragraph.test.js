@@ -131,13 +131,70 @@ describe("paragraph table detection", () => {
   });
 
   it("anchors the student label to the whole cell", () => {
-    // "Học viên viết lại câu…" là đề bài của bảng câu, không phải nhãn dòng.
-    const table = makeParagraphTable({ student: STUDENT });
-    table[2].tableCells[0].content = [
-      PIndexed("Học viên viết lại câu sau\n", 900),
+    // "Học viên viết lại câu…" là đề bài của bảng câu, không phải nhãn dòng:
+    // một bảng có dòng đó (mà không có tiêu đề + dòng mẫu của bảng đoạn văn)
+    // không được thành bảng đoạn văn.
+    const table = [
+      row([P("Câu")], [P("")], [P("GV sửa")]),
+      row([P("Học viên viết lại câu sau")], [P(STUDENT)], [P("")]),
     ];
     const tab = makeTabFromTables([table]);
     expect(detectTables(tab).tables).toEqual([]);
+  });
+
+  describe("when the student wiped the “Học viên viết” label", () => {
+    // KTN749N buổi 02: the label cell is empty, the paragraph is in place.
+    const wiped = (label, options = {}) => {
+      const table = makeParagraphTable({ student: STUDENT, ...options });
+      table[2].tableCells[0].content = [PIndexed(`${label}\n`, 900)];
+      return table;
+    };
+
+    for (const label of ["", "Na", "Học viên viết lại"]) {
+      it(`still finds the student row (label ${JSON.stringify(label)})`, () => {
+        const tab = makeTabFromTables([wiped(label)]);
+        const { rows, unclassifiedWithQuestions } = collectExerciseRows(tab);
+
+        expect(unclassifiedWithQuestions).toEqual([]);
+        expect(rows).toHaveLength(1);
+        const [entry] = rows;
+        expect(entry.kind).toBe(KIND_PARAGRAPH);
+        expect(entry.rowIdx).toBe(2);
+        expect(getCellText(entry.qCell)).toBe(STUDENT);
+        expect(entry.fbCell.content[0].startIndex).toBe(
+          paragraphFeedbackIndex(),
+        );
+        expect(entry.promptText).toMatch(/^Chủ đề: Hobbies\nĐoạn văn mẫu:\n/);
+      });
+    }
+
+    it("grades it like any other paragraph, and never over a filled cell", () => {
+      const empty = rowsOf(makeTabFromTables([wiped("")]));
+      expect(selectItemsToGrade(empty).map((item) => item.type)).toEqual([
+        KIND_PARAGRAPH,
+      ]);
+      const corrected = rowsOf(
+        makeTabFromTables([wiped("", { feedback: "Cô sửa tay." })]),
+      );
+      expect(selectItemsToGrade(corrected)).toEqual([]);
+    });
+
+    it("needs the title: a sample row alone does not make a paragraph table", () => {
+      const table = wiped("");
+      table[0].tableCells[0].content = [PIndexed("Bài tập\n", 500)];
+      expect(detectTables(makeTabFromTables([table])).tables).toEqual([]);
+    });
+
+    it("needs the sample row: the title alone does not either", () => {
+      const table = wiped("");
+      table[1].tableCells[0].content = [PIndexed("Gợi ý\n", 560)];
+      expect(detectTables(makeTabFromTables([table])).tables).toEqual([]);
+    });
+
+    it("needs a row under the sample", () => {
+      const table = wiped("").slice(0, 2);
+      expect(detectTables(makeTabFromTables([table])).tables).toEqual([]);
+    });
   });
 
   it("never grades the BÀI TẬP TỰ CHỌN table next to it", () => {

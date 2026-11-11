@@ -1416,6 +1416,10 @@ export const translations = {
       unreadableAnswers:
         "{docId}: could not read the answer for question {list}. Please check manually.",
       noMatch: "No feedback matched for {docId}, skipped.",
+      aiSkippedItems:
+        "{docId}: the AI could not grade {count} answer(s) — left blank. A paragraph can be graded again; sentences must be corrected by hand.",
+      incompleteDocs:
+        "Note: {n} doc(s) still have sentences or a paragraph the AI could not grade, left blank — a paragraph can be graded again; sentences must be corrected by hand.",
       failedWrite: "Failed writing to {docId}: {msg}",
       stoppedNoPoints:
         "Out of balance — stopped grading the remaining docs. Please contact admin to top up.",
@@ -2822,6 +2826,10 @@ export const translations = {
       unreadableAnswers:
         "{docId}: không đọc được câu trả lời của câu {list}. Vui lòng kiểm tra tay.",
       noMatch: "Không khớp feedback cho {docId}, bỏ qua.",
+      aiSkippedItems:
+        "{docId}: AI chưa chấm được {count} câu/đoạn văn — để trống. Đoạn văn có thể bấm chấm lại, câu thì cần chấm tay.",
+      incompleteDocs:
+        "Lưu ý: {n} bài còn câu/đoạn văn AI chưa chấm được, ô GV sửa đang để trống — đoạn văn có thể bấm chấm lại, câu thì cần chấm tay.",
       failedWrite: "Ghi {docId} thất bại: {msg}",
       stoppedNoPoints:
         "Hết số dư — dừng chấm các bài còn lại. Vui lòng liên hệ admin để nạp thêm tiền.",

@@ -187,10 +187,18 @@ export function describeJob(job, t, { showWarnings = true } = {}) {
   }
   if (job.written > 0) {
     const cost = chargeText(job, t);
+    // Part of the summary, not a warning: every teacher must see that some
+    // docs were written with answers the AI could not grade.
+    const incomplete =
+      job.incompleteDocs > 0
+        ? `\n${t("grading.incompleteDocs", { n: job.incompleteDocs })}`
+        : "";
     return {
       phase: "done",
       text:
-        t("grading.doneCount", { n: job.written }) + (cost ? `\n${cost}` : ""),
+        t("grading.doneCount", { n: job.written }) +
+        (cost ? `\n${cost}` : "") +
+        incomplete,
       warnings,
     };
   }
