@@ -75,9 +75,20 @@ const ANSWER_MARKER = new RegExp(
   `^\\s*(?:${ARROW.source}|${ANSWER_LABEL.source})\\s*`,
   "i",
 );
-// Bản dùng để XOÁ marker trước khi kiểm tra "ô này có chữ không". Neo đầu dòng
-// (cờ `m`) nên không bao giờ đụng tới dấu ">" nằm giữa câu ("x > 2").
-const ANSWER_MARKER_LINE_START = new RegExp(ANSWER_MARKER.source, "gim");
+/**
+ * Phần sau marker chỉ là một NHÃN có sẵn trong đề ("→ Câu phức:" của buổi 15),
+ * chưa phải câu trả lời: cụm ngắn kết thúc bằng ":" và không có dấu câu. Học
+ * viên viết câu ngay sau nhãn ("→ Câu phức: The man…") hoặc xuống dòng dưới;
+ * để trống thì dòng này KHÔNG được tính là đã làm bài.
+ */
+const BARE_LABEL = /^[^.?!:\n]{1,30}:$/u;
+
+/** "→ Câu phức:" — một dòng marker chỉ mang nhãn của đề, chưa có chữ trả lời. */
+function isBareAnswerLabel(line) {
+  const str = String(line ?? "");
+  const match = str.match(ANSWER_MARKER);
+  return Boolean(match) && BARE_LABEL.test(str.slice(match[0].length).trim());
+}
 
 /**
  * Ký tự chỉ có trong tiếng Việt ⇒ dòng đó là đề bài, không phải câu trả lời
@@ -170,8 +181,13 @@ export function hasAnswer(val) {
   }
   // Strip the marker at the START of each line ("→", "->", "Trả lời:"…), then
   // look for real content. Anchoring per line keeps a ">" inside the answer
-  // itself ("x > 2") intact.
-  return /\S/.test(str.replace(ANSWER_MARKER_LINE_START, " "));
+  // itself ("x > 2") intact. A marker line holding only the template's label
+  // ("→ Câu phức:") is no answer either.
+  return str.split(/\r?\n/).some((line) => {
+    if (isBareAnswerLabel(line)) return false;
+    const match = line.match(ANSWER_MARKER);
+    return /\S/.test(match ? line.slice(match[0].length) : line);
+  });
 }
 
 /**
@@ -385,7 +401,12 @@ function buildQnaPairs(lines) {
       inAnswer = false;
       continue;
     }
-    if (PROMPT_CONTINUES.test(previous) || isPromptInstruction(previous)) {
+    // A colon that ends the student's own answer line ("→ Câu phức:") is the
+    // template's label, not an order — what follows it is the answer.
+    if (
+      !startsWithArrow(previous) &&
+      (PROMPT_CONTINUES.test(previous) || isPromptInstruction(previous))
+    ) {
       current.questionLines.push(line);
       continue;
     }
@@ -401,9 +422,36 @@ function buildQnaPairs(lines) {
 
   return pairs.map(({ questionLines, answerLines, guessed }) => ({
     question: questionLines.join("\n"),
-    answer: answerLines.join("\n"),
+    answer: joinLabelledAnswers(answerLines).join("\n"),
     guessed,
   }));
+}
+
+/**
+ * "→ Câu phức:" + the sentence typed on the line below it become one line,
+ * "→ Câu phức: <sentence>" — exactly what a student who typed on the same
+ * line sends, so both get the same grading (and the same cache entry).
+ */
+function joinLabelledAnswers(lines) {
+  const out = [];
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const next = lines[i + 1];
+    if (
+      isBareAnswerLabel(line) &&
+      next !== undefined &&
+      !isBareAnswerLabel(next)
+    ) {
+      const marker = next.match(ANSWER_MARKER);
+      out.push(
+        `${line} ${marker ? next.slice(marker[0].length) : next.trim()}`,
+      );
+      i++;
+      continue;
+    }
+    out.push(line);
+  }
+  return out;
 }
 
 /**

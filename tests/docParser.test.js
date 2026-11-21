@@ -372,6 +372,56 @@ describe("lessons whose cell holds two sentences (buổi 15/16/17/22)", () => {
   });
 });
 
+describe('buổi 15 template line "→ Câu phức:" (cô Linh 21/11, KTN721)', () => {
+  const prompt = [
+    P("4. Người đàn ông đang sửa cái trần nhà. Ông ấy sống ở trên lầu."),
+    P(
+      "Câu phức: Người đàn ông (người) mà đang sửa cái trần nhà thì sống ở trên lầu.",
+    ),
+  ];
+  const question =
+    "4. Người đàn ông đang sửa cái trần nhà. Ông ấy sống ở trên lầu.\n" +
+    "Câu phức: Người đàn ông (người) mà đang sửa cái trần nhà thì sống ở trên lầu.";
+  const sentence = "The man who is repairing the ceiling lives upstairs.";
+
+  it("does not grade a row the student left empty", () => {
+    expect(pairsOf(tabOf([...prompt, P("→ Câu phức:")]))).toEqual([]);
+    expect(hasAnswer("→ Câu phức:")).toBe(false);
+    expect(hasAnswer("→ Câu phức: ")).toBe(false);
+  });
+
+  it("reads a sentence typed on the line below the label as the answer", () => {
+    // Before: the sentence went into the QUESTION (the label ends with ":")
+    // and the AI graded "→ Câu phức:" — "Chưa viết câu hoàn chỉnh".
+    expect(
+      pairsOf(tabOf([...prompt, P("→ Câu phức:"), P(""), P(sentence)])),
+    ).toEqual([{ question, answer: `→ Câu phức: ${sentence}` }]);
+  });
+
+  it("sends the same answer whether typed after the label or below it", () => {
+    expect(pairsOf(tabOf([...prompt, P(`→ Câu phức: ${sentence}`)]))).toEqual(
+      pairsOf(tabOf([...prompt, P("→ Câu phức:"), P(sentence)])),
+    );
+    expect(
+      pairsOf(tabOf([...prompt, P("→ Câu phức:"), P(`→ ${sentence}`)])),
+    ).toEqual([{ question, answer: `→ Câu phức: ${sentence}` }]);
+  });
+
+  it("does not report an empty labelled row as unreadable", () => {
+    expect(
+      getUnreadableQuestions(rowsOf(tabOf([...prompt, P("→ Câu phức:")]))),
+    ).toEqual([]);
+  });
+
+  it("still counts real answers that end with a colon or contain one", () => {
+    expect(hasAnswer("→ I need three things: milk, eggs and bread.")).toBe(
+      true,
+    );
+    expect(hasAnswer("Note: done")).toBe(true);
+    expect(hasAnswer("→")).toBe(false);
+  });
+});
+
 describe("buổi 23, where the prompt itself contains English", () => {
   // "12. Rút gọn DCN trong câu sau:" is followed by the English sentence the
   // student has to reduce — that sentence is the QUESTION, not their answer.
